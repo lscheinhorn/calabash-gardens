@@ -1,0 +1,48 @@
+.container {
+
+}
+
+.header_color {
+    background-color: #F3CF50;
+    color: #735284;
+}
+
+.above_nav {
+    display: flex;
+    justify-content: space-around;
+}
+
+.get_in_touch {
+    display: flex;
+    align-items: center;
+}
+
+.get_in_touch button {
+    color: #F9F8FA;
+    background-color: #735284;
+}
+
+
+.title_container {
+    display: flex;
+    justify-content: flex-start;
+    font: 22px barlow-medium, barlow, sans-serif;
+}
+
+.title {
+
+
+}
+
+
+.purple_logo {
+    display: flex;
+    align-items: center;
+    background-color: #F3CF50;
+
+}
+
+.purple_logo img {
+    
+    
+}

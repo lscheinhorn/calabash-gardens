@@ -1,0 +1,13 @@
+.banner {
+    color: white;
+    text-align: center;
+
+    background-image: url('../../resources/images/background_farm.webp');
+    background-attachment: fixed;
+    height: 100vh;
+}
+
+
+
+
+
