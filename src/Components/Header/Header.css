@@ -1,5 +1,4 @@
 .container {
-
 }
 
 .header_color {
@@ -18,31 +17,49 @@
 }
 
 .get_in_touch button {
+    font-size: 15px;
     color: #F9F8FA;
     background-color: #735284;
+    padding: 13px 22px;
+
 }
 
 
 .title_container {
     display: flex;
-    justify-content: flex-start;
     font: 22px barlow-medium, barlow, sans-serif;
 }
 
-.title {
+.title h1 {
+    block-size: auto;
 
-
+    font: 22px barlow-medium, barlow, sans-serif;
+    position: relative;
+    top: 0px;
+    height: 1rem;
+    padding: 10px;
+    margin: 40px 0px 0px 10px;
 }
+
+.title p {
+    block-size: auto;
+    font-size: 15px;
+    position: relative;
+    height: 1rem;
+    padding: 10px;
+}
+
 
 
 .purple_logo {
-    display: flex;
-    align-items: center;
-    background-color: #F3CF50;
-
+    
 }
 
 .purple_logo img {
-    
-    
+    position: relative;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    width: 90%;
 }

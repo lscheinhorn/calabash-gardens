@@ -1,11 +1,46 @@
 .banner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     color: white;
     text-align: center;
-
     background-image: url('../../resources/images/background_farm.webp');
     background-attachment: fixed;
+    background-size: cover;
     height: 100vh;
 }
+
+.banner h1 {
+    font: 72px barlow-medium, barlow, sans-serif;
+    block-size: auto;
+    margin: 0px;
+}
+
+.banner h4 {
+    font: 20px barlow-medium, barlow, sans-serif;
+    line-height: 33px;
+    block-size: auto;
+
+}
+
+.banner_p p {
+    font-size: 15px;
+    line-height: 28px;
+    block-size: auto;
+    margin: 0px 15%;
+}
+
+
+.learn_more {
+    padding: 20px;
+}
+
+.learn_more button {
+    background-color: #F3CF50;
+    padding: 15px 25px;
+}
+
+
 
 
 
