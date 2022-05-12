@@ -1,6 +1,7 @@
 import './Main.css'
 import Banner from '../Banner/Banner'
 import HighlightedProducts from '../HighlightedProducts/HighlightedProducts'
+import Offerings from '../Offerings/Offerings'
 
 export default function Main () {
     return (
@@ -9,6 +10,7 @@ export default function Main () {
             <div>
                 <h1>Main</h1>
                 <HighlightedProducts />
+                <Offerings />
             </div>
         </div>
     )
