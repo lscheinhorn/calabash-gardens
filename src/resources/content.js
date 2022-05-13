@@ -38,7 +38,12 @@ export const content = {
             paragraph_1: "Calabash Gardens was started in late summer of 2018 with 2000 Crocus Sativus corms. They were directly planted in the ground and were subject to the whim of nature. The test plot succesfully flowered each October, facilitating the planting of a half acre in 2020, 9 acres will follow with in the next 10 years. Using regenerative agriculture practices and a variety of cover crops for maximum biodiversity we will build soil and sequester carbon reducing our carbon footprint while activiely regenerating the landscape.",
             paragraph_2: "Calabash is on track to be a pioneer producer and distributor of the saffron spice in the western hemisphere while our community-centered business model is constructed to employ Black farmers and shareholders while bringing saffron to the plates of everyday Americans. Calabash Gardens is not just a farm, it's a movement.",
             button: "Get In Touch"
-        }
+        },
+        team: {
+            title: "Team",
+            paragraph_1: "",
+            paragraph_2: ""
+        },
     },
     saffron_pricing: {
 

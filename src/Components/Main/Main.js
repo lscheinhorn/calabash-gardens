@@ -4,6 +4,8 @@ import HighlightedProducts from '../HighlightedProducts/HighlightedProducts'
 import Offerings from '../Offerings/Offerings'
 import About from '../About/About'
 import Parallax from '../Parallax/Parallax'
+import Team from '../Team/Team'
+
 
 export default function Main () {
     return (
@@ -13,10 +15,9 @@ export default function Main () {
                 <h1>Main</h1>
                 <HighlightedProducts />
                 <Offerings />
-                <div id='parallax-region'>
-                    <About />
-                    <Parallax />
-                </div>
+                <About />
+                <Parallax />
+                <Team />
                 
             </div>
         </div>

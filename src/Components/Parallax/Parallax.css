@@ -2,6 +2,7 @@
     background-image: url('../../../public/images/parallax.webp');
     background-attachment: fixed;
     background-size: 100% 150vh;
+    background-repeat: no-repeat;
     height: 60vh;
 }
 
