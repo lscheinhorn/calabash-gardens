@@ -1,0 +1,7 @@
+#parallax_container {
+    background-image: url('../../../public/images/parallax.webp');
+    background-attachment: fixed;
+    background-size: 100% 150vh;
+    height: 60vh;
+}
+
