@@ -3,7 +3,7 @@ import './Offerings.css'
 
 export default function Offerings () {
     return (
-        <div>
+        <div id="offerings">
             <h1>Offerings</h1>
             <p>{ content.home.offerings.paragraph }</p>
             <div>

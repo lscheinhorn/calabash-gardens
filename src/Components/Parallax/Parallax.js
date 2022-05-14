@@ -7,7 +7,7 @@ document.querySelector("body").onscroll = function slowScroll() {
     const target = document.getElementById("parallax_container")
     const xvalue = "center"
     const factor = -0.3;
-    let yvalue = scrolltotop * factor + 1000
+    let yvalue = scrolltotop * factor + 1100
     target.style.backgroundPosition = xvalue + " " + yvalue +"px"
   }
 

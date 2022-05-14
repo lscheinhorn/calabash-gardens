@@ -3,7 +3,7 @@ import { content } from '../../resources/content'
 
 export default function About () {
     return (
-        <div>
+        <div id="about">
             <h1>{ content.home.about.title }</h1>
             <p>{ content.home.about.paragraph_1 }</p>
             <p>{ content.home.about.paragraph_2 }</p>

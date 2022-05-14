@@ -41,8 +41,16 @@ export const content = {
         },
         team: {
             title: "Team",
-            paragraph_1: "",
-            paragraph_2: ""
+            position_1: {
+                title: "President",
+                name: "Claudel Chery",
+                bio: "Claudel Zaka Chery, a Haitian poet and film director, moved to Newbury from Jacmel-Haiti in 2011. He was the assistant to the director of FOSAJ, Flo McGarrell. Both Mr McGarrell and Zaka ran the Jacmel art center with great energy and taste. On 12 January 2010, his beloved country of Haiti entered a nightmare from which there was no hope of waking. 316,000 people died in the 37 seconds that an earthquake moved just under the surface of the island facilitating his move to Newbury."
+            },
+            position_2: {
+                title: "Vice President",
+                name: "Jette Mandl-Abramson",
+                bio: "Jette Mandl-Abramson, born in New Mexico, raised in the South coast of New Hampshire, is primarily a ceramist, herbalist and organic regenerative farmer. She has also worked in the restaurant industry for fifteen years. Her passions are great food, horticulture, animals and wild edible plants. She wants every initiative she takes to be Eco- friendly and regenerative as well as giving something back to the community."
+            }
         },
     },
     saffron_pricing: {

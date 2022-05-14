@@ -1,0 +1,58 @@
+#team {
+    color: white;
+    text-align: center;
+    background-color: #EBA644;
+    border: 1px solid black;
+    padding: 40px;
+}
+
+#team p {
+    font-family: avenir-lt-w01_35-light1475496, avenir-lt-w05_35-light, sans-serif;
+    font-size: 15px;
+    line-height: 28px;
+}
+
+#team_main {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    border: 2px solid black;
+}
+
+
+
+#position_1_container {
+    display: flex;
+    min-width: 200px;
+    max-width: 500px;
+    border: 2px solid blue;
+}
+
+#position_2_container {
+    display: flex;
+    min-width: 200px;
+    max-width: 500px;
+
+    border: 2px solid green;
+
+}
+
+#position_1_container img {
+    padding: 20px;
+}
+
+#position_2_container img {
+    padding: 20px;
+}
+
+#position_1 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#position_2 {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}

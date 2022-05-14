@@ -6,7 +6,7 @@ export default function HighlightedProducts () {
     
     
     return (
-        <div>
+        <div id="highlighted_products">
             <h1>Highlighted Products</h1>
             {
                 products.map( product => {
