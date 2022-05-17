@@ -25,3 +25,7 @@
     background-color: #04AA6D;
     color: white;
   }
+
+  #cart-navlink {
+    float: right;
+  }

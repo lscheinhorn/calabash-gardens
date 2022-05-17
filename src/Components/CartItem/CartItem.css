@@ -1,8 +1,8 @@
-.product_container {
+.cartItem_container {
     display: flex;
     width: 33%;   
 }
 
-.product_container img {
+.cartItem_container img {
     width: 100%;   
 }

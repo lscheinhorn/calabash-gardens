@@ -1,3 +1,29 @@
 #offerings {
+    color: white;
+    text-align: center;
     background-color:#EBA644;
+    padding: 80px;
+}
+
+#offerings p {
+}
+
+#offerings-blocks {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 50px 100px;
+}
+
+.offerings-row {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.offerings-block {
+    color: black;
+    background-color: white;
+    margin: 25px;
+    width: 30%;
+    aspect-ratio: 1;
 }

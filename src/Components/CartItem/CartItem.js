@@ -1,7 +1,7 @@
-import './Product.css'
+import './CartItem.css'
 import { Link } from 'react-router-dom' 
 
-export default function Product (props) {
+export default function CartItem (props) {
     const { product } = props
     const photos = product.photos.map(photo => {
         return `${photo}`
@@ -12,13 +12,12 @@ export default function Product (props) {
 
 
     return (
-        <div className="product_container">
+        <div className="cartItem_container">
             <Link to={ toLink }>
                 <img src={ featured } alt={ featured } />
                 <h4>{ title }</h4>
                 <p>{ info }</p>
-                <p>${ price }</p>
-                <button className="add_to_cart" >Add To Cart</button>
+                <p>{ price }</p>
             </Link>
             
         </div>

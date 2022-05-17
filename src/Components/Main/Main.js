@@ -12,7 +12,6 @@ export default function Main () {
         <div className='main'>
             <Banner />
             <div>
-                <h1>Main</h1>
                 <HighlightedProducts />
                 <Offerings />
                 <About />

@@ -1,17 +1,15 @@
-import './HighlightedProducts.css'
+import './Shop.css'
 import { products } from '../../resources/products'
 import Product from '../Product/Product'
 
-export default function HighlightedProducts () {
+export default function Shop () {
     
     
     return (
-        <div id="highlighted-products">
+        <div id="shop">
             {
                 products.map( product => {
-                    if ( product.isHighlighted ) {
                         return <Product product={ product } key={ product.key } />
-                    }
                 })
             }
         </div>

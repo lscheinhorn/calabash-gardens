@@ -1,2 +1,4 @@
-#highlighted_products {
+#highlighted-products {
+    display: flex;
+    border: 2px dotted blue;
 }
