@@ -1,7 +1,7 @@
 import './ProductPage.css'
 import { useParams } from 'react-router-dom'
 import { products } from '../../resources/products'
-import { addCartItem } from '../../Store'
+import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 
 export default function ProductPage () {

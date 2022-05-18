@@ -1,12 +1,13 @@
 import './Cart.css'
 import CartItem from '../CartItem/CartItem'
 import { useSelector } from 'react-redux'
-import { selectCart } from '../../Store'
+import { selectCart } from './cartSlice'
+
 
 export default function Cart () {
 
     const cartItems = useSelector(selectCart)
-    console.log('cart', cartItems)
+    console.log('cart =>', cartItems)
 
     const promoCode = "10"
 
@@ -40,6 +41,8 @@ export default function Cart () {
     const total = getTotal(subtotal, shipping, discount)
     console.log('subtotal', subtotal, 'shipping', shipping, 'discount', discount, 'total', total)
     
+ 
+
     return (
         <div id="cart">
             <h2>My Cart</h2>
@@ -51,7 +54,6 @@ export default function Cart () {
             <p id="subtotal">Subtotal ${ subtotal }</p>
             <p id="shipping">Shipping ${ shipping }</p>
             <p id="total">Total ${ total }</p>
-
 
         </div>
     )

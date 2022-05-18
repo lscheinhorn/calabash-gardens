@@ -1,45 +1,55 @@
-import { createStore } from 'redux'
+import { configureStore } from '@reduxjs/toolkit'
+import cartSlice from './Components/Cart/cartSlice'
 
-const initialState = { cart: [] }
 
-export const addCartItem = (product) => {
-    return {
-        type: 'cart/addCartItem',
-        payload: product
+const store = configureStore({
+    reducer: {
+        cart: cartSlice
     }
-}
-
-export const removeCartItem = (product) => {
-    return {
-        type: 'cart/removeCartItem',
-        payload: product
-    }
-}
-
-const cartReducer = (state = initialState, action) => {
-    switch( action.type ) {
-        case 'cart/addCartItem':
-            return { 
-                ...state, 
-                cart: [
-                    ...state.cart,
-                    action.payload
-                ]  
-            }
-        case 'cart/removeCartItem':
-            return { 
-                ...state, 
-                cart: state.cart.filter( item => item.key !== action.payload.key)
-            }
-            
-            
-        default:
-            return state
-    }
-}
-
-const store = createStore(cartReducer)
-
-export const selectCart = state => state.cart 
+})
 
 export default store
+
+// const initialState = { cart: [] }
+
+// export const addCartItem = (product) => {
+//     return {
+//         type: 'cart/addCartItem',
+//         payload: product
+//     }
+// }
+
+// export const removeCartItem = (product) => {
+//     return {
+//         type: 'cart/removeCartItem',
+//         payload: product
+//     }
+// }
+
+// const cartReducer = (state = initialState, action) => {
+//     switch( action.type ) {
+//         case 'cart/addCartItem':
+//             return { 
+//                 ...state, 
+//                 cart: [
+//                     ...state.cart,
+//                     action.payload
+//                 ]  
+//             }
+//         case 'cart/removeCartItem':
+//             return { 
+//                 ...state, 
+//                 cart: state.cart.filter( item => item.key !== action.payload.key)
+//             }
+            
+            
+//         default:
+//             return state
+//     }
+// }
+
+// const store = createStore(cartReducer)
+
+// export const selectCart = state => state.cart 
+
+// export default store
