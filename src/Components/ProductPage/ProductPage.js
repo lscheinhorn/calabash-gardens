@@ -26,13 +26,13 @@ export default function ProductPage () {
     const photos = product.photos.map(photo => {
         return `${photo}`
     })
-    
+
     const featured = photos[0]
     const { title, info, price } = product
 
    
 
-    const handleAddToCart = (product) => {
+    const handleAddToCart = () => {
         dispatch(addCartItem(product))
     }
 
@@ -42,7 +42,7 @@ export default function ProductPage () {
             <img src={ featured } alt={ featured } />
             <p>{ info }</p>
             <p>${ price }</p>
-            <button className="add_to_cart" onClick={ handleAddToCart(product) } >Add To Cart</button>
+            <button className="add_to_cart" onClick={ handleAddToCart } >Add To Cart</button>
         </div>
     )
 }
