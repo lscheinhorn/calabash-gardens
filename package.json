@@ -2,7 +2,7 @@
   "name": "clabash_gardens",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://lscheinhorn.github.io/calabash_gardens",
+  "homepage": "https://lscheinhorn.github.io/calabash-gardens",
   "dependencies": {
     "@reduxjs/toolkit": "^1.8.1",
     "@testing-library/jest-dom": "^5.16.4",
