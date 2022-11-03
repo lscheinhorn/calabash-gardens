@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/calabash_gardens/static/css/main.babab6b0.css",
+    "main.js": "/calabash_gardens/static/js/main.a1e8aa01.js",
+    "static/media/parallax.webp": "/calabash_gardens/static/media/parallax.38f2463d95275deba0b4.webp",
+    "static/media/background_farm.webp": "/calabash_gardens/static/media/background_farm.255a5e3386878460ebf0.webp",
+    "index.html": "/calabash_gardens/index.html",
+    "main.babab6b0.css.map": "/calabash_gardens/static/css/main.babab6b0.css.map",
+    "main.a1e8aa01.js.map": "/calabash_gardens/static/js/main.a1e8aa01.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.babab6b0.css",
+    "static/js/main.a1e8aa01.js"
+  ]
+}
