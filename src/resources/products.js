@@ -1,3 +1,4 @@
+
 const defaultInfo = "I'm a product detail. I'm a great place to add more information about your product such as sizing, material, care and cleaning instructions. This is also a great space to write what makes this product special and how your customers can benefit from this item."
 
 const createKey = (input) => {
@@ -16,7 +17,7 @@ export const products = [
         price: '100.00',
         isHighlighted: false,
         photos: [
-            '/images/product_photos/holidays_gifts_basket.webp'
+            require('../resources/images/product_photos/holidays_gifts_basket.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -28,7 +29,7 @@ export const products = [
         price: '100.00',
         isHighlighted: false,
         photos: [
-            '/images/product_photos/gifts_basket.webp'
+            require('../resources/images/product_photos/gifts_basket.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -40,7 +41,7 @@ export const products = [
         price: '50.00',
         isHighlighted: false,
         photos: [
-            '/images/product_photos/gift_basket.webp'
+            require('../resources/images/product_photos/gift_basket.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -52,9 +53,9 @@ export const products = [
         price: '30.00',
         isHighlighted: true,
         photos: [
-            '/images/product_photos/0.5g_vermont_grown_saffron_1.webp',
-            '/images/product_photos/0.5g_vermont_grown_saffron_2.webp',
-            '/images/product_photos/0.5g_vermont_grown_saffron_3.webp'
+            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp'),
+            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp'),
+            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -66,7 +67,7 @@ export const products = [
         price: '50.00',
         isHighlighted: true,
         photos: [
-            '/images/product_photos/1g_vt_grown_saffron.webp'
+            require('../resources/images/product_photos/1g_vt_grown_saffron.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -78,8 +79,8 @@ export const products = [
         price: '100.00',
         isHighlighted: true,
         photos: [
-            '/images/product_photos/2g_vt_grown_saffron_1.webp',
-            '/images/product_photos/2g_vt_grown_saffron_2.webp'
+            require('../resources/images/product_photos/2g_vt_grown_saffron_1.webp'),
+            require('../resources/images/product_photos/2g_vt_grown_saffron_2.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -91,7 +92,7 @@ export const products = [
         price: '10.00',
         isHighlighted: false,
         photos: [
-            '/images/product_photos/saffron_tincture.webp'
+            require('../resources/images/product_photos/saffron_tincture.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -103,7 +104,7 @@ export const products = [
         price: '15.00',
         isHighlighted: false,
         photos: [
-            '/images/product_photos/saffron_maple_sirup.webp'
+            require('../resources/images/product_photos/saffron_maple_sirup.webp')
         ],
         get key() {
             return createKey(this.title)

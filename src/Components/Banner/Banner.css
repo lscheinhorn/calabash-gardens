@@ -4,7 +4,7 @@
     justify-content: center;
     color: white;
     text-align: center;
-    background-image: url('../../../public/images/background_farm.webp');
+    background-image: url('../../resources/images/background_farm.webp');
     background-attachment: fixed;
     background-size: cover;
     height: 100vh;
