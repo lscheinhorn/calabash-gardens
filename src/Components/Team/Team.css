@@ -2,7 +2,6 @@
     color: white;
     text-align: center;
     background-color: #EBA644;
-    border: 1px solid black;
     padding: 40px;
 }
 
@@ -16,7 +15,6 @@
     display: flex;
     justify-content: center;
     flex-wrap: wrap;
-    border: 2px solid black;
 }
 
 
@@ -25,7 +23,6 @@
     display: flex;
     min-width: 200px;
     max-width: 500px;
-    border: 2px solid blue;
 }
 
 #position_2_container {
@@ -33,7 +30,6 @@
     min-width: 200px;
     max-width: 500px;
 
-    border: 2px solid green;
 
 }
 
