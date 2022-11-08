@@ -15,19 +15,19 @@ function App() {
       <Header />
       <Routes>
         <Route 
-          path="products/:key" 
+          path="calabash-gardens/products/:key" 
           element={<ProductPage />} 
         />
         <Route 
-          path="shop" 
+          path="calabash-gardens/shop" 
           element={<Shop />} 
         />
         <Route 
-          path="cart"
+          path="calabash-gardens/cart"
           element={<Cart />}
         />
         <Route 
-          path="" 
+          path="calabash-gardens/" 
           element={<Main />} 
         />
       
