@@ -1,0 +1,33 @@
+
+.footer_color {
+    background-color: #735284;
+    color: #F3CF50;
+}
+
+.footer {
+    display: flex;
+    justify-content: space-around;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 20vh; 
+}
+
+.get_in_touch_footer {
+    display: flex;
+    align-items: center;
+    
+}
+
+.get_in_touch_footer button {
+    font-size: 15px;
+    color: #735284;
+    background-color: #F3CF50;
+    padding: 13px 22px;
+    
+}
+
+
+
+
+

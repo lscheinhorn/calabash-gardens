@@ -1,3 +1,9 @@
 .App {
     font-family: Arial, Helvetica, sans-serif;
+    position: relative;
+    min-height: 80vh;
+}
+
+.app_wrap {
+    padding-bottom: 20vh;
 }
