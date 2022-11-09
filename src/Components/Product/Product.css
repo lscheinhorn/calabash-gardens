@@ -1,8 +1,10 @@
 .product_container {
     display: flex;
-    width: 33%;   
+    min-width: 300px;
+    max-width: 500px;   
 }
 
 .product_container img {
     width: 100%;   
+    margin: 5px;
 }
