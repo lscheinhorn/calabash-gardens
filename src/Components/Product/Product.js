@@ -1,8 +1,12 @@
 import './Product.css'
 import { Link } from 'react-router-dom' 
+import { addCartItem } from '../Cart/cartSlice'
+import { useDispatch } from 'react-redux'
 
 export default function Product (props) {
     const { product } = props
+    const dispatch = useDispatch()
+
     const photos = product.photos.map(photo => {
         return `${photo}`
     })
@@ -10,6 +14,9 @@ export default function Product (props) {
     const { title, info, price, key } = product
     const toLink = `/products/${key}`
 
+    const handleAddCartItem = () => {
+        dispatch(addCartItem(product))
+    }
 
     return (
         <div className="product_container">
@@ -18,7 +25,7 @@ export default function Product (props) {
                 <h4>{ title }</h4>
                 <p>{ info }</p>
                 <p>${ price }</p>
-                <button className="add_to_cart" >Add To Cart</button>
+                <button className="add_to_cart" onClick={ handleAddCartItem } >Add To Cart</button>
             </Link>
             
         </div>

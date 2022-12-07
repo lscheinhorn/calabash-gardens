@@ -48,7 +48,7 @@ export default function CartDrawer () {
     return (
         <div id="cart_sleave">
             <div id="cart_drawer">
-                <button id="drawer_tab" ><</button>
+                <button id="drawer_tab" >&#60</button>
                 <div>
                     Div 1
                 </div>
