@@ -1,5 +1,6 @@
 import './Cart.css'
 import CartItem from '../CartItem/CartItem'
+import Paypal from '../Paypal/Paypal'
 import { useSelector } from 'react-redux'
 import { selectCart } from './cartSlice'
 
@@ -54,7 +55,7 @@ export default function Cart () {
             <p id="subtotal">Subtotal ${ subtotal }</p>
             <p id="shipping">Shipping ${ shipping }</p>
             <p id="total">Total ${ total }</p>
-
+            <Paypal />
         </div>
     )
 }
