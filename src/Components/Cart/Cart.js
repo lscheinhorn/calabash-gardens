@@ -10,7 +10,7 @@ export default function Cart () {
     const cartItems = useSelector(selectCart)
     console.log('cart =>', cartItems)
 
-    const promoCode = "10"
+    const promoCode = ""
 
     const getSubtotal = (cartItems) => {
         let subtotal = 0
@@ -23,7 +23,7 @@ export default function Cart () {
     }
 
     const getShipping = () => {
-        return 15
+        return 0
     }
 
     const getDiscount = (promoCode) => {
