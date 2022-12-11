@@ -12,7 +12,7 @@ export default function Product (props) {
     })
     const featured = photos[0]
     const { title, info, price, key } = product
-    const toLink = `/products/${key}`
+    const toLink = `/calabash-gardens/products/${key}`
 
     const handleAddCartItem = () => {
         dispatch(addCartItem(product))
@@ -25,9 +25,9 @@ export default function Product (props) {
                 <h4>{ title }</h4>
                 <p>{ info }</p>
                 <p>${ price }</p>
-                <button className="add_to_cart" onClick={ handleAddCartItem } >Add To Cart</button>
             </Link>
-            
+            <button className="add_to_cart" onClick={ handleAddCartItem } >Add To Cart</button>
+
         </div>
     )
 }

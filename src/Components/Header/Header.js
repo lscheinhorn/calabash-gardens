@@ -1,7 +1,7 @@
 import './Header.css'
 import Navbar from '../Navbar/Navbar'
 import { content } from '../../resources/content'
-
+import { Link } from 'react-router-dom'
 
 
 
@@ -22,7 +22,10 @@ export default function Header () {
                     
                 </div>
                 <div className='get_in_touch header_color'>
-                    <button>{ content.home.header.button }</button>
+                    <Link id="contact-Link" to="calabash-gardens/contact">
+                        <button>{ content.home.header.button }</button>
+                    </Link>
+
                 </div>
             </div>
             

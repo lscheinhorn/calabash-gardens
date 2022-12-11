@@ -1,5 +1,7 @@
 .product_container {
     display: flex;
+    justify-content: center;
+    flex-direction: column;
     min-width: 300px;
     max-width: 500px;   
 }
