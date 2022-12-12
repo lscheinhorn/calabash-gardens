@@ -4,11 +4,13 @@
   "private": true,
   "homepage": "https://lscheinhorn.github.io/calabash-gardens/",
   "dependencies": {
+    "@emailjs/browser": "^3.10.0",
     "@paypal/react-paypal-js": "^7.8.2",
     "@reduxjs/toolkit": "^1.8.1",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^13.1.1",
     "@testing-library/user-event": "^13.5.0",
+    "email-js": "^2.0.2",
     "nodemailer": "^6.8.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
@@ -45,6 +47,9 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^4.0.0"
+    "autoprefixer": "^10.4.13",
+    "gh-pages": "^4.0.0",
+    "postcss": "^8.4.20",
+    "tailwindcss": "^3.2.4"
   }
 }
