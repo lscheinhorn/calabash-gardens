@@ -3,6 +3,14 @@
     --textAlign: left; 
 }
 
+
+@media screen and (max-width: 750px) {
+    :root {
+        --flexDirection: column;
+        --textAlign: center; 
+    }
+}
+
 .header_color {
     background-color: #F3CF50;
     color: #735284;

@@ -1,33 +1,11 @@
 import './Header.css'
 import Navbar from '../Navbar/Navbar'
 import { content } from '../../resources/content'
-import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 
 export default function Header () {
-    const [ vWidth, setVWidth ] = useState( window.innerWidth )
-    
-    const setResponsiveVariables = () => {
-        setVWidth( window.innerWidth )
-        const root = document.documentElement
-        if( vWidth < 750 ) {
-            root.style.setProperty('--flexDirection', 'column')
-            root.style.setProperty('--textAlign', 'center')
-
-        } else {
-            root.style.setProperty('--flexDirection', 'row')
-            root.style.setProperty('--textAlign', 'left')
-
-        }
-    }
-
-    window.onresize = setResponsiveVariables
-
-    useEffect(() => {
-        setResponsiveVariables()
-        }, [])
-
+   
     return (
         <div >
             <div className='above_nav header_color'>
@@ -51,7 +29,7 @@ export default function Header () {
                 </div>
             </div>
             
-            <Navbar vWidth={ vWidth }/>
+            <Navbar />
         </div>
     )
 }
