@@ -5,13 +5,14 @@
   }
   
   /* Style the links inside the navigation bar */
-  .topnav a {
+  .topnav a , #hamburger-container{
     float: left;
     color: #775582;
     text-align: center;
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
+
   }
   
   /* Change the color of links on hover */
@@ -31,7 +32,7 @@
   }
 
   @media screen and (min-width: 480px) {
-    #hamburger-icon {
+    #hamburger-container {
       display: none;
     }
     #navlinks {
@@ -40,10 +41,18 @@
   }
 
   @media screen and (max-width: 480px) {
-    #hamburger-icon {
-      display: block;
+    #hamburger-container {
+      display: block;;
+
     }
     #navlinks {
       display: none;
     }
+  }
+
+  #hamburger-container {
+    margin: 10px 10px 10px 10px;
+  }
+
+  #burger-cart-container {
   }

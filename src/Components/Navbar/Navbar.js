@@ -20,16 +20,24 @@ export default function Navbar () {
 
     return (
         <div className="topnav">
-            <i id='close-navbar-icon' className="fa-solid fa-xmark" onClick={ handleCollaps }></i>
-            <NavLink id="cart-navlink" to="calabash-gardens/cart">Cart</NavLink>
+            <div id='burger-cart-container'>
+                <div id="hamburger-container">
+                    <i id="hamburger-icon" type='button' className="fa-solid fa-bars fa-xl" onClick={ handleHamburger } aria-label='open navigation menu' ></i>
+                    <i id='close-navbar-icon' type='button' className="fa-solid fa-xmark fa-xl" onClick={ handleCollaps } aria-label='close navigation menu' ></i>
+                </div>
+                
+                <NavLink id="cart-navlink" to="calabash-gardens/cart">
+                    <i className="fa-solid fa-cart-shopping" type='button' aria-label='cart' ></i>            
+                </NavLink>
+            </div>
+            
 
-            <section id="navlinks" >
+            <section id="navlinks" onClick={handleCollaps} >
                 <NavLink to="calabash-gardens/">Home</NavLink>
                 <NavLink to="calabash-gardens/book-online">Book Online</NavLink>
                 <NavLink to="calabash-gardens/shop">Shop</NavLink>
                 <NavLink to="calabash-gardens/blog">Blog</NavLink>
             </section>
-            <i id="hamburger-icon" className="fas fa-bars" onClick={ handleHamburger }></i>
     
         </div>
     )
