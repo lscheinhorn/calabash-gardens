@@ -9,6 +9,11 @@
     background-size: 100vw 100%;
     
     height: 100vh;
+
+    position: -webkit-sticky;
+    position: sticky;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
 }
 
 .banner h1 {
