@@ -25,7 +25,7 @@ export default function Contact() {
                 <input className="form-control" type="text" name="phone" />
                 <label>Message</label>
                 <textarea className="form-control" name="message" />
-                <input className="btn btn-primary" type="submit" value="Send" />
+                <input className="btn btn-primary" type="submit" value="Test" />
             </div>
             
         </form>
