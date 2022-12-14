@@ -29,3 +29,21 @@
   #cart-navlink {
     float: right;
   }
+
+  @media screen and (min-width: 480px) {
+    #hamburger-icon {
+      display: none;
+    }
+    #navlink-words {
+      display: block;
+    }
+  }
+
+  @media screen and (max-width: 480px) {
+    #hamburger-icon {
+      display: block;
+    }
+    #navlink-words {
+      display: none;
+    }
+  }

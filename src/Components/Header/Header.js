@@ -1,15 +1,16 @@
 import './Header.css'
 import Navbar from '../Navbar/Navbar'
 import { content } from '../../resources/content'
-import { useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 
 
 export default function Header () {
-
+    const [ vWidth, setVWidth ] = useState( window.innerWidth )
+    
     const setResponsiveVariables = () => {
+        setVWidth( window.innerWidth )
         const root = document.documentElement
-        const vWidth = window.innerWidth
         if( vWidth < 750 ) {
             root.style.setProperty('--flexDirection', 'column')
             root.style.setProperty('--textAlign', 'center')
@@ -50,7 +51,7 @@ export default function Header () {
                 </div>
             </div>
             
-            <Navbar />
+            <Navbar vWidth={ vWidth }/>
         </div>
     )
 }
