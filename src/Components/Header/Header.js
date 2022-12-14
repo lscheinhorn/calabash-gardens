@@ -7,7 +7,7 @@ import { Link } from 'react-router-dom'
 
 export default function Header () {
     return (
-        <div className='container'>
+        <div >
             <div className='above_nav header_color'>
                 <div className='title_container header_color' >
                     <div className='purple_logo header_color'>

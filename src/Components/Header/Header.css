@@ -8,12 +8,14 @@
 
 .above_nav {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
+    padding: 20px 10px;
 }
 
 .get_in_touch {
     display: flex;
     align-items: center;
+    padding: 0px 20px;
 }
 
 .get_in_touch button {
@@ -27,39 +29,30 @@
 
 .title_container {
     display: flex;
+    align-items: center;
     font: 22px barlow-medium, barlow, sans-serif;
 }
 
 .title h1 {
     block-size: auto;
-
     font: 22px barlow-medium, barlow, sans-serif;
     position: relative;
-    top: 0px;
-    height: 1rem;
-    padding: 10px;
-    margin: 40px 0px 0px 10px;
 }
 
 .title p {
     block-size: auto;
     font-size: 15px;
     position: relative;
-    height: 1rem;
-    padding: 10px;
 }
 
 
 
 .purple_logo {
-    
+    display: flex;
+    justify-content: center;
 }
 
 .purple_logo img {
-    position: relative;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
     padding: 10px;
     width: 90%;
 }

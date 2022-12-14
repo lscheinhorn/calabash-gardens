@@ -16,13 +16,17 @@ export default function Contact() {
 
     return (
         <form ref={form} onSubmit={sendEmail}>
-            <label>Name</label>
-            <input type="text" name="from_name" />
-            <label>Email</label>
-            <input type="email" name="user_email" />
-            <label>Message</label>
-            <textarea name="message" />
-            <input type="submit" value="Send" />
+            <div className="form-group">
+            <label for="name">Name</label>
+            <input className="form-control" type="text" name="from_name" />
+                <label for="exampleInputEmail1">Email address</label>
+                <input className="form-control" type="email" name="user_email" />
+                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.<br></br></small>
+                <label>Message</label>
+                <textarea className="form-control" name="message" />
+                <input className="btn btn-primary" type="submit" value="Send" />
+            </div>
+            
         </form>
     )
 }
