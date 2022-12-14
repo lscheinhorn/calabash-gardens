@@ -5,12 +5,12 @@ export default function Contact() {
     const form = useRef();
  
     const sendEmail = (e) => {
-        emailjs.sendForm('service_6n5ow3f', 'template_9y2c7vf', form.current, 'anRu1WXRFLGM58t0y')
-        .then((result) => {
-         // show the user a success message
-        }, (error) => {
-         // show the user an error
-        })
+        // emailjs.sendForm('service_6n5ow3f', 'template_9y2c7vf', form.current, 'anRu1WXRFLGM58t0y')
+        // .then((result) => {
+        //  // show the user a success message
+        // }, (error) => {
+        //  // show the user an error
+        // })
     }
 
     return (
