@@ -6,7 +6,7 @@
 
 .footer {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     position: absolute;
     bottom: 0;
     width: 100%;
@@ -16,15 +16,14 @@
 .get_in_touch_footer {
     display: flex;
     align-items: center;
-
+    padding: 0px 20px;
 }
 
 .get_in_touch_footer button {
-    font-size: 15px;
     color: #735284;
     background-color: #F3CF50;
+    font-size: 15px;
     padding: 13px 22px;
-
 }
 
 
