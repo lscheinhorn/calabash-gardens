@@ -76,3 +76,7 @@
     padding: 10px;
     width: 90%;
 }
+
+#close-navbar-icon {
+    display: none;
+}

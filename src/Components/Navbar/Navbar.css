@@ -1,4 +1,4 @@
-/* Add a black background color to the top navigation */
+/* Add a background color to the top navigation */
 .topnav {
     background-color: #EBA644;
     overflow: hidden;
@@ -34,7 +34,7 @@
     #hamburger-icon {
       display: none;
     }
-    #navlink-words {
+    #navlinks {
       display: block;
     }
   }
@@ -43,7 +43,7 @@
     #hamburger-icon {
       display: block;
     }
-    #navlink-words {
+    #navlinks {
       display: none;
     }
   }
