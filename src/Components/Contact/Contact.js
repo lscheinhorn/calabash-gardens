@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import './Contact.css'
+import React, { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
  
 export default function Contact() {
-    // const form = useRef();
+    const formRef = useRef();
     const [ form, setForm] = useState({
         from_name: "",
         user_email: "",
@@ -25,27 +26,36 @@ export default function Contact() {
 
     const sendEmail = (e) => {
         e.preventDefault() // prevents the page from loading
-        // emailjs.sendForm('service_6n5ow3f', 'template_9y2c7vf', form.current, 'anRu1WXRFLGM58t0y')
-        // .then((result) => {
-        //  // show the user a success message
-        // }, (error) => {
-        //  // show the user an error
-        // })
-        console.log("form", form)
+        emailjs.sendForm('service_6n5ow3f', 'template_9y2c7vf', formRef.current, 'anRu1WXRFLGM58t0y')
+        .then((result) => {
+         // show the user a success message
+         console.log("success", result)
+         if(result.text === "OK") {
+            setForm(prev => {
+                return {
+                    ...prev,
+                    sent: true
+                }
+            })
+         }
+        }, (error) => {
+         // show the user an error
+         console.log("error sending message", error)
+
+        })
+        // reset form and send success message
         setForm({
             from_name: "",
             user_email: "",
             phone: "",
             message: "",
-            sent: true
         })
-        console.log("sent true?", form)
     }
 
     return (
-        <form onSubmit={ sendEmail}>
+        <form ref={ formRef } onSubmit={ sendEmail}>
             <div className="form-group">
-                <label for="name">Name</label>
+                <label>Name</label>
                 <input 
                     className="form-control" 
                     type="text" 
@@ -53,7 +63,7 @@ export default function Contact() {
                     value={ form.from_name } 
                     onChange={ handleChange }
                 />
-                <label for="exampleInputEmail1">Email address</label>
+                <label>Email address</label>
                 <input 
                     className="form-control" 
                     type="email"
@@ -61,8 +71,8 @@ export default function Contact() {
                     value={ form.user_email} 
                     onChange={ handleChange }
                 />
-                <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.<br></br></small>
-                <label for="phone">Phone</label>
+                <small id="emailHelp" className="form-text text-muted">We'll never share your email with anyone else.<br></br></small>
+                <label>Phone</label>
                 <input 
                     className="form-control" 
                     type="tel" 
@@ -78,12 +88,13 @@ export default function Contact() {
                     onChange={ handleChange }
                 />
                 <input 
+                    id="send_button"
                     className="btn btn-primary" 
                     type="submit" 
                     value="Send" 
                 />
             </div>
-            { form.sent?<h4>Your message was sent</h4>:null }
+            { form.sent?<h4>Your message was sent successfully!</h4>:null }
         </form>
     )
 }
