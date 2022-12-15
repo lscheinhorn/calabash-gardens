@@ -8,11 +8,17 @@ export default function Navbar () {
         
         document.getElementById("navlinks").style.display = 'flex'
         document.getElementById("navlinks").style.flexDirection = 'column'
+        document.getElementById("navlinks").style.border = '1px solid black'
+
         document.getElementById("hamburger-icon").style.display = 'none'
         document.getElementById("close-navbar-icon").style.display = 'block'
     }
 
     const handleCollaps = () => {
+        const vWidth = window.innerWidth
+        if( vWidth >= 480) {
+            return
+        }
         document.getElementById("navlinks").style.display = 'none'
         document.getElementById("hamburger-icon").style.display = 'block'
         document.getElementById("close-navbar-icon").style.display = 'none'
@@ -21,13 +27,15 @@ export default function Navbar () {
     return (
         <div className="topnav">
                 <div id="hamburger-container"  >
-                    <i tabIndex='0' id="hamburger-icon" type='button' className="fa-solid fa-bars fa-xl" onClick={ handleHamburger } aria-label='open navigation menu' ></i>
-                    <i tabIndex='0' id='close-navbar-icon' type='button' className="fa-solid fa-xmark fa-xl" onClick={ handleCollaps } aria-label='close navigation menu' ></i>
+                    <button tabIndex='0' id="hamburger-icon" onClick={ handleHamburger } aria-label='open navigation menu'>                    
+                        <i  className="fa-solid fa-bars fa-xl"  ></i>
+                    </button>
+                    <button tabIndex='0' id='close-navbar-icon' onClick={ handleCollaps } aria-label='close navigation menu' >                   
+                        <i  className="fa-solid fa-xmark fa-xl" ></i>
+                    </button>
                 </div>
                 
-                <NavLink id="cart-navlink" to="calabash-gardens/cart">
-                    <i className="fa-solid fa-cart-shopping" type='button' aria-label='cart' ></i>            
-                </NavLink>
+                
             
 
             <section id="navlinks" onClick={handleCollaps} >
@@ -37,6 +45,9 @@ export default function Navbar () {
                 <NavLink to="calabash-gardens/blog">Blog</NavLink>
             </section>
     
+            <NavLink id="cart-navlink" to="calabash-gardens/cart" onClick={handleCollaps} >
+                <i className="fa-solid fa-cart-shopping" type='button' aria-label='cart' ></i>            
+            </NavLink>
         </div>
     )
 }

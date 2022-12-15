@@ -1,5 +1,5 @@
 /* Add a background color to the top navigation */
-.topnav {
+.topnav, .topnav button {
     background-color: #EBA644;
     overflow: hidden;
   }
@@ -48,11 +48,9 @@
     #navlinks {
       display: none;
     }
+    
   }
 
-  #hamburger-container {
-    margin: 10px 10px 10px 10px;
-  }
 
   #burger-cart-container {
   }
