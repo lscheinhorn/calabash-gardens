@@ -41,7 +41,12 @@ export default function Contact() {
         }, (error) => {
          // show the user an error
          console.log("error sending message", error)
-
+         setForm(prev => {
+            return {
+                ...prev,
+                sent: error
+            }
+        })
         })
         // reset form and send success message
         setForm({
@@ -62,6 +67,7 @@ export default function Contact() {
                     name="from_name" 
                     value={ form.from_name } 
                     onChange={ handleChange }
+                    required
                 />
                 <label>Email address</label>
                 <input 
@@ -70,6 +76,7 @@ export default function Contact() {
                     name="user_email" 
                     value={ form.user_email} 
                     onChange={ handleChange }
+                    required
                 />
                 <small id="emailHelp" className="form-text text-muted">We'll never share your email with anyone else.<br></br></small>
                 <label>Phone</label>
@@ -79,6 +86,7 @@ export default function Contact() {
                     name="phone" 
                     value={ form.phone } 
                     onChange={ handleChange }
+                    required
                 />
                 <label>Message</label>
                 <textarea 
@@ -86,6 +94,7 @@ export default function Contact() {
                     name="message" 
                     value={ form.message } 
                     onChange={ handleChange }
+                    required
                 />
                 <input 
                     id="send_button"
@@ -94,7 +103,9 @@ export default function Contact() {
                     value="Send" 
                 />
             </div>
-            { form.sent?<h4>Your message was sent successfully!</h4>:null }
+            { form.sent === 'true' ? <h4>Your message was sent successfully!</h4> : null }
+            { form.sent === 'error' ? <h4>There was an error sending your message. Please try again or email us directly at calabashgardens@gmail.com </h4> : null }
+
         </form>
     )
 }
