@@ -28,10 +28,10 @@ export default function Navbar () {
         <div className="topnav">
                 <div id="hamburger-container"  >
                     <button tabIndex='0' id="hamburger-icon" onClick={ handleHamburger } aria-label='open navigation menu'>                    
-                        <i  className="fa-solid fa-bars fa-xl"  ></i>
+                        <i  className="fa-solid fa-bars fa-2xl"  ></i>
                     </button>
                     <button tabIndex='0' id='close-navbar-icon' onClick={ handleCollaps } aria-label='close navigation menu' >                   
-                        <i  className="fa-solid fa-xmark fa-xl" ></i>
+                        <i  className="fa-solid fa-xmark fa-2xl" ></i>
                     </button>
                 </div>
                 
@@ -46,7 +46,7 @@ export default function Navbar () {
             </section>
     
             <NavLink id="cart-navlink" to="calabash-gardens/cart" onClick={handleCollaps} >
-                <i className="fa-solid fa-cart-shopping" type='button' aria-label='cart' ></i>            
+                <i className="fa-solid fa-cart-shopping fa-xl" type='button' aria-label='cart' ></i>            
             </NavLink>
         </div>
     )

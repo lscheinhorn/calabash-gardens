@@ -9,6 +9,10 @@
         --flexDirection: column;
         --textAlign: center; 
     }
+
+    footer img {
+        display: none;
+    }
 }
 
 .header_color {

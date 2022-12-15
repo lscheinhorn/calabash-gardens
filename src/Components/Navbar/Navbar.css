@@ -33,24 +33,23 @@
 
   @media screen and (min-width: 480px) {
     #hamburger-container {
-      display: none;
+      display: none !important;
     }
     #navlinks {
-      display: block;
+      display: block !important;
+      border: none !important;
     }
   }
 
-  @media screen and (max-width: 480px) {
-    #hamburger-container {
-      display: block;;
+  #hamburger-container {
+    display: block;;
 
-    }
-    #navlinks {
-      display: none;
-    }
+  }
+  #navlinks {
+    display: none;
+  }
+
+  #hamburger-icon, #close-navbar-icon {
+    border: none;
+  }
     
-  }
-
-
-  #burger-cart-container {
-  }
