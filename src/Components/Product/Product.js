@@ -24,10 +24,11 @@ export default function Product (props) {
                 <img src={ featured } alt={ featured } />
                 <h4>{ title }</h4>
             </Link>
-                <p>{ info }</p>
-                <p>${ price }</p>
-            <button className="add_to_cart" onClick={ handleAddCartItem } >Add To Cart</button>
-
+            <p>{ info }</p>
+            <p>${ price }</p>
+            <Link to="/calabash-gardens/cart" className="product-img-title">
+                <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
+            </Link>
         </div>
     )
 }
