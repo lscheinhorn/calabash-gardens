@@ -16,12 +16,17 @@ export default function CartItem (props) {
     }
 
     return (
-        <div className="cartItem_container">
-            <img src={ featured } alt={ featured } />
-            <h4>{ title }</h4>
-            <p>{ info }</p>
-            <p>{ price }</p>
-            <button className="remove_from_cart" onClick={ handleRemoveCartItem } >Remove From Cart</button>
+        <div className="cart-items-container">
+            <div className="cart-item">
+                <img src={ featured } alt={ featured } />
+                <div id="cart-item-title-price">
+                    <h4>{ title }</h4>
+                    <p>${ price }</p>
+                </div>
+                
+                <button className="remove_from_cart " onClick={ handleRemoveCartItem } ><i className="fa-solid fa-trash-can fa-xl"></i></button>
+            </div>
+            
             
         </div>
     )

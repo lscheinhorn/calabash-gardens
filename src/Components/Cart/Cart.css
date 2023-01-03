@@ -1,10 +1,35 @@
-#cart_drawer {
-    position: absolute;
-
-    height: 100%;
-    width: 300px;
+#cart h1{
+    padding: 15px;
 }
 
-#drawer_tab {
-    
+#cart {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+#total-paypal {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+}
+
+#total-container div{
+    display: flex;
+    justify-content: space-between;
+
+}
+
+#empty-cart {
+    display: flex;
+    flex-direction: column;
+    justify-content: cent;
+    padding: 10px
+}
+
+#empty-cart h4 {
+    padding: 30px;
+    font-size: 30px;
 }

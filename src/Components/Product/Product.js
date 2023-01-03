@@ -20,12 +20,12 @@ export default function Product (props) {
 
     return (
         <div className="product_container">
-            <Link to={ toLink }>
+            <Link to={ toLink } className="product-img-title">
                 <img src={ featured } alt={ featured } />
                 <h4>{ title }</h4>
+            </Link>
                 <p>{ info }</p>
                 <p>${ price }</p>
-            </Link>
             <button className="add_to_cart" onClick={ handleAddCartItem } >Add To Cart</button>
 
         </div>

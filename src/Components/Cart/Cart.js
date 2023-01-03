@@ -3,10 +3,9 @@ import CartItem from '../CartItem/CartItem'
 import Paypal from '../Paypal/Paypal'
 import { useSelector } from 'react-redux'
 import { selectCart } from './cartSlice'
-
+import {  Link } from 'react-router-dom'
 
 export default function Cart () {
-
     const cartItems = useSelector(selectCart)
     console.log('cart =>', cartItems)
 
@@ -23,7 +22,7 @@ export default function Cart () {
     }
 
     const getShipping = () => {
-        return 0
+        return 15
     }
 
     const getDiscount = (promoCode) => {
@@ -42,20 +41,44 @@ export default function Cart () {
     const total = getTotal(subtotal, shipping, discount)
     console.log('subtotal', subtotal, 'shipping', shipping, 'discount', discount, 'total', total)
     
- 
+    const isCartEmpty = () => {
+        if ( cartItems.length < 1 ) {
+            return (
+                <div id="empty-cart">
+                    <h4>Your cart is empty</h4>
+                    <Link className="btn btn-secondary" to="../calabash-gardens/shop">Continue Shopping</Link>
+                </div>
+            )
+        }
+        return (
+            <div id="total-paypal">
+                <div id="total-container">
+                    <div><h4>Subtotal</h4><h4>${ subtotal }</h4></div>
+                    <div><h4>Shipping</h4><h4>${ shipping }</h4></div>
+                    <div><h4>Total</h4><h4>${ total }</h4></div>
+
+                </div>
+                
+                <Paypal />
+                <Link className="btn btn-secondary" to="../calabash-gardens/shop">Continue Shopping</Link>
+
+            </div>
+        )
+    }
+
+
 
     return (
         <div id="cart">
-            <h2>My Cart</h2>
+            <h1>Cart</h1>
             {
                 cartItems.map(item => {
                     return <CartItem product={ item } />
                 })
             }
-            <p id="subtotal">Subtotal ${ subtotal }</p>
-            <p id="shipping">Shipping ${ shipping }</p>
-            <p id="total">Total ${ total }</p>
-            <Paypal />
+            { isCartEmpty()}
+            
+            
         </div>
     )
 }
