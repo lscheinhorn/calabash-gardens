@@ -26,7 +26,17 @@ export default function Paypal() {
  const createOrder = (data, actions) => {
    return actions.order
      .create({
-       purchase_units: purchaseUnits,
+       purchase_units: [
+        ...purchaseUnits,
+        {
+          name: "Shipping",
+          amount: {
+              currency_code: "USD",
+              value: 15
+        },
+        reference_id: "001"
+        }
+      ],
        
        // not needed if a shipping address is actually needed
        application_context: {
