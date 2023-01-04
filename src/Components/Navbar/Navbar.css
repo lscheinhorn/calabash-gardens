@@ -12,7 +12,6 @@
     padding: 14px 16px;
     text-decoration: none;
     font-size: 17px;
-
   }
   
   /* Change the color of links on hover */
@@ -29,6 +28,7 @@
 
   #cart-navlink {
     float: right;
+    position: relative;
   }
 
   @media screen and (min-width: 480px) {
@@ -53,3 +53,15 @@
     border: none;
   }
     
+  .topnav p {
+    color: white;
+    background-color: rgba(253, 44, 44, 0.527);
+    border-radius: 50%;
+    height: 30%;
+    width: 30%;
+    display: inline-block;
+    position: absolute;
+    top: 2px;
+    right: 5px;
+    font-size: 60%;
+  }

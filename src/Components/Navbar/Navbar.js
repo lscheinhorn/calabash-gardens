@@ -1,9 +1,19 @@
 import './Navbar.css'
 import {  NavLink } from 'react-router-dom'
-
+import { useSelector } from 'react-redux'
+import { selectCart } from '../Cart/cartSlice'
 
 export default function Navbar () {
-    
+    const cartItems = useSelector(selectCart)
+    const getCartQuantity = () => {
+        if ( cartItems.length < 1 ) {
+            return
+        }
+        return (
+            <p>{ cartItems.length }</p> 
+        )
+    }
+
     const handleHamburger = () => {
         
         document.getElementById("navlinks").style.display = 'flex'
@@ -45,8 +55,10 @@ export default function Navbar () {
                 <NavLink to="calabash-gardens/blog">Blog</NavLink>
             </section>
     
-            <NavLink id="cart-navlink" to="calabash-gardens/cart" onClick={handleCollaps} >
-                <i className="fa-solid fa-cart-shopping fa-xl" type='button' aria-label='cart' ></i>            
+            <NavLink id="cart-navlink" to="calabash-gardens/cart" onClick={handleCollaps} className="">
+                <i className="fa-solid fa-cart-shopping fa-xl" type='button' aria-label='cart' ></i>  
+                { getCartQuantity() } 
+   
             </NavLink>
         </div>
     )

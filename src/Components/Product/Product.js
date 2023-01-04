@@ -26,9 +26,7 @@ export default function Product (props) {
             </Link>
             <p>{ info }</p>
             <p>${ price }</p>
-            <Link to="/calabash-gardens/cart" className="product-img-title">
-                <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
-            </Link>
+            <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
         </div>
     )
 }
