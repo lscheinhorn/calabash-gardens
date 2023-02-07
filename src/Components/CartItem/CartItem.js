@@ -35,7 +35,7 @@ export default function CartItem (props) {
                         <button className="btn btn-primary" onClick={ handleAddCartItem }>+</button>
                     </div>
                     
-                    <p className="m-2">${ price }</p>
+                    <p className="m-2">${ price * quantity }</p>
                     
                 </div>
                 

@@ -14,8 +14,9 @@ export default function Cart () {
     const getSubtotal = (cartItems) => {
         let subtotal = 0
         for ( let i = 0 ; i < cartItems.length ; i++ ) {
+            const quantity = Number(cartItems[i].quantity)
             const price = Number(cartItems[i].price)
-            subtotal += price
+            subtotal += (price * quantity)
         }
         console.log('subtotal', subtotal)
         return subtotal
