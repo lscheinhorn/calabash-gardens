@@ -23,13 +23,17 @@
     display: flex;
     min-width: 200px;
     max-width: 500px;
+    border-top: 1px solid white;
+    padding: 15px 0 0 0;
 }
 
 #position_2_container {
     display: flex;
     min-width: 200px;
     max-width: 500px;
-
+    border-top: 1px solid white;
+    border-bottom: 1px solid white;
+    padding: 15px 0 0 0;
 
 }
 
@@ -51,4 +55,30 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+@media screen and (max-width: 480px) {
+    #team {
+        padding: 0;
+    }
+
+    #team_main {
+        padding: 25px 15px;
+    }
+
+    #team p {
+        font-family: avenir-lt-w01_35-light1475496, avenir-lt-w05_35-light, sans-serif;
+        font-size: 14px;
+        line-height: 18px;
+        padding: 10px;
+    }
+
+    #position_1_container img {
+        width: 33%;
+    }
+    
+    #position_2_container img {
+        width: 33%;
+    }
+
 }
