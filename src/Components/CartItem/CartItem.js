@@ -28,18 +28,22 @@ export default function CartItem (props) {
             <div className="cart-item">
                 <img src={ featured } alt={ featured } />
                 <div id="cart-item-title-price">
-                    <h4>{ title }</h4>
-                    <div className="d-flex m-4">
-                        <button className="btn btn-primary" onClick={ handleDecrementCartItem }>-</button>
-                        <p className="m-2">{ quantity }</p>
-                        <button className="btn btn-primary" onClick={ handleAddCartItem }>+</button>
+                    <h4 id="cart-item-title">{ title }</h4>
+                    <div id="cart-item-quantity-price-trash">
+                        <div id="quantity-container" className="d-flex m-4">
+                            <button className="btn btn-primary" onClick={ handleDecrementCartItem }>-</button>
+                            <p className="m-2">{ quantity }</p>
+                            <button className="btn btn-primary" onClick={ handleAddCartItem }>+</button>
+                        </div>
+                        
+                        <p id="cart-item-price" className="m-2">${ price * quantity }</p>
+                        
+                        <button id="trash-can" className="remove_from_cart " onClick={ handleRemoveCartItem } ><i className="fa-solid fa-trash-can fa-xl"></i></button>
+
                     </div>
-                    
-                    <p className="m-2">${ price * quantity }</p>
                     
                 </div>
                 
-                <button className="remove_from_cart " onClick={ handleRemoveCartItem } ><i className="fa-solid fa-trash-can fa-xl"></i></button>
             </div>
             
             
