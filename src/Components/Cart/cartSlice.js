@@ -34,7 +34,7 @@ export const cartSlice = createSlice({
                 ]  
             }
         },
-        removeCartItem: (state, action) => {
+        decrementCartItem: (state, action) => {
             if( action.payload.quantity > 1 ) {
                 return [
                     ...state.filter( item => item.key !== action.payload.key),
@@ -47,6 +47,12 @@ export const cartSlice = createSlice({
                 return state.filter( item => item.key !== action.payload.key)
             }
             
+        },
+        removeCartItem: (state, action) => {
+            
+            return state.filter( item => item.key !== action.payload.key)
+            
+            
         }
     }
 })
@@ -54,5 +60,5 @@ export const cartSlice = createSlice({
 
 export const selectCart = state => state.cart 
 
-export const { addCartItem, removeCartItem } = cartSlice.actions
+export const { addCartItem, decrementCartItem, removeCartItem } = cartSlice.actions
 export default cartSlice.reducer

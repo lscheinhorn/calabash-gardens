@@ -1,5 +1,5 @@
 import './CartItem.css'
-import { removeCartItem, addCartItem } from '../Cart/cartSlice'
+import { removeCartItem, decrementCartItem, addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 
 export default function CartItem (props) {
@@ -19,6 +19,10 @@ export default function CartItem (props) {
         dispatch(removeCartItem(product))
     }
 
+    const handleDecrementCartItem = () => {
+        dispatch(decrementCartItem(product))
+    }
+
     return (
         <div className="cart-items-container">
             <div className="cart-item">
@@ -26,7 +30,7 @@ export default function CartItem (props) {
                 <div id="cart-item-title-price">
                     <h4>{ title }</h4>
                     <div className="d-flex m-4">
-                        <button className="btn btn-primary" onClick={ handleRemoveCartItem }>-</button>
+                        <button className="btn btn-primary" onClick={ handleDecrementCartItem }>-</button>
                         <p className="m-2">{ quantity }</p>
                         <button className="btn btn-primary" onClick={ handleAddCartItem }>+</button>
                     </div>
