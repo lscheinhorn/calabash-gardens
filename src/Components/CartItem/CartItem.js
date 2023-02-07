@@ -1,7 +1,6 @@
 import './CartItem.css'
-import { removeCartItem } from '../Cart/cartSlice'
+import { removeCartItem, addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 export default function CartItem (props) {
     const dispatch = useDispatch()
@@ -11,6 +10,10 @@ export default function CartItem (props) {
     })
     const featured = photos[0]
     const { title, info, price, quantity, key } = product
+
+    const handleAddCartItem = () => {
+        dispatch(addCartItem(product))
+    }
 
     const handleRemoveCartItem = () => {
         dispatch(removeCartItem(product))
@@ -23,9 +26,9 @@ export default function CartItem (props) {
                 <div id="cart-item-title-price">
                     <h4>{ title }</h4>
                     <div className="d-flex m-4">
-                        <button className="btn btn-primary">-</button>
+                        <button className="btn btn-primary" onClick={ handleRemoveCartItem }>-</button>
                         <p className="m-2">{ quantity }</p>
-                        <button className="btn btn-primary">+</button>
+                        <button className="btn btn-primary" onClick={ handleAddCartItem }>+</button>
                     </div>
                     
                     <p className="m-2">${ price }</p>

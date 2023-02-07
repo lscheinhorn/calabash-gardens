@@ -35,7 +35,18 @@ export const cartSlice = createSlice({
             }
         },
         removeCartItem: (state, action) => {
-            return state.filter( item => item.key !== action.payload.key)
+            if( action.payload.quantity > 1 ) {
+                return [
+                    ...state.filter( item => item.key !== action.payload.key),
+                    {
+                        ...action.payload,
+                        quantity: action.payload.quantity - 1
+                    }
+                ]
+            } else {
+                return state.filter( item => item.key !== action.payload.key)
+            }
+            
         }
     }
 })
