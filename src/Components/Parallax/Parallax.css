@@ -3,19 +3,16 @@
     position: -webkit-sticky;
     position: sticky;
     background-attachment: fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    background-size: 100% 150vh;
+    /* -webkit-background-size: cover;
+    -moz-background-size: cover; */
+    background-size: 150%;
     background-repeat: no-repeat;
     height: 60vh;
 }
 
 @media screen and (max-width: 700px) {
     #parallax_container {
-        position: relative;
-        background-attachment: scroll;
-        background-size: auto 150vh;
-        background-repeat: no-repeat;
+        background-size: 250%;
     }
 }
 
