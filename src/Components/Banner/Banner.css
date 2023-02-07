@@ -14,7 +14,7 @@
     -moz-background-size: cover; */
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 700px) {
     .banner {
         background-image: url('../../resources/images/calabash-gardens-farm-mobile.png');
 
