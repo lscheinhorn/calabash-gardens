@@ -14,6 +14,7 @@ export default function Paypal() {
  const purchaseUnits = cartItems.map( item => {
     return {
         name: item.title,
+        quantity: "2",
         amount: {
             currency_code: "USD",
             value: item.price

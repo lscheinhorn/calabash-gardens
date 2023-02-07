@@ -9,7 +9,7 @@ export default function CartItem (props) {
         return `${photo}`
     })
     const featured = photos[0]
-    const { title, info, price, key } = product
+    const { title, info, price, quantity, key } = product
 
     const handleRemoveCartItem = () => {
         dispatch(removeCartItem(product))
@@ -22,6 +22,7 @@ export default function CartItem (props) {
                 <div id="cart-item-title-price">
                     <h4>{ title }</h4>
                     <p>${ price }</p>
+                    <p>Quantity: { quantity }</p>
                 </div>
                 
                 <button className="remove_from_cart " onClick={ handleRemoveCartItem } ><i className="fa-solid fa-trash-can fa-xl"></i></button>
