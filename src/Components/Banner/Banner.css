@@ -7,17 +7,43 @@
     background-image: url('../../resources/images/background_farm.webp');
     background-attachment: fixed;
     background-size: cover;
-    height: 100vh;
+    height: 120vh;
     background-position: right bottom;
     /* background-position: -webkit-sticky;
     -webkit-background-size: cover;
     -moz-background-size: cover; */
 }
 
+@media screen and (max-height: 480px) {
+    .banner {
+        height: 200vh !important;
+    }
+    
+    .banner h1 {
+        font-size: 10vh !important;
+        padding: 20px;
+    }
+
+    .banner h4 {
+        font-size: 6vh !important;
+        line-height: 35px !important;
+        padding: 10px
+    }
+
+    .banner_p p {
+        font-size: 4.5vh !important;
+        line-height: 28px !important;
+    }
+
+    .learn_more button {
+        padding: 7px 12px !important;
+    }
+    
+}
+
 @media screen and (max-width: 700px) {
     .banner {
         background-image: url('../../resources/images/calabash-gardens-farm-mobile.png');
-
     }
     
     .banner h1 {
@@ -45,6 +71,7 @@
 
 
 .banner h1 {
+    padding: 20px;
     font: 6vw barlow-medium, barlow, sans-serif;
     block-size: auto;
     margin: 0px;
