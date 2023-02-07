@@ -1,0 +1,22 @@
+.productPage_container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-width: 300px;
+    max-width: 500px;  
+    /* border: 1px solid black;  */
+    margin: auto;
+    padding: 10px;
+
+}
+
+.productPage_container img {
+    width: 100%; 
+    padding: 5px;  
+}
+
+#proguctPage-continue-shopping {
+    margin: 20px;
+}
+
