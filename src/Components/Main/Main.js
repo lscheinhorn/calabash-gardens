@@ -13,9 +13,9 @@ export default function Main () {
             <Banner />
             <div>
                 <HighlightedProducts />
-                <Offerings />
-                <About />
+                {/*<Offerings />*/}
                 <Parallax />
+                <About />
                 <Team />
                 
             </div>
