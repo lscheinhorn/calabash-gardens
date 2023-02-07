@@ -15,14 +15,22 @@ export const cartSlice = createSlice({
             const itemInCart = findItem(key)
             if ( itemInCart ) {
                 
-                const filtered = state.filter( item => item.key !== key)
-                return [
-                    ...filtered,
-                    {
-                        ...itemInCart,
-                        quantity: itemInCart.quantity + 1
+            //     const filtered = state.filter( item => item.key !== key)
+            //     return [
+            //         ...filtered,
+            //         {
+            //             ...itemInCart,
+            //             quantity: itemInCart.quantity + 1
+            //         }
+            //     ]  
+                return state.map((item,el) => {
+                    let newItem = {...item}
+                    if (item.key === action.payload.key) {
+                        newItem.quantity++
                     }
-                ]  
+                    return newItem
+                })
+
             } else {
 
                 return [
@@ -35,14 +43,28 @@ export const cartSlice = createSlice({
             }
         },
         decrementCartItem: (state, action) => {
+
             if( action.payload.quantity > 1 ) {
-                return [
-                    ...state.filter( item => item.key !== action.payload.key),
-                    {
-                        ...action.payload,
-                        quantity: action.payload.quantity - 1
+               
+                // THIS WORKS
+                // MODIFY ORIGINAL
+                // state.forEach((item,el) => {
+                //     if (item.key === action.payload.key) {
+                //         console.log({item, el})
+                //         item.quantity--
+                //     }
+                // })
+
+                return state.map((item,el) => {
+                    let newItem = {...item}
+                    if (item.key === action.payload.key) {
+                        console.log({item, el})
+                        newItem.quantity--
                     }
-                ]
+                    return newItem
+                })
+
+                
             } else {
                 return state.filter( item => item.key !== action.payload.key)
             }
