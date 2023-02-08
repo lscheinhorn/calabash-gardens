@@ -3,8 +3,8 @@
     position: -webkit-sticky;
     position: sticky;
     background-attachment: fixed;
-    /* -webkit-background-size: cover;
-    -moz-background-size: cover; */
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
     background-size: 150%;
     background-repeat: no-repeat;
     height: 60vh;
