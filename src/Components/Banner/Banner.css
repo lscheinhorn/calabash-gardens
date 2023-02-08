@@ -11,9 +11,9 @@
     background-size: cover;
     height: 120vh;
     background-position: right bottom;
-    /* background-position: -webkit-sticky;
+    background-position: -webkit-sticky;
     -webkit-background-size: cover;
-    -moz-background-size: cover; */
+    -moz-background-size: cover;
 }
 
 @media screen and (max-height: 480px) {
