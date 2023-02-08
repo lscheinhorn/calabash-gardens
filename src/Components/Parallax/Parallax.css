@@ -12,8 +12,8 @@
 
 @media screen and (max-width: 700px) {
     #parallax_container {
-        -webkit-background-size: 250%;
-        -moz-background-size: 250%;
-        background-size: 250%;    }
+        -webkit-background-size: 350%;
+        -moz-background-size: 350%;
+        background-size: 350%;    }
 }
 
