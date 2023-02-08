@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/calabash-gardens/static/css/main.0b2a06a9.css",
-    "main.js": "/calabash-gardens/static/js/main.4ee10455.js",
+    "main.js": "/calabash-gardens/static/js/main.d973bcda.js",
     "static/media/parallax.webp": "/calabash-gardens/static/media/parallax.38f2463d95275deba0b4.webp",
     "static/media/calabash-gardens-farm-mobile.png": "/calabash-gardens/static/media/calabash-gardens-farm-mobile.d8e4224f2eec8cb3329c.png",
     "static/media/background_farm.webp": "/calabash-gardens/static/media/background_farm.255a5e3386878460ebf0.webp",
@@ -20,10 +20,10 @@
     "static/media/president.webp": "/calabash-gardens/static/media/president.4b0ee7951252c3f13d95.webp",
     "index.html": "/calabash-gardens/index.html",
     "main.0b2a06a9.css.map": "/calabash-gardens/static/css/main.0b2a06a9.css.map",
-    "main.4ee10455.js.map": "/calabash-gardens/static/js/main.4ee10455.js.map"
+    "main.d973bcda.js.map": "/calabash-gardens/static/js/main.d973bcda.js.map"
   },
   "entrypoints": [
     "static/css/main.0b2a06a9.css",
-    "static/js/main.4ee10455.js"
+    "static/js/main.d973bcda.js"
   ]
 }
