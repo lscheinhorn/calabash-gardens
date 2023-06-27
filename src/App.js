@@ -7,38 +7,38 @@ import ProductPage from './Components/ProductPage/ProductPage'
 import Cart from './Components/Cart/Cart'
 import Contact from './Components/Contact/Contact'
 
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+import { HashRouter, Routes, Route } from 'react-router-dom'
 
 function App() {
   return (
   <div className="App app_wrap">
-    <Router>
+    <HashRouter>
       <Header />
       <Routes>
         <Route 
-          path="calabash-gardens/products/:key" 
+          path="/products/:key" 
           element={<ProductPage />} 
         />
         <Route 
-          path="calabash-gardens/shop" 
+          path="/shop" 
           element={<Shop />} 
         />
         <Route 
-          path="calabash-gardens/cart"
+          path="/cart"
           element={<Cart />}
         />
         <Route 
-          path="calabash-gardens/contact"
+          path="/contact"
           element={<Contact />}
         />
         <Route 
-          path="calabash-gardens/" 
+          path="/" 
           element={<Main />} 
         />
       
       </Routes>
       <Footer />
-    </Router>
+    </HashRouter>
   </div>
 
   )

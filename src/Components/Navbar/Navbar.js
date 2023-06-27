@@ -49,11 +49,11 @@ export default function Navbar () {
             
 
             <section id="navlinks" onClick={handleCollaps} >
-                <NavLink to="calabash-gardens/">Home</NavLink>
-                {/*<NavLink to="calabash-gardens/book-online">Book Online</NavLink>*/}
-                <NavLink to="calabash-gardens/shop">Shop</NavLink>
-                {/*<NavLink to="calabash-gardens/blog">Blog</NavLink>*/}
-                <NavLink to="calabash-gardens/contact">Contact Us</NavLink>
+                <NavLink to="/">Home</NavLink>
+                {/*<NavLink to="/book-online">Book Online</NavLink>*/}
+                <NavLink to="/shop">Shop</NavLink>
+                {/*<NavLink to="/blog">Blog</NavLink>*/}
+                <NavLink to="/contact">Contact Us</NavLink>
 
             </section>
     
