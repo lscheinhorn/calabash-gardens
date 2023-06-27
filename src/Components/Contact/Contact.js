@@ -31,9 +31,14 @@ export default function Contact() {
          // show the user a success message
          console.log("success", result)
          if(result.text === "OK") {
-            setForm(prev => {
+            
+            // reset form and send success message
+            setForm( () => {
                 return {
-                    ...prev,
+                    from_name: "",
+                    user_email: "",
+                    phone: "",
+                    message: "",
                     sent: true
                 }
             })
@@ -48,17 +53,10 @@ export default function Contact() {
             }
         })
         })
-        // reset form and send success message
-        setForm({
-            from_name: "",
-            user_email: "",
-            phone: "",
-            message: "",
-        })
     }
 
     return (
-        <form ref={ formRef } onSubmit={ sendEmail}>
+        <form ref={ formRef } onSubmit={ sendEmail }>
             <div className="form-group">
                 <label>Name</label>
                 <input 
@@ -103,10 +101,11 @@ export default function Contact() {
                     value="Send" 
                 />
             </div>
-            { form.sent === 'true' ? <h4>Your message was sent successfully!</h4> : null }
+            { form.sent === true ? <h4>Your message was sent successfully!</h4> : null }
             { form.sent === 'error' ? <h4>There was an error sending your message. Please try again or email us directly at calabashgardens@gmail.com </h4> : null }
 
         </form>
     )
 }
+
  
