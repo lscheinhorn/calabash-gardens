@@ -50,7 +50,7 @@ export const products = [
     {
         title: '0.5g Vermont Grown Saffron',
         info: defaultInfo,
-        price: '30.00',
+        price: '40.00',
         isHighlighted: true,
         photos: [
             require('../resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp'),
@@ -64,7 +64,7 @@ export const products = [
     {
         title: '1g VT Grown Saffron',
         info: defaultInfo,
-        price: '50.00',
+        price: '60.00',
         isHighlighted: true,
         photos: [
             require('../resources/images/product_photos/1g_vt_grown_saffron.webp')
@@ -76,7 +76,7 @@ export const products = [
     {
         title: '2g VT Grown Saffron',
         info: defaultInfo,
-        price: '100.00',
+        price: '110.00',
         isHighlighted: true,
         photos: [
             require('../resources/images/product_photos/2g_vt_grown_saffron_1.webp'),
