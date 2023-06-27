@@ -12,7 +12,7 @@ export default function Product (props) {
     })
     const featured = photos[0]
     const { title, info, price, key } = product
-    const toLink = `/calabash-gardens/products/${key}`
+    const toLink = `/products/${key}`
 
     const handleAddCartItem = () => {
         dispatch(addCartItem(product))
