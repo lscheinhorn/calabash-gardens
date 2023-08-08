@@ -5,6 +5,7 @@ import Offerings from '../Offerings/Offerings'
 import About from '../About/About'
 import Parallax from '../Parallax/Parallax'
 import Team from '../Team/Team'
+import Event from '../Event/Event'
 
 
 export default function Main () {

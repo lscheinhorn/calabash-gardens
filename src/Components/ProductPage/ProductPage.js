@@ -29,7 +29,7 @@ export default function ProductPage () {
     })
 
     const featured = photos[0]
-    const { title, info, price } = product
+    const { title, info, link, price } = product
 
    
 
@@ -42,10 +42,13 @@ export default function ProductPage () {
         <div className="productPage_container">
             <img src={ featured } alt={ featured } />
             <h4>{ title }</h4>
-            <p>{ info }</p>
+            <p>{ info }{ link ? 
+                <a href={link} target="blank"><br></br><br></br>Check out our tasting menu here</a> 
+                : null 
+            }</p>
             <p>${ price }</p>
             <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
-            <Link id="proguctPage-continue-shopping" className="continue-shopping  btn btn-secondary" to="../calabash-gardens/shop">Continue Shopping</Link>
+            <Link id="proguctPage-continue-shopping" className="continue-shopping  btn btn-secondary" to="../shop">Continue Shopping</Link>
 
         </div>
 
