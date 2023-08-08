@@ -76,7 +76,7 @@ useEffect(() => {
  return (
    <PayPalScriptProvider
      options={{
-       "client-id":"AWoGrToBGZi88Yq-dnnKkny5ViSK1qdtoL6QkFH-tch_nzWUETTSns_EwinzhYckX3tBsBFDewHcNGrz",
+       "client-id":"AS9MW8fGSOBHYr4CIpI3XRFZ9whei3bm-9-if3HgaZ4-iF0rE-Vuk_o-qhKaJciYwFwlBszPr_0I2AYr",
      }}
    >
         <PayPalButtons

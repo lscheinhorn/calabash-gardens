@@ -57,7 +57,7 @@ export default function Navbar () {
 
             </section>
     
-            <NavLink id="cart-navlink" to="calabash-gardens/cart" onClick={handleCollaps} className="">
+            <NavLink id="cart-navlink" to="/cart" onClick={handleCollaps} className="">
                 <i className="fa-solid fa-cart-shopping fa-xl" type='button' aria-label='cart' ></i>  
                 { getCartQuantity() } 
    

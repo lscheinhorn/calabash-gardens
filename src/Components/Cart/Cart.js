@@ -47,7 +47,7 @@ export default function Cart () {
             return (
                 <div id="empty-cart">
                     <h4>Your cart is empty</h4>
-                    <Link className="continue-shopping btn btn-secondary" to="../calabash-gardens/shop">Continue Shopping</Link>
+                    <Link className="continue-shopping btn btn-secondary" to="../shop">Continue Shopping</Link>
                 </div>
             )
         }
@@ -61,7 +61,7 @@ export default function Cart () {
                 </div>
                 
                 <Paypal />
-                <Link className="continue-shopping  btn btn-secondary" to="../calabash-gardens/shop">Continue Shopping</Link>
+                <Link className="continue-shopping  btn btn-secondary" to="../shop">Continue Shopping</Link>
 
             </div>
         )

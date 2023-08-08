@@ -22,7 +22,7 @@ export default function Header () {
                     
                 </div>
                 <div className='get_in_touch header_color'>
-                    <Link id="contact-Link" to="calabash-gardens/contact">
+                    <Link id="contact-Link" to="/contact">
                         <button>{ content.home.header.button }</button>
                     </Link>
 

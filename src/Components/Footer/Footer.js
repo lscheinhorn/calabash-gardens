@@ -18,7 +18,7 @@ export default function Footer () {
                     
                 </div>
                 <div className='get_in_touch_footer footer_color'>
-                    <Link to="calabash-gardens/contact">
+                    <Link to="/contact">
                         <button>{ content.home.header.button }</button>
                     </Link>
 
