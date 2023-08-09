@@ -38,6 +38,19 @@ export const products = [
         }
     },
     {
+        title: 'Test basket',
+        info: defaultInfo,
+        price: '0.10',
+        shipping: '0.00',
+        isHighlighted: false,
+        photos: [
+
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
         title: 'Calabash Gift Basket',
         info: defaultInfo,
         price: '50.00',
