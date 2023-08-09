@@ -22,8 +22,16 @@ export default function Cart () {
         return subtotal
     }
 
-    const getShipping = () => {
-        return 15
+    const getShipping = (cartItems) => {
+        let shippingTotal = 0
+        for ( let i = 0 ; i < cartItems.length ; i++ ) {
+            const shipping = Number(cartItems[i].shipping)
+            shippingTotal += shipping
+        }
+        if( shippingTotal > 15 ) {
+            shippingTotal = 15
+        }
+        return shippingTotal
     }
 
     const getDiscount = (promoCode) => {
@@ -37,7 +45,7 @@ export default function Cart () {
     }
 
     const subtotal = getSubtotal(cartItems)
-    const shipping = getShipping()
+    const shipping = getShipping(cartItems)
     const discount = getDiscount(promoCode)
     const total = getTotal(subtotal, shipping, discount)
     console.log('subtotal', subtotal, 'shipping', shipping, 'discount', discount, 'total', total)
