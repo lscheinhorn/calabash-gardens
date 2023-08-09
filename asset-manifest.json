@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.0fb6e206.css",
-    "main.js": "/static/js/main.7db15128.js",
+    "main.css": "/static/css/main.17807e1b.css",
+    "main.js": "/static/js/main.feb2d373.js",
     "static/media/event_night.jpg": "/static/media/event_night.fef1acd6cfa95b44b9b0.jpg",
     "static/media/parallax.webp": "/static/media/parallax.38f2463d95275deba0b4.webp",
     "static/media/calabash-gardens-farm-mobile.png": "/static/media/calabash-gardens-farm-mobile.d8e4224f2eec8cb3329c.png",
@@ -21,11 +21,11 @@
     "static/media/president.webp": "/static/media/president.4b0ee7951252c3f13d95.webp",
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
-    "main.0fb6e206.css.map": "/static/css/main.0fb6e206.css.map",
-    "main.7db15128.js.map": "/static/js/main.7db15128.js.map"
+    "main.17807e1b.css.map": "/static/css/main.17807e1b.css.map",
+    "main.feb2d373.js.map": "/static/js/main.feb2d373.js.map"
   },
   "entrypoints": [
-    "static/css/main.0fb6e206.css",
-    "static/js/main.7db15128.js"
+    "static/css/main.17807e1b.css",
+    "static/js/main.feb2d373.js"
   ]
 }
