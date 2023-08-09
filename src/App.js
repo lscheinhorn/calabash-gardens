@@ -9,7 +9,7 @@ import Contact from './Components/Contact/Contact'
 
 import { HashRouter, Routes, Route } from 'react-router-dom'
 
-alert("This site is currently under construction. Please note that in order to purchase saffron you must contact Calabash Gardens directly through the contact form or email us at calabashgardens@gmail.com")
+// alert("This site is currently under construction. Please note that in order to purchase saffron you must contact Calabash Gardens directly through the contact form or email us at calabashgardens@gmail.com")
 
 function App() {
   return (

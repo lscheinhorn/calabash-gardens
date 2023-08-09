@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { selectCart } from '../Cart/cartSlice'
 import { useSelector } from 'react-redux'
+import { keys } from '../../resources/public_keys'
+
 
 export default function Paypal() {
  const [success, setSuccess] = useState(false);
@@ -76,7 +78,7 @@ useEffect(() => {
  return (
    <PayPalScriptProvider
      options={{
-       "client-id":"AS9MW8fGSOBHYr4CIpI3XRFZ9whei3bm-9-if3HgaZ4-iF0rE-Vuk_o-qhKaJciYwFwlBszPr_0I2AYr",
+       "client-id": keys.paypal.live
      }}
    >
         <PayPalButtons
