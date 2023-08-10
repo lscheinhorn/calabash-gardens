@@ -8,23 +8,13 @@ import { keys } from '../../resources/public_keys'
 export default function Paypal(props) {
   const { shipping, total, subtotal } = props
  const [success, setSuccess] = useState(false);
- const [ErrorMessage, setErrorMessage] = useState("");
+ const [errorMessage, setErrorMessage] = useState("");
  const [orderID, setOrderID] = useState(false);
  const [payerInfo, setPayerInfo] = useState({});
+ const [payer, setPayer] = useState({});
 
  const cartItems = useSelector( selectCart )
 
-//  const getShipping = (cartItems) => {
-//   let shippingTotal = 0
-//   for ( let i = 0 ; i < cartItems.length ; i++ ) {
-//       const shipping = Number(cartItems[i].shipping)
-//       shippingTotal += shipping
-//   }
-//   if( shippingTotal > 15 ) {
-//       shippingTotal = 15
-//   }
-//   return shippingTotal
-// }
 
  const items = cartItems.map( item => {
     return {
@@ -86,8 +76,8 @@ export default function Paypal(props) {
      const { payer } = details;
      console.log("payer", payer)
      console.log("details", details)
+     setPayer( payer )
      setPayerInfo( details.purchase_units[0].shipping )
-     console.log("payerInfo", payerInfo)
      setSuccess(true);
    });
  };
@@ -96,23 +86,46 @@ export default function Paypal(props) {
    setErrorMessage("An Error occured with your payment ");
  };
 
+//  useEffect(() => {
+//   console.log("errorMessage", errorMessage)
+//   alert(errorMessage, "Please check your information and try again")
+//   }, 
+//   [errorMessage] 
+// )
+
 useEffect(() => {
     console.log("payerInfo from effect hook", payerInfo)
+    console.log("payer from effect hook", payer)
+
     }, 
-    [payerInfo] 
+    [payerInfo, payer] 
 )
 
  return (
-   <PayPalScriptProvider
-     options={{
-       "client-id": keys.paypal.live
-     }}
-   >
+  <>
+    {
+      success ? 
+        <>
+          <h1 style={{ textAlign: "center", color: "green"}}>Thank you for your order { payer.name.given_name }!</h1>
+          <p style={{ textAlign: "center" , font: "bold" }}>Your Order ID is: { orderID }</p>
+          <p style={{ textAlign: "center" , font: "bold", fontSize: "120%" }}>Please check your inbox at {payer.email_address } for your order confirmation. If you didn't recieve a confirmation email please contact us directly through our contact form or email us a calabashgardens.gmail.com</p>
+
+          {/*<p style={{ textAlign: "center" , font: "bold" }}>If your product needs to be shipped it will be sent to {payerInfo.address.address_line_1} {payerInfo.address.address_line_2} {payerInfo.address.admin_area_2}, {payerInfo.address.admin_area_1} {payerInfo.address.postal_code}</p>*/}
+
+        </> :
+
+        <PayPalScriptProvider
+          options={{
+            "client-id": keys.paypal.live
+          }}
+        >
         <PayPalButtons
-        style={{ layout: "vertical" }}
-        createOrder={createOrder}
-        onApprove={onApprove}
+          style={{ layout: "vertical" }}
+          createOrder={createOrder}
+          onApprove={onApprove}
         />
-   </PayPalScriptProvider>
- );
+        </PayPalScriptProvider>
+      }
+    </>
+  )
 }
