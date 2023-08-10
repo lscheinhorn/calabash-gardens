@@ -8,7 +8,6 @@ import {  Link } from 'react-router-dom'
 export default function ProductPage () {
     const dispatch = useDispatch()
     const { key } = useParams()
-    console.log("key", key)
     const getProduct = (productKey) => {
         for( let i = 0; i < products.length ; i++) {
             const product = products[i]
