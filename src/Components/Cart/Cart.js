@@ -4,10 +4,18 @@ import Paypal from '../Paypal/Paypal'
 import { useSelector } from 'react-redux'
 import { selectCart } from './cartSlice'
 import {  Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 
 export default function Cart () {
     const cartItems = useSelector(selectCart)
     console.log('cart =>', cartItems)
+    const [ shippingState, setShippingState ] = useState({
+        pref: "",
+        shipping: ""
+    })
+    const [ totalState, setTotalState ] = useState("")
+    const [ subtotalState, setSubtotalState ] = useState("")
+
 
     const promoCode = ""
 
@@ -18,9 +26,13 @@ export default function Cart () {
             const price = Number(cartItems[i].price)
             subtotal += (price * quantity)
         }
-        console.log('subtotal', subtotal)
+        if ( subtotal !== subtotalState ) {
+            setSubtotalState( subtotal )
+        }
         return subtotal
     }
+
+
 
     const getShipping = (cartItems) => {
         let shippingTotal = 0
@@ -30,6 +42,29 @@ export default function Cart () {
         }
         if( shippingTotal > 15 ) {
             shippingTotal = 15
+        }
+        if(shippingTotal === 0 && shippingState.pref !== 'NO_SHIPPING') {
+            setShippingState( prev => {
+                return{
+                    ...prev,
+                    pref: 'NO_SHIPPING'
+                }
+            })
+        } else if (shippingTotal && shippingState.pref !== 'GET_FROM_FILE') {
+            setShippingState( prev => {
+                return{
+                    ...prev,
+                    pref: 'GET_FROM_FILE'
+                }
+            })
+        }
+        if( shippingState.shipping !== shippingTotal ) {
+            setShippingState( prev => {
+                return{
+                    ...prev,
+                    shipping: shippingTotal
+                }
+            })
         }
         return shippingTotal
     }
@@ -41,6 +76,9 @@ export default function Cart () {
 
     const getTotal = (subtotal, shipping, discount) => {
         const total = subtotal * (( 100 - discount ) /100 ) + shipping
+        if ( total !== totalState ) {
+            setTotalState( total )
+        }
         return total
     }
 
@@ -48,7 +86,6 @@ export default function Cart () {
     const shipping = getShipping(cartItems)
     const discount = getDiscount(promoCode)
     const total = getTotal(subtotal, shipping, discount)
-    console.log('subtotal', subtotal, 'shipping', shipping, 'discount', discount, 'total', total)
     
     const isCartEmpty = () => {
         if ( cartItems.length < 1 ) {
@@ -68,7 +105,11 @@ export default function Cart () {
 
                 </div>
                 
-                <Paypal />
+                <Paypal  
+                    shipping={ shippingState }
+                    total={ totalState }
+                    subtotal={ subtotalState }
+                />
                 <Link className="continue-shopping  btn btn-secondary" to="../shop">Continue Shopping</Link>
 
             </div>

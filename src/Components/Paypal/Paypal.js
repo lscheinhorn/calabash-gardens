@@ -5,7 +5,8 @@ import { useSelector } from 'react-redux'
 import { keys } from '../../resources/public_keys'
 
 
-export default function Paypal() {
+export default function Paypal(props) {
+  const { shipping, total, subtotal } = props
  const [success, setSuccess] = useState(false);
  const [ErrorMessage, setErrorMessage] = useState("");
  const [orderID, setOrderID] = useState(false);
@@ -13,45 +14,71 @@ export default function Paypal() {
 
  const cartItems = useSelector( selectCart )
 
- const purchaseUnits = cartItems.map( item => {
+//  const getShipping = (cartItems) => {
+//   let shippingTotal = 0
+//   for ( let i = 0 ; i < cartItems.length ; i++ ) {
+//       const shipping = Number(cartItems[i].shipping)
+//       shippingTotal += shipping
+//   }
+//   if( shippingTotal > 15 ) {
+//       shippingTotal = 15
+//   }
+//   return shippingTotal
+// }
+
+ const items = cartItems.map( item => {
     return {
-        name: item.title,
-        quantity: item.quantity,
-        amount: {
-            currency_code: "USD",
-            value: item.price * item.quantity
-        },
-        reference_id: item.key
+      name: item.title,
+      quantity: item.quantity,
+      unit_amount: {
+        currency_code: "USD",
+        value: item.price
+      },
+      sku: item.key
     }
  })
- console.log("purchaseUnits", purchaseUnits)
  // creates a paypal order
  const createOrder = (data, actions) => {
    return actions.order
      .create({
-       purchase_units: [
-        ...purchaseUnits,
-        {
-          name: "Shipping",
-          amount: {
-              currency_code: "USD",
-              value: 15
-        },
-        reference_id: "001"
+      intent: "CAPTURE",
+      payment_source: {
+        paypal: {
+          experience_content: {
+            shipping_preference: shipping.pref
+          }
         }
-      ],
-       
-       // not needed if a shipping address is actually needed
-       application_context: {
-         shipping_preference: "GET_FROM_FILE",
-       },
-     })
-     .then((orderID) => {
-       setOrderID(orderID);
-       console.log("orderID", orderID)
-       return orderID;
-     });
- };
+      },
+      purchase_units: [
+        {
+          reference_id: "001",
+          description: "Calabash Gardens Online Order",
+          amount: {
+            currency_code: "USD",
+            breakdown: {
+              item_total: {
+                value: subtotal.toString(),
+                currency_code: "USD"
+              },
+              shipping: {
+                value: shipping.shipping,
+                currency_code: "USD"
+              }
+            },
+            value: total.toString(),
+          },
+          items: [
+            ...items
+          ]
+        },
+      ]
+    })
+    .then((orderID) => {
+      setOrderID(orderID);
+      console.log("orderID", orderID)
+      return orderID;
+    });
+  };
  
  // check Approval
  const onApprove = (data, actions) => {
