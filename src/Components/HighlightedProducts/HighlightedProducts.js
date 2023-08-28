@@ -10,7 +10,7 @@ export default function HighlightedProducts () {
         <div id="highlighted-products">
             {
                 products.map( product => {
-                    if ( product.isHighlighted ) {
+                    if ( product.isHighlighted && product.inStock === true ) {
                         return <Product product={ product } key={ product.key } />
                     }
                 })

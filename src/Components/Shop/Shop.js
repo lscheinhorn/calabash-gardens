@@ -8,10 +8,9 @@ export default function Shop () {
             {
                 products.map( product => {
                     //comment this out if you want a test basket product
-                    if(product.title === "Test basket" ) {
-                        return null
+                    if(product.inStock === true ) {
+                        return <Product product={ product } key={ product.key } />
                     }
-                    return <Product product={ product } key={ product.key } />
                 })
             }
         </div>

@@ -1,5 +1,5 @@
 
-const defaultInfo = "I'm a product detail. I'm a great place to add more information about your product such as sizing, material, care and cleaning instructions. This is also a great space to write what makes this product special and how your customers can benefit from this item."
+const defaultInfo = ""
 
 const createKey = (input) => {
     const chars = 'abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890.,'
@@ -17,6 +17,7 @@ export const products = [
         price: '100.00',
         shipping: '15.00',
         isHighlighted: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/holidays_gifts_basket.webp')
         ],
@@ -30,6 +31,7 @@ export const products = [
         price: '100.00',
         shipping: '15.00',
         isHighlighted: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/gifts_basket.webp')
         ],
@@ -43,6 +45,7 @@ export const products = [
         price: '0.10',
         shipping: '0.00',
         isHighlighted: false,
+        inStock: false,
         photos: [
 
         ],
@@ -56,6 +59,7 @@ export const products = [
         price: '50.00',
         shipping: '15.00',
         isHighlighted: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/gift_basket.webp')
         ],
@@ -72,6 +76,7 @@ export const products = [
         price: '50.00',
         shipping: '0.00',
         isHighlighted: true,
+        inStock: false,
         photos: [
             require('../resources/images/product_photos/event_night.jpg'),
         ],
@@ -86,6 +91,7 @@ export const products = [
         price: '40.00',
         shipping: '15.00',
         isHighlighted: true,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp'),
             require('../resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp'),
@@ -101,6 +107,7 @@ export const products = [
         price: '60.00',
         shipping: '15.00',
         isHighlighted: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/1g_vt_grown_saffron.webp')
         ],
@@ -114,6 +121,7 @@ export const products = [
         price: '110.00',
         shipping: '15.00',
         isHighlighted: true,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/2g_vt_grown_saffron_1.webp'),
             require('../resources/images/product_photos/2g_vt_grown_saffron_2.webp')
@@ -128,6 +136,7 @@ export const products = [
         price: '20.00',
         shipping: '15.00',
         isHighlighted: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/saffron_tincture.webp')
         ],
@@ -141,6 +150,7 @@ export const products = [
         price: '15.00',
         shipping: '15.00',
         isHighlighted: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/saffron_maple_sirup.webp')
         ],
