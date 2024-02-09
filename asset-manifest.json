@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.17807e1b.css",
-    "main.js": "/static/js/main.a97c65db.js",
+    "main.css": "/static/css/main.c0818897.css",
+    "main.js": "/static/js/main.6344efda.js",
     "static/media/event_night.jpg": "/static/media/event_night.fef1acd6cfa95b44b9b0.jpg",
     "static/media/parallax.webp": "/static/media/parallax.38f2463d95275deba0b4.webp",
     "static/media/calabash-gardens-farm-mobile.png": "/static/media/calabash-gardens-farm-mobile.d8e4224f2eec8cb3329c.png",
@@ -9,6 +9,7 @@
     "static/media/0.5g_vermont_grown_saffron_3.webp": "/static/media/0.5g_vermont_grown_saffron_3.a701179ae29bf043d8ed.webp",
     "static/media/2g_vt_grown_saffron_1.webp": "/static/media/2g_vt_grown_saffron_1.5fca5de0343df65472cc.webp",
     "static/media/saffron_maple_sirup.webp": "/static/media/saffron_maple_sirup.72da24c95fc5cde02b3a.webp",
+    "static/media/large_logo_no_purple_square.png": "/static/media/large_logo_no_purple_square.70b1815c8b58639f48bd.png",
     "static/media/gifts_basket.webp": "/static/media/gifts_basket.7a38924e1a5a1f060e95.webp",
     "static/media/0.5g_vermont_grown_saffron_2.webp": "/static/media/0.5g_vermont_grown_saffron_2.44efc6684463de1a4ee6.webp",
     "static/media/2g_vt_grown_saffron_2.webp": "/static/media/2g_vt_grown_saffron_2.44efc6684463de1a4ee6.webp",
@@ -21,11 +22,11 @@
     "static/media/president.webp": "/static/media/president.4b0ee7951252c3f13d95.webp",
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
-    "main.17807e1b.css.map": "/static/css/main.17807e1b.css.map",
-    "main.a97c65db.js.map": "/static/js/main.a97c65db.js.map"
+    "main.c0818897.css.map": "/static/css/main.c0818897.css.map",
+    "main.6344efda.js.map": "/static/js/main.6344efda.js.map"
   },
   "entrypoints": [
-    "static/css/main.17807e1b.css",
-    "static/js/main.a97c65db.js"
+    "static/css/main.c0818897.css",
+    "static/js/main.6344efda.js"
   ]
 }
