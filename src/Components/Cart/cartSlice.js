@@ -58,7 +58,7 @@ export const cartSlice = createSlice({
                 return state.map((item,el) => {
                     let newItem = {...item}
                     if (item.key === action.payload.key) {
-                        console.log({item, el})
+                        // console.log({item, el})
                         newItem.quantity--
                     }
                     return newItem

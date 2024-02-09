@@ -14,7 +14,7 @@ export default function CartDrawer () {
       
             
       const distance = 1
-      console.log(distance)
+      // console.log(distance)
       const hop = () => {
         drawer.style.left = parseFloat(drawer.style.left) + distance + '%'
       } 

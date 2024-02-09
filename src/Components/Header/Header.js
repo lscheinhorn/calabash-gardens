@@ -2,6 +2,7 @@ import './Header.css'
 import Navbar from '../Navbar/Navbar'
 import { content } from '../../resources/content'
 import { Link } from 'react-router-dom'
+import largeLogo from '../../resources/images/large_logo_no_purple_square.png';
 
 
 export default function Header () {
@@ -10,10 +11,11 @@ export default function Header () {
         <div>
             <div className='above_nav header_color'>
                 <div className='title_container header_color' >
-                    <div className='purple_logo header_color'>
+                    <div className='logo header_color'>
                         <img 
                             alt='purple flower logo' 
-                            src='https://static.wixstatic.com/media/a339f1_08e8e62aa51141dca62b8ae7529790e1~mv2.png/v1/fill/w_146,h_80,al_c,q_85,usm_0.66_1.00_0.01,enc_auto/purple%20logo%20.png'                         />
+                            src={ largeLogo }
+                        />
                     </div>
                     <div className='title header_color'>
                         <h1 className='header_color'>{ content.home.header.title }</h1>

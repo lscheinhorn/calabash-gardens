@@ -57,9 +57,7 @@ export default function Paypal(props) {
             },
             value: total.toString(),
           },
-          items: [
-            ...items
-          ]
+          items
         },
       ]
     })

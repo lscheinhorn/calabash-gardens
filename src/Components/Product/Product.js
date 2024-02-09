@@ -12,7 +12,7 @@ export default function Product (props) {
         return `${photo}`
     })
     const featured = photos[0]
-    const { title, info, info1, info2, link, price, key } = product
+    const { title, info, info1, info2, link, price, key, inStock } = product
     const toLink = `/products/${key}`
 
     const handleAddCartItem = () => {
@@ -48,7 +48,8 @@ export default function Product (props) {
                 <img src={ featured } alt={ featured } />
                 <h4>{ title }</h4>
             </Link>
-            {info1 ?
+            {
+                info1 ?
                 <p>{ info1 }
                     <span hidden={ hidden.span } >{ info2 }</span> 
                     <button className="readMoreLess" hidden={ hidden.readMore } onClick={readMore}>...read more</button>
@@ -63,9 +64,15 @@ export default function Product (props) {
                 }</p>
             }
             
+            {
+                inStock ? 
+                <>
+                    <p>${ price }</p>
+                    <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
+                </> : <p> Out of Stock </p>
             
-            <p>${ price }</p>
-            <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
+            }
+            
         </div>
     )
 }

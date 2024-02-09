@@ -71,14 +71,14 @@
 
 
 
-.purple_logo {
+.logo {
     display: flex;
     justify-content: center;
 }
 
-.purple_logo img {
+.logo img {
     padding: 10px;
-    width: 90%;
+    width: 40%;
 }
 
 #close-navbar-icon {

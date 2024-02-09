@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react'
 
 export default function Cart () {
     const cartItems = useSelector(selectCart)
-    console.log('cart =>', cartItems)
+    // console.log('cart =>', cartItems)
     const [ shippingState, setShippingState ] = useState({
         pref: "",
         shipping: ""
@@ -89,6 +89,7 @@ export default function Cart () {
     
     const isCartEmpty = () => {
         if ( cartItems.length < 1 ) {
+            console.log("Cart is empty")
             return (
                 <div id="empty-cart">
                     <h4>Your cart is empty</h4>
@@ -96,7 +97,9 @@ export default function Cart () {
                 </div>
             )
         }
+        console.log("Cart is not empty")
         return (
+
             <div id="total-paypal">
                 <div id="total-container">
                     <div><h4>Subtotal</h4><h4>${ subtotal }</h4></div>
