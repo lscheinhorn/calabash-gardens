@@ -9,7 +9,7 @@ export default function Product (props) {
     const dispatch = useDispatch()
     const { title, info, info1, info2, link, priceOptions, key, inStock } = product
     const [ priceOption, setPriceOption ] = useState( priceOptions[0] )
-    const [ productInfo, setProductInfo ] = useState({...product, price: priceOptions[0].price } )
+    const [ productInfo, setProductInfo ] = useState({...product, price: priceOptions[0].price , key: product.key + "0"} )
     const photos = product.photos.map(photo => {
         return `${photo}`
     })
@@ -48,16 +48,18 @@ export default function Product (props) {
     }
 
     useEffect(() => {
-        console.log({priceOption})
+        // console.log({priceOption})
 
         setProductInfo({ 
             ...product, 
             price: priceOption.price,
-            title: priceOption.option + "" + title
+            title: priceOption.option + "" + title,
+            key: product.key.slice(0, -1) + priceOptions.findIndex(({ option }) => { return option === priceOption.option }).toString()
         })
+        // console.log("productInfo", productInfo )
     }, [ priceOption, product, title ])
   
-    console.log(priceOptions)
+    // console.log(priceOptions)
     return (
         <div className="product_container">
             <Link to={ toLink } className="product-img-title">
@@ -91,7 +93,7 @@ export default function Product (props) {
                                     
                                     {
                                         priceOptions.map( option  => {
-                                            console.log({option})
+                                            // console.log({option})
                                             return <option key={option.option} value={ JSON.stringify(option) }>{ option.option } is ${ option.price }</option>
                                         })
                                     }
