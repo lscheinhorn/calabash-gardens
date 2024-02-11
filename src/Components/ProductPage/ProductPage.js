@@ -28,7 +28,7 @@ export default function ProductPage () {
     })
 
     const featured = photos[0]
-    const { title, info, link, price, inStock } = product
+    const { title, info, link, priceOptions, inStock } = product
 
    
 
@@ -48,7 +48,7 @@ export default function ProductPage () {
             {
                 inStock ? 
                 <>
-                    <p>${ price }</p>
+                    <p>${ priceOptions }</p>
                     <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
                 </> : <p> Out of Stock </p>
             
@@ -61,7 +61,7 @@ export default function ProductPage () {
         //     <h2>{ title }</h2>
         //     <img src={ featured } alt={ featured } />
         //     <p>{ info }</p>
-        //     <p>${ price }</p>
+        //     <p>${ priceOptions }</p>
         //     <button className="add_to_cart" onClick={ handleAddToCart } >Add To Cart</button>
         // </div>
     )

@@ -13,7 +13,7 @@ export const cartSlice = createSlice({
                 })
             }
             const itemInCart = findItem(key)
-            if ( itemInCart ) {
+            if ( itemInCart && action.payload.priceOptions.length === 1 ) {
                 
             //     const filtered = state.filter( item => item.key !== key)
             //     return [

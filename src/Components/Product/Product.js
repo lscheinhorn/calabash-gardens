@@ -2,21 +2,22 @@ import './Product.css'
 import { Link } from 'react-router-dom' 
 import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Product (props) {
     const { product } = props
     const dispatch = useDispatch()
-
+    const { title, info, info1, info2, link, priceOptions, key, inStock } = product
+    const [ priceOption, setPriceOption ] = useState( priceOptions[0] )
+    const [ productInfo, setProductInfo ] = useState({...product, price: priceOptions[0].price } )
     const photos = product.photos.map(photo => {
         return `${photo}`
     })
     const featured = photos[0]
-    const { title, info, info1, info2, link, price, key, inStock } = product
     const toLink = `/products/${key}`
 
     const handleAddCartItem = () => {
-        dispatch(addCartItem(product))
+        dispatch(addCartItem(productInfo))
     }
 
     const [ hidden, setHidden ] = useState({
@@ -42,6 +43,21 @@ export default function Product (props) {
         })
     }
 
+    const handleChange = (event) => {
+        setPriceOption( JSON.parse(event.target.value) )
+    }
+
+    useEffect(() => {
+        console.log({priceOption})
+
+        setProductInfo({ 
+            ...product, 
+            price: priceOption.price,
+            title: priceOption.option + "" + title
+        })
+    }, [ priceOption, product, title ])
+  
+    console.log(priceOptions)
     return (
         <div className="product_container">
             <Link to={ toLink } className="product-img-title">
@@ -63,15 +79,33 @@ export default function Product (props) {
                     : null 
                 }</p>
             }
-            
+            <>
             {
-                inStock ? 
-                <>
-                    <p>${ price }</p>
-                    <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
-                </> : <p> Out of Stock </p>
-            
+                !inStock ? <p> Out of Stock </p> :
+                    priceOptions.length > 1 ? 
+                        <>
+                        <select
+                                    onChange={ handleChange }
+                                    value={ JSON.stringify(priceOption) }
+                                >
+                                    
+                                    {
+                                        priceOptions.map( option  => {
+                                            console.log({option})
+                                            return <option key={option.option} value={ JSON.stringify(option) }>{ option.option } is ${ option.price }</option>
+                                        })
+                                    }
+                                </select>
+                            <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
+                        </> 
+                        :
+                        <>
+                            <p>${priceOptions[0].price}</p>
+                            <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
+                        </>
             }
+            </>
+            
             
         </div>
     )

@@ -14,7 +14,7 @@ export const products = [
     {
         title: 'Calabash Holidays Gifts Basket',
         info: defaultInfo,
-        price: '100.00',
+        priceOptions: [{price: '100.00'}],
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
@@ -29,7 +29,7 @@ export const products = [
     {
         title: 'Calabash Gifts Basket',
         info: defaultInfo,
-        price: '100.00',
+        priceOptions: [{price: '100.00'}],
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
@@ -44,7 +44,7 @@ export const products = [
     {
         title: 'Test basket',
         info: defaultInfo,
-        price: '0.10',
+        priceOptions: [{price: '0.10'}],
         shipping: '0.00',
         isHighlighted: false,
         isActive: false,
@@ -59,7 +59,7 @@ export const products = [
     {
         title: 'Calabash Gift Basket',
         info: defaultInfo,
-        price: '50.00',
+        priceOptions: [{price: '50.00'}],
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
@@ -77,7 +77,7 @@ export const products = [
         info1: `On September 2nd, 2023 Calabash is hosting a farm to table fine dining experience for your culinary pleasure. Featuring Chef Micheal Clancy, with every dish featuring Calabash Gardens saffron,  `,
         info2: `local spirits with herbal infusion pairings, mocktails if preferred.  All produce and meats featured are from some of our favorite local farms such as Hogwash Farm in Norwich, Crooked Mile Cheese in Waterford, Joes Brook Farm in Barnet, Honeywilya Salmon caught in Alaska and distributed out of Duxbury and walnuts from the Sweet Cow located here in Newbury. Spirits from our favorite local distilleries Silo in Windsor and Bar Hill in Montpelier and coffee from Upper Valley Coffee Roasters also right here in Newbury. Live music to be announced. The cost of the evening is $90, $50 non refundable deposit per person will hold your reservation and $40 per person at time of service. Gratuities are appreciated. We have limited seating with a maximum of 20 guests so make sure to claim your spot! We are so looking forward to hosting you, let's have an incredible evening of the highest quality local food and drink!`,
         link: require("../resources/Menu.docx.pdf"),
-        price: '50.00',
+        priceOptions: [{price: '50.00'}],
         shipping: '0.00',
         isHighlighted: false,
         isActive: true,
@@ -91,46 +91,31 @@ export const products = [
     },
 
     {
-        title: '0.5g Vermont Grown Saffron',
-        info: "A half gram of our regeneratively grown, organic saffron.",
-        price: '40.00',
-        shipping: '15.00',
-        isHighlighted: false,
-        isActive: true,
-        inStock: true,
-        photos: [
-            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp'),
-            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp'),
-            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp')
+        title: 'Vermont Grown Saffron',
+        info: "Our regeneratively grown, organic saffron.",
+        priceOptions: [
+            {
+                option: '1/2 Gram',
+                price: '40.00'
+            },
+            {
+                option: '1 Gram',
+                price: '60.00'
+            },
+            {
+                option: '2 Grams',
+                price: '110.00'
+            }
         ],
-        get key() {
-            return createKey(this.title)
-        }
-    },
-    {
-        title: '1g VT Grown Saffron',
-        info: "One gram of our regeneratively grown, organic saffron.",
-        price: '60.00',
         shipping: '15.00',
         isHighlighted: true,
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/1g_vt_grown_saffron.webp')
-        ],
-        get key() {
-            return createKey(this.title)
-        }
-    },
-    {
-        title: '2g VT Grown Saffron',
-        info: "two grams of our regeneratively grown, organic saffron.",
-        price: '110.00',
-        shipping: '15.00',
-        isHighlighted: false,
-        isActive: true,
-        inStock: true,
-        photos: [
+            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp'),
+            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp'),
+            require('../resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp'),
+            require('../resources/images/product_photos/1g_vt_grown_saffron.webp'),
             require('../resources/images/product_photos/2g_vt_grown_saffron_1.webp'),
             require('../resources/images/product_photos/2g_vt_grown_saffron_2.webp')
         ],
@@ -138,10 +123,11 @@ export const products = [
             return createKey(this.title)
         }
     },
+    
     {
         title: 'Saffron Tincture',
         info: "Our saffron tincture is an excellent way to ingest all the medicinal benefits of saffron while.",
-        price: '20.00',
+        priceOptions: [{price: '20.00'}],
         shipping: '15.00',
         isHighlighted: true,
         isActive: true,
@@ -156,7 +142,7 @@ export const products = [
     {
         title: 'Saffron Maple Syrup',
         info: defaultInfo,
-        price: '15.00',
+        priceOptions: [{price: '15.00'}],
         shipping: '15.00',
         isHighlighted: true,
         isActive: true,
