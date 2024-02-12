@@ -14,7 +14,9 @@ export default function Product (props) {
         return `${photo}`
     })
     const featured = photos[0]
-    const toLink = `/products/${key}`
+    const productKey = key
+    console.log("productKey", productKey)
+    const toLink = `/products/${productKey}`
 
     const handleAddCartItem = () => {
         dispatch(addCartItem(productInfo))
