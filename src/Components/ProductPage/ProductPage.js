@@ -78,7 +78,7 @@ export default function ProductPage () {
             
             <h4>{ title }</h4>
             <img src={ photos[ photoIdx ] } alt={ photos[ photoIdx ] } />
-            <div className="flex">
+            <div className="flex m-2">
                 <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoLeft } >&lt;</button>
                 <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoRight }>&gt;</button>
             </div>
@@ -97,7 +97,7 @@ export default function ProductPage () {
                     priceOptions.length > 1 ? 
                         <>
                         <select
-                                className= "p-10"
+                                className="mb-3"
                                 onChange={ handleChange }
                                 value={ JSON.stringify(priceOption) }
                             >

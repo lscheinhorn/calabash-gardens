@@ -89,6 +89,7 @@ export default function Product (props) {
                     priceOptions.length > 1 ? 
                         <>
                         <select
+                                    className="mb-3"
                                     onChange={ handleChange }
                                     value={ JSON.stringify(priceOption) }
                                 >
