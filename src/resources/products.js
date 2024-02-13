@@ -20,7 +20,7 @@ export const products = [
         priceOptions: [{price: '0.10'}],
         shipping: '0.00',
         isHighlighted: false,
-        isActive: true,
+        isActive: false,
         inStock: true,
         photos: [
             defaultPhoto
@@ -837,11 +837,135 @@ export const products = [
         }
     },
 
+    {
+        title: "Honey Don't You Glow, Clay Mask 4 0z" ,
+        category: 'Body Care',
+        info: "Kaolin clay mask, made with organanic ingredients that leaves your skin fresh and smooth.",
+        priceOptions: [{
+            option: "4 0z",
+            price: '10.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
 
-
-
-
-
+    {
+        title: "Soaking Salts 5 0z" ,
+        category: 'Body Care',
+        info: "Ease your muscles with our floral soaking salts",
+        priceOptions: [{
+            option: "5 0z",
+            price: '12.50'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: 'Ageless Beauty Butter' ,
+        category: 'Body Care',
+        info: "A body butter made with local herbs that act like collagen to reduce the appearance wrinkles.",
+        priceOptions: [{
+            option: "2 0z",
+            price: '25.00'
+        },
+        {
+            option: "4 0z",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            require('../resources/images/product_photos/ageless_beauty_body_butter.jpg')
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: 'Ageless Beauty Oil 4 0z' ,
+        category: 'Body Care',
+        info: "A body oil made with local herbs that act like collagen to reduce the appearance wrinkles.",
+        priceOptions: [{
+            option: "4 0z",
+            price: '37.00'
+        },
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: 'Bath Bombs' ,
+        category: 'Body Care',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "",
+            price: '10.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: false,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: 'Great Green Heal',
+        category: 'Body Care',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "2 oz",
+            price: '25.00'
+        },
+        {
+            option: "4 oz",
+            price: '40.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: false,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
 
 
 

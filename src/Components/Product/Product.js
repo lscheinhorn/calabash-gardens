@@ -83,35 +83,30 @@ export default function Product (props) {
                     : null 
                 }</p>
             }
-            <>
+            
+            {
+                priceOptions.length > 1 ? 
+                    <>
+                        <select
+                            className="mb-3"
+                            onChange={ handleChange }
+                            value={ JSON.stringify(priceOption) }
+                        >
+                            
+                            {
+                                priceOptions.map( option  => {
+                                    // console.log({option})
+                                    return <option key={option.option} value={ JSON.stringify(option) }>{ option.option } is ${ option.price }</option>
+                                })
+                            }
+                        </select>
+                    </> : 
+                    <p>${priceOptions[0].price}</p>
+            }      
             {
                 !inStock ? <p> Out of Stock </p> :
-                    priceOptions.length > 1 ? 
-                        <>
-                        <select
-                                    className="mb-3"
-                                    onChange={ handleChange }
-                                    value={ JSON.stringify(priceOption) }
-                                >
-                                    
-                                    {
-                                        priceOptions.map( option  => {
-                                            // console.log({option})
-                                            return <option key={option.option} value={ JSON.stringify(option) }>{ option.option } is ${ option.price }</option>
-                                        })
-                                    }
-                                </select>
-                            <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
-                        </> 
-                        :
-                        <>
-                            <p>${priceOptions[0].price}</p>
-                            <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
-                        </>
+                <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
             }
-            </>
-            
-            
         </div>
     )
 }
