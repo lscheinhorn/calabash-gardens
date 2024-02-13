@@ -110,7 +110,7 @@ export const products = [
     },
     {
         title: 'Saffron Maple Syrup',
-        category: 'Culinary',
+        category: 'Saffron',
         info: "Smooth sweet syrup, locally sourced and flavored with our saffron.",
         priceOptions: [{
             option: "4 oz", 
@@ -133,7 +133,7 @@ export const products = [
     },
     {
         title: 'Saffron Honey',
-        category: 'Culinary',
+        category: 'Saffron',
         info: "Raw honey, made by our bees and other local farms, with a touch of saffron",
         priceOptions: [{
             option: "4 oz", 
@@ -156,7 +156,7 @@ export const products = [
     },
     {
         title: 'Saffron Simple Syrup',
-        category: 'Culinary',
+        category: 'Saffron',
         info: "Add saffron to your cocktails with our saffron simple syrup.",
         priceOptions: [{
             option: "4 oz", 
@@ -179,7 +179,7 @@ export const products = [
     },
     {
         title: 'Saffron Salt 2 oz',
-        category: 'Culinary',
+        category: 'Saffron',
         info: "Add saffron to your cocktails with our saffron simple syrup.",
         priceOptions: [{
             option: "2 oz", 
@@ -199,7 +199,7 @@ export const products = [
 
     {
         title: 'Vermont Grown Saffron',
-        category: 'Culinary',
+        category: 'Saffron',
         info: "Our regeneratively grown, organic saffron.",
         priceOptions: [
             {
@@ -234,7 +234,7 @@ export const products = [
     
     {
         title: 'Saffron Tincture',
-        category: 'Culinary',
+        category: 'Saffron',
         info: "Our saffron tincture is an excellent way to ingest all the medicinal benefits of saffron.",
         priceOptions: [{
             option: "1/2 oz",
@@ -562,7 +562,7 @@ export const products = [
 
     {
         title: 'The Heart and Head 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -582,7 +582,7 @@ export const products = [
     },
     {
         title: 'Easy Does It 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -602,7 +602,7 @@ export const products = [
     },
     {
         title: 'Goddess Moon 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -622,7 +622,7 @@ export const products = [
     },
     {
         title: 'Brainiac 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -642,7 +642,7 @@ export const products = [
     },
     {
         title: 'Wild Fire Frenzy 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -662,7 +662,7 @@ export const products = [
     },
     {
         title: 'Cold N Flu 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -682,7 +682,7 @@ export const products = [
     },
     {
         title: 'Milk Machine 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -702,7 +702,7 @@ export const products = [
     },
     {
         title: 'Sweet Relief 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -722,7 +722,7 @@ export const products = [
     },
     {
         title: 'Saffron Macha 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -742,7 +742,7 @@ export const products = [
     },
     {
         title: 'Tea Ball 1/2 oz Loose Leaf Tea',
-        category: 'Wildcraft',
+        category: 'Wildcraft - Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
@@ -763,8 +763,8 @@ export const products = [
 
 
     {
-        title: 'Sizzle Mambo Gede',
-        category: 'Wildcraft',
+        title: 'Sizzle',
+        category: 'Wildcraft - Mambo Gede',
         info: defaultInfo,
         priceOptions: [{
             option: "3/8 dram",
@@ -791,8 +791,8 @@ export const products = [
         }
     },
     {
-        title: 'Sippery Daze 4 oz Mambo Gede',
-        category: 'Wildcraft',
+        title: 'Sippery Daze 4 oz',
+        category: 'Wildcraft - Mambo Gede',
         info: defaultInfo,
         priceOptions: [{
             option: "4 0z",
@@ -811,8 +811,8 @@ export const products = [
         }
     },
     {
-        title: 'Rara Magic Mambo Gede',
-        category: 'Wildcraft',
+        title: 'Rara Magic',
+        category: 'Wildcraft - Mambo Gede',
         info: defaultInfo,
         priceOptions: [{
             option: "1 0z",
