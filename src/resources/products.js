@@ -969,7 +969,7 @@ export const products = [
     {
         title: 'Heal All',
         category: 'Body Care',
-        info: "This salve made from local herbs, coconut oil and beeswax. Naure's #1 bacterial defence.",
+        info: "This salve made from local herbs, coconut oil and beeswax. Nature's #1 bacterial defense.",
         priceOptions: [{
             option: "2 oz",
             price: '25.00'
