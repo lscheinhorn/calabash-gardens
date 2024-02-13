@@ -1,7 +1,7 @@
 
 const defaultInfo = ""
 
-const defaultPhoto = require('../resources/images/large_logo_no_purple_wide.png')
+const defaultPhoto = require('../resources/images/large_logo_no_purple_square.png')
 
 const createKey = (input) => {
     const chars = 'abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890.,'
