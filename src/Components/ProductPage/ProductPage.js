@@ -50,7 +50,7 @@ export default function ProductPage () {
         setProductInfo({ 
             ...product, 
             price: priceOption.price,
-            title: priceOption.option + "" + title,
+            title: title + (priceOption.option ? " " + priceOption.option : ""),
             key: product.key.slice(0, -1) + priceOptions.findIndex(({ option }) => { return option === priceOption.option }).toString()
         })
         // console.log("productInfo", productInfo )
