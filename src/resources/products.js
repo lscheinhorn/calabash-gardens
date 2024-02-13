@@ -676,7 +676,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/cold_and_flu.jpg')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -966,6 +966,566 @@ export const products = [
             return createKey(this.title)
         }
     },
+    {
+        title: 'Heal All',
+        category: 'Body Care',
+        info: "This salve made from local herbs, coconut oil and beeswax. Naure's #1 bacterial defence.",
+        priceOptions: [{
+            option: "2 oz",
+            price: '25.00'
+        },
+        {
+            option: "4 oz",
+            price: '40.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Itch Don't Bug Me Now 10 ml",
+        category: 'Body Care',
+        info: "Roll on antihistamine for hives and bug bites.",
+        priceOptions: [{
+            option: "10 ml",
+            price: '10.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Fungus Among Us 2 oz",
+        category: 'Body Care',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "2 oz",
+            price: '25.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: false,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Lip Balm 1/2 oz",
+        category: 'Body Care',
+        info: "Super hydrating chapstick",
+        priceOptions: [{
+            option: "1/2 oz",
+            price: '10.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Hydration Station",
+        category: 'Body Care',
+        info: "The ultimate moisturizing salve formula.",
+        priceOptions: [{
+            option: "2 oz",
+            price: '25.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Meadow Magic Gardener's Balm",
+        category: 'Body Care',
+        info: "Excelent choice for hard working hands",
+        priceOptions: [{
+            option: "2 oz",
+            price: '25.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Pain B Gone",
+        category: 'Body Care',
+        info: "A salve for achy joints and muscles.",
+        priceOptions: [{
+            option: "2 oz",
+            price: '25.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Silky Smooth Flower Balm",
+        category: 'Body Care',
+        info: "A salve that harnesses the power of wild flowers to repair and hydrate over worked skin.",
+        priceOptions: [{
+            option: "2 oz",
+            price: '25.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Sunny Days, Massage Oil 4 oz",
+        category: 'Body Care',
+        info: "Long lasting message oil, harnessing the powers of dandelion and violet.",
+        priceOptions: [{
+            option: "4 oz",
+            price: '37.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "BO? Not Today, Deoderant Spray 4 oz",
+        category: 'Body Care',
+        info: "Natural spray-on deoderant.",
+        priceOptions: [{
+            option: "4 oz",
+            price: '37.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Bug Spray 4 oz",
+        category: 'Body Care',
+        info: "A natural bug spray made with a potent mix of bug repelling herbs",
+        priceOptions: [{
+            option: "4 oz",
+            price: '37.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Facial Toner",
+        category: 'Body Care',
+        info: "A gentle cleansing and pore minimizing herbal formula.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '15.00'
+        },
+        {
+            option: "4 oz",
+            price: '35.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+
+
+    {
+        title: "Headache and Fever",
+        category: 'Tinctures',
+        info: "A fever reducer and herbal suppliment for headaches and migraines.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Joint Health",
+        category: 'Tinctures',
+        info: "An anti-inflammatory with soft tissue restoration and pain releaver.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Reishi Turkey Tail",
+        category: 'Tinctures',
+        info: "Full body tonic and immune system booster for health and well being.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Allergy Relief",
+        category: 'Tinctures',
+        info: "A powerful antihistamine.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Moon Beams and Day Dreams",
+        category: 'Tinctures',
+        info: "Herbal sleep suppliment that calms the mind.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "A Touch of Sunshine",
+        category: 'Tinctures',
+        info: "St John's Wort herbal blend that for depression and anxiety",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Bitters",
+        category: 'Tinctures',
+        info: "Delicious way to start the digestive system while enjoying a cocktail.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "The Root Cause Bitters",
+        category: 'Tinctures',
+        info: "Delicious way to start the digestive system while enjoying a cocktail.",
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    
+    {
+        title: "Cold and Flu",
+        category: 'Tinctures',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            require('../resources/images/product_photos/cold_and_flu.jpg')
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Lions Share",
+        category: 'Tinctures',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Free the Pee",
+        category: 'Tinctures',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: false,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Goddess Moon",
+        category: 'Tinctures',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "1 oz",
+            price: '20.00'
+        },
+        {
+            option: "4 oz",
+            price: '42.00'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: false,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+
+
+
+
+
 
 
 
