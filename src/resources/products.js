@@ -1523,7 +1523,46 @@ export const products = [
     },
 
 
-
+    {
+        title: "Dream Weaver 1/2 oz",
+        category: 'Ritual Smoking Blends',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "1/2 oz",
+            price: '12.50'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: "Original Blend 1/2 oz",
+        category: 'Ritual Smoking Blends',
+        info: defaultInfo,
+        priceOptions: [{
+            option: "1/2 oz",
+            price: '12.50'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
 
 
 
