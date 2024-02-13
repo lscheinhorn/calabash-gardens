@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.c0818897.css",
-    "main.js": "/static/js/main.7fa9a4fb.js",
+    "main.js": "/static/js/main.a8f103a4.js",
     "static/media/the_heart_and_the_head.jpg": "/static/media/the_heart_and_the_head.3883e90171566ef6db46.jpg",
     "static/media/ageless_beauty_body_butter.jpg": "/static/media/ageless_beauty_body_butter.16e17b37069502a57712.jpg",
     "static/media/cold_and_flu.jpg": "/static/media/cold_and_flu.35a76a31c63cdeb21866.jpg",
@@ -12,6 +12,7 @@
     "static/media/0.5g_vermont_grown_saffron_3.webp": "/static/media/0.5g_vermont_grown_saffron_3.a701179ae29bf043d8ed.webp",
     "static/media/2g_vt_grown_saffron_1.webp": "/static/media/2g_vt_grown_saffron_1.5fca5de0343df65472cc.webp",
     "static/media/saffron_maple_syrup.webp": "/static/media/saffron_maple_syrup.72da24c95fc5cde02b3a.webp",
+    "static/media/large_logo_no_purple_square.png": "/static/media/large_logo_no_purple_square.d79473467cddab92df7c.png",
     "static/media/gifts_basket.webp": "/static/media/gifts_basket.7a38924e1a5a1f060e95.webp",
     "static/media/0.5g_vermont_grown_saffron_2.webp": "/static/media/0.5g_vermont_grown_saffron_2.44efc6684463de1a4ee6.webp",
     "static/media/2g_vt_grown_saffron_2.webp": "/static/media/2g_vt_grown_saffron_2.44efc6684463de1a4ee6.webp",
@@ -19,17 +20,16 @@
     "static/media/holidays_gifts_basket.webp": "/static/media/holidays_gifts_basket.e69653e7c5495f2688da.webp",
     "static/media/saffron_tincture.webp": "/static/media/saffron_tincture.87352a2ab6440e2d88de.webp",
     "static/media/gift_basket.webp": "/static/media/gift_basket.2212de7543a24cbb8695.webp",
-    "static/media/large_logo_no_purple_square.png": "/static/media/large_logo_no_purple_square.d575a479677de3dcc0b5.png",
     "static/media/vice_president.webp": "/static/media/vice_president.17bdc928001c6af4c261.webp",
     "static/media/1g_vt_grown_saffron.webp": "/static/media/1g_vt_grown_saffron.1edd468796e1153f83c3.webp",
     "static/media/president.webp": "/static/media/president.4b0ee7951252c3f13d95.webp",
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
     "main.c0818897.css.map": "/static/css/main.c0818897.css.map",
-    "main.7fa9a4fb.js.map": "/static/js/main.7fa9a4fb.js.map"
+    "main.a8f103a4.js.map": "/static/js/main.a8f103a4.js.map"
   },
   "entrypoints": [
     "static/css/main.c0818897.css",
-    "static/js/main.7fa9a4fb.js"
+    "static/js/main.a8f103a4.js"
   ]
 }
