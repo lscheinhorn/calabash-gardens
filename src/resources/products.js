@@ -173,7 +173,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            defaultPhoto
+            require('../resources/images/product_photos/saffron_simple_syrup.jpg')
         ],
         get key() {
             return createKey(this.title)
