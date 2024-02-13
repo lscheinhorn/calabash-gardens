@@ -1,8 +1,9 @@
 {
   "files": {
     "main.css": "/static/css/main.c0818897.css",
-    "main.js": "/static/js/main.a72b31f0.js",
+    "main.js": "/static/js/main.e4354ddc.js",
     "static/media/the_heart_and_the_head.jpg": "/static/media/the_heart_and_the_head.3883e90171566ef6db46.jpg",
+    "static/media/ageless_beauty_body_butter.jpg": "/static/media/ageless_beauty_body_butter.16e17b37069502a57712.jpg",
     "static/media/cold_and_flu.jpg": "/static/media/cold_and_flu.35a76a31c63cdeb21866.jpg",
     "static/media/event_night.jpg": "/static/media/event_night.fef1acd6cfa95b44b9b0.jpg",
     "static/media/parallax.webp": "/static/media/parallax.38f2463d95275deba0b4.webp",
@@ -26,10 +27,10 @@
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
     "main.c0818897.css.map": "/static/css/main.c0818897.css.map",
-    "main.a72b31f0.js.map": "/static/js/main.a72b31f0.js.map"
+    "main.e4354ddc.js.map": "/static/js/main.e4354ddc.js.map"
   },
   "entrypoints": [
     "static/css/main.c0818897.css",
-    "static/js/main.a72b31f0.js"
+    "static/js/main.e4354ddc.js"
   ]
 }
