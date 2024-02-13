@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.c0818897.css",
-    "main.js": "/static/js/main.e4354ddc.js",
+    "main.js": "/static/js/main.cf35761f.js",
     "static/media/the_heart_and_the_head.jpg": "/static/media/the_heart_and_the_head.3883e90171566ef6db46.jpg",
     "static/media/ageless_beauty_body_butter.jpg": "/static/media/ageless_beauty_body_butter.16e17b37069502a57712.jpg",
     "static/media/cold_and_flu.jpg": "/static/media/cold_and_flu.35a76a31c63cdeb21866.jpg",
@@ -27,10 +27,10 @@
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
     "main.c0818897.css.map": "/static/css/main.c0818897.css.map",
-    "main.e4354ddc.js.map": "/static/js/main.e4354ddc.js.map"
+    "main.cf35761f.js.map": "/static/js/main.cf35761f.js.map"
   },
   "entrypoints": [
     "static/css/main.c0818897.css",
-    "static/js/main.e4354ddc.js"
+    "static/js/main.cf35761f.js"
   ]
 }
