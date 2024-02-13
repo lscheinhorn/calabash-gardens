@@ -1,6 +1,8 @@
 
 const defaultInfo = ""
 
+const defaultPhoto = require('../resources/images/large_logo_no_purple_wide.png')
+
 const createKey = (input) => {
     const chars = 'abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890.,'
     const numbers = Array.prototype.map.call(input, (char) => {
@@ -18,10 +20,10 @@ export const products = [
         priceOptions: [{price: '0.10'}],
         shipping: '0.00',
         isHighlighted: false,
-        isActive: false,
+        isActive: true,
         inStock: true,
         photos: [
-
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -125,7 +127,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_maple_sirup.webp')
+            require('../resources/images/product_photos/saffron_maple_syrup.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -148,7 +150,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_maple_sirup.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -171,7 +173,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_maple_sirup.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -190,7 +192,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_maple_sirup.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -274,7 +276,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -294,7 +296,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -318,7 +320,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -342,7 +344,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -362,7 +364,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -382,7 +384,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -402,7 +404,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -422,7 +424,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -442,7 +444,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -466,7 +468,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -490,7 +492,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -512,7 +514,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -532,7 +534,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -552,7 +554,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -574,7 +576,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            require('../resources/images/product_photos/the_heart_and_the_head.jpg')
         ],
         get key() {
             return createKey(this.title)
@@ -594,7 +596,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -614,7 +616,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -634,7 +636,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -654,7 +656,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -674,7 +676,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            require('../resources/images/product_photos/cold_and_flu.jpg')
         ],
         get key() {
             return createKey(this.title)
@@ -694,7 +696,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -714,7 +716,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -734,7 +736,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -754,7 +756,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -784,7 +786,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -804,7 +806,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
@@ -828,7 +830,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/saffron_tincture.webp')
+            defaultPhoto
         ],
         get key() {
             return createKey(this.title)
