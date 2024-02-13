@@ -96,7 +96,7 @@ export default function ProductPage () {
                 !inStock ? <p> Out of Stock </p> :
                     priceOptions.length > 1 ? 
                         <>
-                        <select
+                            <select
                                 className="mb-3"
                                 onChange={ handleChange }
                                 value={ JSON.stringify(priceOption) }
