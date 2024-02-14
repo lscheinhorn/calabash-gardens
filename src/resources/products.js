@@ -568,7 +568,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -588,7 +588,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -608,7 +608,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -628,7 +628,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -648,7 +648,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -663,12 +663,12 @@ export const products = [
         }
     },
     {
-        title: 'Cold N Flu 1/2 oz Loose Leaf Tea',
+        title: 'Cold & Flu 1/2 oz Loose Leaf Tea',
         category: 'Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -688,7 +688,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -708,7 +708,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '10.00'
         }
         ],
         shipping: '15.00',
@@ -728,7 +728,7 @@ export const products = [
         info: defaultInfo,
         priceOptions: [{
             option: "1/2 oz",
-            price: '12.50'
+            price: '17.00'
         }
         ],
         shipping: '15.00',
