@@ -982,7 +982,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -1102,10 +1102,11 @@ export const products = [
         title: "Pain B Gone",
         category: 'Body Care',
         info: "A salve for achy joints and muscles.",
-        priceOptions: [{
-            option: "2 oz",
-            price: '25.00'
-        },
+        priceOptions: [
+        //     {
+        //     option: "2 oz",
+        //     price: '25.00'
+        // },
         {
             option: "4 oz",
             price: '42.00'
@@ -1198,7 +1199,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
