@@ -106,7 +106,7 @@ useEffect(() => {
         <>
           <h1 style={{ textAlign: "center", color: "green"}}>Thank you for your order { payer.name.given_name }!</h1>
           <p style={{ textAlign: "center" , font: "bold" }}>Your Order ID is: { orderID }</p>
-          <p style={{ textAlign: "center" , font: "bold", fontSize: "120%" }}>Please check your inbox at {payer.email_address } for your order confirmation. If you didn't recieve a confirmation email please contact us directly through our contact form or email us a calabashgardens.gmail.com</p>
+          <p style={{ textAlign: "center" , font: "bold", fontSize: "120%" }}>Please check your inbox at {payer.email_address } for your order confirmation. If you didn't recieve a confirmation email please contact us directly through our contact form or email us at calabashgardens@gmail.com</p>
 
           {/*<p style={{ textAlign: "center" , font: "bold" }}>If your product needs to be shipped it will be sent to {payerInfo.address.address_line_1} {payerInfo.address.address_line_2} {payerInfo.address.admin_area_2}, {payerInfo.address.admin_area_1} {payerInfo.address.postal_code}</p>*/}
 
