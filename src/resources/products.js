@@ -40,7 +40,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/gifts_basket.webp')
+            require('../resources/images/product_photos/calabash_gifts_set.jpeg')
         ],
         get key() {
             return createKey(this.title)
@@ -57,7 +57,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/gift_basket.webp')
+            require('../resources/images/product_photos/calabash_gift_set.webp')
         ],
         get key() {
             return createKey(this.title)
@@ -73,7 +73,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/gift_basket.webp')
+            require('../resources/images/product_photos/spa_day_gift_set.webp')
         ],
         get key() {
             return createKey(this.title)
