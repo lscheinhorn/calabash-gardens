@@ -29,22 +29,7 @@ export const products = [
             return createKey(this.title)
         }
     },
-    {
-        title: 'Calabash Holidays Gift Set',
-        category: "Gifts",
-        info: defaultInfo,
-        priceOptions: [{price: '100.00'}],
-        shipping: '15.00',
-        isHighlighted: false,
-        isActive: true,
-        inStock: true,
-        photos: [
-            require('../resources/images/product_photos/holidays_gifts_basket.webp')
-        ],
-        get key() {
-            return createKey(this.title)
-        }
-    },
+    
     {
         title: 'Calabash Gifts Set',
         category: "Gifts",
@@ -104,7 +89,7 @@ export const products = [
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/gift_basket.webp')
+            require('../resources/images/product_photos/erotic_gift_set.webp')
         ],
         get key() {
             return createKey(this.title)
