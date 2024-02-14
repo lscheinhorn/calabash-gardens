@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.c0818897.css",
-    "main.js": "/static/js/main.a8e5616a.js",
+    "main.js": "/static/js/main.324f859a.js",
     "static/media/saffron_simple_syrup.jpg": "/static/media/saffron_simple_syrup.8aa83cd5a97dfc16e396.jpg",
     "static/media/the_heart_and_the_head.jpg": "/static/media/the_heart_and_the_head.3883e90171566ef6db46.jpg",
     "static/media/ageless_beauty_body_butter.jpg": "/static/media/ageless_beauty_body_butter.16e17b37069502a57712.jpg",
@@ -27,10 +27,10 @@
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
     "main.c0818897.css.map": "/static/css/main.c0818897.css.map",
-    "main.a8e5616a.js.map": "/static/js/main.a8e5616a.js.map"
+    "main.324f859a.js.map": "/static/js/main.324f859a.js.map"
   },
   "entrypoints": [
     "static/css/main.c0818897.css",
-    "static/js/main.a8e5616a.js"
+    "static/js/main.324f859a.js"
   ]
 }
