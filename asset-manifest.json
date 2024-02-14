@@ -1,7 +1,7 @@
 {
   "files": {
     "main.css": "/static/css/main.c0818897.css",
-    "main.js": "/static/js/main.cab5ef4b.js",
+    "main.js": "/static/js/main.f588a61c.js",
     "static/media/saffron_simple_syrup.jpg": "/static/media/saffron_simple_syrup.8aa83cd5a97dfc16e396.jpg",
     "static/media/the_heart_and_the_head.jpg": "/static/media/the_heart_and_the_head.3883e90171566ef6db46.jpg",
     "static/media/ageless_beauty_body_butter.jpg": "/static/media/ageless_beauty_body_butter.16e17b37069502a57712.jpg",
@@ -18,7 +18,7 @@
     "static/media/0.5g_vermont_grown_saffron_2.webp": "/static/media/0.5g_vermont_grown_saffron_2.44efc6684463de1a4ee6.webp",
     "static/media/2g_vt_grown_saffron_2.webp": "/static/media/2g_vt_grown_saffron_2.44efc6684463de1a4ee6.webp",
     "static/media/0.5g_vermont_grown_saffron_1.webp": "/static/media/0.5g_vermont_grown_saffron_1.b8f4e0619c77b680eb02.webp",
-    "static/media/holidays_gifts_basket.webp": "/static/media/holidays_gifts_basket.e69653e7c5495f2688da.webp",
+    "static/media/erotic_gift_set.webp": "/static/media/erotic_gift_set.e69653e7c5495f2688da.webp",
     "static/media/saffron_tincture.webp": "/static/media/saffron_tincture.87352a2ab6440e2d88de.webp",
     "static/media/gift_basket.webp": "/static/media/gift_basket.2212de7543a24cbb8695.webp",
     "static/media/vice_president.webp": "/static/media/vice_president.17bdc928001c6af4c261.webp",
@@ -27,10 +27,10 @@
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
     "main.c0818897.css.map": "/static/css/main.c0818897.css.map",
-    "main.cab5ef4b.js.map": "/static/js/main.cab5ef4b.js.map"
+    "main.f588a61c.js.map": "/static/js/main.f588a61c.js.map"
   },
   "entrypoints": [
     "static/css/main.c0818897.css",
-    "static/js/main.cab5ef4b.js"
+    "static/js/main.f588a61c.js"
   ]
 }
