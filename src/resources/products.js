@@ -274,7 +274,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -294,7 +294,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -318,7 +318,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -342,7 +342,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -402,7 +402,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -466,7 +466,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -512,7 +512,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -532,7 +532,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -552,7 +552,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -743,12 +743,11 @@ export const products = [
         }
     },
     {
-        title: 'Tea Ball 1/2 oz Loose Leaf Tea',
+        title: 'Tea Ball',
         category: 'Loose Leaf Tea',
         info: defaultInfo,
         priceOptions: [{
-            option: "1/2 oz",
-            price: '12.50'
+            price: '5.00'
         }
         ],
         shipping: '15.00',
