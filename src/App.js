@@ -6,6 +6,8 @@ import Footer from './Components/Footer/Footer'
 import ProductPage from './Components/ProductPage/ProductPage'
 import Cart from './Components/Cart/Cart'
 import Contact from './Components/Contact/Contact'
+import Admin from './Components/Admin/Admin'
+
 
 import { HashRouter, Routes, Route } from 'react-router-dom'
 
@@ -21,6 +23,10 @@ function App() {
         <Route 
           path="/products/:key" 
           element={<ProductPage />} 
+        />
+        <Route 
+          path="/admin" 
+          element={<Admin />} 
         />
         <Route 
           path="/shop" 
