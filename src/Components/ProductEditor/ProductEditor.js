@@ -15,11 +15,9 @@ export default function ProductEditor (props) {
         return obj.mapValue.fields
     }
     
-    console.log("product editor", getObj(priceOptions[0]))
+    console.log("product editor", isHighlighted)
 
     const handleDelete =  () => {
-        console.log("delete product")
-
         deleteDoc(doc(db, 'products', title))
         .then(() => {
             getProducts()

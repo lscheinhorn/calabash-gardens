@@ -15,7 +15,7 @@ export default function Editor () {
             price: ""
         }],
         shipping: '15.00',
-        isHighlighted: false,
+        isHighlighted: true,
         isActive: true,
         inStock: true,
         photos: [],
@@ -35,6 +35,7 @@ export default function Editor () {
               ...newProduct
             })
             .then(() => {
+                console.log("new product", newProduct)
                 getProducts()
             })
           
@@ -86,109 +87,163 @@ export default function Editor () {
         
     }, [products])
 
-    
+    const submitButton = () => {
+        if(newProduct.title && newProduct.info && newProduct.category && newProduct.shipping && newProduct.priceOptions[0].option && newProduct.priceOptions[0].price ) {
+            console.log("button active")
+            return <button onClick={ handleSubmit }>Add Product</button>
+        } else {
+            console.log("button disabled")
+
+            return <button disabled onClick={ handleSubmit }>Add Product</button>
+        }
+    }
 
     return (
         <div id='editor'>
             <h1>Editor</h1>
-            <input 
-                value={ newProduct.title }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    title: e.target.value
-                })}}
-                placeholder="title"
-            />
-            <br></br>
-            <input 
-                value={ newProduct.category }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    category: e.target.value
-                })}}
-                placeholder="category"
-            />
-            <br></br>
-
-            <input 
-                value={ newProduct.info }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    info: e.target.value
-                })}}
-                placeholder="info"
-            />
-            <br></br>
-
-            <input 
-                value={ newProduct.priceOptions[0].option }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    priceOptions: [
-                        {
-                            option: e.target.value,
-                            price: newProduct.priceOptions[0].price
-                        },
-                        ...newProduct.priceOptions.slice(1)
-                    ]
-                })}}
-                placeholder="Option 1 name"
-            />
-            <br></br>
-            <input 
-                value={ newProduct.priceOptions[0].price }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    priceOptions: [
-                        {
-                            option: newProduct.priceOptions[0].option,
-                            price: e.target.value
-                        },
-                        ...newProduct.priceOptions.slice(1)
-                    ]
-                })}}
-                placeholder="Option 1 price"
-            />
-            <br></br>
-            <input 
-                value={ newProduct.shipping }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    shipping: e.target.value
-                })}}
-                placeholder="shipping"
-            />
-            <br></br>
-            <input 
-                value={ newProduct.isHighlighted }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    isHighlighted: e.target.value
-                })}}
-                placeholder="isHighlighted"
-            />
-            <br></br>
-            <input 
-                value={ newProduct.isActive }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    isActive: e.target.value
-                })}}
-                placeholder="isActive"
-            />
-            <br></br>
-            <input 
-                value={ newProduct.inStock }
-                onChange={ (e) => { setNewProduct({
-                    ...newProduct,
-                    inStock: e.target.value
-                })}}
-                placeholder="inStock"
-            />
-            <br></br>
-           
+            <label>
+                Product title
+                <input 
+                    value={ newProduct.title }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        title: e.target.value
+                    })}}
+                    placeholder="title"
+                    required
+                />
+            </label>
             
-            <button onClick={ handleSubmit }>Add Product</button>
+            <br></br>
+            <label>
+                Category
+                <input 
+                    value={ newProduct.category }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        category: e.target.value
+                    })}}
+                    placeholder="category"
+                />
+            </label>
+            
+            <br></br>
+            <label>
+                Description
+                <input 
+                    value={ newProduct.info }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        info: e.target.value
+                    })}}
+                    placeholder="info"
+                />
+            </label>
+            
+            <br></br>
+            <label>
+                Option 1 size / name
+                <input 
+                    value={ newProduct.priceOptions[0].option }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        priceOptions: [
+                            {
+                                option: e.target.value,
+                                price: newProduct.priceOptions[0].price
+                            },
+                            ...newProduct.priceOptions.slice(1)
+                        ]
+                    })}}
+                    placeholder="Option 1 name"
+                />
+            </label>
+            
+            <br></br>
+            <label>
+                Option 1 Price
+                <input 
+                    value={ newProduct.priceOptions[0].price }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        priceOptions: [
+                            {
+                                option: newProduct.priceOptions[0].option,
+                                price: e.target.value
+                            },
+                            ...newProduct.priceOptions.slice(1)
+                        ]
+                    })}}
+                    placeholder="Option 1 price"
+                />
+            </label>
+            
+            <br></br>
+            <label>
+                Shipping
+                <input 
+                    value={ newProduct.shipping }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        shipping: e.target.value
+                    })}}
+                    placeholder="shipping"
+                />
+            </label>
+            
+            <br></br>
+            
+            <label>
+                Highlighted
+                <select 
+                    value={ newProduct.isHighlighted }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        isHighlighted: e.target.value === "true"
+                    })}}
+                >
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+
+                </select>
+            </label>
+            
+            <br></br>
+
+
+            <label>
+                Active
+                <select 
+                    value={ newProduct.isActive }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        isActive: e.target.value === "true"
+                    })}}
+                >
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+
+                </select>
+            </label>
+            
+            <br></br>
+            <label>
+                In Stock
+                <select 
+                    value={ newProduct.inStock }
+                    onChange={ (e) => { setNewProduct({
+                        ...newProduct,
+                        inStock: e.target.value === "true"
+                    })}}
+                >
+                    <option value="true">true</option>
+                    <option value="false">false</option>
+
+                </select>
+            </label>
+            <br></br>
+            
+            { submitButton() }
             {   
                 productComponents
             }          
