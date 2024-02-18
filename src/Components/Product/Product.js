@@ -62,12 +62,38 @@ export default function Product (props) {
     }, [ priceOption, product, title ])
   
     // console.log(priceOptions)
+
+
+    const [ photoIdx, setPhotoIdx ] = useState( 0 )
+
+    const handlePhotoLeft = () => {
+        if(photoIdx === 0 ) {
+            return
+        }
+        setPhotoIdx(photoIdx - 1)
+    }
+
+    const handlePhotoRight = () => {
+        if(photoIdx === photos.length - 1 ) {
+            return
+        }
+        setPhotoIdx(photoIdx + 1)
+    }
+
+
     return (
         <div className="product_container">
             <Link to={ toLink } className="product-img-title">
-                <img src={ featured } alt={ featured } />
+                <img src={ photos[ photoIdx ] } alt={ photos[ photoIdx ] } />
+            </Link>
+            <div hidden={ photos.length === 1 } className="flex m-2">
+                <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoLeft } >&lt;</button>
+                <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoRight }>&gt;</button>
+            </div>  
+            <Link to={ toLink } className="product-img-title">
                 <h4>{ title }</h4>
             </Link>
+
             {
                 info1 ?
                 <p>{ info1 }

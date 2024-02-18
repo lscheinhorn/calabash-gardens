@@ -78,7 +78,7 @@ export default function ProductPage () {
             
             <h4>{ title }</h4>
             <img src={ photos[ photoIdx ] } alt={ photos[ photoIdx ] } />
-            <div className="flex m-2">
+            <div hidden={ photos.length === 1 } className="flex m-2">
                 <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoLeft } >&lt;</button>
                 <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoRight }>&gt;</button>
             </div>

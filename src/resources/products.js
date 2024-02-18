@@ -3,7 +3,7 @@ const defaultInfo = ""
 
 const defaultPhoto = require('../resources/images/large_logo_no_purple_square.png')
 
-const createKey = (input) => {
+export const createKey = (input) => {
     const chars = 'abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890.,'
     const numbers = Array.prototype.map.call(input, (char) => {
       const number = chars.indexOf(char)
