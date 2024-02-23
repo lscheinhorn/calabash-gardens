@@ -108,7 +108,7 @@ export const products = [
             price: '27.00'
         }],
         shipping: '15.00',
-        isHighlighted: true,
+        isHighlighted: false,
         isActive: true,
         inStock: true,
         photos: [
@@ -237,7 +237,7 @@ export const products = [
         }
         ],
         shipping: '15.00',
-        isHighlighted: true,
+        isHighlighted: false,
         isActive: true,
         inStock: true,
         photos: [

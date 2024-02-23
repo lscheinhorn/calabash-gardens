@@ -5,6 +5,7 @@ import Offerings from '../Offerings/Offerings'
 import About from '../About/About'
 import Parallax from '../Parallax/Parallax'
 import Team from '../Team/Team'
+import Media from '../Media/Media'
 
 
 export default function Main () {
@@ -14,6 +15,7 @@ export default function Main () {
             <div>
                 <HighlightedProducts />
                 {/*<Offerings />*/}
+                <Media />
                 <Parallax />
                 <About />
                 <Team />
