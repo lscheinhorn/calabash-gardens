@@ -10,7 +10,7 @@
         --textAlign: center; 
     }
 
-    footer img {
+    .footer img {
         display: none;
     }
 }
