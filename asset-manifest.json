@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/static/css/main.535330c7.css",
+    "main.css": "/static/css/main.cab7270c.css",
     "main.js": "/static/js/main.35e59840.js",
     "static/media/saffron_simple_syrup.jpg": "/static/media/saffron_simple_syrup.8aa83cd5a97dfc16e396.jpg",
     "static/media/the_heart_and_the_head.jpg": "/static/media/the_heart_and_the_head.3883e90171566ef6db46.jpg",
@@ -27,11 +27,11 @@
     "static/media/president.webp": "/static/media/president.4b0ee7951252c3f13d95.webp",
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
-    "main.535330c7.css.map": "/static/css/main.535330c7.css.map",
+    "main.cab7270c.css.map": "/static/css/main.cab7270c.css.map",
     "main.35e59840.js.map": "/static/js/main.35e59840.js.map"
   },
   "entrypoints": [
-    "static/css/main.535330c7.css",
+    "static/css/main.cab7270c.css",
     "static/js/main.35e59840.js"
   ]
 }
