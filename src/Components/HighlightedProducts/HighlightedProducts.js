@@ -1,6 +1,7 @@
 import './HighlightedProducts.css'
 import { products } from '../../resources/products'
 import Product from '../Product/Product'
+import {  Link } from 'react-router-dom'
 
 export default function HighlightedProducts () {
     
@@ -16,6 +17,8 @@ export default function HighlightedProducts () {
                     return null
                 })
             }
+            <Link className="btn btn-primary" to="../shop">Shop All</Link>
+
         </div>
     )
 }
