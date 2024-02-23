@@ -1,6 +1,7 @@
 .youtube {
     aspect-ratio: 16/9;
-    width: 90%;
+    width: 98vw;
     max-width: 2000px;
+    max-height: 100vh;
     padding: 20px;
 }
