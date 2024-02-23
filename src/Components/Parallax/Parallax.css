@@ -2,7 +2,7 @@
     background-image: url('../../resources/images/parallax.webp');
     position: -webkit-sticky;
     position: sticky;
-    background-attachment: fixed;
+    /* background-attachment: fixed; */
     -webkit-background-size: 150%;
     -moz-background-size: 150%;
     background-size: 150%;
