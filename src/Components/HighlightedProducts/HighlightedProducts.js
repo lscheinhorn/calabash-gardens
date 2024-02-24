@@ -7,18 +7,22 @@ export default function HighlightedProducts () {
     
     
     return (
-        
-        <div id="highlighted-products">
-            {
-                products.map( product => {
-                    if ( product.isHighlighted && product.isActive === true ) {
-                        return <Product product={ product } key={ product.key } />
-                    }
-                    return null
-                })
-            }
+        <div className="text-center">
+            <div id="highlighted-products">
+                {
+                    products.map( product => {
+                        if ( product.isHighlighted && product.isActive === true ) {
+                            return <Product product={ product } key={ product.key } />
+                        }
+                        return null
+                    })
+                }
+
+
+            </div>
             <Link className="btn btn-primary" to="../shop">Shop All</Link>
 
         </div>
+        
     )
 }
