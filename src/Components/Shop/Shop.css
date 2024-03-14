@@ -2,5 +2,6 @@
     display: flex;
     flex-wrap: wrap;
     justify-content: space-around;
-    
+    margin-left: 3vw; /* Adjust the left margin as needed */
+    margin-right: 3vw; /* Adjust the right margin as needed */
 }
