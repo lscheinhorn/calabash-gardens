@@ -5,7 +5,7 @@ import Event from '../Event/Event';
 import { useState } from 'react';
 
 export default function Events() {
-    const [eventIdx, setEventIdx] = useState(events.length - 1);
+    const [eventIdx, setEventIdx] = useState(events.length - 2);
 
     const handlePrevious = () => {
         if (eventIdx > 0) {

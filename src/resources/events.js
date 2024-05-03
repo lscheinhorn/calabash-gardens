@@ -45,7 +45,7 @@ export const events = [
         }
     },
     {
-        title: 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet ',
+        title: `Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet`,
         category: "Experience",
         info: [
            `July 5th and 6th Calabash Will be hosting a unique Lao experience. Chefs Phet and Mary will be using saffron in a coursed out traditional Lao meal. There will be seating for 30 guests each night featuring incredible local ingredients and cocktail or mocktail pairings.`,
@@ -72,7 +72,7 @@ export const events = [
         }
    },
    {
-        title: 'Fleur De Mar by Chef Cole Conrad Cohen',
+        title: 'Fleur De Mar \nby Chef Cole Conrad Cohen',
         category: "Experience",
         info: [
             `August 2nd and 3rd 2024 Chef Cole COnrad Cohen is bringing the fruits of the sea to central Vermont! Each Course of this incredible seven course meal is filled to the brim with the freshest seafood the Atlantic has to offer Calabash Gardens Saffron and the incredible pairing of local wine with each course. This will be an event you will not want to miss. Book for either Friday or Saturday night or both if you're feeling like you need a lot of seafood in your life.`,

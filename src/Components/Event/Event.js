@@ -87,7 +87,7 @@ export default function Event (props) {
     return (
         <div className="productPage_container">
             
-            <h3>{ title }</h3>
+            <h3 style={{ whiteSpace: 'pre-wrap', textAlign: 'center' }}>{ title }</h3>
 
             {
                 
