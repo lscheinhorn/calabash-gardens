@@ -31,17 +31,17 @@
     font-size: 1.2rem; /* Comfortable reading size for blurbs */
 }
 
-.flex {
+#events .flex {
     justify-content: center; /* Center align the navigation buttons if used */
 }
 
-.btn-outline-primary {
+#events .btn-outline-primary {
     background-color: transparent;
     color: #8B4513; /* Dark brown to match the parchment theme */
     border-color: #deb887; /* Border color to match */
 }
 
-.btn-outline-primary:hover {
+#events .btn-outline-primary:hover {
     background-color: #deb887; /* Light brown hover effect */
 }
 
