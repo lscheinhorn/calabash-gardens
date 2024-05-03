@@ -45,7 +45,7 @@ export const events = [
         }
     },
     {
-        title: 'Ma-Der! Ma-Der! Lao Cuisine By Chef Mary and Phet ',
+        title: 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet ',
         category: "Experience",
         info: [
            `July 5th and 6th Calabash Will be hosting a unique Lao experience. Chefs Phet and Mary will be using saffron in a coursed out traditional Lao meal. There will be seating for 30 guests each night featuring incredible local ingredients and cocktail or mocktail pairings.`,

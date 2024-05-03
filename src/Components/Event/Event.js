@@ -10,6 +10,7 @@ export default function Event (props) {
     const [ quantity, setQuantity ] = useState( 1 )
     const [ dateOption, setDateOption ] = useState(eventDates.length > 1 ? eventDates[0] : null)
     const [ photoIdx, setPhotoIdx ] = useState( 0 )
+    console.log("price of event", priceOptions[0])
     const [ eventInfo, setEventInfo ] = useState({
         ...event, 
         price: priceOptions[0], 
@@ -30,12 +31,13 @@ export default function Event (props) {
     useEffect(() => {
         setEventInfo({ 
             ...eventInfo, 
+            price: priceOptions[0],
             quantity: quantity,
             title: title + (dateOption ? " " + dateOption : ""),
             key: event.key.slice(0, -1) + dateOption
         })
         // console.log("productInfo", productInfo )
-    }, [dateOption, event, title, quantity, eventInfo.price])
+    }, [dateOption, event, title, quantity, eventInfo, priceOptions])
 
     const handleAddCartItem = () => {
         console.log("eventInfo", eventInfo)
