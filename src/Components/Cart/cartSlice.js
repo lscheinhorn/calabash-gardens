@@ -6,9 +6,13 @@ export const cartSlice = createSlice({
     initialState: [],
     reducers: {
         addCartItem: (state, action) => {
+            console.log("addCartItem state", state)
+            console.log("addCartItem action.payload", action.payload)
+
             const key = action.payload.key
             const findItem = (key) => {
                 return state.find( item => {
+                    console.log("find key", item.key === key)
                     return item.key === key
                 })
             }

@@ -6,10 +6,19 @@ import { useState, useEffect } from 'react'
 export default function Event (props) {
     const { event } = props
     const dispatch = useDispatch()
-    const { title, info, dateString, link, price, key, inStock } = event
+    const { title, info, eventDates, link, priceOptions, key, inStock } = event
     const [ quantity, setQuantity ] = useState( 1 )
-    const [ dateOption, setDateOption ] = useState()
-    const [ eventInfo, setEventInfo ] = useState({...event, price: price , key: event.key, quantity: quantity, option: dateString[0]} )
+    const [ dateOption, setDateOption ] = useState(eventDates.length > 1 ? eventDates[0] : null)
+    const [ photoIdx, setPhotoIdx ] = useState( 0 )
+    const [ eventInfo, setEventInfo ] = useState({
+        ...event, 
+        price: priceOptions[0], 
+        key: event.key, 
+        quantity: quantity, 
+        option: eventDates[0],
+        title: title + (dateOption ? " " + dateOption : ""),
+
+    } )
 
     const photos = event.photos.map(photo => {
         return `${photo}`
@@ -18,24 +27,20 @@ export default function Event (props) {
     const eventKey = key
     // console.log("productKey", productKey)
 
-    const handleAddCartItem = () => {
-        console.log("eventInfo", eventInfo)
-        dispatch(addCartItem(eventInfo))
-    }
-
     useEffect(() => {
-        // console.log({priceOption})
-
         setEventInfo({ 
-            ...event, 
+            ...eventInfo, 
             quantity: quantity,
             title: title + (dateOption ? " " + dateOption : ""),
             key: event.key.slice(0, -1) + dateOption
         })
         // console.log("productInfo", productInfo )
-    }, [ dateOption, event, title, quantity ])
+    }, [dateOption, event, title, quantity, eventInfo.price])
 
-
+    const handleAddCartItem = () => {
+        console.log("eventInfo", eventInfo)
+        dispatch(addCartItem(eventInfo))
+    }
 
     const handleIncrement = () => {
         setQuantity( quantity + 1 )
@@ -46,21 +51,6 @@ export default function Event (props) {
         }
         setQuantity( quantity - 1 )
     }
-
-    useEffect(() => {
-        // console.log({priceOption})
-
-        setEventInfo({ 
-            ...event, 
-            price: price,
-            title: title,
-            key: event.key
-        })
-        // console.log("eventInfo", eventInfo )
-    }, [ dateOption, event, title ])
-  
-
-    const [ photoIdx, setPhotoIdx ] = useState( 0 )
 
     const handlePhotoLeft = () => {
         if(photoIdx === 0 ) {
@@ -80,6 +70,18 @@ export default function Event (props) {
         setDateOption( target.value )
     }
 
+    // useEffect(() => {
+    //     // console.log({priceOption})
+
+    //     setEventInfo({ 
+    //         ...event, 
+    //         price: price,
+    //         title: title,
+    //         key: event.key
+    //     })
+    //     // console.log("eventInfo", eventInfo )
+    // }, [ dateOption, event, title ])
+
     return (
         <div className="productPage_container">
             
@@ -87,7 +89,7 @@ export default function Event (props) {
 
             {
                 
-                dateString.length > 1 ? 
+                eventDates.length > 1 ? 
                     <>
                         <label 
                             for="eventDateSelector"
@@ -103,14 +105,14 @@ export default function Event (props) {
                         >
                             
                             {
-                                dateString.map( option  => {
+                                eventDates.map( option  => {
                                     // console.log({option})
                                     return <option key={ option } value={ option }>{ option }</option>
                                 })
                             }
                         </select>
                     </> : 
-                    <p className="fs-3">{dateString[0]}</p>
+                    <p className="fs-3">{eventDates[0]}</p>
             }      
 
             <img src={ photos[ photoIdx ] } alt={ photos[ photoIdx ] } />
@@ -136,7 +138,9 @@ export default function Event (props) {
                 }
             </p>
 
-            <p>${ price * quantity }</p>
+
+            <p>${ eventInfo.price  * quantity   }</p>
+
 
             <div id="quantity-selector" className="d-flex justify-content-center align-items-center m-2">
                 <button className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease quantity">-</button>

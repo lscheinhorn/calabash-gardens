@@ -29,11 +29,11 @@ export const events = [
        ],
        // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
        date: new Date(2023, 8, 2),
-       dateString: [
+       eventDates: [
             "September 2nd, 2023",
         ],
         link: require("../resources/Menu.docx.pdf"),
-        price: '90.00',
+        priceOptions: ['90.00'],
         shipping: '0.00',
         isActive: true,
         inStock: false,
@@ -55,12 +55,12 @@ export const events = [
         ],
         // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
         date: new Date(2024, 6, 5),
-        dateString: [
+        eventDates: [
             "July 5th 2024",
             "July 6th 2024",
         ],
         link: require("../resources/Menu.docx.pdf"),
-        price: '120.00',
+        priceOptions: ['120.00'],
         shipping: '0.00',
         isActive: true,
         inStock: true,
@@ -81,12 +81,12 @@ export const events = [
         ],
         // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
         date: new Date(2024, 8, 2),
-        dateString: [
+        eventDates: [
             "August 2nd 2023",
             "August 3rd 2023",
         ],
         link: require("../resources/Menu.docx.pdf"),
-        price: '190.00',
+        priceOptions: ['190.00'],
         shipping: '0.00',
         isActive: true,
         inStock: true,
