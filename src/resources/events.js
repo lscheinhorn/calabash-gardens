@@ -97,6 +97,32 @@ export const events = [
             return createKey(this.title)
         }
    },
+   {
+    title: 'Fleur De Mar \nby Chef Cole Conrad Cohen',
+    category: "Experience",
+    info: [
+        `August 2nd and 3rd 2024 Chef Cole COnrad Cohen is bringing the fruits of the sea to central Vermont! Each Course of this incredible seven course meal is filled to the brim with the freshest seafood the Atlantic has to offer Calabash Gardens Saffron and the incredible pairing of local wine with each course. This will be an event you will not want to miss. Book for either Friday or Saturday night or both if you're feeling like you need a lot of seafood in your life.`,
+        `Meet your Chef!`,
+        `Cole Conrad Cohen has been practicing culinary arts for over 30 years starting out at a catering gig when he was 13, since then Cole has run the gamut of the local restaurant scene. He has been involved with a majority of the seacoast Maine and New Hampshire restaurant styles including South Asian, African, Mexican, French, Caribbean, Vegan, Southern Soul, Creole and Italian. On days outside the Kitchen he spends his time reading and educating himself on food, history and hospitality, foraging and new geographically specific cooking techniques. He has volunteered in many kitchens and worked in multiple pop-ups. He started his first Executive position in his hometown, Bakery Forward Bistro and Beer Garden during his tenure as a fine dining chef at restaurants in Portsmouth NH. He has worked with the James Beard Awards Foundation as their private chef and for artists in residence. Cole has opened a half dozen restaurants including two of his own and currently owns the Foodio Private Chef's Table Experience LLC. Cole was the head Chef at the largest smokehouse in Maine for over a year, running the 20k sq ft space often alone with plans in the works for a new Breakfast Pop-Up in Portland at the award winning hand-made artisan restaurant he is currently employed with.`      
+    ],
+    // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
+    date: new Date(2024, 8, 2),
+    eventDates: [
+        "August 2nd 2023",
+        "August 3rd 2023",
+    ],
+    link: require("../resources/Menu.docx.pdf"),
+    priceOptions: ['190.00'],
+    shipping: '0.00',
+    isActive: true,
+    inStock: true,
+    photos: [
+        require('../resources/images/product_photos/event_night.jpg'),
+    ],
+    get key() {
+        return createKey(this.title)
+    }
+},
 ]
 
 
