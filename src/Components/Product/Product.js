@@ -13,7 +13,7 @@ export default function Product (props) {
     const photos = product.photos.map(photo => {
         return `${photo}`
     })
-    const featured = photos[0]
+    // const featured = photos[0]
     const productKey = key
     // console.log("productKey", productKey)
     const toLink = `/products/${productKey}`

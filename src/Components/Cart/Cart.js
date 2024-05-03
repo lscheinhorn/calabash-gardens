@@ -120,7 +120,7 @@ export default function Cart () {
     }
 
 
-
+    console.log("cart Items", cartItems)
     return (
         <div id="cart">
             <h1>Cart</h1>

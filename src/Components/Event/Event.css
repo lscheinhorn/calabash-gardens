@@ -1,9 +1,17 @@
-#event {
-    text-align: center;
-    padding: 20px;
+.container {
+    display: grid;
+    grid-template-columns: 3fr 1fr; /* Adjust as per content requirement */
+    gap: 20px;
 }
 
-#event h1 {
-    color: #F3CF50;
-    text-align: center;
+.event-details, .event-description {
+    padding: 20px;
+    background-color: #ffffff; /* For better readability */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Soft shadow for depth */
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
 }

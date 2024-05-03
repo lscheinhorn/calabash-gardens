@@ -37,7 +37,7 @@ export const cartSlice = createSlice({
                     ...state,
                     {
                         ...action.payload,
-                        quantity: 1
+                        quantity: action.payload.quantity ? action.payload.quantity : 1
                     }
                 ]  
             }
