@@ -89,8 +89,8 @@ export const events = [
         // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
         date: new Date(2024, 8, 2),
         eventDates: [
-            "August 2nd 2023",
-            "August 3rd 2023",
+            "August 2nd 2024",
+            "August 3rd 2024",
         ],
         link: require("../resources/images/Fluer_De_Mar.pdf"),
         priceOptions: ['190.00'],
