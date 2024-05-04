@@ -126,16 +126,23 @@ export default function Event (props) {
             
             <p>
                 {info.map((p, index) => (
-                <div key={index}>
+                <div 
+                    key={index}
+                    style={{ textIndent: '2em' }}
+                >
                     {p}
                     <br />
                 </div>
                 ))}
                 {link ? 
-                <a href={link} target="_blank" rel="noopener noreferrer">
-                    <br />
-                    Check out our tasting menu here
-                </a> 
+                <div style={{ textAlign: 'center' }} >
+                    <a href={link} target="_blank" rel="noopener noreferrer">
+                        <br />
+                        Check out our tasting menu here
+                    </a> 
+                </div>
+                    
+
                 : null 
                 }
             </p>

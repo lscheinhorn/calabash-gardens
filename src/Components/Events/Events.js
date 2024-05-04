@@ -24,7 +24,12 @@ export default function Events() {
             <div id="events">
                 <h1 style={{ textAlign: 'center' }}>The Calabash Experience</h1>
                 {experienceBlurb.map((p, index) => (
-                    <p key={index}>{p}</p>  // Ensure you use keys for better performance
+                    <p 
+                        key={index}
+                        style={{ textIndent: '2em' }}
+                    >
+                        {p}
+                    </p>
                 ))}
                 <div style={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
                     <button className="btn btn-outline-primary" onClick={handlePrevious}>Previous Experience</button>

@@ -59,13 +59,15 @@ export const events = [
             "July 5th 2024",
             "July 6th 2024",
         ],
-        link: require("../resources/Menu.docx.pdf"),
+        link: require("../resources/images/Ma-Der_Ma-Der_Menu.pdf"),
         priceOptions: ['120.00'],
         shipping: '0.00',
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/event_night.jpg'),
+            require('../resources/images/Moo_and_Mom_Fall_Joy_.jpg'),
+            require('../resources/images/Mary_and_boys.jpg'),
+
         ],
         get key() {
             return createKey(this.title)
@@ -85,44 +87,46 @@ export const events = [
             "August 2nd 2023",
             "August 3rd 2023",
         ],
-        link: require("../resources/Menu.docx.pdf"),
+        link: require("../resources/images/Fluer_De_Mar.pdf"),
         priceOptions: ['190.00'],
         shipping: '0.00',
         isActive: true,
         inStock: true,
         photos: [
-            require('../resources/images/product_photos/event_night.jpg'),
+            require('../resources/images/cole_photo.jpg'),
         ],
         get key() {
             return createKey(this.title)
         }
-   },
-   {
-    title: 'Fleur De Mar \nby Chef Cole Conrad Cohen',
-    category: "Experience",
-    info: [
-        `August 2nd and 3rd 2024 Chef Cole COnrad Cohen is bringing the fruits of the sea to central Vermont! Each Course of this incredible seven course meal is filled to the brim with the freshest seafood the Atlantic has to offer Calabash Gardens Saffron and the incredible pairing of local wine with each course. This will be an event you will not want to miss. Book for either Friday or Saturday night or both if you're feeling like you need a lot of seafood in your life.`,
-        `Meet your Chef!`,
-        `Cole Conrad Cohen has been practicing culinary arts for over 30 years starting out at a catering gig when he was 13, since then Cole has run the gamut of the local restaurant scene. He has been involved with a majority of the seacoast Maine and New Hampshire restaurant styles including South Asian, African, Mexican, French, Caribbean, Vegan, Southern Soul, Creole and Italian. On days outside the Kitchen he spends his time reading and educating himself on food, history and hospitality, foraging and new geographically specific cooking techniques. He has volunteered in many kitchens and worked in multiple pop-ups. He started his first Executive position in his hometown, Bakery Forward Bistro and Beer Garden during his tenure as a fine dining chef at restaurants in Portsmouth NH. He has worked with the James Beard Awards Foundation as their private chef and for artists in residence. Cole has opened a half dozen restaurants including two of his own and currently owns the Foodio Private Chef's Table Experience LLC. Cole was the head Chef at the largest smokehouse in Maine for over a year, running the 20k sq ft space often alone with plans in the works for a new Breakfast Pop-Up in Portland at the award winning hand-made artisan restaurant he is currently employed with.`      
-    ],
-    // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
-    date: new Date(2024, 8, 2),
-    eventDates: [
-        "August 2nd 2023",
-        "August 3rd 2023",
-    ],
-    link: require("../resources/Menu.docx.pdf"),
-    priceOptions: ['190.00'],
-    shipping: '0.00',
-    isActive: true,
-    inStock: true,
-    photos: [
-        require('../resources/images/product_photos/event_night.jpg'),
-    ],
-    get key() {
-        return createKey(this.title)
-    }
-},
+    },
+    {
+        title: 'Chuseok \nby Mountain Song Kitchen',
+        category: "Experience",
+        info: [
+            `September 6th and 7th we have Mountain Song Kitchen from Newbury, VT hosting this experience, welcome to Chuseok! A traditionally based Korean meal fussed with a saffron forward theme, an experience never before tasted!`,
+            `Meet your Chef!`,
+            `My Mother is a chef and in our household sharing food with friends and family was an integral part of the day. The importance of food, the time spent preparing it and the time we shared enjoying it was instilled in me at a young age. As a teenager I started working in the food industry and over the course of the next ten years I worked up from dishwasher to chef. Seven years ago I decided to take a break from working in kitchens and reevaluate, and reassess my relationship with the industry and with Korean food in particular. I was curious about how I could honor the traditions of Korean cuisine while also accommodating the western palette. Most importantly, having started this business with Jesa, I’ve been having a pretty good time. -Driscoll`,
+            `Moving to Vermont and starting a garden has helped my husband and I tie our cuisine to the food source. We began using korean natural farming and organic methods in our garden. The focus of our garden inputs are sourced through foraging and using food waste to cultivate specific fertilizers, indigenous microorganisms, healthy bacteria and fungi for soil health. The garden feeds the kitchen, feeds the garden, feeds the kitchen. -Jesa`     
+        ],
+        // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
+        date: new Date(2024, 9, 5),
+        eventDates: [
+            "September 5th 2024",
+            "September 6th 2024",
+        ],
+        link: require("../resources/images/Mountain_Song_Menu.png"),
+        priceOptions: ['120.00'],
+        shipping: '0.00',
+        isActive: true,
+        inStock: true,
+        photos: [
+            require('../resources/images/Driscoll_and_Jesa.jpg'),
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+     },
+     
 ]
 
 
