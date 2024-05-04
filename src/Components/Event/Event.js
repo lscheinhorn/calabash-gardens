@@ -2,13 +2,14 @@ import './Event.css'
 import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 import { useState, useEffect } from 'react'
+import { eventsInventory } from '../../resources/inventory';
 
 export default function Event (props) {
     const { event } = props
     const dispatch = useDispatch()
     const { title, info, eventDates, link, priceOptions, key, inStock } = event
     const [ quantity, setQuantity ] = useState( 1 )
-    const [ dateOption, setDateOption ] = useState(eventDates.length > 1 ? eventDates[0] : null)
+    const [ dateOption, setDateOption ] = useState( eventDates[0] )
     const [ photoIdx, setPhotoIdx ] = useState( 0 )
     console.log("price of event", priceOptions[0])
     const [ eventInfo, setEventInfo ] = useState({
@@ -29,6 +30,10 @@ export default function Event (props) {
     // console.log("productKey", productKey)
 
     useEffect(() => {
+        setDateOption(eventDates[0])
+    }, [ eventDates ])
+
+    useEffect(() => {
         setEventInfo({ 
             ...eventInfo, 
             price: priceOptions[0],
@@ -36,15 +41,26 @@ export default function Event (props) {
             title: title + (dateOption ? " " + dateOption : ""),
             key: event.key.slice(0, -1) + dateOption
         })
-        // console.log("productInfo", productInfo )
-    }, [dateOption, event, title, quantity, eventInfo, priceOptions])
+        // console.log("eventInfo", eventInfo )
+    }, [dateOption, event, title, quantity, eventInfo, priceOptions, eventDates])
 
     const handleAddCartItem = () => {
-        console.log("eventInfo", eventInfo)
+        // console.log("eventInfo", eventInfo)
+        setEventInfo({ 
+            ...eventInfo, 
+            price: priceOptions[0],
+            quantity: quantity,
+            title: title + (dateOption ? " " + dateOption : ""),
+            key: event.key.slice(0, -1) + dateOption
+        })
+        // console.log("eventInfo.title", eventInfo.title)
         dispatch(addCartItem(eventInfo))
     }
 
     const handleIncrement = () => {
+        if( quantity >= eventsInventory[ eventInfo.title].stock ) {
+            return
+        }
         setQuantity( quantity + 1 )
     }
     const handleDecrement = () => {
@@ -69,6 +85,7 @@ export default function Event (props) {
     }
 
     const handleChange = ({ target }) => {
+        setQuantity(1)
         setDateOption( target.value )
     }
 

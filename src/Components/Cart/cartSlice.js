@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
+import { eventsInventory } from '../../resources/inventory';
 
 
 export const cartSlice = createSlice({
@@ -24,12 +25,12 @@ export const cartSlice = createSlice({
             //         ...filtered,
             //         {
             //             ...itemInCart,
-            //             quantity: itemInCart.quantity + 1
+            //             quantity: itemInCart.category === "Experience" && itemInCart.quantity === 30 ? itemInCart.quantity : itemInCart.quantity + 1
             //         }
             //     ]  
                 return state.map((item,el) => {
                     let newItem = {...item}
-                    if (item.key === action.payload.key) {
+                    if (item.key === action.payload.key && !( action.payload.category === "Experience" && action.payload.quantity === eventsInventory[action.payload.title].stock )) {
                         newItem.quantity++
                     }
                     return newItem
