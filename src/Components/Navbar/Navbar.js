@@ -52,7 +52,7 @@ export default function Navbar () {
                 <NavLink to="/">Home</NavLink>
                 {/*<NavLink to="/book-online">Book Online</NavLink>*/}
                 <NavLink to="/shop">Shop</NavLink>
-                {/*<NavLink to="/events">The Calabash Experience</NavLink>*/}
+                <NavLink to="/events">The Calabash Experience</NavLink>
                 {/*<NavLink to="/blog">Blog</NavLink>*/}
                 <NavLink to="/contact">Contact Us</NavLink>
 

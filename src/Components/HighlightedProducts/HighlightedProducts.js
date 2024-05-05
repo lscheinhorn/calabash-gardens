@@ -18,10 +18,8 @@ export default function HighlightedProducts () {
                     })
                 }
 
-
             </div>
-            <Link className="btn btn-primary" to="../shop">Shop All</Link>
-
+            <Link id="product-button" className="btn btn-primary" to="../shop">Shop All</Link>
         </div>
         
     )

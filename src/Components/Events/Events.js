@@ -21,7 +21,7 @@ export default function Events() {
 
     return (
         <div className="productPage_container">
-            <div id="events">
+            <div className="events">
                 <h1 style={{ textAlign: 'center' }}>The Calabash Experience</h1>
                 {experienceBlurb.map((p, index) => (
                     <p 

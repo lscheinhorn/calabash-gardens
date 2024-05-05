@@ -1,0 +1,46 @@
+.events-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px; /* Add padding to the container */
+}
+
+.events {
+    text-align: center;
+}
+
+.events h1 {
+    font-size: 24px;
+    padding: 10px; /* Add padding to the title */
+}
+
+.events img {
+    width: 50%; /* Default width */
+    max-width: 300px; /* Default max-width */
+}
+
+/* Adjust image size based on screen size */
+@media screen and (min-width: 768px) {
+    .events img {
+        width: 30%; /* Smaller percentage on larger screens */
+        max-width: none; /* Remove max-width */
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .events img {
+        width: 70%; /* Larger percentage on smaller screens */
+        max-width: none; /* Remove max-width */
+    }
+}
+
+.events a,
+.eventDate a {
+    color: #8B4513; /* Dark brown text for contrast */
+    text-decoration: none; /* Remove underline from links */
+}
+
+.events a:hover,
+.eventDate a:hover {
+    text-decoration: underline; /* Add underline on hover */
+}

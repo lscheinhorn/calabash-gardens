@@ -4,7 +4,7 @@ export default function Media () {
     
     return (
         <div>
-            <div className=" d-flex align-items-center justify-content-center">
+            <div className=" events d-flex align-items-center justify-content-center">
                 
                 <iframe 
                     className="youtube"
