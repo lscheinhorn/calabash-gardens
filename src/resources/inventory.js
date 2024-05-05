@@ -9,10 +9,10 @@ export const eventsInventory = {
     'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024' : {
         stock: 30
     },
-    'Fleur De Mar \nby Chef Cole Conrad Cohen August 2nd 2023' : {
+    'Fleur De Mar \nby Chef Cole Conrad Cohen August 2nd 2024' : {
         stock: 30
     },
-    'Fleur De Mar \nby Chef Cole Conrad Cohen August 3rd 2023' : {
+    'Fleur De Mar \nby Chef Cole Conrad Cohen August 3rd 2024' : {
         stock: 30
     },
     'Chuseok \nby Mountain Song Kitchen September 5th 2024' : {

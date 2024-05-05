@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux'
 export default function CartItem (props) {
     const dispatch = useDispatch()
     const { product } = props
+    console.log("cartItem", product)
     const photos = product.photos.map(photo => {
         return `${photo}`
     })

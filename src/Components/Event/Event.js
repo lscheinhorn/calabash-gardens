@@ -3,6 +3,7 @@ import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 import { useState, useEffect } from 'react'
 import { eventsInventory } from '../../resources/inventory';
+import { Link } from 'react-router-dom'; 
 
 export default function Event (props) {
     const { event } = props
@@ -11,7 +12,7 @@ export default function Event (props) {
     const [ quantity, setQuantity ] = useState( 1 )
     const [ dateOption, setDateOption ] = useState( eventDates[0] )
     const [ photoIdx, setPhotoIdx ] = useState( 0 )
-    console.log("price of event", priceOptions[0])
+    // console.log("price of event", priceOptions[0])
     const [ eventInfo, setEventInfo ] = useState({
         ...event, 
         price: priceOptions[0], 
@@ -21,6 +22,7 @@ export default function Event (props) {
         title: title + (dateOption ? " " + dateOption : ""),
 
     } )
+    const [ addedToCart, setAddToCart ]  = useState( false )
 
     const photos = event.photos.map(photo => {
         return `${photo}`
@@ -34,8 +36,18 @@ export default function Event (props) {
     }, [ eventDates ])
 
     useEffect(() => {
+        setPhotoIdx(0)
+    }, [ title ])
+
+    useEffect(() => {
+        setAddToCart( false )
+    }, [ title, dateOption ])
+
+    useEffect(() => {
+        
         setEventInfo({ 
-            ...eventInfo, 
+            ...eventInfo,
+            photos: event.photos,
             price: priceOptions[0],
             quantity: quantity,
             title: title + (dateOption ? " " + dateOption : ""),
@@ -45,6 +57,7 @@ export default function Event (props) {
     }, [dateOption, event, title, quantity, eventInfo, priceOptions, eventDates])
 
     const handleAddCartItem = () => {
+        setAddToCart( true )
         // console.log("eventInfo", eventInfo)
         setEventInfo({ 
             ...eventInfo, 
@@ -111,8 +124,8 @@ export default function Event (props) {
                 eventDates.length > 1 ? 
                     <>
                         <label 
-                            for="eventDateSelector"
-                            className="fs-4"
+                            htmlFor = "eventDateSelector"
+                            className = "fs-4"
                         >
                             Please select a date below
                         </label>
@@ -141,15 +154,16 @@ export default function Event (props) {
             </div>  
 
             
-            <p>
-                {info.map((p, index) => (
-                <div 
+            
+            {
+                info.map((p, index) => (
+                <p 
                     key={index}
                     style={{ textIndent: '2em' }}
                 >
                     {p}
                     <br />
-                </div>
+                </p>
                 ))}
                 {link ? 
                 <div style={{ textAlign: 'center' }} >
@@ -161,8 +175,8 @@ export default function Event (props) {
                     
 
                 : null 
-                }
-            </p>
+            }
+            
 
 
             <p>${ eventInfo.price  * quantity   }</p>
@@ -179,7 +193,15 @@ export default function Event (props) {
                 <button className="btn btn-success btn-lg" onClick={handleAddCartItem}>
                     <i className="fa fa-ticket-alt"></i> Buy Tickets
                 </button>
+            
             }
+            {   
+                addedToCart ?
+                <Link to="/cart" className="btn btn-warning btn-lg mt-2">
+                    <i className="fas fa-shopping-cart"></i> Go to Cart
+                </Link> : null
+            }
+            
         </div>
     )
 }
