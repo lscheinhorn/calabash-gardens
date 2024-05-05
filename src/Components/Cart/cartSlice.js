@@ -10,6 +10,17 @@ export const cartSlice = createSlice({
             console.log("addCartItem state", state)
             console.log("addCartItem action.payload", action.payload)
 
+            function removeDietarySuffix(str) {
+                // Regular expression to match "Vegetarian", "Gluten Free", or "Vegetarian Gluten Free" at the end of a string
+                const regex = /( Vegetarian Gluten Free| Gluten Free| Vegetarian)\s*$/;
+                
+                // Replace the matched pattern with an empty string
+                return str.replace(regex, '');
+            }
+
+            const title = removeDietarySuffix(action.payload.title)
+
+
             const key = action.payload.key
             const findItem = (key) => {
                 return state.find( item => {
@@ -30,7 +41,7 @@ export const cartSlice = createSlice({
             //     ]  
                 return state.map((item,el) => {
                     let newItem = {...item}
-                    if (item.key === action.payload.key && !( action.payload.category === "Experience" && action.payload.quantity === eventsInventory[action.payload.title].stock )) {
+                    if (item.key === action.payload.key && !( action.payload.category === "Experience" && action.payload.quantity === eventsInventory[title].stock )) {
                         newItem.quantity++
                     }
                     return newItem

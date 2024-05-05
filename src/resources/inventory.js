@@ -6,9 +6,28 @@ export const eventsInventory = {
     'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 5th 2024' : {
         stock: 30
     },
+    // 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 5th 2024 Vegetarian' : {
+    //     stock: this['Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 5th 2024'].stock
+    // },
+    // 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 5th 2024 Gluten Free' : {
+    //     stock: this['Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 5th 2024'].stock
+    // },
+    // 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 5th 2024 Vegetarian Gluten Free' : {
+    //     stock: this['Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 5th 2024'].stock
+    // },
     'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024' : {
         stock: 30
     },
+    // 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024 Vegetarian' : {
+    //     stock: this['Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024'].stock
+    // },
+    // 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024 Gluten Free' : {
+    //     stock: this['Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024'].stock
+    // },
+    // 'Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024 Vegetarian Gluten Free' : {
+    //     stock: this['Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet July 6th 2024'].stock
+    // },
+
     'Fleur De Mar \nby Chef Cole Conrad Cohen August 2nd 2024' : {
         stock: 30
     },

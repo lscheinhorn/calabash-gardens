@@ -12,17 +12,25 @@ export default function Event (props) {
     const [ quantity, setQuantity ] = useState( 1 )
     const [ dateOption, setDateOption ] = useState( eventDates[0] )
     const [ photoIdx, setPhotoIdx ] = useState( 0 )
+    const [ veg, setVeg ]  = useState( false )
+    const [ vegOption, setVegOption ]  = useState( "I am vegetarian" )
+
+    const [ gFree, setGFree ]  = useState( false )
+    const [ gFreeOption, setGFreeOption ]  = useState( "I am gluten free" )
+    
     // console.log("price of event", priceOptions[0])
     const [ eventInfo, setEventInfo ] = useState({
         ...event, 
-        price: priceOptions[0], 
+        price: (veg || gFree) ? Number(priceOptions[0]) + 20 : priceOptions[0], 
         key: event.key, 
         quantity: quantity, 
         option: eventDates[0],
-        title: title + (dateOption ? " " + dateOption : ""),
+        title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
 
     } )
     const [ addedToCart, setAddToCart ]  = useState( false )
+    
+
 
     const photos = event.photos.map(photo => {
         return `${photo}`
@@ -48,10 +56,10 @@ export default function Event (props) {
         setEventInfo({ 
             ...eventInfo,
             photos: event.photos,
-            price: priceOptions[0],
+            price: (veg || gFree) ? Number(priceOptions[0]) + 20 : priceOptions[0], 
             quantity: quantity,
-            title: title + (dateOption ? " " + dateOption : ""),
-            key: event.key.slice(0, -1) + dateOption
+            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
+            key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
         })
         // console.log("eventInfo", eventInfo )
     }, [dateOption, event, title, quantity, eventInfo, priceOptions, eventDates])
@@ -63,8 +71,8 @@ export default function Event (props) {
             ...eventInfo, 
             price: priceOptions[0],
             quantity: quantity,
-            title: title + (dateOption ? " " + dateOption : ""),
-            key: event.key.slice(0, -1) + dateOption
+            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
+            key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")        
         })
         // console.log("eventInfo.title", eventInfo.title)
         dispatch(addCartItem(eventInfo))
@@ -113,6 +121,53 @@ export default function Event (props) {
     //     })
     //     // console.log("eventInfo", eventInfo )
     // }, [ dateOption, event, title ])
+
+    const handleVeg = () => {
+        if(veg) {
+            setVeg(false)
+            setVegOption("I am vegetarian")
+        } else {
+            setVeg(true)
+            setVegOption("I eat meat")
+
+        }
+    }
+
+    const handleGFree = () => {
+        if(gFree) {
+            setGFree(false)
+            setGFreeOption("I am gluten free")
+        } else {
+            setGFree(true)
+            setGFreeOption("I eat gluten")
+        }
+        setEventInfo((eventInfo) => ({
+            ...eventInfo,
+            price: Number(eventInfo.price) + 20,
+            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
+            key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
+        }));
+    }
+
+    // useEffect(() => {
+    //     if (veg || gFree) {
+    //         console.log("Updating price...");
+    //         setEventInfo(prevEventInfo => {
+    //             console.log("prevEventInfo.price", prevEventInfo.price);
+
+    //             const newPrice = Number(prevEventInfo.price) + 20;
+    //             console.log("Number(prevEventInfo.price)", Number(prevEventInfo.price));
+    //             console.log("newPrice", newPrice);
+
+    //             return {
+    //                 ...prevEventInfo,
+    //                 price: `${newPrice}`,
+    //                 title: prevEventInfo.title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : ""),
+    //                 key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
+    //             };
+    //         });
+    //     }
+    // }, [veg, gFree]);
 
     return (
         <div className="productPage_container">
@@ -178,6 +233,15 @@ export default function Event (props) {
             }
             
 
+            <button className="btn btn-warning btn-lg mt-2" onClick={ handleVeg }>
+                <i className="fas fa-leaf"></i> { vegOption }
+            </button>
+
+            <button className="btn btn-warning btn-lg mt-2" onClick={handleGFree}>
+                <i className="fas fa-bread-slice"></i> { gFreeOption }
+            </button>
+           
+
 
             <p>${ eventInfo.price  * quantity   }</p>
 
@@ -188,6 +252,7 @@ export default function Event (props) {
                 <button className="btn btn-secondary" onClick={ handleIncrement } aria-label="Increase quantity">+</button>
 
             </div>
+
             {
                 !inStock ? <p> Out of Stock </p> :
                 <button className="btn btn-success btn-lg" onClick={handleAddCartItem}>
