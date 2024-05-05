@@ -34,3 +34,7 @@
     padding: 30px;
     font-size: 30px;
 }
+
+.align-left {
+    align-self: flex-start !important;
+}

@@ -5,8 +5,10 @@ import { useSelector } from 'react-redux'
 import { selectCart } from './cartSlice'
 import {  Link } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
-export default function Cart () {
+export default function Cart (  ) {
     const cartItems = useSelector(selectCart)
     // console.log('cart =>', cartItems)
     const [ shippingState, setShippingState ] = useState({
@@ -119,11 +121,24 @@ export default function Cart () {
         )
     }
 
+    const handleGoBack = () => {
+        window.history.go(-1);
+    }
 
     console.log("cart Items", cartItems)
     return (
         <div id="cart">
+            <div className="d-flex justify-content-start align-left"> {/* This will force its children to the left */}
+                <button
+                className="btn btn-link align-left"
+                onClick={handleGoBack}
+                >
+                <FontAwesomeIcon icon={faArrowLeft} />
+                <span className="ms-2">Go Back</span>
+                </button>
+            </div>
             <h1>Cart</h1>
+            
             {
                 cartItems.map(item => {
                     return <CartItem product={ item } />

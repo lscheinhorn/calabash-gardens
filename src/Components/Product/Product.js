@@ -88,8 +88,8 @@ export default function Product (props) {
                 <img src={ photos[ photoIdx ] } alt={ photos[ photoIdx ] } />
             </Link>
             <div hidden={ photos.length === 1 } className="flex m-2">
-                <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoLeft } >&lt;</button>
-                <button className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoRight }>&gt;</button>
+                <button aria-label="Previous Photo" className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoLeft } >&lt;</button>
+                <button aria-label="Next Photo" className="d-inline-block btn btn-outline-primary" onClick={ handlePhotoRight }>&gt;</button>
             </div>  
 
             {

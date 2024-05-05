@@ -16,7 +16,7 @@ export const createKey = (input) => {
 
  export const experienceBlurb = [
     `The Calabash Experience is our way to bring the finest quality Calabash saffron, wild foraged foods, organic produce and regeneratively grown meats from hyper local farms to your plate in the most beautiful ways. We are harboring a space for creativity, diversity and culture with an air of accessibility, it’s easier than you may think to eat local and eat well. With Jette’s two decade run in the service industry it only felt right to begin hosting Elevated Farm to Plate Experiences on the lush lawn of our farm house, serving up the finest, healthiest and most local ingredients possible all with a saffron forward mindset. We are purveyors of fine foods and spirits, of a regenerative and responsible nature, with a flare for the diverse and unexpected. We feature as many Chefs as we can, highlighting their unique cultural heritage and allowing them total creativity in what they bring to the table. Our two requirements are that the menus they create are saffron forward, inviting our guests to enjoy a unique experience duplicated nowhere else, and all aspects be made in house with only the finest quality local ingredients. Using wildcrafted, organic and regeneratively  grown meats and produce allows us to present a completely sustainable experience while also maintaining a  superior level of health for guests and the planet alike. We are merging accessibility, diversity, uniqueness, health and above all flavor, for an incredible evening of food, spirits, and of course most of all enjoyment!`,
-    `There are 30 seats available for each seating, Friday and Saturday nights for all Calabash Experiences in 2024. Gratuities are appreciated for our incredibly hard working staff, cash tips at time of service are split evenly between all function employees.`,
+	`There are 30 seats available for each seating, Friday and Saturday nights for all Calabash Experiences in 2024. Gratuities are appreciated for our incredibly hard working staff, cash tips at time of service are split evenly between all function employees. We can accommodate vegetarians and gluten free for most of our meals, please hit the vegetarian option when purchasing tickets. There is a $20 additional fee for the vegetarian option. If you are purchasing a mix bag of meat, veggie or gluten free, make sure you have picked the correct option before clicking buy tickets, and please check again once in the cart.`,
     `The Calabash Gardens team works incredibly hard to bring these events to you, in light of all the hard work we do, and the associated cost of these events, the whole price of the meal is charged at purchase, if for any reason you need to cancel you will receive 50% of the ticket price up to a week prior. If less than a week's notice is given there is no refund available. Thank you for understanding.`  
  ]
  
@@ -108,8 +108,7 @@ export const events = [
         title: 'Chuseok \nby Mountain Song Kitchen',
         category: "Experience",
         info: [
-            `September 6th and 7th we have Mountain Song Kitchen from Newbury, VT hosting this experience, welcome to Chuseok! A traditionally based Korean meal fussed with a saffron forward theme, an experience never before tasted! Book this experience today for a first in a lifetime flavor mash up.`,
-            `Meet your Chef!`,
+            `September 6th for one night only we have Mountain Song Kitchen from Newbury, VT hosting this experience, welcome to Chuseok! A traditionally based Korean meal fussed with a saffron forward theme, an experience never before tasted! Book this experience today for a first in a lifetime flavor mash up.`,            `Meet your Chef!`,
             `My Mother is a chef and in our household sharing food with friends and family was an integral part of the day. The importance of food, the time spent preparing it and the time we shared enjoying it was instilled in me at a young age. As a teenager I started working in the food industry and over the course of the next ten years I worked up from dishwasher to chef. Seven years ago I decided to take a break from working in kitchens and reevaluate, and reassess my relationship with the industry and with Korean food in particular. I was curious about how I could honor the traditions of Korean cuisine while also accommodating the western palette. Most importantly, having started this business with Jesa, I've been having a pretty good time. -Driscoll`,
             `Moving to Vermont and starting a garden has helped my husband and I tie our cuisine to the food source. We began using korean natural farming and organic methods in our garden. The focus of our garden inputs are sourced through foraging and using food waste to cultivate specific fertilizers, indigenous microorganisms, healthy bacteria and fungi for soil health. The garden feeds the kitchen, feeds the garden, feeds the kitchen. -Jesa`,    
         ],
@@ -117,7 +116,6 @@ export const events = [
         // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
         date: new Date(2024, 9, 5),
         eventDates: [
-            "September 5th 2024",
             "September 6th 2024",
         ],
         link: require("../resources/images/Mountain_Song_Menu.png"),
