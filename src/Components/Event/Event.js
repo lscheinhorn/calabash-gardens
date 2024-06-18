@@ -56,7 +56,7 @@ export default function Event (props) {
         setEventInfo({ 
             ...eventInfo,
             photos: event.photos,
-            price: (veg || gFree) ? Number(priceOptions[0]) + 20 : priceOptions[0], 
+            price: (veg || gFree) ? Number(priceOptions[0]) + 10 : priceOptions[0], 
             quantity: quantity,
             title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
             key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")

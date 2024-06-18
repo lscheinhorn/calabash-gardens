@@ -2,10 +2,20 @@ import './Events.css'
 import '../Shop/Shop.css';  // Make sure your paths are correct
 import { events, experienceBlurb } from '../../resources/events';
 import Event from '../Event/Event';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function Events() {
-    const [eventIdx, setEventIdx] = useState(events.length - 3);
+    const [eventIdx, setEventIdx] = useState(events.length - 1);
+
+    useEffect(() => {
+        const today = new Date()
+        const nextEventIdx = events.findIndex( event => event.date > today )
+        if( nextEventIdx !== -1 ) {
+            setEventIdx( nextEventIdx )
+        } else (
+            setEventIdx( events.length - 1 )
+        )
+    }, [])
 
     const handlePrevious = () => {
         if (eventIdx > 0) {
