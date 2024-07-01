@@ -75,7 +75,7 @@ export const events = [
       title: `Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet`,
       category: "Experience",
       info: [
-          `July 5th and 6th Calabash Will be hosting a unique Lao experience. Chefs Phet and Mary will be using saffron in a coursed out traditional Lao meal featuring incredible local ingredients and cocktail or mocktail pairings. The Experience can accommodate both Vegetarian and Gluten free. A 50% non refundable deposit of $55 to book your seats, the second $55 is payed at time of event.`,
+          `July 5th Calabash Will be hosting a unique Lao experience. Chefs Phet and Mary will be using saffron in a coursed out traditional Lao meal featuring incredible local ingredients and cocktail or mocktail pairings. The Experience can accommodate both Vegetarian and Gluten free. A 50% non refundable deposit of $55 to book your seats, the second $55 is payed at time of event.`,
           `Meet your Chefs!`,
           `Phet Keomanyvahn grew up in the Northeast Kingdom and graduated from St. Johnsbury Academy. She went on to obtain her B.A. in Anthropology at The University of North Carolina-Greensboro and then her M.A. in Public Administration at the University of Vermont. She currently works for the City and Burlington as Program Manager in the Racial Equity, Inclusion and Belonging Office to further advance the City’s diversity and equity goals. Phet enjoys spending her time with family and friends, hiking, practicing yoga, and foraging with her dog Moo `,
           `Mary Nasouluk-G works in finance and received her bachelor’s degree from the University of North Carolina in Accounting. Born and raised in Boston to Lao immigrants, a sense of community was built around cooking and sharing Laos food. Her family prepared staple Laos dishes for gatherings and local community events. She continues this tradition with her two sons by sharing their culture through cooking.`,
@@ -84,7 +84,6 @@ export const events = [
       date: new Date(2024, 6, 5),
       eventDates: [
           "July 5th 2024",
-          "July 6th 2024",
       ],
       link: require("../resources/images/Ma-Der_Ma-Der_Menu.pdf"),
       priceOptions: ['55.00'],
