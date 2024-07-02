@@ -89,7 +89,7 @@ export const events = [
       priceOptions: ['55.00'],
       shipping: '0.00',
       isActive: true,
-      inStock: true,
+      inStock: false,
       photos: [
           require('../resources/images/Moo_and_Mom_Fall_Joy_.jpg'),
           require('../resources/images/Mary_and_boys.jpg'),
