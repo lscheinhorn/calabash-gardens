@@ -81,9 +81,9 @@ export const events = [
           `Mary Nasouluk-G works in finance and received her bachelor’s degree from the University of North Carolina in Accounting. Born and raised in Boston to Lao immigrants, a sense of community was built around cooking and sharing Laos food. Her family prepared staple Laos dishes for gatherings and local community events. She continues this tradition with her two sons by sharing their culture through cooking.`,
        ],
        // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
-      date: new Date(2024, 6, 5),
+      date: new Date(2024, 5, 5),
       eventDates: [
-          "July 5th 2024",
+          "",
       ],
       link: require("../resources/images/Ma-Der_Ma-Der_Menu.pdf"),
       priceOptions: ['55.00'],
