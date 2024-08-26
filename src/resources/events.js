@@ -136,7 +136,7 @@ export const events = [
       title: 'Chuseok \nby Mountain Song Kitchen',
       category: "Experience",
       info: [
-          `September 6th for one night only we have Mountain Song Kitchen from Newbury, VT hosting this experience, welcome to Chuseok! A traditionally based Korean meal fussed with a saffron forward theme, an experience never before tasted! Book this experience today for a first in a lifetime flavor mash up. This Experience can accommodate Vegetarian but not gluten free. A 50% non refundable deposit to book your seats, the second half is payed at time of event.`,          
+          `For one night only we have Mountain Song Kitchen from Newbury, VT hosting this experience, welcome to Chuseok! A traditionally based Korean meal fussed with a saffron forward theme, an experience never before tasted! Book this experience today for a first in a lifetime flavor mash up. This Experience can accommodate Vegetarian but not gluten free. A 50% non refundable deposit to book your seats, the second half is payed at time of event.`,          
     `Meet your Chef!`,
           `My Mother is a chef and in our household sharing food with friends and family was an integral part of the day. The importance of food, the time spent preparing it and the time we shared enjoying it was instilled in me at a young age. As a teenager I started working in the food industry and over the course of the next ten years I worked up from dishwasher to chef. Seven years ago I decided to take a break from working in kitchens and reevaluate, and reassess my relationship with the industry and with Korean food in particular. I was curious about how I could honor the traditions of Korean cuisine while also accommodating the western palette. Most importantly, having started this business with Jesa, I've been having a pretty good time. -Driscoll`,
           `Moving to Vermont and starting a garden has helped my husband and I tie our cuisine to the food source. We began using korean natural farming and organic methods in our garden. The focus of our garden inputs are sourced through foraging and using food waste to cultivate specific fertilizers, indigenous microorganisms, healthy bacteria and fungi for soil health. The garden feeds the kitchen, feeds the garden, feeds the kitchen. -Jesa`,  
@@ -146,15 +146,15 @@ export const events = [
 
 
       // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
-      date: new Date(2024, 8, 6),
+      date: new Date(2024, 7, 6),
       eventDates: [
-          "September 6th 2024",
+          
       ],
       link: require("../resources/images/Mountain_Song_Menu.png"),
       priceOptions: ['55.00'],
       shipping: '0.00',
       isActive: true,
-      inStock: true,
+      inStock: false,
       photos: [
           require('../resources/images/Driscoll_and_Jesa.jpg'),
       ],
