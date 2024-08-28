@@ -166,7 +166,7 @@ export const events = [
       title: 'A Taste of Season in Vermont \nby Chefs Samantha Langevin and Jeannie Kovacs',
       category: "Experience",
       info: [
-       ` October 5th and 6th Samantha Langevin and Jeannie Kovacs are bringing to Calabash a power packed menu full of unique mediterranean themed vermont grown courses paired with cocktails to spotlight the early fall colors and flavors. Come welcome autumn with the warm flavor of saffron and the gifts of the land!.`,   
+       ` October 5th Samantha Langevin and Jeannie Kovacs are bringing to Calabash a power packed menu full of unique mediterranean themed vermont grown courses paired with cocktails to spotlight the early fall colors and flavors. Come welcome autumn with the warm flavor of saffron and the gifts of the land!.`,   
 `Samantha Langevin and Jeannie Kovacs are a daughter & mother who have spent more time eating together than anything else they can think of. Jeannie raised Samantha and her siblings in Vermont and Texas in a household that required adventurous eaters, with Samantha’s formative food memories including coquilles St Jacques, homemade tacos, pan fried trout, and the best birthday cakes.
 Samantha has worked as a chef in farm to table dining for over 10 years, getting her start in the Bay Area of California before returning to Vermont. Most recently the Chef de Cuisine at American Flatbread, Middlebury Hearth, she now works for The Vermont Releaf Collective, helping in its mission to amplify the voices of BIPOC in Land, Environment, Agriculture, & Food. She lives on a small farm with her partner and will enthusiastically discuss Vermont cheese with
 anyone who cares to listen.`,
@@ -177,10 +177,9 @@ anyone who cares to listen.`,
 
 
       // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
-      date: new Date(2024, 9, 4),
+      date: new Date(2024, 9, 5),
       eventDates: [
-          "October 4th 2024",
-    "October 5th 2024",
+          "October 5th 2024",
       ],
       link: require("../resources/images/a_taste_of_season.pdf"),
       priceOptions: ['55.00'],

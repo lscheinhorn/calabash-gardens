@@ -40,5 +40,9 @@ export const eventsInventory = {
     'Chuseok \nby Mountain Song Kitchen September 6th 2024' : {
         stock: 30
     },
+    'A Taste of Season in Vermont \nby Chefs Samantha Langevin and Jeannie Kovacs October 5th 2024' : {
+        stock: 30
+    },
+    
 }
  

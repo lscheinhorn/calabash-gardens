@@ -79,6 +79,7 @@ export default function Event (props) {
     }
 
     const handleIncrement = () => {
+        console.log("eventsInventory[ eventInfo.title].stock", eventsInventory,  eventInfo.title )
         if( quantity >= eventsInventory[ eventInfo.title].stock ) {
             return
         }
