@@ -27,6 +27,8 @@ export default function Paypal(props) {
       sku: item.key
     }
  })
+
+ console.log("items", items)
  // creates a paypal order
  const createOrder = (data, actions) => {
    return actions.order

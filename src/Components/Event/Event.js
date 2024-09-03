@@ -2,7 +2,8 @@ import './Event.css'
 import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 import { useState, useEffect } from 'react'
-import { eventsInventory } from '../../resources/inventory';
+import { eventsInventory } from '../../resources/inventory'
+import { createKey } from '../../resources/products'
 import { Link } from 'react-router-dom'; 
 
 export default function Event (props) {
@@ -72,8 +73,9 @@ export default function Event (props) {
             price: priceOptions[0],
             quantity: quantity,
             title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
-            key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")        
+            key: event.key.slice(0, -1) + (dateOption ? createKey(dateOption) : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")        
         })
+        console.log("eventInfo", eventInfo)
         // console.log("eventInfo.title", eventInfo.title)
         dispatch(addCartItem(eventInfo))
     }

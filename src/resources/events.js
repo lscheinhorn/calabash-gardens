@@ -189,9 +189,10 @@ anyone who cares to listen.`,
       photos: [
           require('../resources/images/samantha_and_jeannie.jpg'),
       ],
-      get key() {
-          return createKey(this.title)
-      }
+      key: `A Taste of Season in Vermont \nby Chefs Samantha Langevin and Jeannie Kovacs October 5th 2024`
+    //   get key() {
+    //       return createKey(this.title)
+    //   }
    },
  
 ]
