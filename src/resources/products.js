@@ -38,7 +38,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             require('../resources/images/product_photos/calabash_gifts_set.jpeg')
         ],
@@ -55,7 +55,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             require('../resources/images/product_photos/calabash_gift_set.webp')
         ],
@@ -70,7 +70,7 @@ export const products = [
         priceOptions: [{price: '50.00'}],
         shipping: '15.00',
         isHighlighted: false,
-        isActive: true,
+        isActive: false,
         inStock: true,
         photos: [
             require('../resources/images/product_photos/spa_day_gift_set.webp')
@@ -133,7 +133,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -156,7 +156,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             require('../resources/images/product_photos/saffron_simple_syrup.jpg')
         ],
@@ -205,7 +205,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: true,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             require('../resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp'),
             require('../resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp'),
@@ -239,7 +239,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             require('../resources/images/product_photos/saffron_tincture.webp')
         ],
@@ -279,7 +279,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -327,7 +327,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -427,7 +427,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -537,7 +537,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -719,7 +719,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -777,7 +777,7 @@ export const products = [
         }
     },
     {
-        title: 'Sippery Daze 4 oz',
+        title: 'Slippery Daze 4 oz',
         category: 'Mambo Gede',
         info: defaultInfo,
         priceOptions: [{
@@ -832,8 +832,8 @@ export const products = [
         ],
         shipping: '15.00',
         isHighlighted: false,
-        isActive: true,
-        inStock: true,
+        isActive: false,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -917,7 +917,7 @@ export const products = [
         ],
         shipping: '15.00',
         isHighlighted: false,
-        isActive: true,
+        isActive: false,
         inStock: false,
         photos: [
             defaultPhoto
@@ -958,15 +958,15 @@ export const products = [
             option: "2 oz",
             price: '25.00'
         },
-        {
-            option: "4 oz",
-            price: '40.00'
-        }
+        // {
+        //     option: "4 oz",
+        //     price: '40.00'
+        // }
         ],
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -986,7 +986,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -1087,14 +1087,14 @@ export const products = [
         category: 'Body Care',
         info: "A salve for achy joints and muscles.",
         priceOptions: [
-        //     {
-        //     option: "2 oz",
-        //     price: '25.00'
-        // },
-        {
-            option: "4 oz",
-            price: '42.00'
-        }
+            {
+            option: "2 oz",
+            price: '25.00'
+        },
+        // {
+        //     option: "4 oz",
+        //     price: '42.00'
+        // }
         ],
         shipping: '15.00',
         isHighlighted: false,
@@ -1498,7 +1498,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
