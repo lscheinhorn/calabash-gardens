@@ -167,7 +167,7 @@ export const products = [
     {
         title: 'Saffron Salt 2 oz',
         category: 'Saffron',
-        info: "Add saffron to your cocktails with our saffron simple syrup.",
+        info: "",
         priceOptions: [{
             option: "2 oz", 
             price: '12.50'
