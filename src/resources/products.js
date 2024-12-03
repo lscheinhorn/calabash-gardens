@@ -133,7 +133,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -156,7 +156,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/saffron_simple_syrup.jpg')
         ],
@@ -205,7 +205,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: true,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp'),
             require('../resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp'),
@@ -239,7 +239,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             require('../resources/images/product_photos/saffron_tincture.webp')
         ],
@@ -497,7 +497,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -517,7 +517,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -719,7 +719,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
