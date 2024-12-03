@@ -185,7 +185,7 @@ anyone who cares to listen.`,
       priceOptions: ['55.00'],
       shipping: '0.00',
       isActive: true,
-      inStock: true,
+      inStock: false,
       photos: [
           require('../resources/images/samantha_and_jeannie.jpg'),
       ],
