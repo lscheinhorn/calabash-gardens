@@ -87,7 +87,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             require('../resources/images/product_photos/erotic_gift_set.webp')
         ],
@@ -155,7 +155,7 @@ export const products = [
         }],
         shipping: '15.00',
         isHighlighted: false,
-        isActive: true,
+        isActive: false,
         inStock: true,
         photos: [
             require('../resources/images/product_photos/saffron_simple_syrup.jpg')
@@ -191,15 +191,15 @@ export const products = [
         priceOptions: [
             {
                 option: '1/2 Gram',
-                price: '40.00'
+                price: '45.00'
             },
             {
                 option: '1 Gram',
-                price: '60.00'
+                price: '65.00'
             },
             {
                 option: '2 Grams',
-                price: '110.00'
+                price: '120.00'
             }
         ],
         shipping: '15.00',
@@ -224,10 +224,6 @@ export const products = [
         category: 'Saffron',
         info: "Our saffron tincture is an excellent way to ingest all the medicinal benefits of saffron.",
         priceOptions: [{
-            option: "1/2 oz",
-            price: '20.00'
-        },
-        {
             option: "1 oz",
             price: '30.00'
         },
@@ -327,7 +323,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -367,7 +363,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -427,7 +423,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -460,9 +456,9 @@ export const products = [
         }
     },
     {
-        title: 'Elderflower Elixir',
+        title: 'Elderflower Saffron Elixir',
         category: 'Culinary',
-        info: "Elder flower tinture mix with raw local honey to make elder flower cordials.",
+        info: "Elder flower tinture mixed with saffron infused raw local honey to make elder flower cordials.",
         priceOptions: [{
             option: "4 oz",
             price: '15.00'
@@ -517,7 +513,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -537,6 +533,26 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
+        inStock: false,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: 'Saffron Red Dragon 4 oz',
+        category: 'Culinary',
+        info: "(Mild) Made with locally grown strawberries and habaneros",
+        priceOptions: [{
+            option: "4 oz",
+            price: '12.50'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
         inStock: true,
         photos: [
             defaultPhoto
@@ -545,8 +561,46 @@ export const products = [
             return createKey(this.title)
         }
     },
-
-
+    {
+        title: 'Saffron Dreams in Peach 4 oz',
+        category: 'Culinary',
+        info: "(Mild) Mild sauce made with local peaches, Trinidad perfume and habanero peppers",
+        priceOptions: [{
+            option: "4 oz",
+            price: '12.50'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
+    {
+        title: 'Jalapeno Popper 4 oz',
+        category: 'Culinary',
+        info: "(Mild) Traditional jalapeno hot sauce",
+        priceOptions: [{
+            option: "4 oz",
+            price: '12.50'
+        }
+        ],
+        shipping: '15.00',
+        isHighlighted: false,
+        isActive: true,
+        inStock: true,
+        photos: [
+            defaultPhoto
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+    },
     {
         title: 'The Heart and Head 1/2 oz Loose Leaf Tea',
         category: 'Loose Leaf Tea',
@@ -870,10 +924,7 @@ export const products = [
             option: "2 0z",
             price: '25.00'
         },
-        {
-            option: "4 0z",
-            price: '42.00'
-        }
+        
         ],
         shipping: '15.00',
         isHighlighted: false,
@@ -889,7 +940,7 @@ export const products = [
     {
         title: 'Ageless Beauty Oil 4 0z' ,
         category: 'Body Care',
-        info: "A body oil made with local herbs that act like collagen to reduce the appearance wrinkles.",
+        info: "A body oil made with local herbs that act like collagen to reduce the appearance of fine lines and wrinkles.",
         priceOptions: [{
             option: "4 0z",
             price: '37.00'
@@ -1039,7 +1090,11 @@ export const products = [
         category: 'Body Care',
         info: "The ultimate moisturizing salve formula.",
         priceOptions: [{
-            option: "2 oz",
+            option: "2 oz tin",
+            price: '25.00'
+        },
+        {
+            option: "2 oz stick",
             price: '25.00'
         },
         {
@@ -1074,7 +1129,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -1108,16 +1163,12 @@ export const products = [
         }
     },
     {
-        title: "Silky Smooth Flower Balm",
+        title: "SALE! 30% OFF Silky Smooth Flower Balm",
         category: 'Body Care',
         info: "A salve that harnesses the power of wild flowers to repair and hydrate over worked skin.",
         priceOptions: [{
-            option: "2 oz",
-            price: '25.00'
-        },
-        {
             option: "4 oz",
-            price: '42.00'
+            price: '30.00'
         }
         ],
         shipping: '15.00',
@@ -1364,7 +1415,7 @@ export const products = [
     {
         title: "Bitters",
         category: 'Tinctures',
-        info: "Delicious way to start the digestive system while enjoying a cocktail.",
+        info: "An excellent way to kick start the digestive system or to enjoy in a cocktail",
         priceOptions: [{
             option: "1 oz",
             price: '20.00'
@@ -1388,7 +1439,7 @@ export const products = [
     {
         title: "The Root Cause Bitters",
         category: 'Tinctures',
-        info: "Delicious way to start the digestive system while enjoying a cocktail.",
+        info: "An excellent way to kick start the digestive system or to enjoy in a cocktail",
         priceOptions: [{
             option: "1 oz",
             price: '20.00'
@@ -1520,7 +1571,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
@@ -1540,7 +1591,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos: [
             defaultPhoto
         ],
