@@ -125,11 +125,8 @@ export const products = [
         priceOptions: [{
             option: "4 oz", 
             price: '17.00'
-        },
-        {
-            option: "8 oz", 
-            price: '30.00'
-        }],
+        }
+        ],
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
@@ -299,7 +296,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
@@ -323,7 +320,7 @@ export const products = [
         shipping: '15.00',
         isHighlighted: false,
         isActive: true,
-        inStock: false,
+        inStock: true,
         photos: [
             defaultPhoto
         ],
