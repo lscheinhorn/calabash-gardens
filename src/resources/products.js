@@ -119,7 +119,7 @@ export const products = [
         }
     },
     {
-        title: 'Saffron Honey',
+        title: 'Saffron Honey 4 oz',
         category: 'Saffron',
         info: "Raw honey, made by our bees and other local farms, with a touch of saffron",
         priceOptions: [{
