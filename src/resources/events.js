@@ -290,6 +290,7 @@ anyone who cares to listen.`,
      isActive: true,
      inStock: true,
      photos:[
+        require('../resources/images/large_logo_no_purple_square.png'),
      ],
      get key() {
         return createKey(this.title)
@@ -313,6 +314,7 @@ anyone who cares to listen.`,
      isActive: true,
      inStock: true,
      photos:[
+        require('../resources/images/large_logo_no_purple_square.png'),
 
 
      ],
@@ -338,6 +340,7 @@ anyone who cares to listen.`,
      isActive: true,
      inStock: true,
      photos:[
+        require('../resources/images/large_logo_no_purple_square.png'),
 
 
      ],
