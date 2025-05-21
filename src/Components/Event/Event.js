@@ -227,7 +227,7 @@ export default function Event (props) {
                 <div style={{ textAlign: 'center' }} >
                     <a href={link} target="_blank" rel="noopener noreferrer">
                         <br />
-                        Check out our tasting menu here
+                        Check out the band bio here
                     </a> 
                 </div>
                     
