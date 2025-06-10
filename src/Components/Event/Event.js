@@ -10,7 +10,10 @@ export default function Event (props) {
     const { event } = props
     const dispatch = useDispatch()
     const { title, info, eventDates, link, priceOptions, key, inStock } = event
-    const [ quantity, setQuantity ] = useState( 1 )
+    const [ quantity, setQuantity ] = useState( {
+        adult: 0,
+        child: 0
+    } )
     const [ dateOption, setDateOption ] = useState( eventDates[0] )
     const [ photoIdx, setPhotoIdx ] = useState( 0 )
     const [ veg, setVeg ]  = useState( false )
@@ -22,16 +25,19 @@ export default function Event (props) {
     // console.log("price of event", priceOptions[0])
     const [ eventInfo, setEventInfo ] = useState({
         ...event, 
-        price: (veg || gFree) ? Number(priceOptions[0]) + 20 : priceOptions[0], 
+        price: Number(priceOptions[0]), 
         key: event.key, 
-        quantity: quantity, 
+        quantity: quantity.adult, 
         option: eventDates[0],
-        title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
 
     } )
     const [ addedToCart, setAddToCart ]  = useState( false )
-    
 
+    useEffect(() => {
+        console.log("quantity.child", quantity.child)
+    }, [quantity.child])
+
+   
 
     const photos = event.photos.map(photo => {
         return `${photo}`
@@ -53,46 +59,52 @@ export default function Event (props) {
     }, [ title, dateOption ])
 
     useEffect(() => {
-        
+
         setEventInfo({ 
             ...eventInfo,
             photos: event.photos,
-            price: (veg || gFree) ? Number(priceOptions[0]) + 10 : priceOptions[0], 
-            quantity: quantity,
-            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
+            price: ((veg || gFree) ? Number(priceOptions[0]) + 10 : Number(priceOptions[0])) + quantity.child * 10, 
+            quantity: quantity.adult,
+            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : "") + (quantity.child ? quantity.child + " Children" : "" ),
             key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
         })
-        // console.log("eventInfo", eventInfo )
-    }, [dateOption, event, title, quantity, eventInfo, priceOptions, eventDates])
+    }, [dateOption, event, title, quantity, priceOptions, eventDates, gFree, veg])
 
     const handleAddCartItem = () => {
         setAddToCart( true )
         // console.log("eventInfo", eventInfo)
-        setEventInfo({ 
-            ...eventInfo, 
-            price: priceOptions[0],
-            quantity: quantity,
-            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
-            key: event.key.slice(0, -1) + (dateOption ? createKey(dateOption) : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")        
-        })
+        // setEventInfo({ 
+        //     ...eventInfo, 
+        //     price: priceOptions[0],
+        //     quantity: quantity.adult,
+        //     title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
+        //     key: event.key.slice(0, -1) + (dateOption ? createKey(dateOption) : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")        
+        // })
         console.log("eventInfo", eventInfo)
         // console.log("eventInfo.title", eventInfo.title)
         dispatch(addCartItem(eventInfo))
     }
 
-    const handleIncrement = () => {
+    const handleIncrement = ( event ) => {
+        const type = event.target.getAttribute("tickettype")
         console.log("eventsInventory[ eventInfo.title].stock", eventsInventory,  eventInfo.title )
-        if( quantity >= eventsInventory[ eventInfo.title].stock ) {
+        
+        if( eventsInventory[ eventInfo.title ] && quantity >= eventsInventory[ eventInfo.title ].stock ) {
             return
         }
-        setQuantity( quantity + 1 )
+        setQuantity({...quantity, [ type ]: quantity[ type ] + 1 })
     }
-    const handleDecrement = () => {
-        if( quantity === 1 ) {
+    const handleDecrement = ( event ) => {
+        const type = event.target.getAttribute("tickettype")
+        if( quantity[ type ] === 0 ) {
             return
         }
-        setQuantity( quantity - 1 )
+        setQuantity({...quantity, [ type ]: quantity[ type ] - 1 })
     }
+
+    
+
+
 
     const handlePhotoLeft = () => {
         if(photoIdx === 0 ) {
@@ -146,8 +158,8 @@ export default function Event (props) {
         }
         setEventInfo((eventInfo) => ({
             ...eventInfo,
-            price: Number(eventInfo.price) + 20,
-            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
+            price: ((veg || gFree) ? Number(priceOptions[0]) + 20 : priceOptions[0]) + quantity.child * 10,
+            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : "") + (quantity.child ? quantity.child + " Children" : "" ),
             key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
         }));
     }
@@ -243,16 +255,26 @@ export default function Event (props) {
             <button className="btn btn-warning btn-lg mt-2" onClick={handleGFree}>
                 <i className="fas fa-bread-slice"></i> { gFreeOption }
             </button>
-           
 
-
-            <p>${ eventInfo.price  * quantity   }</p>
-
-
+            <p>${ eventInfo.price * quantity.adult   }</p>
+            
+            <div style={{ textAlign: 'center' }} >
+               <p>Children 12 & under</p>
+            </div>
             <div id="quantity-selector" className="d-flex justify-content-center align-items-center m-2">
-                <button className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease quantity">-</button>
-                <span className="mx-3">{ quantity }</span>
-                <button className="btn btn-secondary" onClick={ handleIncrement } aria-label="Increase quantity">+</button>
+                <button tickettype="child" className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease quantity">-</button>
+                <span className="mx-3">{ quantity.child }</span>
+                <button tickettype="child" className="btn btn-secondary" onClick={ handleIncrement } aria-label="Increase quantity">+</button>
+
+            </div>
+
+            <div style={{ textAlign: 'center' }} >
+               <p>Adults</p>
+            </div>
+            <div id="quantity-selector" className="d-flex justify-content-center align-items-center m-2">
+                <button tickettype="adult" className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease quantity">-</button>
+                <span className="mx-3">{ quantity.adult }</span>
+                <button tickettype="adult" className="btn btn-secondary" onClick={ handleIncrement } aria-label="Increase quantity">+</button>
 
             </div>
 

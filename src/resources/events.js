@@ -297,56 +297,56 @@ anyone who cares to listen.`,
      }
    },
    {
-     title: 'Calabash Experience, Deep Summer Dance Party, Saffron Bites',
-    category: "Experience",
-    info: [
-        `August 23rd 2025 Calabash Gardens welcomes the hosting the Pilgrims for a rocking dance party with saffron forward passed hor d'oeuvres. The Pilgrims are a rock band reminiscent of the 60’s but bringing all the influences from all the decades. `,
-        `Local spirits with herbal infusions, beer, wine and mocktails will be served at a CASH bar, we can run credit for this event if you want to open a tab.  All produce and meats featured are from some of our favorite local farms. Our chefs for this event are Geoffrey Turcich and Cole Conrad Cohen.  `
-    ],
-    // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
-    date: new Date(2025, 7, 23),
-    eventDates: [
-         "August 23rd, 2025",
-     ],
-     link: require("../resources/Menu.docx.pdf"),
-     priceOptions: ['45.00'],
-     shipping: '0.00',
-     isActive: true,
-     inStock: true,
-     photos:[
-        require('../resources/images/large_logo_no_purple_square.png'),
+        title: 'Calabash Experience, Deep Summer Dance Party, Saffron Bites',
+        category: "Experience",
+        info: [
+            `August 23rd 2025 Calabash Gardens welcomes the hosting the Pilgrims for a rocking dance party with saffron forward passed hor d'oeuvres. The Pilgrims are a rock band reminiscent of the 60’s but bringing all the influences from all the decades. `,
+            `Local spirits with herbal infusions, beer, wine and mocktails will be served at a CASH bar, we can run credit for this event if you want to open a tab.  All produce and meats featured are from some of our favorite local farms. Our chefs for this event are Geoffrey Turcich and Cole Conrad Cohen.  `
+        ],
+        // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
+        date: new Date(2025, 7, 23),
+        eventDates: [
+            "August 23rd, 2025",
+        ],
+        link: require("../resources/Menu.docx.pdf"),
+        priceOptions: ['45.00'],
+        shipping: '0.00',
+        isActive: true,
+        inStock: true,
+        photos:[
+            require('../resources/images/large_logo_no_purple_square.png'),
 
 
-     ],
-     get key() {
-        return createKey(this.title)
-     }
+        ],
+        get key() {
+            return createKey(this.title)
+        }
    },
    {
-       title: 'Calabash Experience, Chad Lumbra',
-    category: "Experience",
-    info: [
-        `September 20th, 2025 Calabash Gardens and Chef Chad Lumbra are hosting a farm to table fine dining experience for your culinary pleasure.`,
-        `Local spirits with herbal infusion pairings or mocktails if preferred are included in this event.  All produce and meats featured are from some of our favorite local farms and Chad takes full culinary creative license. Saffron from Calabash Gardens featured in each course 30 seats only, 50% non refundable deposit to secure your spot, 50% taken upon arrival at time of service, total cost $120. `
-    ],
-    // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
-    date: new Date(2025, 8, 20),
-    eventDates: [
-         "September 20th, 2025",
-     ],
-     link: require("../resources/Menu.docx.pdf"),
-     priceOptions: ['60.00'],
-     shipping: '0.00',
-     isActive: true,
-     inStock: true,
-     photos:[
-        require('../resources/images/large_logo_no_purple_square.png'),
+        title: 'Calabash Experience, Chad Lumbra',
+        category: "Experience",
+        info: [
+            `September 20th, 2025 Calabash Gardens and Chef Chad Lumbra are hosting a farm to table fine dining experience for your culinary pleasure.`,
+            `Local spirits with herbal infusion pairings or mocktails if preferred are included in this event.  All produce and meats featured are from some of our favorite local farms and Chad takes full culinary creative license. Saffron from Calabash Gardens featured in each course 30 seats only, 50% non refundable deposit to secure your spot, 50% taken upon arrival at time of service, total cost $120. `
+        ],
+        // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
+        date: new Date(2025, 8, 20),
+        eventDates: [
+            "September 20th, 2025",
+        ],
+        link: require("../resources/Menu.docx.pdf"),
+        priceOptions: ['60.00'],
+        shipping: '0.00',
+        isActive: true,
+        inStock: true,
+        photos:[
+            require('../resources/images/large_logo_no_purple_square.png'),
 
 
-     ],
-     get key() {
-        return createKey(this.title)
-     }
+        ],
+        get key() {
+            return createKey(this.title)
+        }
    },
 ]
 
