@@ -65,7 +65,7 @@ export default function Event (props) {
             photos: event.photos,
             price: ((veg || gFree) ? Number(priceOptions[0]) + 10 : Number(priceOptions[0])) + quantity.child * 10, 
             quantity: quantity.adult,
-            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : "") + (quantity.child ? quantity.child + " Children" : "" ),
+            title: ((veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : "")) + (quantity.child ? " with " + quantity.child + " Children" : "" ) ,
             key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
         })
     }, [dateOption, event, title, quantity, priceOptions, eventDates, gFree, veg])
