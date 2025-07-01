@@ -271,31 +271,7 @@ anyone who cares to listen.`,
         return createKey(this.title)
      }
    },
-   {
-       title: `Calabash Experience, Into the Wolf's Mouth`,
-       category: "Experience",
-    info: [
-        `SUBJECT TO CHANGE.`,
-`July 26th, 2025 Calabash Gardens and Into the Wolf’s Mouth is hosting a farm to table fine dining experience for your culinary pleasure. Bringing a Burlington staple to the Upper Valley`,
-        `Local spirits with herbal infusion pairings or mocktails if preferred are included in this event.  All produce and meats featured are from some of our favorite local farms and Into the Wolf’s Mouth has full culinary creative license. Saffron from Calabash Gardens featured in each course 30 seats only, 50% non refundable deposit to secure your spot, 50% taken upon arrival at time of service for a total of $120.`
-    ],
-    // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
-    date: new Date(2025, 6, 26),
-    eventDates: [
-         "July 26th, 2025",
-     ],
-     link: require("../resources/Menu.docx.pdf"),
-     priceOptions: ['60.00'],
-     shipping: '0.00',
-     isActive: true,
-     inStock: true,
-     photos:[
-        require('../resources/images/large_logo_no_purple_square.png'),
-     ],
-     get key() {
-        return createKey(this.title)
-     }
-   },
+   
    {
         title: 'Calabash Experience, Deep Summer Dance Party, Saffron Bites',
         category: "Experience",
@@ -308,7 +284,7 @@ anyone who cares to listen.`,
         eventDates: [
             "August 23rd, 2025",
         ],
-        link: require("../resources/Menu.docx.pdf"),
+        link: null,
         priceOptions: ['45.00'],
         shipping: '0.00',
         isActive: true,
@@ -334,7 +310,7 @@ anyone who cares to listen.`,
         eventDates: [
             "September 20th, 2025",
         ],
-        link: require("../resources/Menu.docx.pdf"),
+        link: null,
         priceOptions: ['60.00'],
         shipping: '0.00',
         isActive: true,
