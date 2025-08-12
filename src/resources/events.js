@@ -1,35 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 const defaultPhoto = require('../resources/images/large_logo_no_purple_square.png')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 export const createKey = (input) => {
 const chars = 'abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ-1234567890.,'
@@ -41,28 +10,6 @@ return numbers.join('')
 }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const experienceBlurb = [
    `The Calabash Experience is our way to bring the finest quality Calabash saffron, wild foraged foods, organic produce and regeneratively grown meats from hyper local farms to your plate in the most beautiful ways. We are harboring a space for creativity, diversity and culture with an air of accessibility, it’s easier than you may think to eat local, eat well and use saffron! With Jette’s two decade run in the service industry it only felt right to begin hosting Elevated Farm to Plate Experiences on the lush lawn of our farm house, serving up the finest, healthiest and most local ingredients possible all with a saffron forward mindset. We are purveyors of fine foods and spirits, of a regenerative and responsible nature, with a flare for the diverse and unexpected. We have an incredible core team and bring in new chefs, highlighting their unique cultural heritage while allowing them total creativity in what they create for your plate. Our two requirements are that the menus they create are saffron forward, inviting our guests to enjoy a unique experience duplicated nowhere else, and all aspects be made in house with only the finest quality local ingredients. Using wildcrafted, organic and regeneratively  grown meats and produce allows us to present a completely sustainable experience while also maintaining a  superior level of health for guests and the planet alike. We are merging accessibility, diversity, uniqueness, health and above all flavor, for an incredible evening of food, spirits, and of course most of all enjoyment!`,
    `The fine dining experiences take a 50% non refundable deposit, the second 50% is taken at time of service. The music experiences are 100% at time of purchase non refundable.`,
@@ -70,12 +17,6 @@ export const experienceBlurb = [
    `Events are held at 1831 Fish Pond Rd Wells River Vermont 05081. Arrival time is 5pm with seating at 5:30pm. Menus are subject to change depending on local availability and seasonality.`,
    `The Calabash Gardens team works incredibly hard to bring these events to you, in light of all the hard work we do, and the associated cost of these events, 50% of the ticket price is charged at time of purchase with no refund available. The second 50% is taken at time of arrival as you check in. Thank you for understanding. Gratuities are appreciated for our incredibly hard working staff, tips are split evenly between all function employees.`
 ]
-
-
-
-
-
-
 
 
 export const events = [
@@ -276,21 +217,22 @@ anyone who cares to listen.`,
         title: 'Calabash Experience, Deep Summer Dance Party, Saffron Bites',
         category: "Experience",
         info: [
-            `August 23rd 2025 Calabash Gardens welcomes the hosting the Pilgrims for a rocking dance party with saffron forward passed hor d'oeuvres. The Pilgrims are a rock band reminiscent of the 60’s but bringing all the influences from all the decades. `,
-            `Local spirits with herbal infusions, beer, wine and mocktails will be served at a CASH bar, we can run credit for this event if you want to open a tab.  All produce and meats featured are from some of our favorite local farms. Our chefs for this event are Geoffrey Turcich and Cole Conrad Cohen.  `
+            `Faux In Love will be gracing the Calabash Stage with their all original suffer rock vibes!`,
+            `We have a packed menu full of farm fresh saffron forward buffet items with some tried and true favorites. Geoff and Jette will be running the kitchen with meat and produce ingredients coming as locally as possible from some of our favorite farms, Logan Roystan will be behind the bar bringing his creativity to the Calabash Experience with signature cocktails, mocktails, beer and wine. CASH (or credit) bar. Tickets are $45, 12 and under $10. Doors open at 5pm. Booking ahead of time is helpful for us in the kitchen to manage food costs and make sure there is plenty of food to feed everyone. However, we do take walk-ins so if it feels right to just show up, please do!`
         ],
         // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
         date: new Date(2025, 7, 23),
         eventDates: [
             "August 23rd, 2025",
         ],
-        link: null,
+        link: require('../resources/images/August 23rd Buffet Menu_.pdf'),
         priceOptions: ['45.00'],
         shipping: '0.00',
         isActive: true,
         inStock: true,
         photos:[
-            require('../resources/images/large_logo_no_purple_square.png'),
+            require('../resources/images/FLAIL.JPG'),
+            require('../resources/images/Faux in Love Poster .png'),
 
 
         ],
