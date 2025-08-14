@@ -214,7 +214,7 @@ anyone who cares to listen.`,
    },
    
    {
-        title: 'Calabash Experience, Deep Summer Dance Party, Saffron Bites',
+        title: 'Deep Summer Dance Party, Saffron Bites',
         category: "Experience",
         info: [
             `Faux In Love will be gracing the Calabash Stage with their all original suffer rock vibes!`,
