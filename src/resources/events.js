@@ -11,11 +11,12 @@ return numbers.join('')
 
 
 export const experienceBlurb = [
-   `The Calabash Experience is our way to bring the finest quality Calabash saffron, wild foraged foods, organic produce and regeneratively grown meats from hyper local farms to your plate in the most beautiful ways. We are harboring a space for creativity, diversity and culture with an air of accessibility, it’s easier than you may think to eat local, eat well and use saffron! With Jette’s two decade run in the service industry it only felt right to begin hosting Elevated Farm to Plate Experiences on the lush lawn of our farm house, serving up the finest, healthiest and most local ingredients possible all with a saffron forward mindset. We are purveyors of fine foods and spirits, of a regenerative and responsible nature, with a flare for the diverse and unexpected. We have an incredible core team and bring in new chefs, highlighting their unique cultural heritage while allowing them total creativity in what they create for your plate. Our two requirements are that the menus they create are saffron forward, inviting our guests to enjoy a unique experience duplicated nowhere else, and all aspects be made in house with only the finest quality local ingredients. Using wildcrafted, organic and regeneratively  grown meats and produce allows us to present a completely sustainable experience while also maintaining a  superior level of health for guests and the planet alike. We are merging accessibility, diversity, uniqueness, health and above all flavor, for an incredible evening of food, spirits, and of course most of all enjoyment!`,
-   `The fine dining experiences take a 50% non refundable deposit, the second 50% is taken at time of service. The music experiences are 100% at time of purchase non refundable.`,
-   `There are 30 seats available for each fine dining Calabash Experience and unlimited for music events. We can accommodate Vegetarians and Gluten Free for most of our meals, please hit the Vegetarian or Gluten Free options when purchasing tickets. There is an additional $10 fee for either or both options. We may not be able to do Gluten Free or Vegetarian for every Experience, please check the descriptions. If you are purchasing a mix of meat, veggie or gluten free please make sure you have picked the correct option before clicking buy tickets, and check again once in the cart.`,
-   `Events are held at 1831 Fish Pond Rd Wells River Vermont 05081. Arrival time is 5pm with seating at 5:30pm. Menus are subject to change depending on local availability and seasonality.`,
+   `The Calabash Experience is our way to bring the finest quality Calabash saffron, wild foraged foods, organic produce and regeneratively grown meats from hyper local farms to your plate in the most beautiful ways. Calabash Gardens is harboring a space for creativity, diversity and culture with an air of accessibility. It's easier than you may think to eat local, eat well and use saffron! We are purveyors of fine foods and spirits, featuring local, regenerative and responsibly grown food, with a flare for the diverse and unexpected. We have an incredible core team dedicated to bringing you excellent service, inviting our guests to enjoy a unique experience duplicated nowhere else. Using hyperlocal, wildcrafted, organic and regeneratively grown meats and produce allows us to present a completely sustainable experience while also maintaining a superior level of health and quality for our guests and the planet alike. We are merging accessibility, diversity, uniqueness, health and above all flavor, for an incredible evening of food, spirits, and of course most of all enjoyment!`,
+   `The fine dining experiences take a 50% non refundable deposit, the second 50% is taken at time of service. The music experiences are paid in full at time of purchase and are non refundable.`,
+   `We can accommodate Vegetarians and Gluten Free, please hit the Vegetarian or Gluten Free options when purchasing tickets. There is an additional $10 fee for either or both options. If you are purchasing a mix of meat, veggie or gluten free please make sure you have picked the correct option before clicking buy tickets, and check again once in the cart.`,
+   `Events are held at 1831 Fish Pond Rd Wells River Vermont 05081. Arrival time is between 4:30 and 5pm with seating at 5:30pm. Menus are subject to change depending on local availability and seasonality. There are 30 seats available for each Elevated dining Experience and unlimited for music events.`,
    `The Calabash Gardens team works incredibly hard to bring these events to you, in light of all the hard work we do, and the associated cost of these events, 50% of the ticket price is charged at time of purchase with no refund available. The second 50% is taken at time of arrival as you check in. Thank you for understanding. Gratuities are appreciated for our incredibly hard working staff, tips are split evenly between all function employees.`
+
 ]
 
 
@@ -269,6 +270,60 @@ anyone who cares to listen.`,
             return createKey(this.title)
         }
    },
+
+   {
+       title: 'We Are More Alike Than Different, A Juneteenth Calabash Solstice Bash',
+        category: "Experience",
+        info: [
+            `June 19th 2026 in honor of togetherness and humanity we are hosting our annual Solstice Bash in collaboration with three incredible bands! Join us for a full buffet menu featuring unique dishes from Iran both new and old. We are a global community and we are more beautiful for our diversity.`,
+	        `For your listening pleasure we have an incredible line up of music, Starting off the evening at 5pm,coming back for their second year is Faux In Love, followed by The Pilgrims and finishing off the evening we have the deep soul sounds of Kuf Knots and Christine Elise! We are so thrilled to welcome these fine folks to the Calabash Stage and share in this incredible evening of Music, food and libations with you!`,
+            `Cocktails, mocktails beer and wine are available at our CASH bar created and brought to you by our dear friend and bartender extraordinaire, Logan Roystan. All produce and meats featured are from some of our favorite local farms and of course saffron from Calabash Gardens. Unlimited seating, tickets are $55, non refundable, please print your receipt and bring it to the door.`
+        ],
+        // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
+        date: new Date(2026, 5, 19),
+        eventDates: [
+            "June 19th, 2026",
+        ],
+        link: require("../resources/Menu.docx.pdf"),
+        priceOptions: ['55.00'],
+        shipping: '0.00',
+        isActive: true,
+        inStock: true,
+        photos:[
+
+        ],
+        get key() {
+            return createKey(this.title)
+        }
+   },
+
+
+   {
+       title: 'Calabash Experience, Home Grown',
+        category: "Experience",
+        info: [
+            `September 5th, 2026 Calabash Gardens is hosting an Elevated Farm to Plate experience full of saffron and locally procured produce and meats. This event is called Home Grown as we are not bringing in a guest chef but taking full responsibility for the cooking at this event, Zaka and Jette will be heading up the kitchen with the help of Geoffrey Turcich and Chesna Mandl, all individuals participating have extensive culinary and restaurant backgrounds, creativity and deep love for fine foods. We are taking the helm and leading the farm into a new era!`,
+            `Local spirits with herbal infusion pairings or mocktails if preferred are included in this event.  All produce and meats featured are from some of our favorite local farms and we take full culinary creative license. Saffron from Calabash Gardens featured in each course, 30 seats only, 50% non refundable deposit to secure your spot, 50% taken upon arrival at time of service, total cost $120. `
+        ],
+        // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
+        date: new Date(2026, 8, 5),
+        eventDates: [
+            "September 5th, 2026",
+        ],
+        link: require("../resources/Menu.docx.pdf"),
+        priceOptions: ['60.00'],
+        shipping: '0.00',
+        isActive: true,
+        inStock: true,
+        photos:[
+
+
+        ],
+        get key() {
+        return createKey(this.title)
+        }
+   },
+
 ]
 
 
