@@ -32,12 +32,12 @@ export const products = [
     
     {
         title: 'Calabash Gifts Set',
-        category: "Gifts",
+        // category: "Gifts",
         info: defaultInfo,
         priceOptions: [{price: '100.00'}],
         shipping: '15.00',
         isHighlighted: false,
-        isActive: true,
+        isActive: false,
         inStock: false,
         photos: [
             require('../resources/images/product_photos/calabash_gifts_set.jpeg')
@@ -49,12 +49,12 @@ export const products = [
     
     {
         title: 'Calabash Gift Set',
-        category: 'Gifts',
+        // category: 'Gifts',
         info: defaultInfo,
         priceOptions: [{price: '50.00'}],
         shipping: '15.00',
         isHighlighted: false,
-        isActive: true,
+        isActive: false,
         inStock: false,
         photos: [
             require('../resources/images/product_photos/calabash_gift_set.webp')
@@ -65,7 +65,7 @@ export const products = [
     },
     {
         title: 'Spa Day Gift Set',
-        category: 'Gifts',
+        // category: 'Gifts',
         info: defaultInfo,
         priceOptions: [{price: '50.00'}],
         shipping: '15.00',
@@ -81,12 +81,12 @@ export const products = [
     },
     {
         title: 'Erotic Gift Set',
-        category: 'Gifts',
+        // category: 'Gifts',
         info: defaultInfo,
         priceOptions: [{price: '100.00'}],
         shipping: '15.00',
         isHighlighted: false,
-        isActive: true,
+        isActive: false,
         inStock: false,
         photos: [
             require('../resources/images/product_photos/erotic_gift_set.webp')

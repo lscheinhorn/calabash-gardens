@@ -245,20 +245,23 @@ anyone who cares to listen.`,
         category: "Experience",
         info: [
             `September 20th, 2025 Calabash Gardens and Chef Chad Lumbra are hosting a farm to table fine dining experience for your culinary pleasure.`,
-            `Local spirits with herbal infusion pairings or mocktails if preferred are included in this event.  All produce and meats featured are from some of our favorite local farms and Chad takes full culinary creative license. Saffron from Calabash Gardens featured in each course 30 seats only, 50% non refundable deposit to secure your spot, 50% taken upon arrival at time of service, total cost $120. `
+            `Local spirits with herbal infusion pairings or mocktails if preferred are included in this event.  All produce and meats featured are from some of our favorite local farms and Chad takes full culinary creative license. Saffron from Calabash Gardens featured in each course 30 seats only, 50% non refundable deposit to secure your spot, 50% taken upon arrival at time of service, total cost $120. `,
+            `About the chef`,
+            `A Vermont native, Chad’s first food memories were of cooking rainbow trout caught from the Ompompanoosuc and picking and eating (mostly eating) berries from the surrounding forrest.  Following an education at the Culinary Institute of America, Chad held a position in the kitchen of Manhattan’s prestigious Eleven Madison Park.  Having his fill of the city life, Chad moved to the Princeton NJ area where he grew an appreciation for local foods as the slow food and farm to table craze took off.  With an overwhelming desire to travel and experience other cultures and cuisines, Chad found himself boarding a plane to Italy and would ultimately make his Slovenia where he would learn the local foods while working in the capital and also hiking and picking grapes in wine country during his time off.  Years later, Chad returned to the Upper Valley where he ran the kitchen at Elixir, a staple of White River Junction.`,
+            `In the midst of Covid, Chad and his wife, Arlanda, made a dream come true and opened Midva in 2020, a small 24 seat bistro in their home town of Windsor, VT.  Sadly, they lasted 3 years before closing due to difficulties with the building in disrepair that the landlord would not address.  Chad is now a sous chef with Dartmouth College where he experiences a new challenge of cooking up to 5000 meals a day.`
         ],
         // Date must be as follows: Date(year, month, day) format with month starting at index 0 for January
         date: new Date(2025, 8, 20),
         eventDates: [
             "September 20th, 2025",
         ],
-        link: null,
+        link: require('../resources/images/Chad Lumbra menu .pdf'),
         priceOptions: ['60.00'],
         shipping: '0.00',
         isActive: true,
         inStock: true,
         photos:[
-            require('../resources/images/large_logo_no_purple_square.png'),
+            require('../resources/images/chad_photo.jpg'),
 
 
         ],
