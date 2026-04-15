@@ -3,7 +3,7 @@
     background-image: url('../../resources/images/parchment_background.jpeg'); /* replace with your actual image path */
     background-color: #fdf5e6; /* Fallback for when the image is not loaded */
     color: #8B4513; /* Dark brown text for contrast */
-    font-family: 'Dancing Script', cursive; /* Example of a handwriting-like font */
+    font-family: 'Dancing Script'/*, cursive*/; /* Example of a handwriting-like font */
     padding: 20px;
     border-radius: 8px;
     border: 1px solid #deb887; /* Light brown border to mimic old paper edges */
