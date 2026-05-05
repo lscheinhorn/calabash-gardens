@@ -1,70 +1,56 @@
-# Getting Started with Create React App
+# Calabash Gardens
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Calabash Gardens is a React storefront and event-booking site for a Vermont saffron farm. It supports product browsing, event promotion, cart management, PayPal checkout, and customer contact.
 
-## Available Scripts
+## Stack
 
-In the project directory, you can run:
+- React 18
+- Create React App / `react-scripts`
+- React Router with `HashRouter`
+- Redux Toolkit
+- PayPal React SDK
+- EmailJS
+- Static JS resource files for products, events, content, and event inventory
 
-### `npm start`
+## Local Setup
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Install dependencies:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```bash
+npm install
+```
 
-### `npm test`
+Start development server:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```bash
+npm start
+```
 
-### `npm run build`
+Build for production:
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```bash
+npm run build
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Scripts
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- `npm start`: run local development server
+- `npm run build`: create production build
+- `npm test`: run Create React App test runner
+- `npm run deploy`: build and publish with `gh-pages`
 
-### `npm run eject`
+## Project Docs
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `AGENTS.md`: operating rules and agent roles
+- `PROJECT_STATUS.md`: live source of truth
+- `docs/app-overview.md`: product and route overview
+- `docs/architecture.md`: technical architecture
+- `docs/data-model.md`: current static data model
+- `docs/maintenance.md`: common maintenance tasks
+- `docs/agent-workflow.md`: Git and phase workflow
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Notes
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+The app currently uses static product and event data. Firebase/admin work exists in commented form but is not active.
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Before implementation work, confirm scope in `PROJECT_STATUS.md`, use a feature branch, and get Luke's approval.
