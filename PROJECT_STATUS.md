@@ -36,6 +36,8 @@ Phase 1: small customer-request content and pricing updates.
 - Updated cart shipping cap from `$15` to `$17`.
 - Added cart shipping increase note.
 - Updated Saffron Salt 2 oz from `$12.50` to `$15.00`.
+- Kept the 2025 event data in `events.js` but set those events inactive.
+- Updated the Events page to respect `isActive` when choosing which events to show.
 
 ## In Progress Work
 
@@ -79,6 +81,7 @@ Phase 1: small customer-request content and pricing updates.
 - 2026-05-05: `npm run build` completed successfully with warnings.
 - 2026-05-05: Dev server starts when allowed to bind to `127.0.0.1`.
 - 2026-05-05: `npm run build` completed successfully after customer-request fixes, with the same existing warnings.
+- 2026-05-05: `npm run build` completed successfully after inactive-event correction, with the same existing warnings.
 
 ## Commits
 
