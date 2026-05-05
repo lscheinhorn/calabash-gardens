@@ -201,7 +201,7 @@ anyone who cares to listen.`,
      link: require("../resources/young_brothers_band_bio.pdf"),
      priceOptions: ['45.00'],
      shipping: '0.00',
-     isActive: false,
+     isActive: true,
      inStock: true,
      photos:[
          require('../resources/images/young_brothers_band_photo.jpeg'),
@@ -228,7 +228,7 @@ anyone who cares to listen.`,
         link: require('../resources/images/August 23rd Buffet Menu_.pdf'),
         priceOptions: ['45.00'],
         shipping: '0.00',
-        isActive: false,
+        isActive: true,
         inStock: true,
         photos:[
             require('../resources/images/FLAIL.JPG'),
@@ -258,7 +258,7 @@ anyone who cares to listen.`,
         link: require('../resources/images/Chad Lumbra menu .pdf'),
         priceOptions: ['60.00'],
         shipping: '0.00',
-        isActive: false,
+        isActive: true,
         inStock: true,
         photos:[
             require('../resources/images/chad_photo.jpg'),
@@ -286,7 +286,7 @@ anyone who cares to listen.`,
         link: require("../resources/Menu.docx.pdf"),
         priceOptions: ['55.00'],
         shipping: '0.00',
-        isActive: true,
+        isActive: false,
         inStock: true,
         photos:[
 
@@ -312,7 +312,7 @@ anyone who cares to listen.`,
         link: require("../resources/Menu.docx.pdf"),
         priceOptions: ['60.00'],
         shipping: '0.00',
-        isActive: true,
+        isActive: false,
         inStock: true,
         photos:[
 
@@ -324,7 +324,6 @@ anyone who cares to listen.`,
    },
 
 ]
-
 
 
 

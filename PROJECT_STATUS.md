@@ -36,7 +36,8 @@ Phase 1: small customer-request content and pricing updates.
 - Updated cart shipping cap from `$15` to `$17`.
 - Added cart shipping increase note.
 - Updated Saffron Salt 2 oz from `$12.50` to `$15.00`.
-- Kept the 2025 event data in `events.js` but set those events inactive.
+- Kept the 2026 event data in `events.js` but set those events inactive.
+- Restored 2025 events to active so events before 2026 still show.
 - Updated the Events page to respect `isActive` when choosing which events to show.
 
 ## In Progress Work
