@@ -8,6 +8,8 @@ import { useState, useEffect } from 'react'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
+const SHIPPING_MAX = 17
+
 export default function Cart (  ) {
     const cartItems = useSelector(selectCart)
     // console.log('cart =>', cartItems)
@@ -42,8 +44,8 @@ export default function Cart (  ) {
             const shipping = Number(cartItems[i].shipping)
             shippingTotal += shipping
         }
-        if( shippingTotal > 15 ) {
-            shippingTotal = 15
+        if( shippingTotal > SHIPPING_MAX ) {
+            shippingTotal = SHIPPING_MAX
         }
         if(shippingTotal === 0 && shippingState.pref !== 'NO_SHIPPING') {
             setShippingState( prev => {
@@ -106,6 +108,7 @@ export default function Cart (  ) {
                 <div id="total-container">
                     <div><h4>Subtotal</h4><h4>${ subtotal }</h4></div>
                     <div><h4>Shipping</h4><h4>${ shipping }</h4></div>
+                    { shipping > 0 ? <p>Because shipping costs have increased, we have had to raise our shipping price.</p> : null }
                     <div><h4>Total</h4><h4>${ total }</h4></div>
 
                 </div>

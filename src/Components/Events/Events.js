@@ -2,20 +2,21 @@ import './Events.css'
 import '../Shop/Shop.css';  // Make sure your paths are correct
 import { events, experienceBlurb } from '../../resources/events';
 import Event from '../Event/Event';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 export default function Events() {
-    const [eventIdx, setEventIdx] = useState(events.length - 1);
+    const activeEvents = useMemo(() => events.filter(event => event.isActive), [])
+    const [eventIdx, setEventIdx] = useState(activeEvents.length - 1);
 
     useEffect(() => {
         const today = new Date()
-        const nextEventIdx = events.findIndex( event => event.date > today )
+        const nextEventIdx = activeEvents.findIndex( event => event.date > today )
         if( nextEventIdx !== -1 ) {
             setEventIdx( nextEventIdx )
         } else (
-            setEventIdx( events.length - 1 )
+            setEventIdx( activeEvents.length - 1 )
         )
-    }, [])
+    }, [activeEvents])
 
     const handlePrevious = () => {
         if (eventIdx > 0) {
@@ -24,7 +25,7 @@ export default function Events() {
     };
 
     const handleNext = () => {
-        if (eventIdx < events.length - 1) {
+        if (eventIdx < activeEvents.length - 1) {
             setEventIdx(eventIdx + 1);
         }
     };
@@ -46,7 +47,7 @@ export default function Events() {
                     <button className="btn btn-outline-primary" onClick={handleNext}>Next Experience</button>
 
                 </div>
-                <Event event={events[eventIdx]} />
+                { activeEvents.length ? <Event event={activeEvents[eventIdx]} /> : null }
             </div>
         </div>
     );

@@ -35,7 +35,7 @@ export const products = [
         // category: "Gifts",
         info: defaultInfo,
         priceOptions: [{price: '100.00'}],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: false,
         inStock: false,
@@ -52,7 +52,7 @@ export const products = [
         // category: 'Gifts',
         info: defaultInfo,
         priceOptions: [{price: '50.00'}],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: false,
         inStock: false,
@@ -68,7 +68,7 @@ export const products = [
         // category: 'Gifts',
         info: defaultInfo,
         priceOptions: [{price: '50.00'}],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: false,
         inStock: true,
@@ -84,7 +84,7 @@ export const products = [
         // category: 'Gifts',
         info: defaultInfo,
         priceOptions: [{price: '100.00'}],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: false,
         inStock: false,
@@ -107,7 +107,7 @@ export const products = [
             option: "8 oz", 
             price: '27.00'
         }],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -127,7 +127,7 @@ export const products = [
             price: '17.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -150,7 +150,7 @@ export const products = [
             option: "8 oz", 
             price: '30.00'
         }],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: false,
         inStock: true,
@@ -167,9 +167,9 @@ export const products = [
         info: "",
         priceOptions: [{
             option: "2 oz", 
-            price: '12.50'
+            price: '15.00'
         }],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -199,7 +199,7 @@ export const products = [
                 price: '120.00'
             }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: true,
         isActive: true,
         inStock: true,
@@ -229,7 +229,7 @@ export const products = [
             price: '110.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -249,7 +249,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -269,7 +269,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -293,7 +293,7 @@ export const products = [
             price: '30.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -317,7 +317,7 @@ export const products = [
             price: '30.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -337,7 +337,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -357,7 +357,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -377,7 +377,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -397,7 +397,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -417,7 +417,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -441,7 +441,7 @@ export const products = [
             price: '27.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -465,7 +465,7 @@ export const products = [
             price: '27.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -487,7 +487,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -507,7 +507,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -527,7 +527,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -547,7 +547,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -567,7 +567,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -587,7 +587,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -607,7 +607,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -627,7 +627,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -647,7 +647,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -667,7 +667,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -687,7 +687,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -707,7 +707,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -727,7 +727,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -747,7 +747,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -767,7 +767,7 @@ export const products = [
             price: '17.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -786,7 +786,7 @@ export const products = [
             price: '5.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -816,7 +816,7 @@ export const products = [
             price: '12.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -836,7 +836,7 @@ export const products = [
             price: '55.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -860,7 +860,7 @@ export const products = [
         price: '55.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -881,7 +881,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: false,
         inStock: false,
@@ -902,7 +902,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -923,7 +923,7 @@ export const products = [
         },
         
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -943,7 +943,7 @@ export const products = [
             price: '37.00'
         },
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -963,7 +963,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: false,
         inStock: false,
@@ -987,7 +987,7 @@ export const products = [
             price: '40.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1011,7 +1011,7 @@ export const products = [
         //     price: '40.00'
         // }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1031,7 +1031,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1051,7 +1051,7 @@ export const products = [
             price: '25.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1071,7 +1071,7 @@ export const products = [
             price: '10.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1099,7 +1099,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1123,7 +1123,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1148,7 +1148,7 @@ export const products = [
         //     price: '42.00'
         // }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1168,7 +1168,7 @@ export const products = [
             price: '30.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1188,7 +1188,7 @@ export const products = [
             price: '37.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1208,7 +1208,7 @@ export const products = [
             price: '37.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1228,7 +1228,7 @@ export const products = [
             price: '37.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1252,7 +1252,7 @@ export const products = [
             price: '35.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1278,7 +1278,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1302,7 +1302,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1326,7 +1326,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1350,7 +1350,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1374,7 +1374,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1398,7 +1398,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1422,7 +1422,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1446,7 +1446,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1471,7 +1471,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1495,7 +1495,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1519,7 +1519,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1543,7 +1543,7 @@ export const products = [
             price: '42.00'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: true,
@@ -1565,7 +1565,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1585,7 +1585,7 @@ export const products = [
             price: '12.50'
         }
         ],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: false,
         isActive: true,
         inStock: false,
@@ -1598,4 +1598,3 @@ export const products = [
     },
 
 ]
-
