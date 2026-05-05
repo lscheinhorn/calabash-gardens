@@ -63,7 +63,7 @@ export const events = [
      priceOptions: ['55.00'],
      shipping: '0.00',
      isActive: true,
-     inStock: true,
+     inStock: false,
      photos: [
          require('../resources/images/Moo_and_Mom_Fall_Joy_.jpg'),
          require('../resources/images/Mary_and_boys.jpg'),
@@ -106,7 +106,7 @@ export const events = [
      priceOptions: ['80.00'],
      shipping: '0.00',
      isActive: true,
-     inStock: true,
+     inStock: false,
      photos: [
          require('../resources/images/cole_photo.jpg'),
      ],
@@ -140,7 +140,7 @@ export const events = [
      priceOptions: ['55.00'],
      shipping: '0.00',
      isActive: true,
-     inStock: true,
+     inStock: false,
      photos: [
          require('../resources/images/Driscoll_and_Jesa.jpg'),
      ],
@@ -176,7 +176,7 @@ anyone who cares to listen.`,
      priceOptions: ['55.00'],
      shipping: '0.00',
      isActive: true,
-     inStock: true,
+     inStock: false,
      photos: [
          require('../resources/images/Driscoll_and_Jesa.jpg'),
      ],
@@ -202,7 +202,7 @@ anyone who cares to listen.`,
      priceOptions: ['45.00'],
      shipping: '0.00',
      isActive: true,
-     inStock: true,
+     inStock: false,
      photos:[
          require('../resources/images/young_brothers_band_photo.jpeg'),
 
@@ -229,7 +229,7 @@ anyone who cares to listen.`,
         priceOptions: ['45.00'],
         shipping: '0.00',
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos:[
             require('../resources/images/FLAIL.JPG'),
             require('../resources/images/Faux in Love Poster .png'),
@@ -259,7 +259,7 @@ anyone who cares to listen.`,
         priceOptions: ['60.00'],
         shipping: '0.00',
         isActive: true,
-        inStock: true,
+        inStock: false,
         photos:[
             require('../resources/images/chad_photo.jpg'),
 
@@ -324,8 +324,6 @@ anyone who cares to listen.`,
    },
 
 ]
-
-
 
 
 
