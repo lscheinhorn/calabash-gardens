@@ -17,10 +17,10 @@ export default function Event (props) {
     const [ dateOption, setDateOption ] = useState( eventDates[0] )
     const [ photoIdx, setPhotoIdx ] = useState( 0 )
     const [ veg, setVeg ]  = useState( false )
-    const [ vegOption, setVegOption ]  = useState( "I am vegetarian" )
+    const [ vegOption, setVegOption ]  = useState( "I am vegetarian (+$10)" )
 
     const [ gFree, setGFree ]  = useState( false )
-    const [ gFreeOption, setGFreeOption ]  = useState( "I am gluten free" )
+    const [ gFreeOption, setGFreeOption ]  = useState( "I am gluten free (+$10)" )
     
     // console.log("price of event", priceOptions[0])
     const [ eventInfo, setEventInfo ] = useState({
@@ -140,7 +140,7 @@ export default function Event (props) {
     const handleVeg = () => {
         if(veg) {
             setVeg(false)
-            setVegOption("I am vegetarian")
+            setVegOption("I am vegetarian (+$10)")
         } else {
             setVeg(true)
             setVegOption("I eat meat")
@@ -151,7 +151,7 @@ export default function Event (props) {
     const handleGFree = () => {
         if(gFree) {
             setGFree(false)
-            setGFreeOption("I am gluten free")
+            setGFreeOption("I am gluten free (+$10)")
         } else {
             setGFree(true)
             setGFreeOption("I eat gluten")

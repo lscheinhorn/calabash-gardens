@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-PM workflow baseline is drafted on branch `codex/pm-workflow-docs` and ready for Luke review.
+Customer-request fixes are drafted on branch `codex/cousin-request-fixes` and ready for Luke review.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ PM workflow baseline is drafted on branch `codex/pm-workflow-docs` and ready for
 
 ## Current Phase
 
-Phase 0: establish project documentation and Git workflow.
+Phase 1: small customer-request content and pricing updates.
 
 ## Done Work
 
@@ -30,10 +30,16 @@ Phase 0: establish project documentation and Git workflow.
 - Created `AGENTS.md`.
 - Created project-specific `README.md`.
 - Created docs for app overview, architecture, data model, maintenance, and agent workflow.
+- Updated Calabash Experience main blurb.
+- Updated vegetarian and gluten-free event option labels to show `+$10`.
+- Updated product shipping from `$15` to `$17`.
+- Updated cart shipping cap from `$15` to `$17`.
+- Added cart shipping increase note.
+- Updated Saffron Salt 2 oz from `$12.50` to `$15.00`.
 
 ## In Progress Work
 
-- Await Luke review of the documentation baseline.
+- Await Luke review of customer-request fixes.
 
 ## Planned Work
 
@@ -72,10 +78,12 @@ Phase 0: establish project documentation and Git workflow.
 
 - 2026-05-05: `npm run build` completed successfully with warnings.
 - 2026-05-05: Dev server starts when allowed to bind to `127.0.0.1`.
+- 2026-05-05: `npm run build` completed successfully after customer-request fixes, with the same existing warnings.
 
 ## Commits
 
-- Pending commit for Phase 0 documentation baseline.
+- `bf03950 docs: establish PM workflow`
+- Pending commit for customer-request fixes.
 
 ## Deployments
 

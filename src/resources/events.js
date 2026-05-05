@@ -11,11 +11,10 @@ return numbers.join('')
 
 
 export const experienceBlurb = [
-   `The Calabash Experience is our way to bring the finest quality Calabash saffron, wild foraged foods, organic produce and regeneratively grown meats from hyper local farms to your plate in the most beautiful ways. Calabash Gardens is harboring a space for creativity, diversity and culture with an air of accessibility. It's easier than you may think to eat local, eat well and use saffron! We are purveyors of fine foods and spirits, featuring local, regenerative and responsibly grown food, with a flare for the diverse and unexpected. We have an incredible core team dedicated to bringing you excellent service, inviting our guests to enjoy a unique experience duplicated nowhere else. Using hyperlocal, wildcrafted, organic and regeneratively grown meats and produce allows us to present a completely sustainable experience while also maintaining a superior level of health and quality for our guests and the planet alike. We are merging accessibility, diversity, uniqueness, health and above all flavor, for an incredible evening of food, spirits, and of course most of all enjoyment!`,
-   `The fine dining experiences take a 50% non refundable deposit, the second 50% is taken at time of service. The music experiences are paid in full at time of purchase and are non refundable.`,
+   `The Calabash Experience is our way to bring the finest quality Calabash saffron, wild foraged foods, organic produce and regeneratively grown meats from hyper local farms to your plate in the most beautiful ways. Calabash Gardens is harboring a space for creativity, diversity and culture with an air of accessibility. It's easier than you may think to eat local, eat well and use saffron! We have an incredible core team dedicated to bringing you excellent service, inviting our guests to enjoy a unique experience duplicated nowhere else. Using hyperlocal meats and produce allows us to present a sustainable experience while also maintaining a superior level of health and quality for our guests and the planet alike. We are merging accessibility, diversity, uniqueness, health and above all flavor, for an unforgettable evening of food, spirits, and of course most of all, enjoyment!`,
    `We can accommodate Vegetarians and Gluten Free, please hit the Vegetarian or Gluten Free options when purchasing tickets. There is an additional $10 fee for either or both options. If you are purchasing a mix of meat, veggie or gluten free please make sure you have picked the correct option before clicking buy tickets, and check again once in the cart.`,
-   `Events are held at 1831 Fish Pond Rd Wells River Vermont 05081. Arrival time is between 4:30 and 5pm with seating at 5:30pm. Menus are subject to change depending on local availability and seasonality. There are 30 seats available for each Elevated dining Experience and unlimited for music events.`,
-   `The Calabash Gardens team works incredibly hard to bring these events to you, in light of all the hard work we do, and the associated cost of these events, 50% of the ticket price is charged at time of purchase with no refund available. The second 50% is taken at time of arrival as you check in. Thank you for understanding. Gratuities are appreciated for our incredibly hard working staff, tips are split evenly between all function employees.`
+   `Events are held at 1831 Fish Pond Rd Wells River Vermont 05081. Arrival time is between 4:30 and 5pm with seating at 5:30pm. Menus are subject to change depending on local availability and seasonality. There are 30 seats available for Elevated dining Experiences and unlimited availability for music events.`,
+   `The Calabash team works incredibly hard to bring these events to you, in light of all the hard work we do, and the associated cost of these events, 50% of the ticket price is charged at time of purchase and 50% at check in for Elevated dining experiences. Tickets for music events are paid in full at time of purchase. There is a zero refund policy for online ticket sales. Thank you for understanding. Gratuities are appreciated for our incredibly hard working staff, tips are split evenly between all function employees.`
 
 ]
 
@@ -325,7 +324,6 @@ anyone who cares to listen.`,
    },
 
 ]
-
 
 
 

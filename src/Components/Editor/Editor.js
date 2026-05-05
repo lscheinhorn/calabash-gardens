@@ -14,7 +14,7 @@ export default function Editor () {
             option: "",
             price: ""
         }],
-        shipping: '15.00',
+        shipping: '17.00',
         isHighlighted: true,
         isActive: true,
         inStock: true,
