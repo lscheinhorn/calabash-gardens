@@ -1,6 +1,6 @@
 # Firebase Setup Plan
 
-This document tracks Firebase setup for a future admin editor. The current implementation adds an env-driven Firebase config foundation, but it does not connect public site data to Firebase, deploy rules, migrate content, or add admin editing behavior.
+This document tracks Firebase setup for a future admin editor. The current implementation adds an env-driven Firebase config foundation and admin auth shell, but it does not connect public site data to Firebase, deploy rules, migrate content, or add admin editing behavior.
 
 ## Current State
 
@@ -11,9 +11,9 @@ This document tracks Firebase setup for a future admin editor. The current imple
 - `package.json` now lists `firebase`.
 - `package-lock.json` lists `firebase`.
 - `node_modules/firebase` exists locally.
-- `src/Components/Admin/Admin.js` is fully commented out.
+- `src/Components/Admin/Admin.js` provides a Firebase sign-in shell and checks `adminUsers/{uid}` for active admin access.
 - `src/Components/ProductEditor/ProductEditor.js` is fully commented out.
-- `src/Components/Editor/Editor.js` imports Firebase services, but it is not mounted through the inactive admin route.
+- `src/Components/Editor/Editor.js` imports Firebase services, but it is not mounted by the admin auth shell.
 
 ## Non-Goals
 
@@ -98,7 +98,7 @@ Rules must be designed before writes are enabled:
 
 ### Step 1: Dependency And Config Branch
 
-Status: in progress on `codex/firebase-dependency-config`.
+Status: done.
 
 - Fix dependency name. Done.
 - Add active Firebase config module that reads environment variables. Done.
@@ -108,9 +108,9 @@ Status: in progress on `codex/firebase-dependency-config`.
 
 ### Step 2: Admin Auth Shell
 
-- Restore `/admin` as a login/dashboard shell.
-- Gate dashboard access behind Firebase Auth.
-- Check admin allowlist before showing editor navigation.
+- Restore `/admin` as a login/dashboard shell. Done.
+- Gate dashboard access behind Firebase Auth. Done.
+- Check admin allowlist before showing editor navigation. Done.
 - No product/event/content writes yet.
 
 ### Step 3: Read-Only Backend Probe

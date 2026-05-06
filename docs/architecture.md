@@ -38,4 +38,6 @@ The contact form uses EmailJS from `src/Components/Contact/Contact.js`.
 
 ## Backend Foundation
 
-`src/firebase-config.js` provides an env-driven Firebase config foundation, but public site data still comes from static resources. The repo does not currently have an active backend data model, active admin auth flow, or active security rules.
+`src/firebase-config.js` provides an env-driven Firebase config foundation, and `/admin` provides a Firebase sign-in shell with an allowlist check. Public site data still comes from static resources. The repo does not currently have an active backend data model, content editor, or active security rules.
+
+The admin route is lazy-loaded from `src/App.js` so Firebase/admin code stays out of the main storefront bundle.

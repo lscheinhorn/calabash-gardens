@@ -1,57 +1,212 @@
-// import {  signInWithEmailAndPassword } from "firebase/auth";
-// import { auth } from '../../firebase-config'
-// import { useState } from 'react'
-// import  Editor  from '../Editor/Editor'
+import "./Admin.css";
 
-// export default function Admin () {
-//     const [ email, setEmail ] = useState("")
-//     const [ password, setPassword ] = useState("")
-//     const [ user, setUser ] = useState("")
-//     const uid = ["1PtSGU91GXRVssf17Y2lDReYes53", "IvIXfrqaoQZ4JkwgRLrcmSvnQVz1"]
+import { useEffect, useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
 
-//     const handleSubmit = () => {
-//         console.log("email", email, "password", password)
-//         signInWithEmailAndPassword(auth, email, password)
-//         .then((userCredential) => {
-//             // Signed in 
-//             const user = userCredential.user;
-//             console.log("user", user)
-//             setUser(user)
-//         })
-//         .catch((error) => {
-//             const errorCode = error.code;
-//             const errorMessage = error.message;
-//             console.log("Error signing in", errorCode, errorMessage)
-//         });
-//     }
-    
-//     const isAdmin = () => {
-//         return (user.uid === uid[0]) || (user.uid === uid[1])
-//     }
+import { auth, db, isFirebaseConfigured } from "../../firebase-config";
 
-//     return (
-//         <div id="admin">
-//             Admin
+const adminCollection = "adminUsers";
 
-//             <form onSubmit={ handleSubmit }>
-//                 <input 
-//                     value={ email }
-//                     onChange={ (e) => { setEmail( e.target.value ) }}
-//                     name="email"
-//                     type='text'
-//                     placeholder="Email"
-//                 />
-//                 <input 
-//                     value={ password }
-//                     onChange={ (e) => { setPassword( e.target.value ) }}
-//                     name="password"
-//                     type='text'
-//                     placeholder="Password"
-//                 />
-//                 <button type="submit">Sign In</button>
-//             </form>
+export default function Admin() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [user, setUser] = useState(null);
+  const [isApprovedAdmin, setIsApprovedAdmin] = useState(false);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
+  const [isSigningIn, setIsSigningIn] = useState(false);
+  const [message, setMessage] = useState("");
 
-//             { isAdmin() ? <Editor user={ user }/> : null }
-//         </div>
-//     )
-// } 
+  useEffect(() => {
+    if (!auth) {
+      return undefined;
+    }
+
+    return onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+      setIsApprovedAdmin(false);
+      setMessage("");
+    });
+  }, []);
+
+  useEffect(() => {
+    let isCurrentCheck = true;
+
+    const checkAdminAccess = async () => {
+      if (!user || !db) {
+        setIsApprovedAdmin(false);
+        return;
+      }
+
+      const userId = user.uid;
+      setIsCheckingAdmin(true);
+
+      try {
+        const adminUser = await getDoc(doc(db, adminCollection, userId));
+        if (!isCurrentCheck) {
+          return;
+        }
+
+        const adminData = adminUser.exists() ? adminUser.data() : null;
+        setIsApprovedAdmin(adminData?.active === true);
+      } catch (error) {
+        if (isCurrentCheck) {
+          setIsApprovedAdmin(false);
+          setMessage("Admin access could not be checked.");
+        }
+      } finally {
+        if (isCurrentCheck) {
+          setIsCheckingAdmin(false);
+        }
+      }
+    };
+
+    checkAdminAccess();
+
+    return () => {
+      isCurrentCheck = false;
+    };
+  }, [user]);
+
+  const canUseFirebase = isFirebaseConfigured && auth && db;
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!canUseFirebase) {
+      setMessage("Firebase is not configured for this environment.");
+      return;
+    }
+
+    setIsSigningIn(true);
+    setMessage("");
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      setPassword("");
+    } catch (error) {
+      setMessage("Sign in failed. Check the email and password.");
+    } finally {
+      setIsSigningIn(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    if (!auth) {
+      return;
+    }
+
+    await signOut(auth);
+    setEmail("");
+    setPassword("");
+    setIsApprovedAdmin(false);
+  };
+
+  const renderDashboard = () => {
+    if (isCheckingAdmin) {
+      return <p className="admin_status">Checking admin access...</p>;
+    }
+
+    if (!isApprovedAdmin) {
+      return (
+        <div className="admin_panel">
+          <h2>Access Pending</h2>
+          <p>
+            This account is signed in, but it is not approved for the admin
+            dashboard yet.
+          </p>
+        </div>
+      );
+    }
+
+    return (
+      <div className="admin_panel">
+        <h2>Dashboard</h2>
+        <p>Admin access is confirmed.</p>
+        <div className="admin_placeholder_grid">
+          <div>
+            <h3>Products</h3>
+            <p>Editor not connected yet.</p>
+          </div>
+          <div>
+            <h3>Events</h3>
+            <p>Editor not connected yet.</p>
+          </div>
+          <div>
+            <h3>Site Content</h3>
+            <p>Editor not connected yet.</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <main id="admin" className="admin_page">
+      <section className="admin_shell">
+        <div className="admin_header">
+          <h1>Admin</h1>
+          {user ? (
+            <button className="admin_secondary_button" onClick={handleSignOut}>
+              Sign Out
+            </button>
+          ) : null}
+        </div>
+
+        {!canUseFirebase ? (
+          <div className="admin_panel">
+            <h2>Setup Needed</h2>
+            <p>
+              Firebase environment variables are required before admin sign in
+              can be used.
+            </p>
+          </div>
+        ) : null}
+
+        {!user ? (
+          <form className="admin_form" onSubmit={handleSubmit}>
+            <label>
+              Email
+              <input
+                autoComplete="email"
+                disabled={!canUseFirebase || isSigningIn}
+                name="email"
+                onChange={(event) => setEmail(event.target.value)}
+                type="email"
+                value={email}
+              />
+            </label>
+
+            <label>
+              Password
+              <input
+                autoComplete="current-password"
+                disabled={!canUseFirebase || isSigningIn}
+                name="password"
+                onChange={(event) => setPassword(event.target.value)}
+                type="password"
+                value={password}
+              />
+            </label>
+
+            <button
+              className="admin_primary_button"
+              disabled={!canUseFirebase || isSigningIn || !email || !password}
+              type="submit"
+            >
+              {isSigningIn ? "Signing In..." : "Sign In"}
+            </button>
+          </form>
+        ) : (
+          renderDashboard()
+        )}
+
+        {message ? <p className="admin_message">{message}</p> : null}
+      </section>
+    </main>
+  );
+}
