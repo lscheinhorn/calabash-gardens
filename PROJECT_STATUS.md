@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin data-shape planning is in progress on branch `codex/admin-data-shapes`.
+Firestore rules/data-shape alignment is in progress on branch `codex/firestore-rules-align-shapes`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin data-shape planning is in progress on branch `codex/admin-data-shapes`.
 
 ## Current Phase
 
-Phase 10: Admin data-shape planning.
+Phase 11: Firestore rules/data-shape alignment.
 
 ## Done Work
 
@@ -57,6 +57,7 @@ Phase 10: Admin data-shape planning.
 - Merged admin setup/status into `main`.
 - Merged Firestore rules planning into `main`.
 - Merged Storage rules planning into `main`.
+- Merged admin data-shape planning into `main`.
 
 ## Planned Work
 
@@ -69,7 +70,7 @@ Phase 10: Admin data-shape planning.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Review admin data-shape contract before merge.
+- Review Firestore rules/data-shape alignment before merge.
 - Decide first editor implementation slice.
 - Plan seed/export strategy before backend content reads.
 
@@ -91,6 +92,7 @@ Phase 10: Admin data-shape planning.
 - Draft Firestore rules are not deployed and `firebase.json` remains commented out.
 - Draft Storage rules are not deployed and `firebase.json` remains commented out.
 - Admin data-shape contract is a planning document and is not a migration.
+- Draft Firestore rules are aligned with the data-shape contract but are still not deployed.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -115,6 +117,7 @@ Phase 10: Admin data-shape planning.
 - The first admin user must be bootstrapped manually before draft rules are deployed.
 - Storage rules must be reviewed before image upload controls are added.
 - Admin editor forms must follow the documented data shapes unless Luke approves a change.
+- Firestore validators must be rechecked whenever editor fields change.
 
 ## Verification History
 
@@ -139,7 +142,8 @@ Phase 10: Admin data-shape planning.
 - `a28459e docs: add admin setup status`
 - `1fb5d03 docs: draft firestore rules`
 - `48f1e1d docs: draft storage rules`
-- Pending commit for admin data-shape planning.
+- `3284b98 docs: define admin data shapes`
+- Pending commit for Firestore rules/data-shape alignment.
 
 ## Deployments
 

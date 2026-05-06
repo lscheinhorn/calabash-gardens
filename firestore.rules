@@ -32,32 +32,85 @@ service cloud.firestore {
         && request.resource.data.role is string;
     }
 
-    function validPublicDocument() {
+    function validProduct() {
       return hasOnlyAllowedKeys([
-          'active',
           'category',
           'createdAt',
-          'date',
-          'description',
-          'displayOrder',
-          'eventDates',
-          'featured',
-          'images',
           'info',
-          'inventory',
-          'key',
+          'info1',
+          'info2',
+          'inStock',
+          'isActive',
+          'isHighlighted',
+          'photos',
+          'priceOptions',
+          'published',
+          'shipping',
+          'slug',
+          'sortOrder',
+          'title',
+          'updatedAt'
+        ])
+        && hasRequiredKeys(['inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
+        && request.resource.data.published is bool
+        && request.resource.data.inStock is bool
+        && request.resource.data.isActive is bool
+        && request.resource.data.photos is list
+        && request.resource.data.priceOptions is list
+        && request.resource.data.shipping is string
+        && request.resource.data.title is string;
+    }
+
+    function validEvent() {
+      return hasOnlyAllowedKeys([
+          'capacity',
+          'category',
+          'childTicket',
+          'createdAt',
+          'date',
+          'dietaryOptions',
+          'eventDates',
+          'eventType',
+          'info',
+          'inStock',
+          'isActive',
           'link',
           'photos',
           'priceOptions',
           'published',
           'shipping',
           'slug',
+          'sortOrder',
           'title',
           'updatedAt'
         ])
-        && hasRequiredKeys(['published', 'title'])
+        && hasRequiredKeys(['category', 'date', 'eventDates', 'info', 'inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
+        && request.resource.data.eventDates is list
+        && request.resource.data.category is string
+        && request.resource.data.date is timestamp
+        && request.resource.data.info is list
+        && request.resource.data.inStock is bool
+        && request.resource.data.isActive is bool
+        && request.resource.data.photos is list
+        && request.resource.data.priceOptions is list
         && request.resource.data.published is bool
+        && request.resource.data.shipping is string
         && request.resource.data.title is string;
+    }
+
+    function validSiteContent() {
+      return hasOnlyAllowedKeys(['createdAt', 'published', 'sections', 'sortOrder', 'updatedAt'])
+        && hasRequiredKeys(['published', 'sections'])
+        && request.resource.data.published is bool
+        && (request.resource.data.sections is map || request.resource.data.sections is list);
+    }
+
+    function validInventory() {
+      return hasOnlyAllowedKeys(['createdAt', 'dietaryVariant', 'eventDate', 'linkedId', 'linkedType', 'notes', 'stock', 'updatedAt'])
+        && hasRequiredKeys(['linkedId', 'linkedType', 'stock'])
+        && request.resource.data.linkedId is string
+        && request.resource.data.linkedType is string
+        && request.resource.data.stock is number;
     }
 
     match /adminUsers/{userId} {
@@ -68,26 +121,27 @@ service cloud.firestore {
     }
 
     match /products/{productId} {
-      allow get, list: if resource.data.published == true || isAdmin();
-      allow create, update: if isAdmin() && validPublicDocument();
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validProduct();
       allow delete: if isAdmin();
     }
 
     match /events/{eventId} {
-      allow get, list: if resource.data.published == true || isAdmin();
-      allow create, update: if isAdmin() && validPublicDocument();
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validEvent();
       allow delete: if isAdmin();
     }
 
     match /siteContent/{contentId} {
-      allow get, list: if resource.data.published == true || isAdmin();
-      allow create, update: if isAdmin() && validPublicDocument();
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validSiteContent();
       allow delete: if isAdmin();
     }
 
     match /inventory/{inventoryId} {
       allow get, list: if isAdmin();
-      allow create, update, delete: if isAdmin();
+      allow create, update: if isAdmin() && validInventory();
+      allow delete: if isAdmin();
     }
 
     match /orders/{orderId} {
