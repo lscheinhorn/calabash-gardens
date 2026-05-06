@@ -47,6 +47,7 @@ npm run build
 - `docs/architecture.md`: technical architecture
 - `docs/admin-setup.md`: Firebase/admin setup checklist
 - `docs/firestore-rules-plan.md`: draft Firestore security rules notes
+- `docs/storage-rules-plan.md`: draft Firebase Storage rules notes
 - `docs/data-model.md`: current static data model
 - `docs/maintenance.md`: common maintenance tasks
 - `docs/agent-workflow.md`: Git and phase workflow

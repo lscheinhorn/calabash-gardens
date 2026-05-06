@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Firestore rules planning is in progress on branch `codex/firestore-rules-plan`.
+Storage rules planning is in progress on branch `codex/storage-rules-plan`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Firestore rules planning is in progress on branch `codex/firestore-rules-plan`.
 
 ## Current Phase
 
-Phase 8: Firestore rules planning.
+Phase 9: Storage rules planning.
 
 ## Done Work
 
@@ -55,6 +55,7 @@ Phase 8: Firestore rules planning.
 - Merged the Firebase dependency/config foundation into `main`.
 - Merged the admin auth shell into `main`.
 - Merged admin setup/status into `main`.
+- Merged Firestore rules planning into `main`.
 
 ## Planned Work
 
@@ -67,9 +68,9 @@ Phase 8: Firestore rules planning.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Review draft Firestore rules before merge.
-- Draft Storage rules before image upload work.
+- Review draft Storage rules before merge.
 - Plan product/event/content editor data shapes before write controls.
+- Plan image upload data shape before upload UI.
 
 ## Bugs
 
@@ -87,6 +88,7 @@ Phase 8: Firestore rules planning.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - Real admin testing still needs Firebase project values and approved admin user records.
 - Draft Firestore rules are not deployed and `firebase.json` remains commented out.
+- Draft Storage rules are not deployed and `firebase.json` remains commented out.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -109,6 +111,7 @@ Phase 8: Firestore rules planning.
 - Admin route should stay lazy-loaded so Firebase/admin code is not bundled into the main storefront path.
 - Firestore rules must be reviewed before admin write controls are added.
 - The first admin user must be bootstrapped manually before draft rules are deployed.
+- Storage rules must be reviewed before image upload controls are added.
 
 ## Verification History
 
@@ -131,7 +134,8 @@ Phase 8: Firestore rules planning.
 - `17367b9 chore: add firebase config foundation`
 - `c805190 feat: add admin auth shell`
 - `a28459e docs: add admin setup status`
-- Pending commit for Firestore rules planning.
+- `1fb5d03 docs: draft firestore rules`
+- Pending commit for Storage rules planning.
 
 ## Deployments
 
