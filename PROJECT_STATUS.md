@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin/backend planning is in progress on branch `codex/admin-backend-plan`.
+Firebase setup planning is in progress on branch `codex/firebase-setup-plan`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin/backend planning is in progress on branch `codex/admin-backend-plan`.
 
 ## Current Phase
 
-Phase 3: admin/backend implementation planning.
+Phase 4: Firebase setup planning.
 
 ## Done Work
 
@@ -50,6 +50,7 @@ Phase 3: admin/backend implementation planning.
 - Document existing admin/Firebase blockers and recommended first implementation slice.
 - Implement read-only content adapter boundary without changing protected resource files.
 - Add read-only helper functions to the content adapter and use them where equivalent.
+- Merged the read-only content adapter and helper phases into `main`.
 
 ## Planned Work
 
@@ -62,6 +63,8 @@ Phase 3: admin/backend implementation planning.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
+- Resolve Firebase dependency mismatch in a dedicated approved branch.
+- Create active Firebase config only after approval.
 
 ## Bugs
 
@@ -76,6 +79,7 @@ Phase 3: admin/backend implementation planning.
 - Checkout is client-side PayPal integration only; order persistence and fulfillment workflow are unclear.
 - Inventory is static and may not prevent overselling.
 - Admin/Firebase code is commented out; the intended data-management path needs approval.
+- `package.json` lists `firebzase`, while `package-lock.json` lists `firebase`; this dependency mismatch must be fixed before Firebase activation.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
 - Product, event, content, inventory, image, and public key files are protected and must not be edited without explicit approval.
@@ -91,6 +95,7 @@ Phase 3: admin/backend implementation planning.
 - First implementation slice should be a read-only content adapter, not Firebase activation or admin editing.
 - `src/data/siteData.js` is the initial read-only content adapter boundary.
 - Adapter helpers are read-only and must not mutate or normalize protected source data.
+- Firebase setup should use environment variables from `.env.local`; an `.env.example` template can be added only after approval.
 
 ## Verification History
 
@@ -106,7 +111,10 @@ Phase 3: admin/backend implementation planning.
 - `2966a85 merge: cousin request fixes`
 - `160e5a1 merge: prevent past event purchases`
 - `31f7ad7 merge: backend readiness guardrails`
-- Pending commit for admin/backend plan.
+- `67fb218 merge: admin backend plan`
+- `7a348ef merge: read-only content adapter`
+- `39a1396 merge: content adapter helpers`
+- Pending commit for Firebase setup planning.
 
 ## Deployments
 
