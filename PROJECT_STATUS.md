@@ -49,6 +49,7 @@ Phase 3: admin/backend implementation planning.
 - Use subagents to review implementation readiness and guardrail compliance before coding.
 - Document existing admin/Firebase blockers and recommended first implementation slice.
 - Implement read-only content adapter boundary without changing protected resource files.
+- Add read-only helper functions to the content adapter and use them where equivalent.
 
 ## Planned Work
 
@@ -89,6 +90,7 @@ Phase 3: admin/backend implementation planning.
 - Recommended backend path is Firebase Auth, Firestore, and Storage, pending Luke approval before implementation.
 - First implementation slice should be a read-only content adapter, not Firebase activation or admin editing.
 - `src/data/siteData.js` is the initial read-only content adapter boundary.
+- Adapter helpers are read-only and must not mutate or normalize protected source data.
 
 ## Verification History
 
