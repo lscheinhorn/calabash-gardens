@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Firebase setup planning is in progress on branch `codex/firebase-setup-plan`.
+Firebase dependency/config setup is in progress on branch `codex/firebase-dependency-config`.
 
 ## Approved Tech Stack
 
@@ -15,11 +15,11 @@ Firebase setup planning is in progress on branch `codex/firebase-setup-plan`.
 - PayPal React SDK for checkout
 - EmailJS for contact form
 - Static JS resource files for products, events, content, and event inventory
-- Firebase is present as commented/dormant setup, not active
+- Firebase is present as an env-driven config module, not connected to public site data
 
 ## Current Phase
 
-Phase 4: Firebase setup planning.
+Phase 5: Firebase dependency/config setup.
 
 ## Done Work
 
@@ -51,6 +51,7 @@ Phase 4: Firebase setup planning.
 - Implement read-only content adapter boundary without changing protected resource files.
 - Add read-only helper functions to the content adapter and use them where equivalent.
 - Merged the read-only content adapter and helper phases into `main`.
+- Merged the Firebase setup plan into `main`.
 
 ## Planned Work
 
@@ -63,8 +64,9 @@ Phase 4: Firebase setup planning.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Resolve Firebase dependency mismatch in a dedicated approved branch.
-- Create active Firebase config only after approval.
+- Build and verify Firebase dependency/config setup.
+- Review Firebase dependency/config setup before merge.
+- Create admin auth shell only after this branch is reviewed and merged.
 
 ## Bugs
 
@@ -79,7 +81,8 @@ Phase 4: Firebase setup planning.
 - Checkout is client-side PayPal integration only; order persistence and fulfillment workflow are unclear.
 - Inventory is static and may not prevent overselling.
 - Admin/Firebase code is commented out; the intended data-management path needs approval.
-- `package.json` lists `firebzase`, while `package-lock.json` lists `firebase`; this dependency mismatch must be fixed before Firebase activation.
+- Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
+- `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
 - Product, event, content, inventory, image, and public key files are protected and must not be edited without explicit approval.
@@ -96,6 +99,7 @@ Phase 4: Firebase setup planning.
 - `src/data/siteData.js` is the initial read-only content adapter boundary.
 - Adapter helpers are read-only and must not mutate or normalize protected source data.
 - Firebase setup should use environment variables from `.env.local`; an `.env.example` template can be added only after approval.
+- Firebase dependency/config setup must not connect products, events, content, or inventory to Firebase.
 
 ## Verification History
 
@@ -114,7 +118,8 @@ Phase 4: Firebase setup planning.
 - `67fb218 merge: admin backend plan`
 - `7a348ef merge: read-only content adapter`
 - `39a1396 merge: content adapter helpers`
-- Pending commit for Firebase setup planning.
+- `b9205f1 docs: plan firebase setup`
+- Pending commit for Firebase dependency/config setup.
 
 ## Deployments
 

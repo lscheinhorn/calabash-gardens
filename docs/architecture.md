@@ -36,6 +36,6 @@ Checkout uses `@paypal/react-paypal-js` in `src/Components/Paypal/Paypal.js`. Ca
 
 The contact form uses EmailJS from `src/Components/Contact/Contact.js`.
 
-## Dormant Backend Work
+## Backend Foundation
 
-Firebase imports and admin/auth code exist but are commented out. The repo does not currently have an active backend data model, active auth, or active security rules.
+`src/firebase-config.js` provides an env-driven Firebase config foundation, but public site data still comes from static resources. The repo does not currently have an active backend data model, active admin auth flow, or active security rules.

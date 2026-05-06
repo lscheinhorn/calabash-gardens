@@ -1,24 +1,24 @@
 # Firebase Setup Plan
 
-This phase plans Firebase setup for a future admin editor. It does not activate Firebase, add dependencies, deploy rules, migrate content, or change runtime behavior.
+This document tracks Firebase setup for a future admin editor. The current implementation adds an env-driven Firebase config foundation, but it does not connect public site data to Firebase, deploy rules, migrate content, or add admin editing behavior.
 
 ## Current State
 
-- `src/firebase-config.js` contains commented Firebase setup code.
+- `src/firebase-config.js` exports an env-driven Firebase config foundation.
+- Firebase services export `null` until required `REACT_APP_FIREBASE_*` variables are configured.
 - `.firebaserc` is commented out and references project `calabash-54fb5`.
 - `firebase.json` is commented out.
-- `package.json` lists `firebzase`, which appears to be a typo.
+- `package.json` now lists `firebase`.
 - `package-lock.json` lists `firebase`.
 - `node_modules/firebase` exists locally.
 - `src/Components/Admin/Admin.js` is fully commented out.
 - `src/Components/ProductEditor/ProductEditor.js` is fully commented out.
-- `src/Components/Editor/Editor.js` imports Firebase services, but active config exports do not exist.
+- `src/Components/Editor/Editor.js` imports Firebase services, but it is not mounted through the inactive admin route.
 
 ## Non-Goals
 
 - Do not modify protected content/data files.
-- Do not enable Firebase in runtime code.
-- Do not add, remove, or install dependencies.
+- Do not connect products, events, content, inventory, checkout, or public pages to Firebase yet.
 - Do not deploy Firebase hosting, Firestore rules, or Storage rules.
 - Do not build the admin editor yet.
 - Do not migrate product, event, content, or inventory data.
@@ -49,13 +49,12 @@ Required future variables:
 
 ## Dependency Plan
 
-Before activation, resolve the dependency mismatch:
+Dependency mismatch status:
 
-- Replace `firebzase` in `package.json` with `firebase`.
-- Confirm `package-lock.json` remains consistent.
-- Do this in a dedicated approved branch because dependency changes can affect builds.
+- `firebzase` has been replaced with `firebase` in `package.json`.
+- `package-lock.json` already listed `firebase`.
 
-Do not make this change in the planning branch.
+Any future Firebase package upgrades should happen in a dedicated approved branch because dependency changes can affect builds.
 
 ## Admin Access Model
 
@@ -99,11 +98,11 @@ Rules must be designed before writes are enabled:
 
 ### Step 1: Dependency And Config Branch
 
-After approval:
+Status: in progress on `codex/firebase-dependency-config`.
 
-- Fix dependency name.
-- Add active Firebase config module that reads environment variables.
-- Export `auth`, `db`, and `storage`.
+- Fix dependency name. Done.
+- Add active Firebase config module that reads environment variables. Done.
+- Export `auth`, `db`, and `storage`. Done.
 - Do not connect public data reads to Firebase yet.
 - Build must pass.
 

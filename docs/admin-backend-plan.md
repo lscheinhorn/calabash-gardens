@@ -8,12 +8,12 @@ Recommended backend: Firebase Auth, Firestore, and Firebase Storage.
 
 Why:
 
-- The repo already has dormant Firebase/Auth/Firestore code.
+- The repo already has an env-driven Firebase config foundation and dormant admin/Auth/Firestore UI experiments.
 - It fits a small owner-managed admin workflow.
 - Auth, document storage, image storage, and security rules can live in one stack.
 - It avoids building and hosting a custom server before the business needs one.
 
-No Firebase dependency, config, rule, or data migration should be changed until Luke approves implementation of a specific phase.
+No Firebase rule, data migration, or public data connection should be changed until Luke approves implementation of a specific phase.
 
 ## Current Repo State
 
@@ -28,10 +28,10 @@ The public site is still powered by static JavaScript resource files:
 The current admin/backend code is not production-ready:
 
 - `/admin` exists as a route, but `src/Components/Admin/Admin.js` is fully commented out.
-- `src/firebase-config.js` is fully commented out.
+- `src/firebase-config.js` exports env-driven Firebase `app`, `auth`, `db`, and `storage` values, which remain `null` until required environment variables are configured.
 - `src/Components/ProductEditor/ProductEditor.js` is fully commented out.
-- `src/Components/Editor/Editor.js` imports Firebase from a config file that does not currently export active Firebase services.
-- `package.json` contains `firebzase`, which appears to be a stale or misspelled Firebase dependency.
+- `src/Components/Editor/Editor.js` imports Firebase services, but it is not mounted through the inactive admin route.
+- `package.json` lists the real `firebase` dependency.
 - Orders are not persisted to a backend after PayPal approval.
 
 These facts are blockers to a safe admin editor and should be handled in planned phases, not patched casually.
