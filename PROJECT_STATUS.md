@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Firebase dependency/config setup is in progress on branch `codex/firebase-dependency-config`.
+Admin auth shell is in progress on branch `codex/admin-auth-shell`.
 
 ## Approved Tech Stack
 
@@ -15,11 +15,11 @@ Firebase dependency/config setup is in progress on branch `codex/firebase-depend
 - PayPal React SDK for checkout
 - EmailJS for contact form
 - Static JS resource files for products, events, content, and event inventory
-- Firebase is present as an env-driven config module, not connected to public site data
+- Firebase is present as an env-driven config module, with admin auth shell only
 
 ## Current Phase
 
-Phase 5: Firebase dependency/config setup.
+Phase 6: Admin auth shell.
 
 ## Done Work
 
@@ -52,6 +52,7 @@ Phase 5: Firebase dependency/config setup.
 - Add read-only helper functions to the content adapter and use them where equivalent.
 - Merged the read-only content adapter and helper phases into `main`.
 - Merged the Firebase setup plan into `main`.
+- Merged the Firebase dependency/config foundation into `main`.
 
 ## Planned Work
 
@@ -64,9 +65,9 @@ Phase 5: Firebase dependency/config setup.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Build and verify Firebase dependency/config setup.
-- Review Firebase dependency/config setup before merge.
-- Create admin auth shell only after this branch is reviewed and merged.
+- Build and verify admin auth shell.
+- Review admin auth shell before merge.
+- Create product/event/content editor planning branch only after auth shell is reviewed and merged.
 
 ## Bugs
 
@@ -80,7 +81,7 @@ Phase 5: Firebase dependency/config setup.
 
 - Checkout is client-side PayPal integration only; order persistence and fulfillment workflow are unclear.
 - Inventory is static and may not prevent overselling.
-- Admin/Firebase code is commented out; the intended data-management path needs approval.
+- Admin auth shell exists, but content editing and public content backend data reads are not active.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
@@ -100,6 +101,8 @@ Phase 5: Firebase dependency/config setup.
 - Adapter helpers are read-only and must not mutate or normalize protected source data.
 - Firebase setup should use environment variables from `.env.local`; an `.env.example` template can be added only after approval.
 - Firebase dependency/config setup must not connect products, events, content, or inventory to Firebase.
+- Admin auth shell must not mount `src/Components/Editor/Editor.js` or expose write controls.
+- Admin route should stay lazy-loaded so Firebase/admin code is not bundled into the main storefront path.
 
 ## Verification History
 
@@ -119,7 +122,8 @@ Phase 5: Firebase dependency/config setup.
 - `7a348ef merge: read-only content adapter`
 - `39a1396 merge: content adapter helpers`
 - `b9205f1 docs: plan firebase setup`
-- Pending commit for Firebase dependency/config setup.
+- `17367b9 chore: add firebase config foundation`
+- Pending commit for admin auth shell.
 
 ## Deployments
 

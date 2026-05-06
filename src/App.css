@@ -8,3 +8,8 @@
 .app_wrap {
     padding-bottom: 20vh;
 }
+
+.route_loading {
+    padding: 48px 16px;
+    text-align: center;
+}

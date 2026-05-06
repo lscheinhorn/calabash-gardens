@@ -27,14 +27,14 @@ The public site is still powered by static JavaScript resource files:
 
 The current admin/backend code is not production-ready:
 
-- `/admin` exists as a route, but `src/Components/Admin/Admin.js` is fully commented out.
+- `/admin` exists as a Firebase sign-in shell with an `adminUsers/{uid}` allowlist check.
 - `src/firebase-config.js` exports env-driven Firebase `app`, `auth`, `db`, and `storage` values, which remain `null` until required environment variables are configured.
 - `src/Components/ProductEditor/ProductEditor.js` is fully commented out.
-- `src/Components/Editor/Editor.js` imports Firebase services, but it is not mounted through the inactive admin route.
+- `src/Components/Editor/Editor.js` imports Firebase services, but it is not mounted by the admin auth shell.
 - `package.json` lists the real `firebase` dependency.
 - Orders are not persisted to a backend after PayPal approval.
 
-These facts are blockers to a safe admin editor and should be handled in planned phases, not patched casually.
+These facts are blockers to safe editing and should be handled in planned phases, not patched casually.
 
 ## Hard Guardrails
 
