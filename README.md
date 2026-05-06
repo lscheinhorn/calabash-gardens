@@ -51,6 +51,6 @@ npm run build
 
 ## Notes
 
-The app currently uses static product and event data. Firebase/admin work exists in commented form but is not active.
+The app currently uses static product and event data. Firebase config exists as an env-driven foundation, but admin editing and backend data reads are not active.
 
 Before implementation work, confirm scope in `PROJECT_STATUS.md`, use a feature branch, and get Luke's approval.
