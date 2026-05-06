@@ -1,5 +1,5 @@
 import './About.css'
-import { content } from '../../resources/content'
+import { content } from '../../data/siteData'
 import { Link } from 'react-router-dom'
 
 export default function About () {

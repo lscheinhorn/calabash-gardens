@@ -1,5 +1,5 @@
 import './Banner.css'
-import { content } from '../../resources/content'
+import { content } from '../../data/siteData'
 
 export default function Banner () {
 

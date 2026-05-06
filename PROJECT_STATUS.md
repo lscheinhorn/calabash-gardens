@@ -48,6 +48,7 @@ Phase 3: admin/backend implementation planning.
 - Draft admin/backend implementation plan for Jette-managed products, events, and site content.
 - Use subagents to review implementation readiness and guardrail compliance before coding.
 - Document existing admin/Firebase blockers and recommended first implementation slice.
+- Implement read-only content adapter boundary without changing protected resource files.
 
 ## Planned Work
 
@@ -87,6 +88,7 @@ Phase 3: admin/backend implementation planning.
 - Future backend prep should start with read-only content boundaries and data-shape documentation before adding backend dependencies.
 - Recommended backend path is Firebase Auth, Firestore, and Storage, pending Luke approval before implementation.
 - First implementation slice should be a read-only content adapter, not Firebase activation or admin editing.
+- `src/data/siteData.js` is the initial read-only content adapter boundary.
 
 ## Verification History
 

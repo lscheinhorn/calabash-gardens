@@ -147,6 +147,12 @@ Security rules should allow writes only for approved admin users.
 
 Goal: Introduce read-only data access modules that return the current static data unchanged.
 
+Initial implementation:
+
+- `src/data/siteData.js` re-exports current static resource values from protected files.
+- Public components import through `src/data/siteData.js` instead of importing product, event, inventory, key, or content resources directly.
+- The adapter is intentionally read-only and does not change data shape or values.
+
 Allowed changes:
 
 - New adapter files.

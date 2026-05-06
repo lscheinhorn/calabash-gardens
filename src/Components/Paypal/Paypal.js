@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { selectCart } from '../Cart/cartSlice'
 import { useSelector } from 'react-redux'
-import { keys } from '../../resources/public_keys'
+import { keys } from '../../data/siteData'
 
 
 export default function Paypal(props) {

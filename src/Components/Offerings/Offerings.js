@@ -1,4 +1,4 @@
-import { content } from '../../resources/content'
+import { content } from '../../data/siteData'
 import './Offerings.css'
 
 export default function Offerings () {

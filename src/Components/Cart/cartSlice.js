@@ -1,5 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit'
-import { eventsInventory } from '../../resources/inventory';
+import { eventsInventory } from '../../data/siteData';
 
 
 export const cartSlice = createSlice({

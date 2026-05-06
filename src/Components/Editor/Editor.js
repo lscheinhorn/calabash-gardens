@@ -1,7 +1,7 @@
 import { db  } from '../../firebase-config'
 import { collection, addDoc, getDocs, setDoc, doc } from "firebase/firestore"; 
 import { useState, useEffect } from 'react'
-import { createKey } from '../../resources/products'
+import { createKey } from '../../data/siteData'
 import ProductEditor from '../ProductEditor/ProductEditor'
 
 

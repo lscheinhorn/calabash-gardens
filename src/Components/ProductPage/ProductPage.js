@@ -1,6 +1,6 @@
 import './ProductPage.css'
 import { useParams } from 'react-router-dom'
-import { products } from '../../resources/products'
+import { products } from '../../data/siteData'
 import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 import {  Link } from 'react-router-dom'
