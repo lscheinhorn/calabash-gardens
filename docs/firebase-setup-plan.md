@@ -94,6 +94,8 @@ Rules must be designed before writes are enabled:
 - Validate required fields for products/events/content where practical.
 - Protect image upload paths by admin UID.
 
+Draft Firestore rules are in `firestore.rules`. They are not deployed yet, and `firebase.json` remains commented out.
+
 ## Implementation Sequence
 
 ### Step 1: Dependency And Config Branch

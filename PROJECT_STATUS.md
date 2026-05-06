@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin setup/status work is in progress on branch `codex/admin-setup-status`.
+Firestore rules planning is in progress on branch `codex/firestore-rules-plan`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin setup/status work is in progress on branch `codex/admin-setup-status`.
 
 ## Current Phase
 
-Phase 7: Admin setup/status.
+Phase 8: Firestore rules planning.
 
 ## Done Work
 
@@ -54,6 +54,7 @@ Phase 7: Admin setup/status.
 - Merged the Firebase setup plan into `main`.
 - Merged the Firebase dependency/config foundation into `main`.
 - Merged the admin auth shell into `main`.
+- Merged admin setup/status into `main`.
 
 ## Planned Work
 
@@ -66,9 +67,9 @@ Phase 7: Admin setup/status.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Build and verify admin setup/status work.
-- Review admin setup/status work before merge.
-- Draft Firestore security rules before product/event/content editor work.
+- Review draft Firestore rules before merge.
+- Draft Storage rules before image upload work.
+- Plan product/event/content editor data shapes before write controls.
 
 ## Bugs
 
@@ -85,6 +86,7 @@ Phase 7: Admin setup/status.
 - Admin auth shell exists, but content editing and public content backend data reads are not active.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - Real admin testing still needs Firebase project values and approved admin user records.
+- Draft Firestore rules are not deployed and `firebase.json` remains commented out.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -106,6 +108,7 @@ Phase 7: Admin setup/status.
 - Admin auth shell must not mount `src/Components/Editor/Editor.js` or expose write controls.
 - Admin route should stay lazy-loaded so Firebase/admin code is not bundled into the main storefront path.
 - Firestore rules must be reviewed before admin write controls are added.
+- The first admin user must be bootstrapped manually before draft rules are deployed.
 
 ## Verification History
 
@@ -127,7 +130,8 @@ Phase 7: Admin setup/status.
 - `b9205f1 docs: plan firebase setup`
 - `17367b9 chore: add firebase config foundation`
 - `c805190 feat: add admin auth shell`
-- Pending commit for admin setup/status work.
+- `a28459e docs: add admin setup status`
+- Pending commit for Firestore rules planning.
 
 ## Deployments
 

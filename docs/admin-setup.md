@@ -55,4 +55,6 @@ Minimum fields:
 
 ## Next Guardrail
 
-Before editor work begins, Firestore rules must be drafted and reviewed so only approved admins can write admin-managed content.
+Before editor work begins, `firestore.rules` must be reviewed so only approved admins can write admin-managed content.
+
+The first admin user must be created manually in the Firebase console before the draft rules are deployed.
