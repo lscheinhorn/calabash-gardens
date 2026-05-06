@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Backend-readiness guardrails are being drafted on branch `codex/backend-readiness-guardrails`.
+Admin/backend planning is in progress on branch `codex/admin-backend-plan`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Backend-readiness guardrails are being drafted on branch `codex/backend-readines
 
 ## Current Phase
 
-Phase 2: backend-readiness planning and persistent guardrails.
+Phase 3: admin/backend implementation planning.
 
 ## Done Work
 
@@ -41,11 +41,13 @@ Phase 2: backend-readiness planning and persistent guardrails.
 - Updated the Events page to respect `isActive` when choosing which events to show.
 - Prevented past events before 2026 from being purchasable by setting their `inStock` values to false.
 - Merged and deployed customer-request fixes.
+- Added backend-readiness guardrails and merged them into `main`.
 
 ## In Progress Work
 
-- Add persistent guardrails so future cleanup/backend work does not change product, event, inventory, or content files without explicit approval.
-- Draft backend-readiness plan for future Jette-admin-managed content.
+- Draft admin/backend implementation plan for Jette-managed products, events, and site content.
+- Use subagents to review implementation readiness and guardrail compliance before coding.
+- Document existing admin/Firebase blockers and recommended first implementation slice.
 
 ## Planned Work
 
@@ -57,6 +59,7 @@ Phase 2: backend-readiness planning and persistent guardrails.
 - Decide whether admin/Firebase work should be completed, removed, or deferred.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
+- Approve backend stack and first implementation phase.
 
 ## Bugs
 
@@ -82,6 +85,8 @@ Phase 2: backend-readiness planning and persistent guardrails.
 - Treat docs as required infrastructure before product implementation.
 - Do not change `src/resources/products.js`, `src/resources/events.js`, `src/resources/content.js`, `src/resources/inventory.js`, `src/resources/images/**`, or `src/resources/public_keys.js` without explicit approval.
 - Future backend prep should start with read-only content boundaries and data-shape documentation before adding backend dependencies.
+- Recommended backend path is Firebase Auth, Firestore, and Storage, pending Luke approval before implementation.
+- First implementation slice should be a read-only content adapter, not Firebase activation or admin editing.
 
 ## Verification History
 
@@ -96,7 +101,8 @@ Phase 2: backend-readiness planning and persistent guardrails.
 - `bf03950 docs: establish PM workflow`
 - `2966a85 merge: cousin request fixes`
 - `160e5a1 merge: prevent past event purchases`
-- Pending commit for backend-readiness guardrails.
+- `31f7ad7 merge: backend readiness guardrails`
+- Pending commit for admin/backend plan.
 
 ## Deployments
 
