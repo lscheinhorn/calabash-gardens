@@ -228,7 +228,7 @@ Goal: Let Jette create/edit/deactivate products.
 Acceptance criteria:
 
 - Edits save to backend.
-- Public product pages read backend data safely.
+- Public product pages remain static until the backend-read phase is approved.
 - Product data can be backed up/exported.
 - No checkout regression.
 

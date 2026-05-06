@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Firestore rules/data-shape alignment is in progress on branch `codex/firestore-rules-align-shapes`.
+Admin product editor is in progress on branch `codex/admin-product-editor`.
 
 ## Approved Tech Stack
 
@@ -15,11 +15,11 @@ Firestore rules/data-shape alignment is in progress on branch `codex/firestore-r
 - PayPal React SDK for checkout
 - EmailJS for contact form
 - Static JS resource files for products, events, content, and event inventory
-- Firebase is present as an env-driven config module, with admin auth shell only
+- Firebase is present as an env-driven config module, with admin auth shell and product editor only
 
 ## Current Phase
 
-Phase 11: Firestore rules/data-shape alignment.
+Phase 12: Admin product editor.
 
 ## Done Work
 
@@ -58,6 +58,7 @@ Phase 11: Firestore rules/data-shape alignment.
 - Merged Firestore rules planning into `main`.
 - Merged Storage rules planning into `main`.
 - Merged admin data-shape planning into `main`.
+- Merged Firestore rules/data-shape alignment into `main`.
 
 ## Planned Work
 
@@ -70,8 +71,8 @@ Phase 11: Firestore rules/data-shape alignment.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Review Firestore rules/data-shape alignment before merge.
-- Decide first editor implementation slice.
+- Review admin product editor before merge.
+- Test `/admin` with Firebase env values and an approved admin user.
 - Plan seed/export strategy before backend content reads.
 
 ## Bugs
@@ -86,13 +87,14 @@ Phase 11: Firestore rules/data-shape alignment.
 
 - Checkout is client-side PayPal integration only; order persistence and fulfillment workflow are unclear.
 - Inventory is static and may not prevent overselling.
-- Admin auth shell exists, but content editing and public content backend data reads are not active.
+- Admin product editor writes to Firestore, but public product pages still use static data.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - Real admin testing still needs Firebase project values and approved admin user records.
 - Draft Firestore rules are not deployed and `firebase.json` remains commented out.
 - Draft Storage rules are not deployed and `firebase.json` remains commented out.
 - Admin data-shape contract is a planning document and is not a migration.
 - Draft Firestore rules are aligned with the data-shape contract but are still not deployed.
+- Product editor requires Firebase env values, deployed/reviewed rules, and an approved admin record for real testing.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -118,6 +120,7 @@ Phase 11: Firestore rules/data-shape alignment.
 - Storage rules must be reviewed before image upload controls are added.
 - Admin editor forms must follow the documented data shapes unless Luke approves a change.
 - Firestore validators must be rechecked whenever editor fields change.
+- Admin product editor must not edit static product resource files.
 
 ## Verification History
 
@@ -143,7 +146,8 @@ Phase 11: Firestore rules/data-shape alignment.
 - `1fb5d03 docs: draft firestore rules`
 - `48f1e1d docs: draft storage rules`
 - `3284b98 docs: define admin data shapes`
-- Pending commit for Firestore rules/data-shape alignment.
+- `17639d0 docs: align firestore rules with data shapes`
+- Pending commit for admin product editor.
 
 ## Deployments
 
