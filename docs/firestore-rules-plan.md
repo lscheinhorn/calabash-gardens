@@ -43,7 +43,7 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 - `firebase.json` is not activated in this phase.
 - Public site data remains static until a later approved backend-read branch.
 - Admin write controls must not be added until rules are reviewed against the exact editor data shape.
-- Storage rules still need a separate draft before image upload work begins.
+- Draft Storage rules are tracked separately in `storage.rules` and `docs/storage-rules-plan.md`.
 
 ## Deployment Caveats
 

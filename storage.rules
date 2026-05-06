@@ -1,0 +1,57 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function adminPath(uid) {
+      return /databases/(default)/documents/adminUsers/$(uid);
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && firestore.exists(adminPath(request.auth.uid))
+        && firestore.get(adminPath(request.auth.uid)).data.active == true;
+    }
+
+    function isImageUpload() {
+      return request.resource != null
+        && request.resource.size < 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    match /product-images/{fileName} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isAdmin() && isImageUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /event-images/{fileName} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isAdmin() && isImageUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /site-content-images/{fileName} {
+      allow get: if true;
+      allow list: if false;
+      allow create, update: if isAdmin() && isImageUpload();
+      allow delete: if isAdmin();
+    }
+
+    match /admin-private/{userId}/{fileName} {
+      allow get: if isAdmin() && request.auth.uid == userId;
+      allow list: if false;
+      allow create, update: if isAdmin() && request.auth.uid == userId && isImageUpload();
+      allow delete: if isAdmin() && request.auth.uid == userId;
+    }
+
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

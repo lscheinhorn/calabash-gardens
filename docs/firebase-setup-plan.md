@@ -96,6 +96,8 @@ Rules must be designed before writes are enabled:
 
 Draft Firestore rules are in `firestore.rules`. They are not deployed yet, and `firebase.json` remains commented out.
 
+Draft Storage rules are in `storage.rules`. They are not deployed yet, and image upload UI is not connected.
+
 ## Implementation Sequence
 
 ### Step 1: Dependency And Config Branch

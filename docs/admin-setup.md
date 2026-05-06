@@ -58,3 +58,5 @@ Minimum fields:
 Before editor work begins, `firestore.rules` must be reviewed so only approved admins can write admin-managed content.
 
 The first admin user must be created manually in the Firebase console before the draft rules are deployed.
+
+Before image upload work begins, `storage.rules` must be reviewed so only approved admins can upload public site images.
