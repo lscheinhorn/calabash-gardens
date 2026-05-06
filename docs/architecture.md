@@ -22,6 +22,10 @@ Most site data is static and imported from JS files:
 - `src/resources/inventory.js`: event stock values
 - `src/resources/public_keys.js`: public client keys
 
+These resource files are protected business content. Backend prep and refactors should not edit their values without explicit approval.
+
+Future backend work should first introduce a read-only content boundary so UI components can keep their current data shape while the storage layer is designed.
+
 ## Checkout
 
 Checkout uses `@paypal/react-paypal-js` in `src/Components/Paypal/Paypal.js`. Cart totals are calculated in the browser.

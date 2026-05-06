@@ -2,6 +2,8 @@
 
 The current app uses static JavaScript objects instead of a database.
 
+The static resource files are protected business data. Do not edit their values without an explicit product, event, inventory, or content request from Luke.
+
 ## Product
 
 Defined in `src/resources/products.js`.
@@ -61,3 +63,7 @@ Cart items are derived from products or events and stored in Redux. Important fi
 - `priceOptions`
 
 Event cart items currently encode selected date and dietary choices into title/key strings.
+
+## Backend Migration Notes
+
+Before moving this data into Firebase or another backend, document the exact current data shape and preserve current values. A migration should not rename keys, rewrite copy, remove inactive records, or change prices unless Luke explicitly approves that content change.

@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Customer-request fixes are drafted on branch `codex/cousin-request-fixes` and ready for Luke review.
+Backend-readiness guardrails are being drafted on branch `codex/backend-readiness-guardrails`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Customer-request fixes are drafted on branch `codex/cousin-request-fixes` and re
 
 ## Current Phase
 
-Phase 1: small customer-request content and pricing updates.
+Phase 2: backend-readiness planning and persistent guardrails.
 
 ## Done Work
 
@@ -39,16 +39,19 @@ Phase 1: small customer-request content and pricing updates.
 - Kept the 2026 event data in `events.js` but set those events inactive.
 - Restored 2025 events to active so events before 2026 still show.
 - Updated the Events page to respect `isActive` when choosing which events to show.
+- Prevented past events before 2026 from being purchasable by setting their `inStock` values to false.
+- Merged and deployed customer-request fixes.
 
 ## In Progress Work
 
-- Await Luke review of customer-request fixes.
+- Add persistent guardrails so future cleanup/backend work does not change product, event, inventory, or content files without explicit approval.
+- Draft backend-readiness plan for future Jette-admin-managed content.
 
 ## Planned Work
 
 - Review and approve this documentation baseline.
 - Create a prioritized implementation plan before product code changes.
-- QA current commerce and event-ticket flows.
+- QA current commerce and event-ticket flows before backend work.
 - Clean build warnings and stale code.
 - Stabilize event quantity, dietary-option, child-ticket, and inventory behavior.
 - Decide whether admin/Firebase work should be completed, removed, or deferred.
@@ -70,12 +73,15 @@ Phase 1: small customer-request content and pricing updates.
 - Admin/Firebase code is commented out; the intended data-management path needs approval.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
+- Product, event, content, inventory, image, and public key files are protected and must not be edited without explicit approval.
 
 ## Decisions
 
 - Use branch-per-phase workflow.
 - Do not merge without Luke's approval.
 - Treat docs as required infrastructure before product implementation.
+- Do not change `src/resources/products.js`, `src/resources/events.js`, `src/resources/content.js`, `src/resources/inventory.js`, `src/resources/images/**`, or `src/resources/public_keys.js` without explicit approval.
+- Future backend prep should start with read-only content boundaries and data-shape documentation before adding backend dependencies.
 
 ## Verification History
 
@@ -83,12 +89,15 @@ Phase 1: small customer-request content and pricing updates.
 - 2026-05-05: Dev server starts when allowed to bind to `127.0.0.1`.
 - 2026-05-05: `npm run build` completed successfully after customer-request fixes, with the same existing warnings.
 - 2026-05-05: `npm run build` completed successfully after inactive-event correction, with the same existing warnings.
+- 2026-05-05: `npm run deploy` published customer-request fixes.
 
 ## Commits
 
 - `bf03950 docs: establish PM workflow`
-- Pending commit for customer-request fixes.
+- `2966a85 merge: cousin request fixes`
+- `160e5a1 merge: prevent past event purchases`
+- Pending commit for backend-readiness guardrails.
 
 ## Deployments
 
-- No deployment performed in this phase.
+- 2026-05-05: Published customer-request fixes with `npm run deploy`.
