@@ -33,6 +33,32 @@
   padding: 20px;
 }
 
+.admin_status_panel {
+  border: 1px solid #d8d1dd;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 18px;
+  padding: 14px;
+}
+
+.admin_status_panel div {
+  display: grid;
+  gap: 4px;
+}
+
+.admin_status_panel span {
+  color: #5f5366;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin_status_panel strong {
+  color: #735284;
+  overflow-wrap: anywhere;
+}
+
 .admin_form label {
   color: #3d3343;
   display: grid;
@@ -101,6 +127,10 @@
   }
 
   .admin_placeholder_grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin_status_panel {
     grid-template-columns: 1fr;
   }
 }

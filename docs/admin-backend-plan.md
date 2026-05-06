@@ -216,6 +216,8 @@ Acceptance criteria:
 - Only approved admin users can access editor screens.
 - Unauthorized users cannot write.
 - No product/event/content writes yet.
+- Admin setup status is visible.
+- Required environment/admin allowlist setup is documented.
 
 ### Phase 5: Product Editor
 

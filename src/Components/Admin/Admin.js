@@ -74,6 +74,18 @@ export default function Admin() {
 
   const canUseFirebase = isFirebaseConfigured && auth && db;
 
+  const adminAccessLabel = () => {
+    if (!user) {
+      return "Not signed in";
+    }
+
+    if (isCheckingAdmin) {
+      return "Checking";
+    }
+
+    return isApprovedAdmin ? "Approved" : "Not approved";
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -145,6 +157,23 @@ export default function Admin() {
     );
   };
 
+  const renderStatusPanel = () => (
+    <div className="admin_status_panel" aria-label="Admin setup status">
+      <div>
+        <span>Firebase Config</span>
+        <strong>{canUseFirebase ? "Ready" : "Missing"}</strong>
+      </div>
+      <div>
+        <span>Signed In</span>
+        <strong>{user?.email || "No"}</strong>
+      </div>
+      <div>
+        <span>Admin Access</span>
+        <strong>{adminAccessLabel()}</strong>
+      </div>
+    </div>
+  );
+
   return (
     <main id="admin" className="admin_page">
       <section className="admin_shell">
@@ -156,6 +185,8 @@ export default function Admin() {
             </button>
           ) : null}
         </div>
+
+        {renderStatusPanel()}
 
         {!canUseFirebase ? (
           <div className="admin_panel">
