@@ -67,3 +67,5 @@ Event cart items currently encode selected date and dietary choices into title/k
 ## Backend Migration Notes
 
 Before moving this data into Firebase or another backend, document the exact current data shape and preserve current values. A migration should not rename keys, rewrite copy, remove inactive records, or change prices unless Luke explicitly approves that content change.
+
+The target admin-managed backend contract is tracked in `docs/admin-data-shapes.md`.

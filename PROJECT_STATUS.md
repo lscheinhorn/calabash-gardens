@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Storage rules planning is in progress on branch `codex/storage-rules-plan`.
+Admin data-shape planning is in progress on branch `codex/admin-data-shapes`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Storage rules planning is in progress on branch `codex/storage-rules-plan`.
 
 ## Current Phase
 
-Phase 9: Storage rules planning.
+Phase 10: Admin data-shape planning.
 
 ## Done Work
 
@@ -56,6 +56,7 @@ Phase 9: Storage rules planning.
 - Merged the admin auth shell into `main`.
 - Merged admin setup/status into `main`.
 - Merged Firestore rules planning into `main`.
+- Merged Storage rules planning into `main`.
 
 ## Planned Work
 
@@ -68,9 +69,9 @@ Phase 9: Storage rules planning.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Review draft Storage rules before merge.
-- Plan product/event/content editor data shapes before write controls.
-- Plan image upload data shape before upload UI.
+- Review admin data-shape contract before merge.
+- Decide first editor implementation slice.
+- Plan seed/export strategy before backend content reads.
 
 ## Bugs
 
@@ -89,6 +90,7 @@ Phase 9: Storage rules planning.
 - Real admin testing still needs Firebase project values and approved admin user records.
 - Draft Firestore rules are not deployed and `firebase.json` remains commented out.
 - Draft Storage rules are not deployed and `firebase.json` remains commented out.
+- Admin data-shape contract is a planning document and is not a migration.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -112,6 +114,7 @@ Phase 9: Storage rules planning.
 - Firestore rules must be reviewed before admin write controls are added.
 - The first admin user must be bootstrapped manually before draft rules are deployed.
 - Storage rules must be reviewed before image upload controls are added.
+- Admin editor forms must follow the documented data shapes unless Luke approves a change.
 
 ## Verification History
 
@@ -135,7 +138,8 @@ Phase 9: Storage rules planning.
 - `c805190 feat: add admin auth shell`
 - `a28459e docs: add admin setup status`
 - `1fb5d03 docs: draft firestore rules`
-- Pending commit for Storage rules planning.
+- `48f1e1d docs: draft storage rules`
+- Pending commit for admin data-shape planning.
 
 ## Deployments
 

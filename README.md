@@ -46,6 +46,7 @@ npm run build
 - `docs/app-overview.md`: product and route overview
 - `docs/architecture.md`: technical architecture
 - `docs/admin-setup.md`: Firebase/admin setup checklist
+- `docs/admin-data-shapes.md`: target admin-managed backend data contract
 - `docs/firestore-rules-plan.md`: draft Firestore security rules notes
 - `docs/storage-rules-plan.md`: draft Firebase Storage rules notes
 - `docs/data-model.md`: current static data model

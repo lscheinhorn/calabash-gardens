@@ -75,6 +75,8 @@ These facts are blockers to safe editing and should be handled in planned phases
 
 ## Data Model Draft
 
+The more detailed editor/backend contract is tracked in `docs/admin-data-shapes.md`.
+
 ### `products`
 
 Document ID should be stable and not derived from editable display title.
