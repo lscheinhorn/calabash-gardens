@@ -1,6 +1,6 @@
 import './ProductPage.css'
 import { useParams } from 'react-router-dom'
-import { products } from '../../data/siteData'
+import { getProductByKey } from '../../data/siteData'
 import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 import {  Link } from 'react-router-dom'
@@ -11,11 +11,9 @@ export default function ProductPage () {
     const { key } = useParams()
     
     const getProduct = (productKey) => {
-        for( let i = 0; i < products.length ; i++) {
-            const product = products[i]
-            if ( product.key === productKey ) {
-                return product
-            } 
+        const product = getProductByKey(productKey)
+        if ( product ) {
+            return product
         }
         console.log("getProduct() function failed to find a product matching the key")
         alert("There was a problem loading this page!")

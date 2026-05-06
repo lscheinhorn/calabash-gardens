@@ -1,11 +1,11 @@
 import './Events.css'
 import '../Shop/Shop.css';  // Make sure your paths are correct
-import { events, experienceBlurb } from '../../data/siteData';
+import { getActiveEvents, experienceBlurb } from '../../data/siteData';
 import Event from '../Event/Event';
 import { useState, useEffect, useMemo } from 'react';
 
 export default function Events() {
-    const activeEvents = useMemo(() => events.filter(event => event.isActive), [])
+    const activeEvents = useMemo(() => getActiveEvents(), [])
     const [eventIdx, setEventIdx] = useState(activeEvents.length - 1);
 
     useEffect(() => {

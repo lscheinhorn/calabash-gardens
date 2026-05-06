@@ -1,5 +1,5 @@
 import './HighlightedProducts.css'
-import { products } from '../../data/siteData'
+import { getHighlightedProducts } from '../../data/siteData'
 import Product from '../Product/Product'
 import {  Link } from 'react-router-dom'
 
@@ -10,11 +10,8 @@ export default function HighlightedProducts () {
         <div className="text-center">
             <div id="highlighted-products">
                 {
-                    products.map( product => {
-                        if ( product.isHighlighted && product.isActive === true ) {
-                            return <Product product={ product } key={ product.key } />
-                        }
-                        return null
+                    getHighlightedProducts().map( product => {
+                        return <Product product={ product } key={ product.key } />
                     })
                 }
 

@@ -150,6 +150,7 @@ Goal: Introduce read-only data access modules that return the current static dat
 Initial implementation:
 
 - `src/data/siteData.js` re-exports current static resource values from protected files.
+- `src/data/siteData.js` exposes a minimal set of read-only helpers for highlighted products, product lookup by key, and active events.
 - Public components import through `src/data/siteData.js` instead of importing product, event, inventory, key, or content resources directly.
 - The adapter is intentionally read-only and does not change data shape or values.
 
