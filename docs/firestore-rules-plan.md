@@ -30,9 +30,9 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 ## Collection Access
 
 - `adminUsers`: signed-in users can read their own record; admins can read and manage admin records.
-- `products`: public reads only for `published: true`; admins can read and write.
-- `events`: public reads only for `published: true`; admins can read and write.
-- `siteContent`: public reads only for `published: true`; admins can read and write.
+- `products`: admin reads and writes only until public backend reads are approved.
+- `events`: admin reads and writes only until public backend reads are approved.
+- `siteContent`: admin reads and writes only until public backend reads are approved.
 - `inventory`: admin-only reads and writes.
 - `orders`: admin reads only; client writes are denied until checkout/order persistence is designed.
 - Everything else is denied by default.
@@ -47,14 +47,15 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 
 ## Deployment Caveats
 
-- Public list queries for `products`, `events`, and `siteContent` must be constrained to `published == true`; Firestore rules do not filter unsafe query results after the fact.
+- Public reads for `products`, `events`, and `siteContent` are intentionally disabled in the current draft. When public backend reads are approved, list queries must be constrained to the public-read fields; Firestore rules do not filter unsafe query results after the fact.
 - Roles are stored but not enforced yet. Any active admin can manage other admin records in this draft.
+- Product, event, site content, and inventory writes use collection-specific validators aligned to `docs/admin-data-shapes.md`.
 - Product, event, and content deletes are currently admin-allowed in the draft. The UI may still choose to deactivate instead of delete.
-- Public reads use `published`, while `active` is optional. That should be decided before backend reads power the public site.
+- Public reads are not enabled yet. Before backend reads power the public site, decide whether `published`, `isActive`, or both should gate public access.
 
 ## Open Questions
 
 - Should admins be allowed to delete product/event/content records, or should the UI only deactivate them?
 - Should admin roles be limited to `owner` and `editor`, or kept flexible for now?
-- Should public reads use `published`, `active`, or both?
+- Should public reads use `published`, `isActive`, or both?
 - Should order records be written by a server/cloud function rather than the browser?

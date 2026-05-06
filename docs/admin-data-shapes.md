@@ -32,7 +32,7 @@ Use stable document IDs. Do not derive document IDs from editable display titles
 
 Use storage paths or URLs for future backend images. Do not store JavaScript `require(...)` values in Firestore.
 
-The draft Firestore rules currently use a looser field list with some placeholder names such as `active`, `featured`, and `displayOrder`. Before any editor writes are enabled, `firestore.rules` must be updated to match this document or this document must be revised with Luke's approval.
+Firestore rules use collection-specific validators for these shapes. Before any editor writes are enabled, review the exact final form fields against `firestore.rules`.
 
 ## Products
 
@@ -158,7 +158,7 @@ Current compatibility notes:
 - `src/resources/content.js` is nested by page and section.
 - `experienceBlurb` currently lives in `src/resources/events.js`, not `content.js`.
 - The first backend version should preserve the existing nested shape as closely as possible.
-- Draft Firestore rules currently require `title` for generic public documents and do not yet allow `sections`; update rules before enabling site content writes.
+- Firestore rules allow `sections` for site content documents.
 
 Editor controls:
 
@@ -240,3 +240,4 @@ Before any editor writes are built:
 - Update `firestore.rules` required/allowed fields if the final data shape changes.
 - Decide whether deletes are allowed or whether admin UI only deactivates records.
 - Decide whether public reads use `published`, `isActive`, or both.
+- Public Firestore reads remain disabled until Luke approves the backend-read phase.
