@@ -1,6 +1,6 @@
 import './Header.css'
 import Navbar from '../Navbar/Navbar'
-import { content } from '../../resources/content'
+import { content } from '../../data/siteData'
 import { Link } from 'react-router-dom'
 import largeLogo from '../../resources/images/large_logo_no_purple_square.png';
 
@@ -35,4 +35,3 @@ export default function Header () {
         </div>
     )
 }
-

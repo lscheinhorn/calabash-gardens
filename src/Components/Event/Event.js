@@ -2,8 +2,7 @@ import './Event.css'
 import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 import { useState, useEffect } from 'react'
-import { eventsInventory } from '../../resources/inventory'
-import { createKey } from '../../resources/products'
+import { eventsInventory, createKey } from '../../data/siteData'
 import { Link } from 'react-router-dom'; 
 
 export default function Event (props) {

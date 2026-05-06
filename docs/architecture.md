@@ -26,6 +26,8 @@ These resource files are protected business content. Backend prep and refactors 
 
 Future backend work should first introduce a read-only content boundary so UI components can keep their current data shape while the storage layer is designed.
 
+The first read-only boundary is `src/data/siteData.js`. It re-exports the current static resource values without changing data shape or behavior.
+
 ## Checkout
 
 Checkout uses `@paypal/react-paypal-js` in `src/Components/Paypal/Paypal.js`. Cart totals are calculated in the browser.

@@ -1,6 +1,6 @@
 import './Events.css'
 import '../Shop/Shop.css';  // Make sure your paths are correct
-import { events, experienceBlurb } from '../../resources/events';
+import { events, experienceBlurb } from '../../data/siteData';
 import Event from '../Event/Event';
 import { useState, useEffect, useMemo } from 'react';
 

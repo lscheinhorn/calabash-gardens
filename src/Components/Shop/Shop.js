@@ -1,5 +1,5 @@
 import './Shop.css'
-import { products } from '../../resources/products'
+import { products } from '../../data/siteData'
 import Product from '../Product/Product'
 import { useState, useEffect   } from 'react'
 
