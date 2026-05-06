@@ -35,7 +35,7 @@ Use `.env.local` for local Firebase config once implementation is approved. Keep
 
 Future template file, only after approval:
 
-- `.env.example`
+- `.env.example` has been added.
 
 Required future variables:
 
@@ -115,7 +115,7 @@ Status: done.
 
 ### Step 3: Read-Only Backend Probe
 
-- Add a safe read-only Firestore probe or status panel inside admin.
+- Add a safe read-only Firestore probe or status panel inside admin. Done.
 - Keep public site data on static adapter fallback.
 
 ### Step 4: Data Seeding Plan
