@@ -30,6 +30,8 @@ PATH=/usr/local/opt/node/bin:$PATH npm run build
 
 Edit `src/resources/products.js`.
 
+Only edit this file when Luke explicitly asks for a product/content change or approves a migration plan.
+
 Before shipping product changes, verify:
 
 - Product appears in the expected category.
@@ -42,6 +44,8 @@ Before shipping product changes, verify:
 ## Updating Events
 
 Edit `src/resources/events.js` and, when seats are limited, `src/resources/inventory.js`.
+
+Only edit these files when Luke explicitly asks for an event/inventory/content change or approves a migration plan.
 
 Before shipping event changes, verify:
 
@@ -56,3 +60,5 @@ Before shipping event changes, verify:
 ## Deployment
 
 Deployment target needs confirmation. `firebase.json` is currently commented out, while `package.json` includes a `homepage` value and a `gh-pages` deploy script.
+
+Do not deploy without Luke's explicit approval.
