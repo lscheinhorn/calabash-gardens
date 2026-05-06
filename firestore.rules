@@ -1,0 +1,102 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function adminPath(uid) {
+      return /databases/$(database)/documents/adminUsers/$(uid);
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && exists(adminPath(request.auth.uid))
+        && get(adminPath(request.auth.uid)).data.active == true;
+    }
+
+    function hasOnlyAllowedKeys(allowedKeys) {
+      return request.resource.data.keys().hasOnly(allowedKeys);
+    }
+
+    function hasRequiredKeys(requiredKeys) {
+      return request.resource.data.keys().hasAll(requiredKeys);
+    }
+
+    function validAdminUser() {
+      return hasOnlyAllowedKeys(['active', 'email', 'role', 'displayName', 'createdAt', 'updatedAt'])
+        && hasRequiredKeys(['active', 'email', 'role'])
+        && request.resource.data.active is bool
+        && request.resource.data.email is string
+        && request.resource.data.role is string;
+    }
+
+    function validPublicDocument() {
+      return hasOnlyAllowedKeys([
+          'active',
+          'category',
+          'createdAt',
+          'date',
+          'description',
+          'displayOrder',
+          'eventDates',
+          'featured',
+          'images',
+          'info',
+          'inventory',
+          'key',
+          'link',
+          'photos',
+          'priceOptions',
+          'published',
+          'shipping',
+          'slug',
+          'title',
+          'updatedAt'
+        ])
+        && hasRequiredKeys(['published', 'title'])
+        && request.resource.data.published is bool
+        && request.resource.data.title is string;
+    }
+
+    match /adminUsers/{userId} {
+      allow get: if (signedIn() && request.auth.uid == userId) || isAdmin();
+      allow list: if isAdmin();
+      allow create, update: if isAdmin() && validAdminUser();
+      allow delete: if isAdmin();
+    }
+
+    match /products/{productId} {
+      allow get, list: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() && validPublicDocument();
+      allow delete: if isAdmin();
+    }
+
+    match /events/{eventId} {
+      allow get, list: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() && validPublicDocument();
+      allow delete: if isAdmin();
+    }
+
+    match /siteContent/{contentId} {
+      allow get, list: if resource.data.published == true || isAdmin();
+      allow create, update: if isAdmin() && validPublicDocument();
+      allow delete: if isAdmin();
+    }
+
+    match /inventory/{inventoryId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /orders/{orderId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
