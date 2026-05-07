@@ -389,8 +389,54 @@ const buildMarkdown = (rows) => {
   return `${lines.join("\n")}\n`;
 };
 
-const rows = buildManifest();
-const markdown = buildMarkdown(rows);
+const buildMediaAssetPlan = () => {
+  const rows = buildManifest();
+  const candidateRows = rows.filter((row) => row.action === "candidate");
+  const skippedRows = rows.filter((row) => row.action !== "candidate");
+  const missingRows = rows.filter((row) => !row.sourceExists);
+  const unreferencedFiles = listUnreferencedProductPhotos(rows);
+  const productMediaAssets = candidateRows.map((row) => ({
+    ...buildProductMediaAsset(row),
+    productId: row.productId,
+    productTitle: row.title,
+    productPhoto: {
+      path: row.proposedStoragePath,
+      alt: "",
+      mediaAssetId: buildProductMediaAsset(row).mediaAssetId,
+      sortOrder: row.photoIndex,
+    },
+    sourcePath: row.sourcePath,
+    sourceExists: row.sourceExists,
+  }));
+  const otherMediaAssets = unreferencedFiles.map(buildOtherMediaAsset);
 
-fs.writeFileSync(outputPath, markdown);
-console.log(`Wrote ${path.relative(repoRoot, outputPath)}`);
+  return {
+    candidateRows,
+    missingRows,
+    otherMediaAssets,
+    productMediaAssets,
+    rows,
+    skippedRows,
+    unreferencedFiles,
+  };
+};
+
+const writeManifest = () => {
+  const rows = buildManifest();
+  const markdown = buildMarkdown(rows);
+
+  fs.writeFileSync(outputPath, markdown);
+  console.log(`Wrote ${path.relative(repoRoot, outputPath)}`);
+};
+
+if (require.main === module) {
+  writeManifest();
+}
+
+module.exports = {
+  buildManifest,
+  buildMediaAssetPlan,
+  buildMarkdown,
+  repoRoot,
+  writeManifest,
+};

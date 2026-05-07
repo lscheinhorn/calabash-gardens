@@ -51,10 +51,12 @@ Phase 19: Media library foundation.
 - Merged and deployed admin product card UI for `/admin` testing.
 - Added a dry-run product image migration manifest generator on the active branch.
 - Added the admin media library foundation on the active branch.
+- Added a controlled media upload/import dry-run planner on the active branch.
 
 ## In Progress Work
 
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
+- Resolve media migration dry-run upload blockers before any real upload/import.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -101,6 +103,7 @@ Phase 19: Media library foundation.
 - Product image migration dry run found many shared default-logo placeholders; those should not be uploaded as individual product photos without approval.
 - Media library metadata can organize photos by bin and tags, but actual upload migration is still not connected.
 - Media asset rules validate `tags` as a list; admin UI normalizes tags to strings before writing.
+- Media migration dry run found two files over the current 10 MB Storage rule limit.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
@@ -143,6 +146,7 @@ Phase 19: Media library foundation.
 - Project-directory product image migration must be planned as a separate dry-run manifest before uploading.
 - Product image migration dry run must not upload files, write Firestore data, or edit protected static resource files.
 - Media bins are Firestore metadata only; moving a media item between bins does not move the Storage object.
+- Real media upload/import must not run while the dry-run report has upload blockers.
 - Product categories must come from the approved category list: Body Care, Culinary, Gifts, Loose Leaf Tea, Mambo Gede, Ritual Smoking Blends, Saffron, and Tinctures.
 - Gifts is reserved for the preserved legacy gift-set product IDs and should not be used for newly created products.
 - Product categories have active/inactive status; new products can use active categories only.
@@ -166,6 +170,9 @@ Phase 19: Media library foundation.
 - 2026-05-07: `npm run build` completed successfully after adding the product image manifest generator, with the same existing warnings.
 - 2026-05-07: `npm run manifest:product-images` regenerated the media asset manifest with product and other-bin metadata candidates.
 - 2026-05-07: `npm run build` completed successfully after adding the media library foundation, with the same existing warnings.
+- 2026-05-07: `npm run plan:media-migration` generated Markdown and JSON dry-run reports with 20 planned uploads, 20 planned `mediaAssets` documents, 11 product update targets, and 2 upload blockers over 10 MB.
+- 2026-05-07: `npm run build` completed successfully after adding the media migration dry-run planner, with the same existing warnings.
+- 2026-05-07: `npm run build` completed successfully after expanding exact media migration payload reports, with the same existing warnings.
 
 ## Commits
 

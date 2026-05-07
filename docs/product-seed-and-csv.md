@@ -29,6 +29,12 @@ Use this command to regenerate the current dry-run manifest:
 npm run manifest:product-images
 ```
 
+Use this command to generate the controlled upload/import dry-run report:
+
+```sh
+npm run plan:media-migration
+```
+
 The command reads `src/resources/products.js`, parses product `photos` references, and writes `docs/product-image-migration-manifest.md`.
 
 The manifest is review-only:
@@ -42,6 +48,8 @@ The manifest is review-only:
 - it proposes `mediaAssets` metadata for product images and `other` bin candidates
 
 Do not build an upload phase until Luke approves the manifest decisions listed at the bottom of that file.
+The dry-run report must show zero upload blockers before a real upload/import should run.
+The dry-run command also writes `docs/media-migration-dry-run.json` with exact planned Firestore payloads and Storage upload records.
 
 ## Required Validation
 

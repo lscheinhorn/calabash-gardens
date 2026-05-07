@@ -30,6 +30,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "manifest:product-images": "node scripts/product-image-migration-manifest.js",
+    "plan:media-migration": "node scripts/media-migration-dry-run.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

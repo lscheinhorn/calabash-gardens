@@ -1,0 +1,740 @@
+{
+  "mediaAssetDocuments": [
+    {
+      "id": "product-calabash-gifts-set-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/jpeg",
+        "linkedId": "calabash-gifts-set",
+        "linkedType": "product",
+        "size": 1279850,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/calabash_gifts_set.jpeg",
+        "status": "active",
+        "storagePath": "product-images/calabash-gifts-set-01-calabash-gifts-set.jpeg",
+        "tags": [
+          "product",
+          "gifts",
+          "calabash-gifts-set"
+        ],
+        "title": "Calabash Gifts Set"
+      }
+    },
+    {
+      "id": "product-calabash-gift-set-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "calabash-gift-set",
+        "linkedType": "product",
+        "size": 107208,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/calabash_gift_set.webp",
+        "status": "active",
+        "storagePath": "product-images/calabash-gift-set-01-calabash-gift-set.webp",
+        "tags": [
+          "product",
+          "gifts",
+          "calabash-gift-set"
+        ],
+        "title": "Calabash Gift Set"
+      }
+    },
+    {
+      "id": "product-spa-day-gift-set-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "spa-day-gift-set",
+        "linkedType": "product",
+        "size": 83706,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/spa_day_gift_set.webp",
+        "status": "active",
+        "storagePath": "product-images/spa-day-gift-set-01-spa-day-gift-set.webp",
+        "tags": [
+          "product",
+          "gifts",
+          "spa-day-gift-set"
+        ],
+        "title": "Spa Day Gift Set"
+      }
+    },
+    {
+      "id": "product-erotic-gift-set-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "erotic-gift-set",
+        "linkedType": "product",
+        "size": 97064,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/erotic_gift_set.webp",
+        "status": "active",
+        "storagePath": "product-images/erotic-gift-set-01-erotic-gift-set.webp",
+        "tags": [
+          "product",
+          "gifts",
+          "erotic-gift-set"
+        ],
+        "title": "Erotic Gift Set"
+      }
+    },
+    {
+      "id": "product-saffron-maple-syrup-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "saffron-maple-syrup",
+        "linkedType": "product",
+        "size": 130194,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/saffron_maple_syrup.webp",
+        "status": "active",
+        "storagePath": "product-images/saffron-maple-syrup-01-saffron-maple-syrup.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "saffron-maple-syrup"
+        ],
+        "title": "Saffron Maple Syrup"
+      }
+    },
+    {
+      "id": "product-saffron-simple-syrup-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/jpeg",
+        "linkedId": "saffron-simple-syrup",
+        "linkedType": "product",
+        "size": 18087346,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/saffron_simple_syrup.jpg",
+        "status": "active",
+        "storagePath": "product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg",
+        "tags": [
+          "product",
+          "saffron",
+          "saffron-simple-syrup"
+        ],
+        "title": "Saffron Simple Syrup"
+      }
+    },
+    {
+      "id": "product-vermont-grown-saffron-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "vermont-grown-saffron",
+        "linkedType": "product",
+        "size": 104694,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp",
+        "status": "active",
+        "storagePath": "product-images/vermont-grown-saffron-01-0.5g-vermont-grown-saffron-1.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "vermont-grown-saffron"
+        ],
+        "title": "Vermont Grown Saffron"
+      }
+    },
+    {
+      "id": "product-vermont-grown-saffron-02",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "vermont-grown-saffron",
+        "linkedType": "product",
+        "size": 106068,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp",
+        "status": "active",
+        "storagePath": "product-images/vermont-grown-saffron-02-0.5g-vermont-grown-saffron-2.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "vermont-grown-saffron"
+        ],
+        "title": "Vermont Grown Saffron"
+      }
+    },
+    {
+      "id": "product-vermont-grown-saffron-03",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "vermont-grown-saffron",
+        "linkedType": "product",
+        "size": 191330,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp",
+        "status": "active",
+        "storagePath": "product-images/vermont-grown-saffron-03-0.5g-vermont-grown-saffron-3.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "vermont-grown-saffron"
+        ],
+        "title": "Vermont Grown Saffron"
+      }
+    },
+    {
+      "id": "product-vermont-grown-saffron-04",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "vermont-grown-saffron",
+        "linkedType": "product",
+        "size": 44172,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/1g_vt_grown_saffron.webp",
+        "status": "active",
+        "storagePath": "product-images/vermont-grown-saffron-04-1g-vt-grown-saffron.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "vermont-grown-saffron"
+        ],
+        "title": "Vermont Grown Saffron"
+      }
+    },
+    {
+      "id": "product-vermont-grown-saffron-05",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "vermont-grown-saffron",
+        "linkedType": "product",
+        "size": 148114,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/2g_vt_grown_saffron_1.webp",
+        "status": "active",
+        "storagePath": "product-images/vermont-grown-saffron-05-2g-vt-grown-saffron-1.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "vermont-grown-saffron"
+        ],
+        "title": "Vermont Grown Saffron"
+      }
+    },
+    {
+      "id": "product-vermont-grown-saffron-06",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "vermont-grown-saffron",
+        "linkedType": "product",
+        "size": 106068,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/2g_vt_grown_saffron_2.webp",
+        "status": "active",
+        "storagePath": "product-images/vermont-grown-saffron-06-2g-vt-grown-saffron-2.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "vermont-grown-saffron"
+        ],
+        "title": "Vermont Grown Saffron"
+      }
+    },
+    {
+      "id": "product-saffron-tincture-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/webp",
+        "linkedId": "saffron-tincture",
+        "linkedType": "product",
+        "size": 91400,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/saffron_tincture.webp",
+        "status": "active",
+        "storagePath": "product-images/saffron-tincture-01-saffron-tincture.webp",
+        "tags": [
+          "product",
+          "saffron",
+          "saffron-tincture"
+        ],
+        "title": "Saffron Tincture"
+      }
+    },
+    {
+      "id": "product-the-heart-and-head-1-2-oz-loose-leaf-tea-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/jpeg",
+        "linkedId": "the-heart-and-head-1-2-oz-loose-leaf-tea",
+        "linkedType": "product",
+        "size": 10269768,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/the_heart_and_the_head.jpg",
+        "status": "active",
+        "storagePath": "product-images/the-heart-and-head-1-2-oz-loose-leaf-tea-01-the-heart-and-the-head.jpg",
+        "tags": [
+          "product",
+          "loose-leaf-tea",
+          "the-heart-and-head-1-2-oz-loose-leaf-tea"
+        ],
+        "title": "The Heart and Head 1/2 oz Loose Leaf Tea"
+      }
+    },
+    {
+      "id": "product-ageless-beauty-butter-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/jpeg",
+        "linkedId": "ageless-beauty-butter",
+        "linkedType": "product",
+        "size": 8521883,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/ageless_beauty_body_butter.jpg",
+        "status": "active",
+        "storagePath": "product-images/ageless-beauty-butter-01-ageless-beauty-body-butter.jpg",
+        "tags": [
+          "product",
+          "body-care",
+          "ageless-beauty-butter"
+        ],
+        "title": "Ageless Beauty Butter"
+      }
+    },
+    {
+      "id": "product-cold-and-flu-01",
+      "data": {
+        "alt": "",
+        "bin": "products",
+        "contentType": "image/jpeg",
+        "linkedId": "cold-and-flu",
+        "linkedType": "product",
+        "size": 8136386,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/cold_and_flu.jpg",
+        "status": "active",
+        "storagePath": "product-images/cold-and-flu-01-cold-and-flu.jpg",
+        "tags": [
+          "product",
+          "tinctures",
+          "cold-and-flu"
+        ],
+        "title": "Cold and Flu"
+      }
+    },
+    {
+      "id": "other-img-1785",
+      "data": {
+        "alt": "",
+        "bin": "other",
+        "contentType": "image/jpeg",
+        "linkedId": "",
+        "linkedType": "none",
+        "size": 1026892,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/IMG-1785.jpg",
+        "status": "active",
+        "storagePath": "other-images/img-1785.jpg",
+        "tags": [
+          "other",
+          "needs-review"
+        ],
+        "title": "IMG 1785"
+      }
+    },
+    {
+      "id": "other-img-2623",
+      "data": {
+        "alt": "",
+        "bin": "other",
+        "contentType": "image/jpeg",
+        "linkedId": "",
+        "linkedType": "none",
+        "size": 1929965,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/IMG-2623.JPG",
+        "status": "active",
+        "storagePath": "other-images/img-2623.jpg",
+        "tags": [
+          "other",
+          "needs-review"
+        ],
+        "title": "IMG 2623"
+      }
+    },
+    {
+      "id": "other-event-night",
+      "data": {
+        "alt": "",
+        "bin": "other",
+        "contentType": "image/jpeg",
+        "linkedId": "",
+        "linkedType": "none",
+        "size": 2242101,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/event_night.jpg",
+        "status": "active",
+        "storagePath": "other-images/event-night.jpg",
+        "tags": [
+          "other",
+          "needs-review"
+        ],
+        "title": "event night"
+      }
+    },
+    {
+      "id": "other-saffron-tin",
+      "data": {
+        "alt": "",
+        "bin": "other",
+        "contentType": "image/jpeg",
+        "linkedId": "",
+        "linkedType": "none",
+        "size": 15689035,
+        "source": "static-product-photo-migration",
+        "sourcePath": "src/resources/images/product_photos/saffron_tin.jpg",
+        "status": "active",
+        "storagePath": "other-images/saffron-tin.jpg",
+        "tags": [
+          "other",
+          "needs-review"
+        ],
+        "title": "saffron tin"
+      }
+    }
+  ],
+  "productPhotoUpdates": [
+    {
+      "productId": "calabash-gifts-set",
+      "productTitle": "Calabash Gifts Set",
+      "photos": [
+        {
+          "path": "product-images/calabash-gifts-set-01-calabash-gifts-set.jpeg",
+          "alt": "",
+          "mediaAssetId": "product-calabash-gifts-set-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "calabash-gift-set",
+      "productTitle": "Calabash Gift Set",
+      "photos": [
+        {
+          "path": "product-images/calabash-gift-set-01-calabash-gift-set.webp",
+          "alt": "",
+          "mediaAssetId": "product-calabash-gift-set-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "spa-day-gift-set",
+      "productTitle": "Spa Day Gift Set",
+      "photos": [
+        {
+          "path": "product-images/spa-day-gift-set-01-spa-day-gift-set.webp",
+          "alt": "",
+          "mediaAssetId": "product-spa-day-gift-set-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "erotic-gift-set",
+      "productTitle": "Erotic Gift Set",
+      "photos": [
+        {
+          "path": "product-images/erotic-gift-set-01-erotic-gift-set.webp",
+          "alt": "",
+          "mediaAssetId": "product-erotic-gift-set-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "saffron-maple-syrup",
+      "productTitle": "Saffron Maple Syrup",
+      "photos": [
+        {
+          "path": "product-images/saffron-maple-syrup-01-saffron-maple-syrup.webp",
+          "alt": "",
+          "mediaAssetId": "product-saffron-maple-syrup-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "saffron-simple-syrup",
+      "productTitle": "Saffron Simple Syrup",
+      "photos": [
+        {
+          "path": "product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg",
+          "alt": "",
+          "mediaAssetId": "product-saffron-simple-syrup-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "vermont-grown-saffron",
+      "productTitle": "Vermont Grown Saffron",
+      "photos": [
+        {
+          "path": "product-images/vermont-grown-saffron-01-0.5g-vermont-grown-saffron-1.webp",
+          "alt": "",
+          "mediaAssetId": "product-vermont-grown-saffron-01",
+          "sortOrder": 0
+        },
+        {
+          "path": "product-images/vermont-grown-saffron-02-0.5g-vermont-grown-saffron-2.webp",
+          "alt": "",
+          "mediaAssetId": "product-vermont-grown-saffron-02",
+          "sortOrder": 1
+        },
+        {
+          "path": "product-images/vermont-grown-saffron-03-0.5g-vermont-grown-saffron-3.webp",
+          "alt": "",
+          "mediaAssetId": "product-vermont-grown-saffron-03",
+          "sortOrder": 2
+        },
+        {
+          "path": "product-images/vermont-grown-saffron-04-1g-vt-grown-saffron.webp",
+          "alt": "",
+          "mediaAssetId": "product-vermont-grown-saffron-04",
+          "sortOrder": 3
+        },
+        {
+          "path": "product-images/vermont-grown-saffron-05-2g-vt-grown-saffron-1.webp",
+          "alt": "",
+          "mediaAssetId": "product-vermont-grown-saffron-05",
+          "sortOrder": 4
+        },
+        {
+          "path": "product-images/vermont-grown-saffron-06-2g-vt-grown-saffron-2.webp",
+          "alt": "",
+          "mediaAssetId": "product-vermont-grown-saffron-06",
+          "sortOrder": 5
+        }
+      ]
+    },
+    {
+      "productId": "saffron-tincture",
+      "productTitle": "Saffron Tincture",
+      "photos": [
+        {
+          "path": "product-images/saffron-tincture-01-saffron-tincture.webp",
+          "alt": "",
+          "mediaAssetId": "product-saffron-tincture-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "the-heart-and-head-1-2-oz-loose-leaf-tea",
+      "productTitle": "The Heart and Head 1/2 oz Loose Leaf Tea",
+      "photos": [
+        {
+          "path": "product-images/the-heart-and-head-1-2-oz-loose-leaf-tea-01-the-heart-and-the-head.jpg",
+          "alt": "",
+          "mediaAssetId": "product-the-heart-and-head-1-2-oz-loose-leaf-tea-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "ageless-beauty-butter",
+      "productTitle": "Ageless Beauty Butter",
+      "photos": [
+        {
+          "path": "product-images/ageless-beauty-butter-01-ageless-beauty-body-butter.jpg",
+          "alt": "",
+          "mediaAssetId": "product-ageless-beauty-butter-01",
+          "sortOrder": 0
+        }
+      ]
+    },
+    {
+      "productId": "cold-and-flu",
+      "productTitle": "Cold and Flu",
+      "photos": [
+        {
+          "path": "product-images/cold-and-flu-01-cold-and-flu.jpg",
+          "alt": "",
+          "mediaAssetId": "product-cold-and-flu-01",
+          "sortOrder": 0
+        }
+      ]
+    }
+  ],
+  "storageUploads": [
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "product-calabash-gifts-set-01",
+      "size": 1279850,
+      "sourcePath": "src/resources/images/product_photos/calabash_gifts_set.jpeg",
+      "storagePath": "product-images/calabash-gifts-set-01-calabash-gifts-set.jpeg"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-calabash-gift-set-01",
+      "size": 107208,
+      "sourcePath": "src/resources/images/product_photos/calabash_gift_set.webp",
+      "storagePath": "product-images/calabash-gift-set-01-calabash-gift-set.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-spa-day-gift-set-01",
+      "size": 83706,
+      "sourcePath": "src/resources/images/product_photos/spa_day_gift_set.webp",
+      "storagePath": "product-images/spa-day-gift-set-01-spa-day-gift-set.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-erotic-gift-set-01",
+      "size": 97064,
+      "sourcePath": "src/resources/images/product_photos/erotic_gift_set.webp",
+      "storagePath": "product-images/erotic-gift-set-01-erotic-gift-set.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-saffron-maple-syrup-01",
+      "size": 130194,
+      "sourcePath": "src/resources/images/product_photos/saffron_maple_syrup.webp",
+      "storagePath": "product-images/saffron-maple-syrup-01-saffron-maple-syrup.webp"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "product-saffron-simple-syrup-01",
+      "size": 18087346,
+      "sourcePath": "src/resources/images/product_photos/saffron_simple_syrup.jpg",
+      "storagePath": "product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-vermont-grown-saffron-01",
+      "size": 104694,
+      "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp",
+      "storagePath": "product-images/vermont-grown-saffron-01-0.5g-vermont-grown-saffron-1.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-vermont-grown-saffron-02",
+      "size": 106068,
+      "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp",
+      "storagePath": "product-images/vermont-grown-saffron-02-0.5g-vermont-grown-saffron-2.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-vermont-grown-saffron-03",
+      "size": 191330,
+      "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp",
+      "storagePath": "product-images/vermont-grown-saffron-03-0.5g-vermont-grown-saffron-3.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-vermont-grown-saffron-04",
+      "size": 44172,
+      "sourcePath": "src/resources/images/product_photos/1g_vt_grown_saffron.webp",
+      "storagePath": "product-images/vermont-grown-saffron-04-1g-vt-grown-saffron.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-vermont-grown-saffron-05",
+      "size": 148114,
+      "sourcePath": "src/resources/images/product_photos/2g_vt_grown_saffron_1.webp",
+      "storagePath": "product-images/vermont-grown-saffron-05-2g-vt-grown-saffron-1.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-vermont-grown-saffron-06",
+      "size": 106068,
+      "sourcePath": "src/resources/images/product_photos/2g_vt_grown_saffron_2.webp",
+      "storagePath": "product-images/vermont-grown-saffron-06-2g-vt-grown-saffron-2.webp"
+    },
+    {
+      "contentType": "image/webp",
+      "mediaAssetId": "product-saffron-tincture-01",
+      "size": 91400,
+      "sourcePath": "src/resources/images/product_photos/saffron_tincture.webp",
+      "storagePath": "product-images/saffron-tincture-01-saffron-tincture.webp"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "product-the-heart-and-head-1-2-oz-loose-leaf-tea-01",
+      "size": 10269768,
+      "sourcePath": "src/resources/images/product_photos/the_heart_and_the_head.jpg",
+      "storagePath": "product-images/the-heart-and-head-1-2-oz-loose-leaf-tea-01-the-heart-and-the-head.jpg"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "product-ageless-beauty-butter-01",
+      "size": 8521883,
+      "sourcePath": "src/resources/images/product_photos/ageless_beauty_body_butter.jpg",
+      "storagePath": "product-images/ageless-beauty-butter-01-ageless-beauty-body-butter.jpg"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "product-cold-and-flu-01",
+      "size": 8136386,
+      "sourcePath": "src/resources/images/product_photos/cold_and_flu.jpg",
+      "storagePath": "product-images/cold-and-flu-01-cold-and-flu.jpg"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "other-img-1785",
+      "size": 1026892,
+      "sourcePath": "src/resources/images/product_photos/IMG-1785.jpg",
+      "storagePath": "other-images/img-1785.jpg"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "other-img-2623",
+      "size": 1929965,
+      "sourcePath": "src/resources/images/product_photos/IMG-2623.JPG",
+      "storagePath": "other-images/img-2623.jpg"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "other-event-night",
+      "size": 2242101,
+      "sourcePath": "src/resources/images/product_photos/event_night.jpg",
+      "storagePath": "other-images/event-night.jpg"
+    },
+    {
+      "contentType": "image/jpeg",
+      "mediaAssetId": "other-saffron-tin",
+      "size": 15689035,
+      "sourcePath": "src/resources/images/product_photos/saffron_tin.jpg",
+      "storagePath": "other-images/saffron-tin.jpg"
+    }
+  ],
+  "uploadBlockers": [
+    {
+      "mediaAssetId": "product-saffron-simple-syrup-01",
+      "size": 18087346,
+      "sourcePath": "src/resources/images/product_photos/saffron_simple_syrup.jpg",
+      "storagePath": "product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg"
+    },
+    {
+      "mediaAssetId": "other-saffron-tin",
+      "size": 15689035,
+      "sourcePath": "src/resources/images/product_photos/saffron_tin.jpg",
+      "storagePath": "other-images/saffron-tin.jpg"
+    }
+  ]
+}
