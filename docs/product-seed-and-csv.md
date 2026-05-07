@@ -64,6 +64,30 @@ Do not build an upload phase until Luke approves the manifest decisions listed a
 The dry-run report must show zero upload blockers before a real upload/import should run.
 The dry-run command also writes `docs/media-migration-dry-run.json` with exact planned Firestore payloads and Storage upload records.
 
+After visual review and approval, run the guarded importer without confirmation first:
+
+```sh
+npm run import:media-migration
+```
+
+That prints the current import plan and performs no Firebase writes.
+
+For a real upload/import, `.env.local` must include the Firebase config values plus:
+
+```sh
+MIGRATION_ADMIN_EMAIL=approved-admin@example.com
+MIGRATION_ADMIN_PASSWORD=admin-password
+```
+
+Then run:
+
+```sh
+npm run import:media-migration -- --confirm
+```
+
+The importer uses the normal Firebase client SDK and signs in as an approved admin, so Firestore and Storage rules still apply. It uploads missing Storage objects, creates missing `mediaAssets` documents, and appends missing product photo references without replacing existing product photos.
+It skips Storage objects, `mediaAssets` documents, and product photo refs that already exist.
+
 ## Required Validation
 
 The seed must block writes when:

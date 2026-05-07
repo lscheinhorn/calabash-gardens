@@ -33,6 +33,7 @@
     "plan:media-migration": "node scripts/media-migration-dry-run.js",
     "prepare:media-migration-assets": "node scripts/prepare-media-migration-assets.js",
     "review:media-optimization": "node scripts/media-optimization-review.js",
+    "import:media-migration": "node scripts/import-media-migration.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

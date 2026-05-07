@@ -47,6 +47,13 @@ Required future variables:
 - `REACT_APP_FIREBASE_APP_ID`
 - `REACT_APP_FIREBASE_MEASUREMENT_ID`
 
+One-off guarded migration scripts may also require local-only admin credentials:
+
+- `MIGRATION_ADMIN_EMAIL`
+- `MIGRATION_ADMIN_PASSWORD`
+
+These values must stay in `.env.local` or the shell environment and must not be committed.
+
 ## Dependency Plan
 
 Dependency mismatch status:

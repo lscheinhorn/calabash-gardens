@@ -54,12 +54,14 @@ Phase 19: Media library foundation.
 - Added a controlled media upload/import dry-run planner on the active branch.
 - Added a non-destructive media asset preparation step for oversized migration images on the active branch.
 - Added admin large-image optimization controls and a local media optimization review report on the active branch.
+- Added a guarded Firebase media migration importer on the active branch.
 
 ## In Progress Work
 
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
 - Review the zero-blocker media migration dry-run report before any real upload/import.
 - Review `docs/media-optimization-review.html` before uploading optimized migration images.
+- Run `npm run import:media-migration` as a no-write importer check before any confirmed upload/import.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -109,6 +111,7 @@ Phase 19: Media library foundation.
 - Media migration preparation creates optimized upload copies under ignored `.media-migration-assets/` for oversized files.
 - Admin product photo upload treats 10 MB as the performance threshold and 25 MB as the draft hard cap for rare original-upload overrides.
 - Original admin photo uploads between 10 MB and 25 MB require reviewed/deployed Storage rules before they work live.
+- Media migration importer requires `--confirm` before Firebase writes and signs in with local-only approved admin credentials.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
@@ -154,6 +157,7 @@ Phase 19: Media library foundation.
 - Real media upload/import must not run while the dry-run report has upload blockers.
 - Optimized media migration copies are generated artifacts and should not be committed.
 - Large admin photo uploads should default to web optimization so public product pages stay fast after backend image reads are approved.
+- Media migration imports must skip existing Storage objects and `mediaAssets` documents, append product photo references, and not replace existing Firestore product photos.
 - Product categories must come from the approved category list: Body Care, Culinary, Gifts, Loose Leaf Tea, Mambo Gede, Ritual Smoking Blends, Saffron, and Tinctures.
 - Gifts is reserved for the preserved legacy gift-set product IDs and should not be used for newly created products.
 - Product categories have active/inactive status; new products can use active categories only.
@@ -184,6 +188,7 @@ Phase 19: Media library foundation.
 - 2026-05-07: `npm run plan:media-migration` regenerated Markdown and JSON dry-run reports with 20 planned uploads, 2 optimized upload copies, and 0 upload blockers.
 - 2026-05-07: `npm run build` completed successfully after adding media migration asset preparation, with the same existing warnings.
 - 2026-05-07: `npm run review:media-optimization` generated a local side-by-side HTML review for optimized migration images.
+- 2026-05-07: `npm run import:media-migration` printed the guarded importer dry-run plan with no Firebase writes.
 
 ## Commits
 
