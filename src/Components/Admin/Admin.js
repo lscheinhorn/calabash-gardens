@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 
 import { auth, db, isFirebaseConfigured } from "../../firebase-config";
+import ProductAdmin from "./ProductAdmin";
 
 const adminCollection = "adminUsers";
 
@@ -141,10 +142,6 @@ export default function Admin() {
         <p>Admin access is confirmed.</p>
         <div className="admin_placeholder_grid">
           <div>
-            <h3>Products</h3>
-            <p>Editor not connected yet.</p>
-          </div>
-          <div>
             <h3>Events</h3>
             <p>Editor not connected yet.</p>
           </div>
@@ -153,6 +150,7 @@ export default function Admin() {
             <p>Editor not connected yet.</p>
           </div>
         </div>
+        <ProductAdmin db={db} />
       </div>
     );
   };

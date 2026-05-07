@@ -50,8 +50,9 @@ Minimum fields:
 - `/admin` is lazy-loaded.
 - The shell signs in with Firebase Auth.
 - The shell reads `adminUsers/{uid}` to confirm `active: true`.
-- Approved admins see dashboard placeholders only.
-- Product, event, site content, inventory, image, and checkout editors are not connected yet.
+- Approved admins can create and update Firestore product drafts.
+- Event, site content, inventory, image, and checkout editors are not connected yet.
+- Public product pages still read static product data.
 
 ## Next Guardrail
 

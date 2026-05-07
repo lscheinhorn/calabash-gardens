@@ -78,6 +78,7 @@ Current compatibility notes:
 - Some current product price options only contain `price` and no `option`.
 - Current prices and shipping values are strings, not numbers.
 - Current product keys are generated from title with `createKey`; future IDs should be stable even if title changes.
+- Seeded Firestore product documents must not include fields outside this contract, because rules validate the full resulting document on update.
 
 Editor controls:
 
@@ -85,6 +86,7 @@ Editor controls:
 - Decimal text input for prices until checkout math is refactored safely.
 - Toggles for published, active, highlighted, and in-stock flags.
 - Image selector/uploader only after Storage rules and image workflow are approved.
+- The first product editor writes Firestore product drafts only; it does not update public static product data.
 
 ## Events
 
