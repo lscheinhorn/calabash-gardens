@@ -79,15 +79,49 @@ Current compatibility notes:
 - Current prices and shipping values are strings, not numbers.
 - Current product keys are generated from title with `createKey`; future IDs should be stable even if title changes.
 - Seeded Firestore product documents must not include fields outside this contract, because rules validate the full resulting document on update.
+- New product IDs are suggested from the first title. The ID is locked after saving; changing it later requires creating a replacement product.
+- New product IDs must not match an existing Firestore product document ID.
 
 Editor controls:
 
 - Text inputs for title, description fields, shipping, and option labels.
+- Product ID input suggested from title for new products and disabled for saved products.
 - Category dropdown populated from admin-managed `productCategories`.
 - Decimal text input for prices until checkout math is refactored safely.
 - Toggles for published, active, highlighted, and in-stock flags.
-- Image selector/uploader only after Storage rules and image workflow are approved.
+- Filterable Firestore product cards with inline edit mode for existing products.
+- Image uploader writes approved admin uploads to Firebase Storage and stores image references on Firestore product drafts.
 - The first product editor writes Firestore product drafts only; it does not update public static product data.
+
+Product image reference shape:
+
+```json
+{
+  "path": "product-images/vermont-grown-saffron-1710000000000-jar.webp",
+  "alt": "Small jar of saffron",
+  "sortOrder": 0
+}
+```
+
+Current image upload notes:
+
+- Product photo uploads are available from each expanded Firestore product card.
+- Product photo paths must stay flat under `product-images/{fileName}` to match the current Storage rules.
+- Uploaded product photos are not connected to public storefront rendering yet.
+
+Static product seed notes:
+
+- Seeded products must pass the same field contract as manually edited Firestore products.
+- Seeded products skip existing Firestore product IDs instead of overwriting them.
+- Seeded products use `photos: []`; image migration/upload is a separate workflow.
+- Static gift-set products with missing runtime categories seed under `Gifts`.
+- `Gifts` is reserved for the preserved legacy gift-set products, not new products.
+- Categories have an `active` flag; new products can use only active categories.
+- Existing products can keep an inactive category while being edited, but new products cannot choose inactive categories.
+- `Gifts` seeds inactive by default.
+- The inactive test product is excluded from seed and must not create an `All` category.
+- Admin-created categories must come from the approved category list.
+- Storefront category filters should show only categories with active products.
 
 ## Product Categories
 
@@ -120,6 +154,8 @@ Current compatibility notes:
 - Some current products omit category; seeded Firestore products must either use an approved category or wait for a migration decision.
 - Product writes require a category ID that exists in this collection.
 - The product editor uses this collection for its category dropdown and validation.
+- New category IDs are suggested from the category name and locked after saving.
+- New category IDs must not match an existing Firestore category document ID.
 
 ## Events
 
