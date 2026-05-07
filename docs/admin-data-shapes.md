@@ -115,6 +115,9 @@ Static product seed notes:
 - Seeded products skip existing Firestore product IDs instead of overwriting them.
 - Seeded products use `photos: []`; image migration/upload is a separate workflow.
 - Static gift-set products with missing runtime categories seed under `Gifts`.
+- `Gifts` is reserved for the preserved legacy gift-set products, not new products.
+- The inactive test product is excluded from seed and must not create an `All` category.
+- Admin-created categories must come from the approved category list.
 - Storefront category filters should show only categories with active products.
 
 ## Product Categories

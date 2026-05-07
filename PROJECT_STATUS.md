@@ -52,6 +52,7 @@ Phase 17: Admin product card UI.
 - Refactor admin product view into collapsible sections.
 - Show Firestore products as filterable collapsible cards with inline edit mode.
 - Keep New Product creation separate from existing product edits.
+- Fix category guardrails so seed/admin categories come only from the approved category list.
 - Use subagents to review implementation scope and guardrail compliance.
 
 ## Planned Work
@@ -95,6 +96,8 @@ Phase 17: Admin product card UI.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
+- Static product seed excludes inactive test products and must not create an `All` category.
+- Existing unapproved Firestore categories may need manual cleanup if they were already seeded before this guardrail.
 - CSV import/export should reuse the product seed validation contract instead of trusting spreadsheet validation.
 - Public product pages still do not read Firestore products; admin Firestore product labels reflect seeded/admin data only.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
@@ -129,6 +132,8 @@ Phase 17: Admin product card UI.
 - Product seeding must not overwrite existing Firestore products.
 - Product seeding must not store bundled JavaScript `require(...)` image values in Firestore.
 - Existing Firestore products should be edited inline from product cards; the New Product form should stay for creation only.
+- Product categories must come from the approved category list: Body Care, Culinary, Gifts, Loose Leaf Tea, Mambo Gede, Ritual Smoking Blends, Saffron, and Tinctures.
+- Gifts is reserved for the preserved legacy gift-set product IDs and should not be used for newly created products.
 
 ## Verification History
 

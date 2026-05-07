@@ -10,6 +10,7 @@ The seed tool:
 
 - reads `src/resources/products.js` without modifying it
 - validates products before writing
+- uses an explicit approved category list
 - creates missing `productCategories` first
 - creates only missing `products`
 - skips existing Firestore product documents instead of overwriting them
@@ -25,19 +26,34 @@ The seed must block writes when:
 - a product title cannot produce a stable product ID
 - a product ID is duplicated
 - a category is missing or cannot produce a stable category ID
+- a category is not in the approved product category list
 - shipping is not a string decimal like `17.00`
 - a product has no price options
 - a price is not a string decimal like `15.00`
 
 Missing categories require an explicit mapping decision before seed. Do not infer categories from comments in the static resource file.
 
+The inactive `Test basket` product is excluded from product seed and must not create an `All` category.
+
 ## Gift Set Category Mapping
 
 Some static gift-set products omit runtime `category` values. Luke approved preserving those products under a real `Gifts` category because Jette may want them later, while keeping them inactive/unpublished unless she turns them back on.
 
 The seed tool maps missing-category gift-set products to `Gifts`.
+Only the four preserved legacy gift-set product IDs can use `Gifts`; it is not a general category for newly created products.
 
 The storefront category dropdown should only show categories that have active/public products. A preserved empty or inactive `Gifts` category should not appear to customers.
+
+Approved product categories:
+
+- `Body Care`
+- `Culinary`
+- `Gifts`
+- `Loose Leaf Tea`
+- `Mambo Gede`
+- `Ritual Smoking Blends`
+- `Saffron`
+- `Tinctures`
 
 ## Future CSV Workflow
 

@@ -2,6 +2,26 @@ import { products as staticProducts } from "../resources/products";
 
 const decimalPattern = /^\d+\.\d{2}$/;
 const giftCategoryName = "Gifts";
+const excludedProductTitles = new Set([
+  "Test basket",
+]);
+const legacyGiftProductTitles = new Set([
+  "Calabash Gifts Set",
+  "Calabash Gift Set",
+  "Spa Day Gift Set",
+  "Erotic Gift Set",
+]);
+
+export const approvedProductCategories = [
+  "Body Care",
+  "Culinary",
+  "Gifts",
+  "Loose Leaf Tea",
+  "Mambo Gede",
+  "Ritual Smoking Blends",
+  "Saffron",
+  "Tinctures",
+];
 
 export const seedSlugify = (value) =>
   String(value || "")
@@ -10,6 +30,13 @@ export const seedSlugify = (value) =>
     .replace(/['‘’]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+
+const approvedCategoryIds = new Set(approvedProductCategories.map((category) => (
+  seedSlugify(category)
+)));
+export const legacyGiftProductIds = new Set(Array.from(legacyGiftProductTitles).map((title) => (
+  seedSlugify(title)
+)));
 
 const normalizeCategoryName = (category) => (
   category && String(category).trim() ? String(category).trim() : ""
@@ -23,12 +50,20 @@ const resolveCategoryName = (product) => {
     return categoryName;
   }
 
-  if (/\bgifts?\s+set\b|\bgift\s+set\b/i.test(title)) {
+  if (legacyGiftProductTitles.has(title)) {
     return giftCategoryName;
   }
 
   return "";
 };
+
+const isLegacyGiftProduct = (product) => (
+  legacyGiftProductTitles.has(String(product?.title || "").trim())
+);
+
+const shouldSeedProduct = (product) => (
+  !excludedProductTitles.has(String(product?.title || "").trim())
+);
 
 const normalizePriceOptions = (priceOptions) => (
   Array.isArray(priceOptions) ? priceOptions : []
@@ -113,7 +148,7 @@ const findDuplicateIds = (items) => {
 };
 
 export const buildProductSeed = () => {
-  const products = staticProducts.map(normalizeStaticProduct);
+  const products = staticProducts.filter(shouldSeedProduct).map(normalizeStaticProduct);
   const productDuplicateIds = findDuplicateIds(products);
   const categoryMap = new Map();
   const errors = [];
@@ -133,6 +168,14 @@ export const buildProductSeed = () => {
 
     if (!product.source.category && product.data.category !== seedSlugify(giftCategoryName)) {
       errors.push(`${productLabel}: Missing category; approve a category mapping before seeding.`);
+    }
+
+    if (product.data.category && !approvedCategoryIds.has(product.data.category)) {
+      errors.push(`${productLabel}: Category "${resolveCategoryName(product.source)}" is not approved for seeding.`);
+    }
+
+    if (product.data.category === seedSlugify(giftCategoryName) && !isLegacyGiftProduct(product.source)) {
+      errors.push(`${productLabel}: Gifts is reserved for approved legacy gift-set products.`);
     }
 
     if (product.data.category && !categoryMap.has(product.data.category)) {

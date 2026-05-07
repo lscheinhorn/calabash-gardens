@@ -14,7 +14,12 @@ import {
   uploadBytes,
 } from "firebase/storage";
 
-import { buildProductSeed } from "../../data/adminProductSeed";
+import {
+  approvedProductCategories,
+  buildProductSeed,
+  legacyGiftProductIds,
+  seedSlugify,
+} from "../../data/adminProductSeed";
 
 const emptyProduct = {
   slug: "",
@@ -96,6 +101,14 @@ const buildImagePath = (productId, fileName) => {
 
   return `product-images/${productId}-${Date.now()}-${safeName}${extension}`;
 };
+
+const approvedCategoryIds = new Set(approvedProductCategories.map((category) => (
+  seedSlugify(category)
+)));
+
+const isApprovedCategoryId = (categoryId) => approvedCategoryIds.has(categoryId);
+const giftCategoryId = seedSlugify("Gifts");
+const isGiftAllowedForProduct = (productId) => legacyGiftProductIds.has(productId);
 
 const buildFormFromProduct = (product) => ({
   slug: product.id,
@@ -363,8 +376,6 @@ export default function ProductAdmin({ db, storage }) {
   };
 
   const validateProduct = (productId, productForm = form, isNewProduct = true) => {
-    const categoryIds = categories.map((category) => category.id);
-
     if (!productId || !productForm.title.trim() || !productForm.shipping.trim()) {
       return "Document ID, title, and shipping are required.";
     }
@@ -373,8 +384,12 @@ export default function ProductAdmin({ db, storage }) {
       return "That product ID already exists. Change the title or edit the existing product.";
     }
 
-    if (!productForm.category || !categoryIds.includes(productForm.category)) {
+    if (!productForm.category || !isApprovedCategoryId(productForm.category)) {
       return "Choose an approved category.";
+    }
+
+    if (productForm.category === giftCategoryId && !isGiftAllowedForProduct(productId)) {
+      return "Gifts is reserved for the preserved legacy gift-set products.";
     }
 
     if (!decimalPattern.test(productForm.shipping.trim())) {
@@ -399,6 +414,10 @@ export default function ProductAdmin({ db, storage }) {
   const validateCategory = (categoryId) => {
     if (!categoryId || !categoryForm.name.trim()) {
       return "Category ID and name are required.";
+    }
+
+    if (!isApprovedCategoryId(categoryId)) {
+      return "Choose one of the approved product categories.";
     }
 
     if (!selectedCategoryId && categories.some((category) => category.id === categoryId)) {
@@ -767,6 +786,14 @@ export default function ProductAdmin({ db, storage }) {
     return matchesSearch && matchesCategory && matchesPublished && matchesActive && matchesStock;
   });
 
+  const approvedCategories = categories.filter((category) => isApprovedCategoryId(category.id));
+  const productCategoryOptions = (productId) => approvedCategories.filter((category) => (
+    category.id !== giftCategoryId || isGiftAllowedForProduct(productId)
+  ));
+  const unapprovedCategories = categories.filter((category) => !isApprovedCategoryId(category.id));
+  const productsWithUnapprovedCategories = products.filter((product) => (
+    product.category && !isApprovedCategoryId(product.category)
+  ));
   const categoryNameById = categories.reduce((categoryNames, category) => ({
     ...categoryNames,
     [category.id]: category.name || category.id,
@@ -802,7 +829,7 @@ export default function ProductAdmin({ db, storage }) {
                 Category
                 <select onChange={(event) => updateFilter("category", event.target.value)} value={productFilters.category}>
                   <option value="all">All Categories</option>
-                  {categories.map((category) => (
+                  {approvedCategories.map((category) => (
                     <option key={category.id} value={category.id}>
                       {category.name || category.id}
                     </option>
@@ -915,7 +942,7 @@ export default function ProductAdmin({ db, storage }) {
                                 value={editingForm.category}
                               >
                                 <option value="">Choose category</option>
-                                {categories
+                                {productCategoryOptions(product.id)
                                   .filter((category) => category.active || category.id === editingForm.category)
                                   .map((category) => (
                                     <option key={category.id} value={category.id}>
@@ -1054,7 +1081,7 @@ export default function ProductAdmin({ db, storage }) {
                 value={form.category}
               >
                 <option value="">Choose category</option>
-                {categories
+                {productCategoryOptions("")
                   .filter((category) => category.active || category.id === form.category)
                   .map((category) => (
                     <option key={category.id} value={category.id}>
@@ -1223,25 +1250,30 @@ export default function ProductAdmin({ db, storage }) {
         {expandedSections.categories ? (
           <>
             <label>
-              Category ID
-              <input
+              Category Name
+              <select
                 disabled={Boolean(selectedCategoryId)}
-                readOnly
-                placeholder="saffron"
-                value={selectedCategoryId || slugify(categoryForm.name)}
-              />
+                onChange={(event) => updateCategoryForm("name", event.target.value)}
+                required
+                value={categoryForm.name}
+              >
+                <option value="">Choose category</option>
+                {approvedProductCategories.map((category) => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
               <small className="admin_help_text">
-                Suggested from the category name. This ID is locked after saving;
-                use a new category if the ID needs to change later.
+                Category IDs are generated only from this approved category list.
               </small>
             </label>
 
             <label>
-              Category Name
+              Category ID
               <input
-                onChange={(event) => updateCategoryForm("name", event.target.value)}
-                required
-                value={categoryForm.name}
+                disabled
+                readOnly
+                placeholder="saffron"
+                value={selectedCategoryId || slugify(categoryForm.name)}
               />
             </label>
 
@@ -1282,10 +1314,25 @@ export default function ProductAdmin({ db, storage }) {
                   type="button"
                 >
                   <span>{category.name || category.id}</span>
-                  <small>{category.active ? "Active" : "Inactive"}</small>
+                  <small>
+                    {isApprovedCategoryId(category.id)
+                      ? (category.active ? "Active" : "Inactive")
+                      : "Unapproved"}
+                  </small>
                 </button>
               ))}
             </div>
+            {unapprovedCategories.length ? (
+              <p className="admin_message">
+                Unapproved Firestore categories found: {unapprovedCategories.map((category) => category.name || category.id).join(", ")}.
+                Remove them from Firestore before relying on this category list.
+              </p>
+            ) : null}
+            {productsWithUnapprovedCategories.length ? (
+              <p className="admin_message">
+                Products with unapproved categories found: {productsWithUnapprovedCategories.map((product) => product.title || product.id).join(", ")}.
+              </p>
+            ) : null}
           </>
         ) : null}
       </form>
