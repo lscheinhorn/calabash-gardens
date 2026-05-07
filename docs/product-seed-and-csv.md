@@ -11,7 +11,7 @@ The seed tool:
 - reads `src/resources/products.js` without modifying it
 - validates products before writing
 - uses an explicit approved category list
-- creates missing `productCategories` first
+- creates missing approved `productCategories` first
 - creates only missing `products`
 - skips existing Firestore product documents instead of overwriting them
 - stores `photos: []` because bundled `require(...)` image values are not valid Firestore image references
@@ -40,7 +40,8 @@ The inactive `Test basket` product is excluded from product seed and must not cr
 Some static gift-set products omit runtime `category` values. Luke approved preserving those products under a real `Gifts` category because Jette may want them later, while keeping them inactive/unpublished unless she turns them back on.
 
 The seed tool maps missing-category gift-set products to `Gifts`.
-Only the four preserved legacy gift-set product IDs can use `Gifts`; it is not a general category for newly created products.
+Only the four preserved legacy gift-set product IDs can use `Gifts`; it is not a general category for newly created products. `Gifts` exists as an inactive category by default.
+New products can use active categories only. Existing products may keep an inactive category when edited.
 
 The storefront category dropdown should only show categories that have active/public products. A preserved empty or inactive `Gifts` category should not appear to customers.
 
@@ -48,12 +49,14 @@ Approved product categories:
 
 - `Body Care`
 - `Culinary`
-- `Gifts`
+- `Gifts` inactive by default
 - `Loose Leaf Tea`
 - `Mambo Gede`
 - `Ritual Smoking Blends`
 - `Saffron`
 - `Tinctures`
+
+`All` exists in the old static file only as a test/filter sentinel and is not an approved product category.
 
 ## Future CSV Workflow
 

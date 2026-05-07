@@ -116,6 +116,9 @@ Static product seed notes:
 - Seeded products use `photos: []`; image migration/upload is a separate workflow.
 - Static gift-set products with missing runtime categories seed under `Gifts`.
 - `Gifts` is reserved for the preserved legacy gift-set products, not new products.
+- Categories have an `active` flag; new products can use only active categories.
+- Existing products can keep an inactive category while being edited, but new products cannot choose inactive categories.
+- `Gifts` seeds inactive by default.
 - The inactive test product is excluded from seed and must not create an `All` category.
 - Admin-created categories must come from the approved category list.
 - Storefront category filters should show only categories with active products.

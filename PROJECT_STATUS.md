@@ -134,6 +134,9 @@ Phase 17: Admin product card UI.
 - Existing Firestore products should be edited inline from product cards; the New Product form should stay for creation only.
 - Product categories must come from the approved category list: Body Care, Culinary, Gifts, Loose Leaf Tea, Mambo Gede, Ritual Smoking Blends, Saffron, and Tinctures.
 - Gifts is reserved for the preserved legacy gift-set product IDs and should not be used for newly created products.
+- Product categories have active/inactive status; new products can use active categories only.
+- Existing products can keep inactive categories during edits for preservation.
+- Gifts seeds inactive by default.
 
 ## Verification History
 

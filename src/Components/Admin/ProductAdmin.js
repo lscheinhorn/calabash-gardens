@@ -376,6 +376,8 @@ export default function ProductAdmin({ db, storage }) {
   };
 
   const validateProduct = (productId, productForm = form, isNewProduct = true) => {
+    const selectedCategory = categories.find((category) => category.id === productForm.category);
+
     if (!productId || !productForm.title.trim() || !productForm.shipping.trim()) {
       return "Document ID, title, and shipping are required.";
     }
@@ -386,6 +388,14 @@ export default function ProductAdmin({ db, storage }) {
 
     if (!productForm.category || !isApprovedCategoryId(productForm.category)) {
       return "Choose an approved category.";
+    }
+
+    if (!selectedCategory) {
+      return "Choose a category that exists in Firestore.";
+    }
+
+    if (isNewProduct && selectedCategory.active !== true) {
+      return "New products can only use active categories.";
     }
 
     if (productForm.category === giftCategoryId && !isGiftAllowedForProduct(productId)) {

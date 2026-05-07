@@ -37,6 +37,11 @@ const approvedCategoryIds = new Set(approvedProductCategories.map((category) => 
 export const legacyGiftProductIds = new Set(Array.from(legacyGiftProductTitles).map((title) => (
   seedSlugify(title)
 )));
+const inactiveDefaultCategoryIds = new Set([
+  seedSlugify(giftCategoryName),
+]);
+
+const isCategoryActiveByDefault = (categoryId) => !inactiveDefaultCategoryIds.has(categoryId);
 
 const normalizeCategoryName = (category) => (
   category && String(category).trim() ? String(category).trim() : ""
@@ -150,7 +155,18 @@ const findDuplicateIds = (items) => {
 export const buildProductSeed = () => {
   const products = staticProducts.filter(shouldSeedProduct).map(normalizeStaticProduct);
   const productDuplicateIds = findDuplicateIds(products);
-  const categoryMap = new Map();
+  const categoryMap = new Map(approvedProductCategories.map((categoryName, index) => {
+    const categoryId = seedSlugify(categoryName);
+
+    return [categoryId, {
+      id: categoryId,
+      data: {
+        name: categoryName,
+        active: isCategoryActiveByDefault(categoryId),
+        sortOrder: index,
+      },
+    }];
+  }));
   const errors = [];
   const warnings = [];
 
@@ -176,17 +192,6 @@ export const buildProductSeed = () => {
 
     if (product.data.category === seedSlugify(giftCategoryName) && !isLegacyGiftProduct(product.source)) {
       errors.push(`${productLabel}: Gifts is reserved for approved legacy gift-set products.`);
-    }
-
-    if (product.data.category && !categoryMap.has(product.data.category)) {
-      categoryMap.set(product.data.category, {
-        id: product.data.category,
-        data: {
-          name: resolveCategoryName(product.source),
-          active: true,
-          sortOrder: categoryMap.size,
-        },
-      });
     }
   });
 
