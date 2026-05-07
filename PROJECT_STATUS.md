@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin product card UI is merged into `main` and deployed for live admin testing.
+Product image migration dry-run manifest is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin product card UI is merged into `main` and deployed for live admin testing.
 
 ## Current Phase
 
-Phase 17: Admin product card UI.
+Phase 18: Product image migration dry-run manifest.
 
 ## Done Work
 
@@ -49,9 +49,11 @@ Phase 17: Admin product card UI.
 - Moved admin product photo upload and attached-photo display into expanded product cards on the active admin branch.
 - Replaced admin collapse/expand text controls with compact arrow controls on the active admin branch.
 - Merged and deployed admin product card UI for `/admin` testing.
+- Added a dry-run product image migration manifest generator on the active branch.
 
 ## In Progress Work
 
+- Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
 - Use subagents to review implementation scope and guardrail compliance.
@@ -70,7 +72,7 @@ Phase 17: Admin product card UI.
 - Test `/admin` with Firebase env values and an approved admin user.
 - Plan CSV import/export UI after the seed validator is reviewed.
 - Plan backend product reads after seeded data is reviewed.
-- Plan project-directory product image migration with a dry-run manifest before uploading existing static images.
+- Plan approved product image upload only after the dry-run manifest is reviewed.
 
 ## Bugs
 
@@ -94,6 +96,7 @@ Phase 17: Admin product card UI.
 - Product editor requires Firebase env values, deployed/reviewed rules, and an approved admin record for real testing.
 - Product writes require approved `productCategories` records.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
+- Product image migration dry run found many shared default-logo placeholders; those should not be uploaded as individual product photos without approval.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
@@ -134,6 +137,7 @@ Phase 17: Admin product card UI.
 - Existing Firestore products should be edited inline from product cards; the New Product form should stay for creation only.
 - Existing Firestore product photos should be uploaded and reviewed from the expanded product card.
 - Project-directory product image migration must be planned as a separate dry-run manifest before uploading.
+- Product image migration dry run must not upload files, write Firestore data, or edit protected static resource files.
 - Product categories must come from the approved category list: Body Care, Culinary, Gifts, Loose Leaf Tea, Mambo Gede, Ritual Smoking Blends, Saffron, and Tinctures.
 - Gifts is reserved for the preserved legacy gift-set product IDs and should not be used for newly created products.
 - Product categories have active/inactive status; new products can use active categories only.
@@ -153,6 +157,8 @@ Phase 17: Admin product card UI.
 - 2026-05-07: `npm run build` completed successfully after admin collapse arrow UI polish, with the same existing warnings.
 - 2026-05-07: Post-merge `npm run build` completed successfully on `main`, with the same existing warnings.
 - 2026-05-07: `npm run deploy` completed successfully and reported `Published`.
+- 2026-05-07: `npm run manifest:product-images` generated a dry-run manifest with 16 upload candidates, 62 skipped default placeholders, 0 missing source files, and 4 unreferenced product photo files.
+- 2026-05-07: `npm run build` completed successfully after adding the product image manifest generator, with the same existing warnings.
 
 ## Commits
 

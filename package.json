@@ -29,6 +29,7 @@
     "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "manifest:product-images": "node scripts/product-image-migration-manifest.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

@@ -21,6 +21,27 @@ Seeded products use the same Firestore product contract as the admin product edi
 
 Project-directory product image migration is intentionally separate from seed. A future image migration should start with a dry-run manifest that maps static product IDs to exact source image files and planned Firebase Storage paths before anything is uploaded.
 
+## Product Image Migration Dry Run
+
+Use this command to regenerate the current dry-run manifest:
+
+```sh
+npm run manifest:product-images
+```
+
+The command reads `src/resources/products.js`, parses product `photos` references, and writes `docs/product-image-migration-manifest.md`.
+
+The manifest is review-only:
+
+- it does not upload files
+- it does not write Firestore data
+- it does not edit static product or image resources
+- it skips the shared default logo placeholder
+- it proposes deterministic flat Storage paths under `product-images/`
+- it lists unreferenced files in `src/resources/images/product_photos/`
+
+Do not build an upload phase until Luke approves the manifest decisions listed at the bottom of that file.
+
 ## Required Validation
 
 The seed must block writes when:
