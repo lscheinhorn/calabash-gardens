@@ -50,7 +50,10 @@ const emptyCategory = {
 };
 
 const decimalPattern = /^\d+\.\d{2}$/;
-const maxImageSize = 10 * 1024 * 1024;
+const recommendedImageSize = 10 * 1024 * 1024;
+const maxOriginalImageSize = 25 * 1024 * 1024;
+const optimizedImageMaxWidth = 1800;
+const optimizedImageQuality = 0.82;
 
 const CollapseIcon = ({ isExpanded }) => (
   <FontAwesomeIcon
@@ -108,12 +111,78 @@ const normalizePhotos = (photos) => {
     .filter(Boolean);
 };
 
-const buildImagePath = (productId, fileName) => {
-  const safeName = slugify(fileName.replace(/\.[^.]+$/, "")) || "product-image";
+const formatFileSize = (size) => {
+  if (!size) {
+    return "0 MB";
+  }
+
+  return `${(size / (1024 * 1024)).toFixed(1)} MB`;
+};
+
+const fileExtensionFor = (fileName, contentType) => {
+  if (contentType === "image/jpeg") {
+    return ".jpg";
+  }
+
+  if (contentType === "image/png") {
+    return ".png";
+  }
+
+  if (contentType === "image/webp") {
+    return ".webp";
+  }
+
   const extensionMatch = fileName.match(/\.([a-z0-9]+)$/i);
-  const extension = extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : "";
+
+  return extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : "";
+};
+
+const buildImagePath = (productId, fileName, contentType) => {
+  const safeName = slugify(fileName.replace(/\.[^.]+$/, "")) || "product-image";
+  const extension = fileExtensionFor(fileName, contentType);
 
   return `product-images/${productId}-${Date.now()}-${safeName}${extension}`;
+};
+
+const loadImage = (file) => new Promise((resolve, reject) => {
+  const image = new Image();
+  const imageUrl = URL.createObjectURL(file);
+
+  image.onload = () => {
+    URL.revokeObjectURL(imageUrl);
+    resolve(image);
+  };
+  image.onerror = () => {
+    URL.revokeObjectURL(imageUrl);
+    reject(new Error("Image could not be read."));
+  };
+  image.src = imageUrl;
+});
+
+const canvasToBlob = (canvas, contentType, quality) => new Promise((resolve, reject) => {
+  canvas.toBlob((blob) => {
+    if (blob) {
+      resolve(blob);
+      return;
+    }
+
+    reject(new Error("Image could not be optimized."));
+  }, contentType, quality);
+});
+
+const optimizeImageFile = async (file) => {
+  const image = await loadImage(file);
+  const scale = Math.min(1, optimizedImageMaxWidth / image.naturalWidth);
+  const width = Math.max(1, Math.round(image.naturalWidth * scale));
+  const height = Math.max(1, Math.round(image.naturalHeight * scale));
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  canvas.width = width;
+  canvas.height = height;
+  context.drawImage(image, 0, 0, width, height);
+
+  return canvasToBlob(canvas, "image/jpeg", optimizedImageQuality);
 };
 
 const approvedCategoryIds = new Set(approvedProductCategories.map((category) => (
@@ -159,6 +228,7 @@ export default function ProductAdmin({ db, storage }) {
   const [photoAlt, setPhotoAlt] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
   const [photoInputKey, setPhotoInputKey] = useState(0);
+  const [photoUploadChoice, setPhotoUploadChoice] = useState("optimize");
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
@@ -288,7 +358,14 @@ export default function ProductAdmin({ db, storage }) {
     setPhotoMessage("");
     setPhotoAlt("");
     setPhotoFile(null);
+    setPhotoUploadChoice("optimize");
     setPhotoInputKey((currentKey) => currentKey + 1);
+  };
+
+  const updatePhotoFile = (file) => {
+    setPhotoFile(file);
+    setPhotoMessage("");
+    setPhotoUploadChoice(file && file.size >= recommendedImageSize ? "optimize" : "original");
   };
 
   const toggleProductCard = (product) => {
@@ -573,8 +650,8 @@ export default function ProductAdmin({ db, storage }) {
       return;
     }
 
-    if (photoFile.size >= maxImageSize) {
-      setPhotoMessage("Product photos must be smaller than 10 MB.");
+    if (photoUploadChoice === "original" && photoFile.size >= maxOriginalImageSize) {
+      setPhotoMessage("Original photos must be smaller than 25 MB. Choose optimize for website.");
       return;
     }
 
@@ -584,11 +661,26 @@ export default function ProductAdmin({ db, storage }) {
 
     try {
       const currentPhotos = normalizePhotos(product.photos);
-      const photoPath = buildImagePath(product.id, photoFile.name);
+      const shouldOptimize = photoUploadChoice === "optimize" && photoFile.size >= recommendedImageSize;
+      const uploadBlob = shouldOptimize ? await optimizeImageFile(photoFile) : photoFile;
+      const uploadContentType = uploadBlob.type || photoFile.type;
+
+      if (shouldOptimize && uploadBlob.size >= recommendedImageSize) {
+        setPhotoMessage("Optimized photo is still over 10 MB. Try a smaller image.");
+        return;
+      }
+
+      const photoPath = buildImagePath(product.id, photoFile.name, uploadContentType);
       const photoRef = ref(storage, photoPath);
 
-      await uploadBytes(photoRef, photoFile, {
-        contentType: photoFile.type,
+      await uploadBytes(photoRef, uploadBlob, {
+        contentType: uploadContentType,
+        customMetadata: {
+          optimizedForWeb: shouldOptimize ? "true" : "false",
+          originalFileName: photoFile.name,
+          originalSize: String(photoFile.size),
+          uploadSize: String(uploadBlob.size),
+        },
       });
 
       const updatedPhotos = [
@@ -612,8 +704,9 @@ export default function ProductAdmin({ db, storage }) {
       )));
       setPhotoAlt("");
       setPhotoFile(null);
+      setPhotoUploadChoice("optimize");
       setPhotoInputKey((currentKey) => currentKey + 1);
-      setPhotoMessage("Photo uploaded and attached to this product.");
+      setPhotoMessage(shouldOptimize ? "Photo optimized, uploaded, and attached to this product." : "Photo uploaded and attached to this product.");
       await loadProducts();
     } catch (error) {
       setPhotoMessage("Photo could not be uploaded.");
@@ -1083,10 +1176,40 @@ export default function ProductAdmin({ db, storage }) {
                               accept="image/*"
                               disabled={isUploadingPhoto}
                               key={`${product.id}-${photoInputKey}`}
-                              onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
+                              onChange={(event) => updatePhotoFile(event.target.files?.[0] || null)}
                               type="file"
                             />
                           </label>
+                          {photoFile && isPhotoTarget ? (
+                            <div className="admin_upload_notice">
+                              <span>{photoFile.name}</span>
+                              <small>{formatFileSize(photoFile.size)}</small>
+                              {photoFile.size >= recommendedImageSize ? (
+                                <div className="admin_upload_options">
+                                  <label>
+                                    <input
+                                      checked={photoUploadChoice === "optimize"}
+                                      disabled={isUploadingPhoto}
+                                      name={`photo-upload-choice-${product.id}`}
+                                      onChange={() => setPhotoUploadChoice("optimize")}
+                                      type="radio"
+                                    />
+                                    Optimize for website
+                                  </label>
+                                  <label>
+                                    <input
+                                      checked={photoUploadChoice === "original"}
+                                      disabled={isUploadingPhoto}
+                                      name={`photo-upload-choice-${product.id}`}
+                                      onChange={() => setPhotoUploadChoice("original")}
+                                      type="radio"
+                                    />
+                                    Upload original
+                                  </label>
+                                </div>
+                              ) : null}
+                            </div>
+                          ) : null}
                           <label>
                             Alt Text
                             <input
