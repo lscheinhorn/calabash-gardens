@@ -31,6 +31,7 @@
     "build": "react-scripts build",
     "manifest:product-images": "node scripts/product-image-migration-manifest.js",
     "plan:media-migration": "node scripts/media-migration-dry-run.js",
+    "prepare:media-migration-assets": "node scripts/prepare-media-migration-assets.js",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

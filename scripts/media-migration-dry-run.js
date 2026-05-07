@@ -8,6 +8,7 @@ const {
 
 const outputPath = path.join(repoRoot, "docs/media-migration-dry-run.md");
 const jsonOutputPath = path.join(repoRoot, "docs/media-migration-dry-run.json");
+const optimizedAssetsDir = path.join(repoRoot, ".media-migration-assets");
 const maxUploadSize = 10 * 1024 * 1024;
 
 const contentTypes = {
@@ -31,10 +32,25 @@ const fileSizeFor = (sourcePath) => {
   return fs.existsSync(absolutePath) ? fs.statSync(absolutePath).size : 0;
 };
 
+const optimizedPathFor = (storagePath) => path.join(optimizedAssetsDir, storagePath);
+
+const uploadSourceFor = (asset) => {
+  const optimizedAbsolutePath = optimizedPathFor(asset.storagePath);
+
+  if (fs.existsSync(optimizedAbsolutePath)) {
+    return path.relative(repoRoot, optimizedAbsolutePath);
+  }
+
+  return asset.sourcePath;
+};
+
 const withFileMetadata = (asset) => ({
   ...asset,
-  contentType: contentTypeFor(asset.sourcePath),
-  size: fileSizeFor(asset.sourcePath),
+  contentType: contentTypeFor(uploadSourceFor(asset)),
+  originalSize: fileSizeFor(asset.sourcePath),
+  size: fileSizeFor(uploadSourceFor(asset)),
+  uploadSourcePath: uploadSourceFor(asset),
+  usesOptimizedUpload: uploadSourceFor(asset) !== asset.sourcePath,
 });
 
 const buildMediaAssetDoc = (asset) => ({
@@ -112,6 +128,7 @@ const buildMarkdown = (dryRun) => {
     `- Product photo references planned: ${dryRun.productAssets.length}`,
     `- Default placeholder references skipped: ${dryRun.skippedPlaceholderCount}`,
     `- Upload blockers over 10 MB: ${dryRun.oversizedAssets.length}`,
+    `- Optimized upload copies used: ${dryRun.allAssets.filter((asset) => asset.usesOptimizedUpload).length}`,
     "",
   ];
 
@@ -121,14 +138,14 @@ const buildMarkdown = (dryRun) => {
       "",
       "These files exceed the current 10 MB Storage rule limit and need resizing/compression or an approved rules change before a real upload.",
       "",
-      "| Media Asset ID | Source File | Size Bytes | Storage Path |",
-      "| --- | --- | --- | --- |",
+    "| Media Asset ID | Upload Source File | Size Bytes | Storage Path |",
+    "| --- | --- | --- | --- |",
     );
 
     dryRun.oversizedAssets.forEach((asset) => {
       lines.push(tableRow([
         asset.mediaAssetId,
-        asset.sourcePath,
+        asset.uploadSourcePath,
         String(asset.size),
         asset.storagePath,
       ]));
@@ -140,8 +157,8 @@ const buildMarkdown = (dryRun) => {
   lines.push(
     "## Planned Storage Uploads",
     "",
-    "| Media Asset ID | Bin | Source File | Storage Path | Content Type | Size Bytes |",
-    "| --- | --- | --- | --- | --- | --- |",
+    "| Media Asset ID | Bin | Original Source File | Upload Source File | Storage Path | Content Type | Upload Size Bytes | Original Size Bytes |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- |",
   );
 
   dryRun.allAssets.forEach((asset) => {
@@ -149,9 +166,11 @@ const buildMarkdown = (dryRun) => {
       asset.mediaAssetId,
       asset.bin,
       asset.sourcePath,
+      asset.uploadSourcePath,
       asset.storagePath,
       asset.contentType,
       String(asset.size),
+      String(asset.originalSize),
     ]));
   });
 
@@ -232,14 +251,17 @@ const writeDryRun = () => {
     storageUploads: dryRun.allAssets.map((asset) => ({
       contentType: asset.contentType,
       mediaAssetId: asset.mediaAssetId,
+      originalSize: asset.originalSize,
       size: asset.size,
       sourcePath: asset.sourcePath,
       storagePath: asset.storagePath,
+      uploadSourcePath: asset.uploadSourcePath,
+      usesOptimizedUpload: asset.usesOptimizedUpload,
     })),
     uploadBlockers: dryRun.oversizedAssets.map((asset) => ({
       mediaAssetId: asset.mediaAssetId,
       size: asset.size,
-      sourcePath: asset.sourcePath,
+      uploadSourcePath: asset.uploadSourcePath,
       storagePath: asset.storagePath,
     })),
   }, null, 2);

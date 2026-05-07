@@ -35,6 +35,15 @@ Use this command to generate the controlled upload/import dry-run report:
 npm run plan:media-migration
 ```
 
+If the report shows upload blockers over the 10 MB Storage rule limit, run:
+
+```sh
+npm run prepare:media-migration-assets
+npm run plan:media-migration
+```
+
+The preparation command writes optimized upload copies to ignored `.media-migration-assets/` paths. It does not edit files under `src/resources/images/`.
+
 The command reads `src/resources/products.js`, parses product `photos` references, and writes `docs/product-image-migration-manifest.md`.
 
 The manifest is review-only:

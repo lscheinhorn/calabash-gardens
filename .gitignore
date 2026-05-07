@@ -11,6 +11,9 @@
 # production
 /build
 
+# local media migration artifacts
+/.media-migration-assets
+
 # misc
 .DS_Store
 .env.local
