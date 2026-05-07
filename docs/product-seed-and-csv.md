@@ -89,6 +89,7 @@ The importer uses the normal Firebase client SDK and signs in as an approved adm
 It skips Storage objects, `mediaAssets` documents, and product photo refs that already exist.
 
 If the confirmed importer fails on the first Storage upload with `404 Not Found`, check Firebase Console for the project Storage setup. Firebase Storage must be enabled and available for the configured bucket before media upload migration can run.
+If it fails with `storage/unauthorized` after Storage rules deploy, check the cross-service rules IAM permission. The Firebase Storage service agent needs the `Firebase Rules Firestore Service Agent` role so Storage rules can read `adminUsers/{uid}` in Firestore.
 
 ## Required Validation
 

@@ -6,8 +6,8 @@ This document tracks Firebase Storage security rules for admin-managed image upl
 
 - Add `storage.rules` as a draft rules file.
 - Document how image paths should be organized.
-- Keep `firebase.json` commented out.
-- Do not deploy rules.
+- Use `firebase.json` for Storage rules deployment only.
+- Deploy rules only after Luke approves the deploy gate.
 - Product photo upload UI exists in the admin product editor.
 - Do not modify existing image assets or protected content files.
 
@@ -53,10 +53,11 @@ Public image folders allow object reads but deny listing so visitors can load kn
 ## Important Guardrails
 
 - These rules must be reviewed before deployment.
-- `firebase.json` is not activated in this phase.
+- `firebase.json` does not enable Firebase Hosting; it points the CLI at `storage.rules` only.
 - Existing local image files remain the public storefront source of truth until a later approved backend-read/image migration phase.
 - Public image path names should be stable before Jette starts uploading files.
 - Storage rules depend on Firestore admin records, so Firestore rules and first-admin bootstrap must be handled first.
+- Because these rules use `firestore.exists()` and `firestore.get()`, the Firebase Storage service agent must have the `Firebase Rules Firestore Service Agent` IAM role before uploads can pass the admin allowlist check.
 
 ## Open Questions
 

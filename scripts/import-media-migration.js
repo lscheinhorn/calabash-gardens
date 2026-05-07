@@ -14,6 +14,12 @@ const {
   serverTimestamp,
   setDoc,
 } = require("firebase/firestore");
+const {
+  getMetadata,
+  getStorage,
+  ref,
+  uploadBytes,
+} = require("firebase/storage");
 const { repoRoot } = require("./product-image-migration-manifest");
 
 const dryRunPath = path.join(repoRoot, "docs/media-migration-dry-run.json");
@@ -86,14 +92,6 @@ const firebaseConfig = () => ({
   measurementId: env.REACT_APP_FIREBASE_MEASUREMENT_ID,
 });
 
-const storageMetadataUrl = (bucket, storagePath) => (
-  `https://firebasestorage.googleapis.com/v0/b/${bucket}/o/${encodeURIComponent(storagePath)}`
-);
-
-const storageUploadUrl = (bucket, storagePath) => (
-  `https://firebasestorage.googleapis.com/v0/b/${bucket}/o?uploadType=media&name=${encodeURIComponent(storagePath)}`
-);
-
 const readDryRun = () => {
   if (!fs.existsSync(dryRunPath)) {
     throw new Error("Run npm run plan:media-migration before importing media.");
@@ -129,29 +127,24 @@ const validateDryRun = (dryRun) => {
   }
 };
 
-const storageObjectExists = async (bucket, idToken, storagePath) => {
-  const response = await fetch(storageMetadataUrl(bucket, storagePath), {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
-
-  if (response.ok) {
+const storageObjectExists = async (storage, storagePath) => {
+  try {
+    await getMetadata(ref(storage, storagePath));
     return true;
-  }
+  } catch (error) {
+    if (error.code === "storage/object-not-found") {
+      return false;
+    }
 
-  if (response.status === 404) {
-    return false;
+    throw new Error(`Could not check Storage object ${storagePath}: ${error.message}`);
   }
-
-  throw new Error(`Could not check Storage object ${storagePath}: ${response.status} ${await response.text()}`);
 };
 
-const uploadStorageObjects = async (bucket, idToken, uploads) => {
+const uploadStorageObjects = async (storage, uploads) => {
   const results = [];
 
   for (const upload of uploads) {
-    const alreadyExists = await storageObjectExists(bucket, idToken, upload.storagePath);
+    const alreadyExists = await storageObjectExists(storage, upload.storagePath);
 
     if (alreadyExists) {
       results.push({
@@ -164,22 +157,20 @@ const uploadStorageObjects = async (bucket, idToken, uploads) => {
 
     const absolutePath = path.join(repoRoot, upload.uploadSourcePath);
     const bytes = fs.readFileSync(absolutePath);
-    const response = await fetch(storageUploadUrl(bucket, upload.storagePath), {
-      body: bytes,
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-        "Content-Type": upload.contentType,
-        "x-goog-meta-mediaAssetId": upload.mediaAssetId,
-        "x-goog-meta-originalSize": String(upload.originalSize),
-        "x-goog-meta-sourcePath": upload.sourcePath,
-        "x-goog-meta-uploadSourcePath": upload.uploadSourcePath,
-        "x-goog-meta-usesOptimizedUpload": String(upload.usesOptimizedUpload),
-      },
-      method: "POST",
-    });
 
-    if (!response.ok) {
-      throw new Error(`Could not upload ${upload.mediaAssetId} to ${upload.storagePath}: ${response.status} ${await response.text()}`);
+    try {
+      await uploadBytes(ref(storage, upload.storagePath), bytes, {
+        contentType: upload.contentType,
+        customMetadata: {
+          mediaAssetId: upload.mediaAssetId,
+          originalSize: String(upload.originalSize),
+          sourcePath: upload.sourcePath,
+          uploadSourcePath: upload.uploadSourcePath,
+          usesOptimizedUpload: String(upload.usesOptimizedUpload),
+        },
+      });
+    } catch (error) {
+      throw new Error(`Could not upload ${upload.mediaAssetId} to ${upload.storagePath}: ${error.message}`);
     }
 
     results.push({
@@ -310,12 +301,12 @@ const run = async () => {
   const app = initializeApp(firebaseConfig());
   const auth = getAuth(app);
   const db = getFirestore(app);
+  const storage = getStorage(app);
 
   try {
-    const credential = await signInWithEmailAndPassword(auth, env.MIGRATION_ADMIN_EMAIL, env.MIGRATION_ADMIN_PASSWORD);
-    const idToken = await credential.user.getIdToken();
+    await signInWithEmailAndPassword(auth, env.MIGRATION_ADMIN_EMAIL, env.MIGRATION_ADMIN_PASSWORD);
 
-    const uploadResults = await uploadStorageObjects(env.REACT_APP_FIREBASE_STORAGE_BUCKET, idToken, dryRun.storageUploads);
+    const uploadResults = await uploadStorageObjects(storage, dryRun.storageUploads);
     const mediaAssetResults = await writeMediaAssetDocuments(db, dryRun.mediaAssetDocuments);
     const productResults = await appendProductPhotoReferences(db, dryRun.productPhotoUpdates);
 

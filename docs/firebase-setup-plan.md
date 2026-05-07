@@ -7,7 +7,7 @@ This document tracks Firebase setup for a future admin editor. The current imple
 - `src/firebase-config.js` exports an env-driven Firebase config foundation.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` variables are configured.
 - `.firebaserc` is commented out and references project `calabash-54fb5`.
-- `firebase.json` is commented out.
+- `firebase.json` contains Storage rules config only; Firebase Hosting is not enabled there.
 - `package.json` now lists `firebase`.
 - `package-lock.json` lists `firebase`.
 - `node_modules/firebase` exists locally.
@@ -101,9 +101,9 @@ Rules must be designed before writes are enabled:
 - Validate required fields for products/events/content where practical.
 - Protect image upload paths by admin UID.
 
-Draft Firestore rules are in `firestore.rules`. They are not deployed yet, and `firebase.json` remains commented out.
+Draft Firestore rules are in `firestore.rules`. They are not deployed yet.
 
-Draft Storage rules are in `storage.rules`. They are not deployed yet, and image upload UI is not connected.
+Draft Storage rules are in `storage.rules`. Storage rules can be deployed independently from Hosting.
 
 ## Implementation Sequence
 
