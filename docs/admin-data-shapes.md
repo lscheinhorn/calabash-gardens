@@ -89,6 +89,7 @@ Editor controls:
 - Category dropdown populated from admin-managed `productCategories`.
 - Decimal text input for prices until checkout math is refactored safely.
 - Toggles for published, active, highlighted, and in-stock flags.
+- Filterable Firestore product cards with inline edit mode for existing products.
 - Image uploader writes approved admin uploads to Firebase Storage and stores image references on Firestore product drafts.
 - The first product editor writes Firestore product drafts only; it does not update public static product data.
 

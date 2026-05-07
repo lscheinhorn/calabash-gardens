@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin product seed/import foundation is in progress on branch `codex/admin-product-seed-import`.
+Admin product card UI is in progress on branch `codex/admin-product-card-ui`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin product seed/import foundation is in progress on branch `codex/admin-produ
 
 ## Current Phase
 
-Phase 16: Admin product seed/import foundation.
+Phase 17: Admin product card UI.
 
 ## Done Work
 
@@ -45,13 +45,13 @@ Phase 16: Admin product seed/import foundation.
 - Merged admin product categories and validation into `main`.
 - Added admin product photo upload on the active admin branch.
 - Added admin product and category ID suggestions on the active admin branch.
+- Added admin product seed/import foundation on the active admin branch.
 
 ## In Progress Work
 
-- Add a guarded admin seed tool for copying static products into Firestore drafts.
-- Map preserved inactive gift-set products to a real `Gifts` category for seed.
-- Keep storefront category filters limited to categories with active products.
-- Document future CSV import/export validation expectations.
+- Refactor admin product view into collapsible sections.
+- Show Firestore products as filterable collapsible cards with inline edit mode.
+- Keep New Product creation separate from existing product edits.
 - Use subagents to review implementation scope and guardrail compliance.
 
 ## Planned Work
@@ -69,6 +69,7 @@ Phase 16: Admin product seed/import foundation.
 - Review admin product photo upload before merge.
 - Plan CSV import/export UI after the seed validator is reviewed.
 - Plan backend product reads after seeded data is reviewed.
+- Consider moving product photo upload directly into product cards after the card editor is tested.
 
 ## Bugs
 
@@ -95,6 +96,7 @@ Phase 16: Admin product seed/import foundation.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - CSV import/export should reuse the product seed validation contract instead of trusting spreadsheet validation.
+- Public product pages still do not read Firestore products; admin Firestore product labels reflect seeded/admin data only.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -126,6 +128,7 @@ Phase 16: Admin product seed/import foundation.
 - Product and category IDs should be suggested from the title/name when created and treated as locked after saving.
 - Product seeding must not overwrite existing Firestore products.
 - Product seeding must not store bundled JavaScript `require(...)` image values in Firestore.
+- Existing Firestore products should be edited inline from product cards; the New Product form should stay for creation only.
 
 ## Verification History
 
@@ -135,6 +138,7 @@ Phase 16: Admin product seed/import foundation.
 - 2026-05-05: `npm run build` completed successfully after inactive-event correction, with the same existing warnings.
 - 2026-05-05: `npm run deploy` published customer-request fixes.
 - 2026-05-07: `npm run build` completed successfully after admin product photo upload, with the same existing warnings.
+- 2026-05-07: `npm run build` completed successfully after admin product card UI, with the same existing warnings.
 
 ## Commits
 
@@ -158,7 +162,9 @@ Phase 16: Admin product seed/import foundation.
 - `341ec93 feat: add admin product photo upload`
 - `6e64617 feat: suggest locked admin ids`
 - `594b0a4 fix: clean apostrophes in admin ids`
-- Pending commit for admin product seed/import foundation.
+- `6271823 feat: add admin product seed foundation`
+- `a0deec5 feat: preserve gift sets in seed`
+- Pending commit for admin product card UI.
 
 ## Deployments
 

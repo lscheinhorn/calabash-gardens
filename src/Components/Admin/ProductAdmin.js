@@ -97,8 +97,25 @@ const buildImagePath = (productId, fileName) => {
   return `product-images/${productId}-${Date.now()}-${safeName}${extension}`;
 };
 
+const buildFormFromProduct = (product) => ({
+  slug: product.id,
+  title: product.title || "",
+  category: product.category || "",
+  info: product.info || "",
+  info1: product.info1 || "",
+  info2: product.info2 || "",
+  shipping: product.shipping || "17.00",
+  priceOptions: normalizePriceOptions(product.priceOptions),
+  published: product.published === true,
+  isActive: product.isActive === true,
+  inStock: product.inStock !== false,
+  isHighlighted: product.isHighlighted === true,
+  sortOrder: product.sortOrder ?? "",
+});
+
 export default function ProductAdmin({ db, storage }) {
   const [form, setForm] = useState(emptyProduct);
+  const [editingForm, setEditingForm] = useState(emptyProduct);
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -119,6 +136,19 @@ export default function ProductAdmin({ db, storage }) {
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    products: true,
+  });
+  const [expandedProductId, setExpandedProductId] = useState("");
+  const [editingProductId, setEditingProductId] = useState("");
+  const [productCardMessage, setProductCardMessage] = useState("");
+  const [productFilters, setProductFilters] = useState({
+    search: "",
+    category: "all",
+    published: "all",
+    active: "all",
+    stock: "all",
+  });
 
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
@@ -168,6 +198,13 @@ export default function ProductAdmin({ db, storage }) {
     }));
   };
 
+  const updateEditingForm = (field, value) => {
+    setEditingForm((currentForm) => ({
+      ...currentForm,
+      [field]: value,
+    }));
+  };
+
   const updateCategoryForm = (field, value) => {
     setCategoryForm((currentForm) => ({
       ...currentForm,
@@ -182,7 +219,7 @@ export default function ProductAdmin({ db, storage }) {
         title: value,
       };
 
-      if (!selectedProductId && !isProductIdEdited) {
+      if (!isProductIdEdited) {
         nextForm.slug = slugify(value);
       }
 
@@ -195,10 +232,22 @@ export default function ProductAdmin({ db, storage }) {
     updateForm("slug", slugify(value));
   };
 
+  const toggleSection = (section) => {
+    setExpandedSections((currentSections) => ({
+      ...currentSections,
+      [section]: !currentSections[section],
+    }));
+  };
+
+  const updateFilter = (field, value) => {
+    setProductFilters((currentFilters) => ({
+      ...currentFilters,
+      [field]: value,
+    }));
+  };
+
   const resetForm = () => {
     setForm(emptyProduct);
-    setSelectedProductId("");
-    setSelectedProduct(null);
     setIsProductIdEdited(false);
     setMessage("");
   };
@@ -210,32 +259,42 @@ export default function ProductAdmin({ db, storage }) {
   };
 
   const selectProduct = (product) => {
-    setSelectedProductId(product.id);
-    setSelectedProduct({
+    const normalizedProduct = {
       ...product,
       photos: normalizePhotos(product.photos),
-    });
-    setForm({
-      slug: product.id,
-      title: product.title || "",
-      category: product.category || "",
-      info: product.info || "",
-      info1: product.info1 || "",
-      info2: product.info2 || "",
-      shipping: product.shipping || "17.00",
-      priceOptions: normalizePriceOptions(product.priceOptions),
-      published: product.published === true,
-      isActive: product.isActive === true,
-      inStock: product.inStock !== false,
-      isHighlighted: product.isHighlighted === true,
-      sortOrder: product.sortOrder ?? "",
-    });
-    setMessage("");
+    };
+
+    setSelectedProductId(product.id);
+    setSelectedProduct(normalizedProduct);
     setPhotoMessage("");
     setPhotoAlt("");
     setPhotoFile(null);
-    setIsProductIdEdited(true);
     setPhotoInputKey((currentKey) => currentKey + 1);
+  };
+
+  const toggleProductCard = (product) => {
+    const nextProductId = expandedProductId === product.id ? "" : product.id;
+
+    setExpandedProductId(nextProductId);
+    setProductCardMessage("");
+
+    if (nextProductId !== product.id && editingProductId === product.id) {
+      setEditingProductId("");
+      setEditingForm(emptyProduct);
+    }
+  };
+
+  const startProductEdit = (product) => {
+    setExpandedProductId(product.id);
+    setEditingProductId(product.id);
+    setEditingForm(buildFormFromProduct(product));
+    setProductCardMessage("");
+  };
+
+  const cancelProductEdit = () => {
+    setEditingProductId("");
+    setEditingForm(emptyProduct);
+    setProductCardMessage("");
   };
 
   const selectCategory = (category) => {
@@ -260,8 +319,26 @@ export default function ProductAdmin({ db, storage }) {
     }));
   };
 
+  const updateEditingPriceOption = (index, field, value) => {
+    setEditingForm((currentForm) => ({
+      ...currentForm,
+      priceOptions: currentForm.priceOptions.map((priceOption, priceOptionIndex) => (
+        priceOptionIndex === index
+          ? { ...priceOption, [field]: value }
+          : priceOption
+      )),
+    }));
+  };
+
   const addPriceOption = () => {
     setForm((currentForm) => ({
+      ...currentForm,
+      priceOptions: [...currentForm.priceOptions, { option: "", price: "" }],
+    }));
+  };
+
+  const addEditingPriceOption = () => {
+    setEditingForm((currentForm) => ({
       ...currentForm,
       priceOptions: [...currentForm.priceOptions, { option: "", price: "" }],
     }));
@@ -276,30 +353,39 @@ export default function ProductAdmin({ db, storage }) {
     }));
   };
 
-  const validateProduct = (productId) => {
+  const removeEditingPriceOption = (index) => {
+    setEditingForm((currentForm) => ({
+      ...currentForm,
+      priceOptions: currentForm.priceOptions.filter((priceOption, priceOptionIndex) => (
+        priceOptionIndex !== index || currentForm.priceOptions.length === 1
+      )),
+    }));
+  };
+
+  const validateProduct = (productId, productForm = form, isNewProduct = true) => {
     const categoryIds = categories.map((category) => category.id);
 
-    if (!productId || !form.title.trim() || !form.shipping.trim()) {
+    if (!productId || !productForm.title.trim() || !productForm.shipping.trim()) {
       return "Document ID, title, and shipping are required.";
     }
 
-    if (!selectedProductId && products.some((product) => product.id === productId)) {
+    if (isNewProduct && products.some((product) => product.id === productId)) {
       return "That product ID already exists. Change the title or edit the existing product.";
     }
 
-    if (!form.category || !categoryIds.includes(form.category)) {
+    if (!productForm.category || !categoryIds.includes(productForm.category)) {
       return "Choose an approved category.";
     }
 
-    if (!decimalPattern.test(form.shipping.trim())) {
+    if (!decimalPattern.test(productForm.shipping.trim())) {
       return "Shipping must be a decimal like 17.00.";
     }
 
-    if (form.sortOrder !== "" && !Number.isInteger(Number(form.sortOrder))) {
+    if (productForm.sortOrder !== "" && !Number.isInteger(Number(productForm.sortOrder))) {
       return "Sort order must be a whole number.";
     }
 
-    const hasInvalidPrice = form.priceOptions.some((priceOption) => (
+    const hasInvalidPrice = productForm.priceOptions.some((priceOption) => (
       !decimalPattern.test(priceOption.price.trim())
     ));
 
@@ -326,32 +412,41 @@ export default function ProductAdmin({ db, storage }) {
     return "";
   };
 
-  const buildProductPayload = (productId) => {
+  const buildProductPayload = (
+    productId,
+    productForm = form,
+    currentProduct = null,
+    isNewProduct = true,
+    includePhotos = true
+  ) => {
     const payload = {
-      title: form.title.trim(),
-      category: form.category.trim(),
-      info: form.info.trim(),
-      info1: form.info1.trim(),
-      info2: form.info2.trim(),
-      shipping: form.shipping.trim(),
-      priceOptions: form.priceOptions.map((priceOption) => ({
+      title: productForm.title.trim(),
+      category: productForm.category.trim(),
+      info: productForm.info.trim(),
+      info1: productForm.info1.trim(),
+      info2: productForm.info2.trim(),
+      shipping: productForm.shipping.trim(),
+      priceOptions: productForm.priceOptions.map((priceOption) => ({
         option: priceOption.option.trim(),
         price: priceOption.price.trim(),
       })),
-      published: form.published,
-      isActive: form.isActive,
-      inStock: form.inStock,
-      isHighlighted: form.isHighlighted,
-      photos: normalizePhotos(selectedProduct?.photos),
+      published: productForm.published,
+      isActive: productForm.isActive,
+      inStock: productForm.inStock,
+      isHighlighted: productForm.isHighlighted,
       slug: productId,
       updatedAt: serverTimestamp(),
     };
 
-    if (form.sortOrder !== "") {
-      payload.sortOrder = Number(form.sortOrder);
+    if (includePhotos) {
+      payload.photos = normalizePhotos(currentProduct?.photos);
     }
 
-    if (!selectedProductId) {
+    if (productForm.sortOrder !== "") {
+      payload.sortOrder = Number(productForm.sortOrder);
+    }
+
+    if (isNewProduct) {
       payload.createdAt = serverTimestamp();
     }
 
@@ -361,8 +456,8 @@ export default function ProductAdmin({ db, storage }) {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    const productId = selectedProductId || slugify(form.slug);
-    const validationMessage = validateProduct(productId);
+    const productId = slugify(form.slug);
+    const validationMessage = validateProduct(productId, form, true);
 
     if (validationMessage) {
       setMessage(validationMessage);
@@ -373,7 +468,7 @@ export default function ProductAdmin({ db, storage }) {
     setMessage("");
 
     try {
-      const payload = buildProductPayload(productId);
+      const payload = buildProductPayload(productId, form, null, true);
 
       await setDoc(doc(db, "products", productId), payload, {
         merge: true,
@@ -387,6 +482,34 @@ export default function ProductAdmin({ db, storage }) {
       await loadProducts();
     } catch (error) {
       setMessage("Product could not be saved.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleProductCardSubmit = async (event, product) => {
+    event.preventDefault();
+
+    const validationMessage = validateProduct(product.id, editingForm, false);
+
+    if (validationMessage) {
+      setProductCardMessage(validationMessage);
+      return;
+    }
+
+    setIsSaving(true);
+    setProductCardMessage("");
+
+    try {
+      const payload = buildProductPayload(product.id, editingForm, product, false, false);
+
+      await setDoc(doc(db, "products", product.id), payload, { merge: true });
+      setProductCardMessage("Product saved to Firestore.");
+      setEditingProductId("");
+      setEditingForm(emptyProduct);
+      await loadProducts();
+    } catch (error) {
+      setProductCardMessage("Product could not be saved.");
     } finally {
       setIsSaving(false);
     }
@@ -626,366 +749,611 @@ export default function ProductAdmin({ db, storage }) {
     }
   };
 
+  const filteredProducts = products.filter((product) => {
+    const search = productFilters.search.trim().toLowerCase();
+    const title = String(product.title || product.id).toLowerCase();
+    const matchesSearch = !search || title.includes(search) || product.id.includes(search);
+    const matchesCategory = productFilters.category === "all" || product.category === productFilters.category;
+    const matchesPublished = productFilters.published === "all"
+      || (productFilters.published === "published" && product.published === true)
+      || (productFilters.published === "draft" && product.published !== true);
+    const matchesActive = productFilters.active === "all"
+      || (productFilters.active === "active" && product.isActive === true)
+      || (productFilters.active === "inactive" && product.isActive !== true);
+    const matchesStock = productFilters.stock === "all"
+      || (productFilters.stock === "inStock" && product.inStock !== false)
+      || (productFilters.stock === "outOfStock" && product.inStock === false);
+
+    return matchesSearch && matchesCategory && matchesPublished && matchesActive && matchesStock;
+  });
+
+  const categoryNameById = categories.reduce((categoryNames, category) => ({
+    ...categoryNames,
+    [category.id]: category.name || category.id,
+  }), {});
+
   return (
     <div className="admin_editor_grid">
-      <form className="admin_form" onSubmit={handleSubmit}>
-        <div className="admin_form_header">
-          <h3>{selectedProductId ? "Edit Product" : "New Product"}</h3>
-          <button className="admin_secondary_button" onClick={resetForm} type="button">
-            New
-          </button>
-        </div>
-
-        <label>
-          Document ID
-          <input
-            disabled={Boolean(selectedProductId)}
-            onChange={(event) => updateProductId(event.target.value)}
-            placeholder="vermont-grown-saffron"
-            required={!selectedProductId}
-            value={form.slug}
-          />
-          <small className="admin_help_text">
-            Suggested from the title. This ID is locked after saving; use a new
-            product if the ID needs to change later.
-          </small>
-        </label>
-
-        <label>
-          Title
-          <input
-            onChange={(event) => updateProductTitle(event.target.value)}
-            required
-            value={form.title}
-          />
-        </label>
-
-        <label>
-          Category
-          <select
-            onChange={(event) => updateForm("category", event.target.value)}
-            required
-            value={form.category}
-          >
-            <option value="">Choose category</option>
-            {categories
-              .filter((category) => category.active || category.id === form.category)
-              .map((category) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-          </select>
-        </label>
-
-        <label>
-          Description
-          <textarea
-            onChange={(event) => updateForm("info", event.target.value)}
-            rows="4"
-            value={form.info}
-          />
-        </label>
-
-        <div className="admin_price_options">
-          {form.priceOptions.map((priceOption, index) => (
-            <div className="admin_split_fields" key={`price-option-${index}`}>
-              <label>
-                Option Label
-                <input
-                  onChange={(event) => updatePriceOption(index, "option", event.target.value)}
-                  placeholder="4 oz"
-                  value={priceOption.option}
-                />
-              </label>
-
-              <label>
-                Price
-                <input
-                  inputMode="decimal"
-                  onChange={(event) => updatePriceOption(index, "price", event.target.value)}
-                  placeholder="15.00"
-                  required
-                  value={priceOption.price}
-                />
-              </label>
-
-              <button
-                className="admin_secondary_button"
-                disabled={form.priceOptions.length === 1}
-                onClick={() => removePriceOption(index)}
-                type="button"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-
-          <button className="admin_secondary_button" onClick={addPriceOption} type="button">
-            Add Price Option
-          </button>
-        </div>
-
-        <div className="admin_split_fields">
-          <label>
-            Shipping
-            <input
-              inputMode="decimal"
-              onChange={(event) => updateForm("shipping", event.target.value)}
-              required
-              value={form.shipping}
-            />
-          </label>
-        </div>
-
-        <div className="admin_checkbox_grid">
-          <label>
-            <input
-              checked={form.published}
-              onChange={(event) => updateForm("published", event.target.checked)}
-              type="checkbox"
-            />
-            Published
-          </label>
-          <label>
-            <input
-              checked={form.isActive}
-              onChange={(event) => updateForm("isActive", event.target.checked)}
-              type="checkbox"
-            />
-            Active
-          </label>
-          <label>
-            <input
-              checked={form.inStock}
-              onChange={(event) => updateForm("inStock", event.target.checked)}
-              type="checkbox"
-            />
-            In Stock
-          </label>
-          <label>
-            <input
-              checked={form.isHighlighted}
-              onChange={(event) => updateForm("isHighlighted", event.target.checked)}
-              type="checkbox"
-            />
-            Highlighted
-          </label>
-        </div>
-
-        <button className="admin_primary_button" disabled={isSaving} type="submit">
-          {isSaving ? "Saving..." : "Save Product"}
-        </button>
-
-        {message ? <p className="admin_message">{message}</p> : null}
-      </form>
-
-      <form className="admin_form admin_photo_panel" onSubmit={handlePhotoUpload}>
-        <div className="admin_form_header">
-          <h3>Product Photos</h3>
-        </div>
-
-        {!selectedProductId ? (
-          <p className="admin_status">Select or save a product to upload photos.</p>
-        ) : null}
-
-        <label>
-          Image File
-          <input
-            accept="image/*"
-            disabled={!selectedProductId || isUploadingPhoto}
-            key={photoInputKey}
-            onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
-            type="file"
-          />
-        </label>
-
-        <label>
-          Alt Text
-          <input
-            disabled={!selectedProductId || isUploadingPhoto}
-            onChange={(event) => setPhotoAlt(event.target.value)}
-            placeholder="Small jar of saffron salt"
-            value={photoAlt}
-          />
-        </label>
-
-        <button
-          className="admin_primary_button"
-          disabled={!selectedProductId || isUploadingPhoto}
-          type="submit"
-        >
-          {isUploadingPhoto ? "Uploading..." : "Upload Photo"}
-        </button>
-
-        {photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
-
-        <div className="admin_photo_list">
-          {normalizePhotos(selectedProduct?.photos).map((photo) => (
-            <div className="admin_photo_row" key={photo.path}>
-              <span>{photo.alt || "No alt text"}</span>
-              <small>{photo.path}</small>
-            </div>
-          ))}
-        </div>
-      </form>
-
-      <div className="admin_panel">
+      <section className="admin_panel admin_full_width">
         <div className="admin_form_header">
           <h3>Firestore Products</h3>
-          <button className="admin_secondary_button" disabled={isLoading} onClick={loadProducts}>
-            Refresh
+          <div className="admin_button_row">
+            <button className="admin_secondary_button" disabled={isLoading} onClick={loadProducts} type="button">
+              Refresh
+            </button>
+            <button className="admin_secondary_button" onClick={() => toggleSection("products")} type="button">
+              {expandedSections.products ? "Collapse" : "Expand"}
+            </button>
+          </div>
+        </div>
+
+        {expandedSections.products ? (
+          <>
+            <div className="admin_filter_grid">
+              <label>
+                Search
+                <input
+                  onChange={(event) => updateFilter("search", event.target.value)}
+                  placeholder="Product title or ID"
+                  value={productFilters.search}
+                />
+              </label>
+              <label>
+                Category
+                <select onChange={(event) => updateFilter("category", event.target.value)} value={productFilters.category}>
+                  <option value="all">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name || category.id}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                Published
+                <select onChange={(event) => updateFilter("published", event.target.value)} value={productFilters.published}>
+                  <option value="all">All</option>
+                  <option value="published">Published</option>
+                  <option value="draft">Draft</option>
+                </select>
+              </label>
+              <label>
+                Active
+                <select onChange={(event) => updateFilter("active", event.target.value)} value={productFilters.active}>
+                  <option value="all">All</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </label>
+              <label>
+                Stock
+                <select onChange={(event) => updateFilter("stock", event.target.value)} value={productFilters.stock}>
+                  <option value="all">All</option>
+                  <option value="inStock">In Stock</option>
+                  <option value="outOfStock">Out of Stock</option>
+                </select>
+              </label>
+            </div>
+
+            {isLoading ? <p className="admin_status">Loading products...</p> : null}
+            <p className="admin_status">{filteredProducts.length} of {products.length} products shown.</p>
+
+            <div className="admin_product_list">
+              {filteredProducts.map((product) => {
+                const isExpanded = expandedProductId === product.id;
+                const isEditing = editingProductId === product.id;
+
+                return (
+                  <article className="admin_product_card" key={product.id}>
+                    <button
+                      className="admin_product_card_header"
+                      onClick={() => toggleProductCard(product)}
+                      type="button"
+                    >
+                      <span>{product.title || product.id}</span>
+                      <small>{isExpanded ? "Collapse" : "Expand"}</small>
+                    </button>
+
+                    <div className="admin_product_meta">
+                      <span>{product.published ? "Published" : "Draft"}</span>
+                      <span>{product.isActive ? "Active" : "Inactive"}</span>
+                      <span>{product.inStock === false ? "Out of Stock" : "In Stock"}</span>
+                      <span>{categoryNameById[product.category] || product.category || "No Category"}</span>
+                    </div>
+
+                    {isExpanded ? (
+                      <div className="admin_product_card_body">
+                        <dl className="admin_product_details">
+                          <div>
+                            <dt>ID</dt>
+                            <dd>{product.id}</dd>
+                          </div>
+                          <div>
+                            <dt>Shipping</dt>
+                            <dd>{product.shipping || "None"}</dd>
+                          </div>
+                          <div>
+                            <dt>Prices</dt>
+                            <dd>
+                              {normalizePriceOptions(product.priceOptions).map((priceOption, index) => (
+                                <span key={`${product.id}-price-${index}`}>
+                                  {priceOption.option ? `${priceOption.option}: ` : ""}${priceOption.price}
+                                </span>
+                              ))}
+                            </dd>
+                          </div>
+                        </dl>
+
+                        {!isEditing ? (
+                          <div className="admin_button_row">
+                            <button className="admin_primary_button" onClick={() => startProductEdit(product)} type="button">
+                              Edit
+                            </button>
+                            <button className="admin_secondary_button" onClick={() => selectProduct(product)} type="button">
+                              Use For Photos
+                            </button>
+                          </div>
+                        ) : (
+                          <form className="admin_inline_form" onSubmit={(event) => handleProductCardSubmit(event, product)}>
+                            <label>
+                              Product ID
+                              <input disabled value={product.id} />
+                            </label>
+                            <label>
+                              Title
+                              <input
+                                onChange={(event) => updateEditingForm("title", event.target.value)}
+                                required
+                                value={editingForm.title}
+                              />
+                            </label>
+                            <label>
+                              Category
+                              <select
+                                onChange={(event) => updateEditingForm("category", event.target.value)}
+                                required
+                                value={editingForm.category}
+                              >
+                                <option value="">Choose category</option>
+                                {categories
+                                  .filter((category) => category.active || category.id === editingForm.category)
+                                  .map((category) => (
+                                    <option key={category.id} value={category.id}>
+                                      {category.name}
+                                    </option>
+                                  ))}
+                              </select>
+                            </label>
+                            <label>
+                              Description
+                              <textarea
+                                onChange={(event) => updateEditingForm("info", event.target.value)}
+                                rows="3"
+                                value={editingForm.info}
+                              />
+                            </label>
+                            <div className="admin_price_options">
+                              {editingForm.priceOptions.map((priceOption, index) => (
+                                <div className="admin_split_fields" key={`edit-price-option-${product.id}-${index}`}>
+                                  <label>
+                                    Option Label
+                                    <input
+                                      onChange={(event) => updateEditingPriceOption(index, "option", event.target.value)}
+                                      value={priceOption.option}
+                                    />
+                                  </label>
+                                  <label>
+                                    Price
+                                    <input
+                                      inputMode="decimal"
+                                      onChange={(event) => updateEditingPriceOption(index, "price", event.target.value)}
+                                      required
+                                      value={priceOption.price}
+                                    />
+                                  </label>
+                                  <button
+                                    className="admin_secondary_button"
+                                    disabled={editingForm.priceOptions.length === 1}
+                                    onClick={() => removeEditingPriceOption(index)}
+                                    type="button"
+                                  >
+                                    Remove
+                                  </button>
+                                </div>
+                              ))}
+                              <button className="admin_secondary_button" onClick={addEditingPriceOption} type="button">
+                                Add Price Option
+                              </button>
+                            </div>
+                            <label>
+                              Shipping
+                              <input
+                                inputMode="decimal"
+                                onChange={(event) => updateEditingForm("shipping", event.target.value)}
+                                required
+                                value={editingForm.shipping}
+                              />
+                            </label>
+                            <div className="admin_checkbox_grid">
+                              <label>
+                                <input checked={editingForm.published} onChange={(event) => updateEditingForm("published", event.target.checked)} type="checkbox" />
+                                Published
+                              </label>
+                              <label>
+                                <input checked={editingForm.isActive} onChange={(event) => updateEditingForm("isActive", event.target.checked)} type="checkbox" />
+                                Active
+                              </label>
+                              <label>
+                                <input checked={editingForm.inStock} onChange={(event) => updateEditingForm("inStock", event.target.checked)} type="checkbox" />
+                                In Stock
+                              </label>
+                              <label>
+                                <input checked={editingForm.isHighlighted} onChange={(event) => updateEditingForm("isHighlighted", event.target.checked)} type="checkbox" />
+                                Highlighted
+                              </label>
+                            </div>
+                            <div className="admin_button_row">
+                              <button className="admin_primary_button" disabled={isSaving} type="submit">
+                                {isSaving ? "Saving..." : "Save Product"}
+                              </button>
+                              <button className="admin_secondary_button" onClick={cancelProductEdit} type="button">
+                                Cancel
+                              </button>
+                            </div>
+                            {productCardMessage ? <p className="admin_message">{productCardMessage}</p> : null}
+                          </form>
+                        )}
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })}
+            </div>
+          </>
+        ) : null}
+      </section>
+
+      <section className="admin_panel">
+        <div className="admin_form_header">
+          <h3>New Product</h3>
+          <button className="admin_secondary_button" onClick={() => toggleSection("newProduct")} type="button">
+            {expandedSections.newProduct ? "Collapse" : "Expand"}
           </button>
         </div>
 
-        {isLoading ? <p className="admin_status">Loading products...</p> : null}
+        {expandedSections.newProduct ? (
+          <form className="admin_form admin_embedded_form" onSubmit={handleSubmit}>
+            <label>
+              Document ID
+              <input
+                onChange={(event) => updateProductId(event.target.value)}
+                placeholder="vermont-grown-saffron"
+                required
+                value={form.slug}
+              />
+              <small className="admin_help_text">
+                Suggested from the title. This ID is locked after saving; use a new
+                product if the ID needs to change later.
+              </small>
+            </label>
 
-        <div className="admin_product_list">
-          {products.map((product) => (
-            <button
-              className="admin_product_row"
-              key={product.id}
-              onClick={() => selectProduct(product)}
-              type="button"
-            >
-              <span>{product.title || product.id}</span>
-              <small>{product.published ? "Published" : "Draft"}</small>
-            </button>
-          ))}
+            <label>
+              Title
+              <input
+                onChange={(event) => updateProductTitle(event.target.value)}
+                required
+                value={form.title}
+              />
+            </label>
+
+            <label>
+              Category
+              <select
+                onChange={(event) => updateForm("category", event.target.value)}
+                required
+                value={form.category}
+              >
+                <option value="">Choose category</option>
+                {categories
+                  .filter((category) => category.active || category.id === form.category)
+                  .map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+              </select>
+            </label>
+
+            <label>
+              Description
+              <textarea
+                onChange={(event) => updateForm("info", event.target.value)}
+                rows="4"
+                value={form.info}
+              />
+            </label>
+
+            <div className="admin_price_options">
+              {form.priceOptions.map((priceOption, index) => (
+                <div className="admin_split_fields" key={`price-option-${index}`}>
+                  <label>
+                    Option Label
+                    <input
+                      onChange={(event) => updatePriceOption(index, "option", event.target.value)}
+                      placeholder="4 oz"
+                      value={priceOption.option}
+                    />
+                  </label>
+                  <label>
+                    Price
+                    <input
+                      inputMode="decimal"
+                      onChange={(event) => updatePriceOption(index, "price", event.target.value)}
+                      placeholder="15.00"
+                      required
+                      value={priceOption.price}
+                    />
+                  </label>
+                  <button
+                    className="admin_secondary_button"
+                    disabled={form.priceOptions.length === 1}
+                    onClick={() => removePriceOption(index)}
+                    type="button"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ))}
+              <button className="admin_secondary_button" onClick={addPriceOption} type="button">
+                Add Price Option
+              </button>
+            </div>
+
+            <label>
+              Shipping
+              <input
+                inputMode="decimal"
+                onChange={(event) => updateForm("shipping", event.target.value)}
+                required
+                value={form.shipping}
+              />
+            </label>
+
+            <div className="admin_checkbox_grid">
+              <label>
+                <input checked={form.published} onChange={(event) => updateForm("published", event.target.checked)} type="checkbox" />
+                Published
+              </label>
+              <label>
+                <input checked={form.isActive} onChange={(event) => updateForm("isActive", event.target.checked)} type="checkbox" />
+                Active
+              </label>
+              <label>
+                <input checked={form.inStock} onChange={(event) => updateForm("inStock", event.target.checked)} type="checkbox" />
+                In Stock
+              </label>
+              <label>
+                <input checked={form.isHighlighted} onChange={(event) => updateForm("isHighlighted", event.target.checked)} type="checkbox" />
+                Highlighted
+              </label>
+            </div>
+
+            <div className="admin_button_row">
+              <button className="admin_primary_button" disabled={isSaving} type="submit">
+                {isSaving ? "Saving..." : "Save Product"}
+              </button>
+              <button className="admin_secondary_button" onClick={resetForm} type="button">
+                Clear
+              </button>
+            </div>
+
+            {message ? <p className="admin_message">{message}</p> : null}
+          </form>
+        ) : null}
+      </section>
+
+      <section className="admin_panel admin_photo_panel">
+        <div className="admin_form_header">
+          <h3>Product Photos</h3>
+          <button className="admin_secondary_button" onClick={() => toggleSection("photos")} type="button">
+            {expandedSections.photos ? "Collapse" : "Expand"}
+          </button>
         </div>
-      </div>
+
+        {expandedSections.photos ? (
+          <form className="admin_embedded_form" onSubmit={handlePhotoUpload}>
+            {!selectedProductId ? (
+              <p className="admin_status">Choose Use For Photos on a product card first.</p>
+            ) : (
+              <p className="admin_status">Uploading for {selectedProduct?.title || selectedProductId}</p>
+            )}
+
+            <label>
+              Image File
+              <input
+                accept="image/*"
+                disabled={!selectedProductId || isUploadingPhoto}
+                key={photoInputKey}
+                onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
+                type="file"
+              />
+            </label>
+            <label>
+              Alt Text
+              <input
+                disabled={!selectedProductId || isUploadingPhoto}
+                onChange={(event) => setPhotoAlt(event.target.value)}
+                placeholder="Small jar of saffron salt"
+                value={photoAlt}
+              />
+            </label>
+            <button
+              className="admin_primary_button"
+              disabled={!selectedProductId || isUploadingPhoto}
+              type="submit"
+            >
+              {isUploadingPhoto ? "Uploading..." : "Upload Photo"}
+            </button>
+            {photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
+            <div className="admin_photo_list">
+              {normalizePhotos(selectedProduct?.photos).map((photo) => (
+                <div className="admin_photo_row" key={photo.path}>
+                  <span>{photo.alt || "No alt text"}</span>
+                  <small>{photo.path}</small>
+                </div>
+              ))}
+            </div>
+          </form>
+        ) : null}
+      </section>
 
       <form className="admin_form admin_category_panel" onSubmit={handleCategorySubmit}>
         <div className="admin_form_header">
           <h3>{selectedCategoryId ? "Edit Category" : "Product Categories"}</h3>
-          <button className="admin_secondary_button" onClick={resetCategoryForm} type="button">
-            New
-          </button>
-        </div>
-
-        <label>
-          Category ID
-          <input
-            disabled={Boolean(selectedCategoryId)}
-            readOnly
-            placeholder="saffron"
-            value={selectedCategoryId || slugify(categoryForm.name)}
-          />
-          <small className="admin_help_text">
-            Suggested from the category name. This ID is locked after saving;
-            use a new category if the ID needs to change later.
-          </small>
-        </label>
-
-        <label>
-          Category Name
-          <input
-            onChange={(event) => updateCategoryForm("name", event.target.value)}
-            required
-            value={categoryForm.name}
-          />
-        </label>
-
-        <label>
-          Sort Order
-          <input
-            inputMode="numeric"
-            onChange={(event) => updateCategoryForm("sortOrder", event.target.value)}
-            value={categoryForm.sortOrder}
-          />
-        </label>
-
-        <div className="admin_checkbox_grid">
-          <label>
-            <input
-              checked={categoryForm.active}
-              onChange={(event) => updateCategoryForm("active", event.target.checked)}
-              type="checkbox"
-            />
-            Active
-          </label>
-        </div>
-
-        <button className="admin_primary_button" disabled={isSavingCategory} type="submit">
-          {isSavingCategory ? "Saving..." : "Save Category"}
-        </button>
-
-        {categoryMessage ? <p className="admin_message">{categoryMessage}</p> : null}
-
-        {isLoadingCategories ? <p className="admin_status">Loading categories...</p> : null}
-
-        <div className="admin_product_list">
-          {categories.map((category) => (
-            <button
-              className="admin_product_row"
-              key={category.id}
-              onClick={() => selectCategory(category)}
-              type="button"
-            >
-              <span>{category.name || category.id}</span>
-              <small>{category.active ? "Active" : "Inactive"}</small>
+          <div className="admin_button_row">
+            <button className="admin_secondary_button" onClick={resetCategoryForm} type="button">
+              New
             </button>
-          ))}
+            <button className="admin_secondary_button" onClick={() => toggleSection("categories")} type="button">
+              {expandedSections.categories ? "Collapse" : "Expand"}
+            </button>
+          </div>
         </div>
+
+        {expandedSections.categories ? (
+          <>
+            <label>
+              Category ID
+              <input
+                disabled={Boolean(selectedCategoryId)}
+                readOnly
+                placeholder="saffron"
+                value={selectedCategoryId || slugify(categoryForm.name)}
+              />
+              <small className="admin_help_text">
+                Suggested from the category name. This ID is locked after saving;
+                use a new category if the ID needs to change later.
+              </small>
+            </label>
+
+            <label>
+              Category Name
+              <input
+                onChange={(event) => updateCategoryForm("name", event.target.value)}
+                required
+                value={categoryForm.name}
+              />
+            </label>
+
+            <label>
+              Sort Order
+              <input
+                inputMode="numeric"
+                onChange={(event) => updateCategoryForm("sortOrder", event.target.value)}
+                value={categoryForm.sortOrder}
+              />
+            </label>
+
+            <div className="admin_checkbox_grid">
+              <label>
+                <input
+                  checked={categoryForm.active}
+                  onChange={(event) => updateCategoryForm("active", event.target.checked)}
+                  type="checkbox"
+                />
+                Active
+              </label>
+            </div>
+
+            <button className="admin_primary_button" disabled={isSavingCategory} type="submit">
+              {isSavingCategory ? "Saving..." : "Save Category"}
+            </button>
+
+            {categoryMessage ? <p className="admin_message">{categoryMessage}</p> : null}
+
+            {isLoadingCategories ? <p className="admin_status">Loading categories...</p> : null}
+
+            <div className="admin_product_list">
+              {categories.map((category) => (
+                <button
+                  className="admin_product_row"
+                  key={category.id}
+                  onClick={() => selectCategory(category)}
+                  type="button"
+                >
+                  <span>{category.name || category.id}</span>
+                  <small>{category.active ? "Active" : "Inactive"}</small>
+                </button>
+              ))}
+            </div>
+          </>
+        ) : null}
       </form>
 
       <div className="admin_panel admin_seed_panel">
         <div className="admin_form_header">
           <h3>Seed Static Products</h3>
-        </div>
-
-        <p className="admin_status">
-          Validate and copy missing static products into Firestore. Existing
-          Firestore products are skipped, not overwritten.
-        </p>
-
-        <div className="admin_button_row">
-          <button className="admin_secondary_button" onClick={previewProductSeed} type="button">
-            Validate Seed
-          </button>
-          <button
-            className="admin_primary_button"
-            disabled={isSeeding || !seedResult || seedResult.errors.length > 0}
-            onClick={seedMissingProducts}
-            type="button"
-          >
-            {isSeeding ? "Seeding..." : "Seed Missing Products"}
+          <button className="admin_secondary_button" onClick={() => toggleSection("seed")} type="button">
+            {expandedSections.seed ? "Collapse" : "Expand"}
           </button>
         </div>
 
-        {seedResult ? (
-          <div className="admin_seed_summary">
-            <strong>
-              {seedResult.errors.length ? "Seed blocked by validation errors." : (
-                `${seedResult.missingProducts.length} products and ${seedResult.missingCategories.length} categories ready to seed.`
-              )}
-            </strong>
-            <small>
-              Checked {seedResult.products.length} static products and{" "}
-              {seedResult.categories.length} categories.
-            </small>
-            {seedResult.message ? <p className="admin_message">{seedResult.message}</p> : null}
-            {seedResult.errors.length ? (
-              <div>
-                <strong>Errors</strong>
-                <ul>
-                  {seedResult.errors.map((error) => (
-                    <li key={error}>{error}</li>
-                  ))}
-                </ul>
+        {expandedSections.seed ? (
+          <>
+            <p className="admin_status">
+              Validate and copy missing static products into Firestore. Existing
+              Firestore products are skipped, not overwritten.
+            </p>
+
+            <div className="admin_button_row">
+              <button className="admin_secondary_button" onClick={previewProductSeed} type="button">
+                Validate Seed
+              </button>
+              <button
+                className="admin_primary_button"
+                disabled={isSeeding || !seedResult || seedResult.errors.length > 0}
+                onClick={seedMissingProducts}
+                type="button"
+              >
+                {isSeeding ? "Seeding..." : "Seed Missing Products"}
+              </button>
+            </div>
+
+            {seedResult ? (
+              <div className="admin_seed_summary">
+                <strong>
+                  {seedResult.errors.length ? "Seed blocked by validation errors." : (
+                    `${seedResult.missingProducts.length} products and ${seedResult.missingCategories.length} categories ready to seed.`
+                  )}
+                </strong>
+                <small>
+                  Checked {seedResult.products.length} static products and{" "}
+                  {seedResult.categories.length} categories.
+                </small>
+                {seedResult.message ? <p className="admin_message">{seedResult.message}</p> : null}
+                {seedResult.errors.length ? (
+                  <div>
+                    <strong>Errors</strong>
+                    <ul>
+                      {seedResult.errors.map((error) => (
+                        <li key={error}>{error}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
+                {seedResult.warnings.length ? (
+                  <div>
+                    <strong>Warnings</strong>
+                    <ul>
+                      {seedResult.warnings.map((warning) => (
+                        <li key={warning}>{warning}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
               </div>
             ) : null}
-            {seedResult.warnings.length ? (
-              <div>
-                <strong>Warnings</strong>
-                <ul>
-                  {seedResult.warnings.map((warning) => (
-                    <li key={warning}>{warning}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
-          </div>
+          </>
         ) : null}
       </div>
     </div>
