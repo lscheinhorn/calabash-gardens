@@ -19,6 +19,8 @@ The seed tool:
 
 Seeded products use the same Firestore product contract as the admin product editor.
 
+Project-directory product image migration is intentionally separate from seed. A future image migration should start with a dry-run manifest that maps static product IDs to exact source image files and planned Firebase Storage paths before anything is uploaded.
+
 ## Required Validation
 
 The seed must block writes when:

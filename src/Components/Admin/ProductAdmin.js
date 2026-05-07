@@ -134,7 +134,6 @@ export default function ProductAdmin({ db, storage }) {
   const [categories, setCategories] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -271,14 +270,7 @@ export default function ProductAdmin({ db, storage }) {
     setCategoryMessage("");
   };
 
-  const selectProduct = (product) => {
-    const normalizedProduct = {
-      ...product,
-      photos: normalizePhotos(product.photos),
-    };
-
-    setSelectedProductId(product.id);
-    setSelectedProduct(normalizedProduct);
+  const resetPhotoForm = () => {
     setPhotoMessage("");
     setPhotoAlt("");
     setPhotoFile(null);
@@ -290,6 +282,8 @@ export default function ProductAdmin({ db, storage }) {
 
     setExpandedProductId(nextProductId);
     setProductCardMessage("");
+    setSelectedProductId(nextProductId);
+    resetPhotoForm();
 
     if (nextProductId !== product.id && editingProductId === product.id) {
       setEditingProductId("");
@@ -299,9 +293,11 @@ export default function ProductAdmin({ db, storage }) {
 
   const startProductEdit = (product) => {
     setExpandedProductId(product.id);
+    setSelectedProductId(product.id);
     setEditingProductId(product.id);
     setEditingForm(buildFormFromProduct(product));
     setProductCardMessage("");
+    resetPhotoForm();
   };
 
   const cancelProductEdit = () => {
@@ -502,10 +498,6 @@ export default function ProductAdmin({ db, storage }) {
       await setDoc(doc(db, "products", productId), payload, {
         merge: true,
       });
-      setSelectedProduct({
-        id: productId,
-        ...payload,
-      });
       setMessage("Product saved to Firestore.");
       setSelectedProductId(productId);
       await loadProducts();
@@ -544,11 +536,11 @@ export default function ProductAdmin({ db, storage }) {
     }
   };
 
-  const handlePhotoUpload = async (event) => {
+  const handlePhotoUpload = async (event, product) => {
     event.preventDefault();
 
-    if (!selectedProductId || !selectedProduct) {
-      setPhotoMessage("Save or select a product before uploading photos.");
+    if (!product?.id) {
+      setPhotoMessage("Open a saved product before uploading photos.");
       return;
     }
 
@@ -573,11 +565,12 @@ export default function ProductAdmin({ db, storage }) {
     }
 
     setIsUploadingPhoto(true);
+    setSelectedProductId(product.id);
     setPhotoMessage("");
 
     try {
-      const currentPhotos = normalizePhotos(selectedProduct.photos);
-      const photoPath = buildImagePath(selectedProductId, photoFile.name);
+      const currentPhotos = normalizePhotos(product.photos);
+      const photoPath = buildImagePath(product.id, photoFile.name);
       const photoRef = ref(storage, photoPath);
 
       await uploadBytes(photoRef, photoFile, {
@@ -593,15 +586,16 @@ export default function ProductAdmin({ db, storage }) {
         },
       ];
 
-      await setDoc(doc(db, "products", selectedProductId), {
+      await setDoc(doc(db, "products", product.id), {
         photos: updatedPhotos,
         updatedAt: serverTimestamp(),
       }, { merge: true });
 
-      setSelectedProduct((currentProduct) => ({
-        ...currentProduct,
-        photos: updatedPhotos,
-      }));
+      setProducts((currentProducts) => currentProducts.map((currentProduct) => (
+        currentProduct.id === product.id
+          ? { ...currentProduct, photos: updatedPhotos }
+          : currentProduct
+      )));
       setPhotoAlt("");
       setPhotoFile(null);
       setPhotoInputKey((currentKey) => currentKey + 1);
@@ -879,6 +873,8 @@ export default function ProductAdmin({ db, storage }) {
               {filteredProducts.map((product) => {
                 const isExpanded = expandedProductId === product.id;
                 const isEditing = editingProductId === product.id;
+                const productPhotos = normalizePhotos(product.photos);
+                const isPhotoTarget = selectedProductId === product.id;
 
                 return (
                   <article className="admin_product_card" key={product.id}>
@@ -925,9 +921,6 @@ export default function ProductAdmin({ db, storage }) {
                           <div className="admin_button_row">
                             <button className="admin_primary_button" onClick={() => startProductEdit(product)} type="button">
                               Edit
-                            </button>
-                            <button className="admin_secondary_button" onClick={() => selectProduct(product)} type="button">
-                              Use For Photos
                             </button>
                           </div>
                         ) : (
@@ -1040,6 +1033,48 @@ export default function ProductAdmin({ db, storage }) {
                             {productCardMessage ? <p className="admin_message">{productCardMessage}</p> : null}
                           </form>
                         )}
+
+                        <form className="admin_embedded_form admin_card_photo_form" onSubmit={(event) => handlePhotoUpload(event, product)}>
+                          <div className="admin_form_header">
+                            <h4>Photos</h4>
+                            <span className="admin_status">{productPhotos.length} attached</span>
+                          </div>
+
+                          <div className="admin_photo_list">
+                            {productPhotos.length ? productPhotos.map((photo) => (
+                              <div className="admin_photo_row" key={photo.path}>
+                                <span>{photo.alt || "No alt text"}</span>
+                                <small>{photo.path}</small>
+                              </div>
+                            )) : (
+                              <p className="admin_status">No photos attached yet.</p>
+                            )}
+                          </div>
+
+                          <label>
+                            Image File
+                            <input
+                              accept="image/*"
+                              disabled={isUploadingPhoto}
+                              key={`${product.id}-${photoInputKey}`}
+                              onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
+                              type="file"
+                            />
+                          </label>
+                          <label>
+                            Alt Text
+                            <input
+                              disabled={isUploadingPhoto}
+                              onChange={(event) => setPhotoAlt(event.target.value)}
+                              placeholder="Small jar of saffron salt"
+                              value={photoAlt}
+                            />
+                          </label>
+                          <button className="admin_primary_button" disabled={isUploadingPhoto} type="submit">
+                            {isUploadingPhoto && isPhotoTarget ? "Uploading..." : "Upload Photo"}
+                          </button>
+                          {isPhotoTarget && photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
+                        </form>
                       </div>
                     ) : null}
                   </article>
@@ -1185,61 +1220,6 @@ export default function ProductAdmin({ db, storage }) {
             </div>
 
             {message ? <p className="admin_message">{message}</p> : null}
-          </form>
-        ) : null}
-      </section>
-
-      <section className="admin_panel admin_photo_panel">
-        <div className="admin_form_header">
-          <h3>Product Photos</h3>
-          <button className="admin_secondary_button" onClick={() => toggleSection("photos")} type="button">
-            {expandedSections.photos ? "Collapse" : "Expand"}
-          </button>
-        </div>
-
-        {expandedSections.photos ? (
-          <form className="admin_embedded_form" onSubmit={handlePhotoUpload}>
-            {!selectedProductId ? (
-              <p className="admin_status">Choose Use For Photos on a product card first.</p>
-            ) : (
-              <p className="admin_status">Uploading for {selectedProduct?.title || selectedProductId}</p>
-            )}
-
-            <label>
-              Image File
-              <input
-                accept="image/*"
-                disabled={!selectedProductId || isUploadingPhoto}
-                key={photoInputKey}
-                onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
-                type="file"
-              />
-            </label>
-            <label>
-              Alt Text
-              <input
-                disabled={!selectedProductId || isUploadingPhoto}
-                onChange={(event) => setPhotoAlt(event.target.value)}
-                placeholder="Small jar of saffron salt"
-                value={photoAlt}
-              />
-            </label>
-            <button
-              className="admin_primary_button"
-              disabled={!selectedProductId || isUploadingPhoto}
-              type="submit"
-            >
-              {isUploadingPhoto ? "Uploading..." : "Upload Photo"}
-            </button>
-            {photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
-            <div className="admin_photo_list">
-              {normalizePhotos(selectedProduct?.photos).map((photo) => (
-                <div className="admin_photo_row" key={photo.path}>
-                  <span>{photo.alt || "No alt text"}</span>
-                  <small>{photo.path}</small>
-                </div>
-              ))}
-            </div>
           </form>
         ) : null}
       </section>

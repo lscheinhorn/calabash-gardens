@@ -156,9 +156,14 @@
   justify-content: space-between;
 }
 
-.admin_form_header h3 {
+.admin_form_header h3,
+.admin_form_header h4 {
   color: #735284;
   margin: 0;
+}
+
+.admin_form_header h4 {
+  font-size: 16px;
 }
 
 .admin_embedded_form,
@@ -310,6 +315,11 @@
   gap: 3px;
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.admin_card_photo_form {
+  border-top: 1px solid #e5deea;
+  padding-top: 14px;
 }
 
 .admin_photo_list {

@@ -105,7 +105,7 @@ Product image reference shape:
 
 Current image upload notes:
 
-- Product photo uploads require selecting or saving a Firestore product first.
+- Product photo uploads are available from each expanded Firestore product card.
 - Product photo paths must stay flat under `product-images/{fileName}` to match the current Storage rules.
 - Uploaded product photos are not connected to public storefront rendering yet.
 

@@ -46,13 +46,11 @@ Phase 17: Admin product card UI.
 - Added admin product photo upload on the active admin branch.
 - Added admin product and category ID suggestions on the active admin branch.
 - Added admin product seed/import foundation on the active admin branch.
+- Moved admin product photo upload and attached-photo display into expanded product cards on the active admin branch.
 
 ## In Progress Work
 
-- Refactor admin product view into collapsible sections.
-- Show Firestore products as filterable collapsible cards with inline edit mode.
-- Keep New Product creation separate from existing product edits.
-- Fix category guardrails so seed/admin categories come only from the approved category list.
+- Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload before merge review.
 - Use subagents to review implementation scope and guardrail compliance.
 
 ## Planned Work
@@ -70,7 +68,7 @@ Phase 17: Admin product card UI.
 - Review admin product photo upload before merge.
 - Plan CSV import/export UI after the seed validator is reviewed.
 - Plan backend product reads after seeded data is reviewed.
-- Consider moving product photo upload directly into product cards after the card editor is tested.
+- Plan project-directory product image migration with a dry-run manifest before uploading existing static images.
 
 ## Bugs
 
@@ -132,6 +130,8 @@ Phase 17: Admin product card UI.
 - Product seeding must not overwrite existing Firestore products.
 - Product seeding must not store bundled JavaScript `require(...)` image values in Firestore.
 - Existing Firestore products should be edited inline from product cards; the New Product form should stay for creation only.
+- Existing Firestore product photos should be uploaded and reviewed from the expanded product card.
+- Project-directory product image migration must be planned as a separate dry-run manifest before uploading.
 - Product categories must come from the approved category list: Body Care, Culinary, Gifts, Loose Leaf Tea, Mambo Gede, Ritual Smoking Blends, Saffron, and Tinctures.
 - Gifts is reserved for the preserved legacy gift-set product IDs and should not be used for newly created products.
 - Product categories have active/inactive status; new products can use active categories only.
@@ -147,6 +147,7 @@ Phase 17: Admin product card UI.
 - 2026-05-05: `npm run deploy` published customer-request fixes.
 - 2026-05-07: `npm run build` completed successfully after admin product photo upload, with the same existing warnings.
 - 2026-05-07: `npm run build` completed successfully after admin product card UI, with the same existing warnings.
+- 2026-05-07: `npm run build` completed successfully after moving product photo upload into product cards, with the same existing warnings.
 
 ## Commits
 
