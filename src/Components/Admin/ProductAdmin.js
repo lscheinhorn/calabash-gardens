@@ -8,6 +8,10 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import {
+  ref,
+  uploadBytes,
+} from "firebase/storage";
 
 const emptyProduct = {
   slug: "",
@@ -33,6 +37,7 @@ const emptyCategory = {
 };
 
 const decimalPattern = /^\d+\.\d{2}$/;
+const maxImageSize = 10 * 1024 * 1024;
 
 const slugify = (value) =>
   value
@@ -52,7 +57,43 @@ const normalizePriceOptions = (priceOptions) => {
   }));
 };
 
-export default function ProductAdmin({ db }) {
+const normalizePhotos = (photos) => {
+  if (!Array.isArray(photos)) {
+    return [];
+  }
+
+  return photos
+    .map((photo, index) => {
+      if (typeof photo === "string") {
+        return {
+          path: photo,
+          alt: "",
+          sortOrder: index,
+        };
+      }
+
+      if (!photo || typeof photo !== "object" || !photo.path) {
+        return null;
+      }
+
+      return {
+        path: photo.path,
+        alt: photo.alt || "",
+        sortOrder: Number.isInteger(photo.sortOrder) ? photo.sortOrder : index,
+      };
+    })
+    .filter(Boolean);
+};
+
+const buildImagePath = (productId, fileName) => {
+  const safeName = slugify(fileName.replace(/\.[^.]+$/, "")) || "product-image";
+  const extensionMatch = fileName.match(/\.([a-z0-9]+)$/i);
+  const extension = extensionMatch ? `.${extensionMatch[1].toLowerCase()}` : "";
+
+  return `product-images/${productId}-${Date.now()}-${safeName}${extension}`;
+};
+
+export default function ProductAdmin({ db, storage }) {
   const [form, setForm] = useState(emptyProduct);
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
   const [products, setProducts] = useState([]);
@@ -64,8 +105,13 @@ export default function ProductAdmin({ db }) {
   const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingCategory, setIsSavingCategory] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [message, setMessage] = useState("");
   const [categoryMessage, setCategoryMessage] = useState("");
+  const [photoMessage, setPhotoMessage] = useState("");
+  const [photoAlt, setPhotoAlt] = useState("");
+  const [photoFile, setPhotoFile] = useState(null);
+  const [photoInputKey, setPhotoInputKey] = useState(0);
 
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
@@ -137,7 +183,10 @@ export default function ProductAdmin({ db }) {
 
   const selectProduct = (product) => {
     setSelectedProductId(product.id);
-    setSelectedProduct(product);
+    setSelectedProduct({
+      ...product,
+      photos: normalizePhotos(product.photos),
+    });
     setForm({
       slug: product.slug || product.id,
       title: product.title || "",
@@ -154,6 +203,10 @@ export default function ProductAdmin({ db }) {
       sortOrder: product.sortOrder ?? "",
     });
     setMessage("");
+    setPhotoMessage("");
+    setPhotoAlt("");
+    setPhotoFile(null);
+    setPhotoInputKey((currentKey) => currentKey + 1);
   };
 
   const selectCategory = (category) => {
@@ -252,7 +305,7 @@ export default function ProductAdmin({ db }) {
       isActive: form.isActive,
       inStock: form.inStock,
       isHighlighted: form.isHighlighted,
-      photos: selectedProduct?.photos || [],
+      photos: normalizePhotos(selectedProduct?.photos),
       slug: productId,
       updatedAt: serverTimestamp(),
     };
@@ -283,8 +336,14 @@ export default function ProductAdmin({ db }) {
     setMessage("");
 
     try {
-      await setDoc(doc(db, "products", productId), buildProductPayload(productId), {
+      const payload = buildProductPayload(productId);
+
+      await setDoc(doc(db, "products", productId), payload, {
         merge: true,
+      });
+      setSelectedProduct({
+        id: productId,
+        ...payload,
       });
       setMessage("Product saved to Firestore.");
       setSelectedProductId(productId);
@@ -293,6 +352,76 @@ export default function ProductAdmin({ db }) {
       setMessage("Product could not be saved.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handlePhotoUpload = async (event) => {
+    event.preventDefault();
+
+    if (!selectedProductId || !selectedProduct) {
+      setPhotoMessage("Save or select a product before uploading photos.");
+      return;
+    }
+
+    if (!storage) {
+      setPhotoMessage("Firebase Storage is not configured.");
+      return;
+    }
+
+    if (!photoFile) {
+      setPhotoMessage("Choose an image to upload.");
+      return;
+    }
+
+    if (!photoFile.type.startsWith("image/")) {
+      setPhotoMessage("Product photos must be image files.");
+      return;
+    }
+
+    if (photoFile.size >= maxImageSize) {
+      setPhotoMessage("Product photos must be smaller than 10 MB.");
+      return;
+    }
+
+    setIsUploadingPhoto(true);
+    setPhotoMessage("");
+
+    try {
+      const currentPhotos = normalizePhotos(selectedProduct.photos);
+      const photoPath = buildImagePath(selectedProductId, photoFile.name);
+      const photoRef = ref(storage, photoPath);
+
+      await uploadBytes(photoRef, photoFile, {
+        contentType: photoFile.type,
+      });
+
+      const updatedPhotos = [
+        ...currentPhotos,
+        {
+          path: photoPath,
+          alt: photoAlt.trim(),
+          sortOrder: currentPhotos.length,
+        },
+      ];
+
+      await setDoc(doc(db, "products", selectedProductId), {
+        photos: updatedPhotos,
+        updatedAt: serverTimestamp(),
+      }, { merge: true });
+
+      setSelectedProduct((currentProduct) => ({
+        ...currentProduct,
+        photos: updatedPhotos,
+      }));
+      setPhotoAlt("");
+      setPhotoFile(null);
+      setPhotoInputKey((currentKey) => currentKey + 1);
+      setPhotoMessage("Photo uploaded and attached to this product.");
+      await loadProducts();
+    } catch (error) {
+      setPhotoMessage("Photo could not be uploaded.");
+    } finally {
+      setIsUploadingPhoto(false);
     }
   };
 
@@ -481,6 +610,56 @@ export default function ProductAdmin({ db }) {
         </button>
 
         {message ? <p className="admin_message">{message}</p> : null}
+      </form>
+
+      <form className="admin_form admin_photo_panel" onSubmit={handlePhotoUpload}>
+        <div className="admin_form_header">
+          <h3>Product Photos</h3>
+        </div>
+
+        {!selectedProductId ? (
+          <p className="admin_status">Select or save a product to upload photos.</p>
+        ) : null}
+
+        <label>
+          Image File
+          <input
+            accept="image/*"
+            disabled={!selectedProductId || isUploadingPhoto}
+            key={photoInputKey}
+            onChange={(event) => setPhotoFile(event.target.files?.[0] || null)}
+            type="file"
+          />
+        </label>
+
+        <label>
+          Alt Text
+          <input
+            disabled={!selectedProductId || isUploadingPhoto}
+            onChange={(event) => setPhotoAlt(event.target.value)}
+            placeholder="Small jar of saffron salt"
+            value={photoAlt}
+          />
+        </label>
+
+        <button
+          className="admin_primary_button"
+          disabled={!selectedProductId || isUploadingPhoto}
+          type="submit"
+        >
+          {isUploadingPhoto ? "Uploading..." : "Upload Photo"}
+        </button>
+
+        {photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
+
+        <div className="admin_photo_list">
+          {normalizePhotos(selectedProduct?.photos).map((photo) => (
+            <div className="admin_photo_row" key={photo.path}>
+              <span>{photo.alt || "No alt text"}</span>
+              <small>{photo.path}</small>
+            </div>
+          ))}
+        </div>
       </form>
 
       <div className="admin_panel">

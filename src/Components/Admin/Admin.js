@@ -8,7 +8,7 @@ import {
   signOut,
 } from "firebase/auth";
 
-import { auth, db, isFirebaseConfigured } from "../../firebase-config";
+import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
 import ProductAdmin from "./ProductAdmin";
 
 const adminCollection = "adminUsers";
@@ -73,7 +73,7 @@ export default function Admin() {
     };
   }, [user]);
 
-  const canUseFirebase = isFirebaseConfigured && auth && db;
+  const canUseFirebase = isFirebaseConfigured && auth && db && storage;
 
   const adminAccessLabel = () => {
     if (!user) {
@@ -150,7 +150,7 @@ export default function Admin() {
             <p>Editor not connected yet.</p>
           </div>
         </div>
-        <ProductAdmin db={db} />
+        <ProductAdmin db={db} storage={storage} />
       </div>
     );
   };

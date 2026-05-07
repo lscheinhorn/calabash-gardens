@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin product categories and validation are in progress on branch `codex/admin-product-categories-validation`.
+Admin product photo upload is in progress on branch `codex/admin-product-photo-upload`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin product categories and validation are in progress on branch `codex/admin-p
 
 ## Current Phase
 
-Phase 13: Admin product categories and validation.
+Phase 14: Admin product photo upload.
 
 ## Done Work
 
@@ -42,24 +42,12 @@ Phase 13: Admin product categories and validation.
 - Prevented past events before 2026 from being purchasable by setting their `inStock` values to false.
 - Merged and deployed customer-request fixes.
 - Added backend-readiness guardrails and merged them into `main`.
+- Merged admin product categories and validation into `main`.
 
 ## In Progress Work
 
-- Draft admin/backend implementation plan for Jette-managed products, events, and site content.
-- Use subagents to review implementation readiness and guardrail compliance before coding.
-- Document existing admin/Firebase blockers and recommended first implementation slice.
-- Implement read-only content adapter boundary without changing protected resource files.
-- Add read-only helper functions to the content adapter and use them where equivalent.
-- Merged the read-only content adapter and helper phases into `main`.
-- Merged the Firebase setup plan into `main`.
-- Merged the Firebase dependency/config foundation into `main`.
-- Merged the admin auth shell into `main`.
-- Merged admin setup/status into `main`.
-- Merged Firestore rules planning into `main`.
-- Merged Storage rules planning into `main`.
-- Merged admin data-shape planning into `main`.
-- Merged Firestore rules/data-shape alignment into `main`.
-- Merged admin product editor into `main`.
+- Add product photo upload to the admin product editor without changing protected static resource files.
+- Use subagents to review implementation scope and guardrail compliance.
 
 ## Planned Work
 
@@ -72,9 +60,8 @@ Phase 13: Admin product categories and validation.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Review admin product categories and validation before merge.
 - Test `/admin` with Firebase env values and an approved admin user.
-- Add product photo upload after category validation is reviewed.
+- Review admin product photo upload before merge.
 - Seed current products into Firestore after category strategy is reviewed.
 - Plan seed/export strategy before backend content reads.
 
@@ -99,6 +86,8 @@ Phase 13: Admin product categories and validation.
 - Draft Firestore rules are aligned with the data-shape contract but are still not deployed.
 - Product editor requires Firebase env values, deployed/reviewed rules, and an approved admin record for real testing.
 - Product writes require approved `productCategories` records.
+- Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
+- Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -126,6 +115,7 @@ Phase 13: Admin product categories and validation.
 - Firestore validators must be rechecked whenever editor fields change.
 - Admin product editor must not edit static product resource files.
 - Product category choices must come from `productCategories`; no free-typed categories in product forms.
+- Product image uploads should use flat `product-images/{fileName}` paths unless Storage rules are approved for a different path structure.
 
 ## Verification History
 
@@ -134,6 +124,7 @@ Phase 13: Admin product categories and validation.
 - 2026-05-05: `npm run build` completed successfully after customer-request fixes, with the same existing warnings.
 - 2026-05-05: `npm run build` completed successfully after inactive-event correction, with the same existing warnings.
 - 2026-05-05: `npm run deploy` published customer-request fixes.
+- 2026-05-07: `npm run build` completed successfully after admin product photo upload, with the same existing warnings.
 
 ## Commits
 
@@ -153,7 +144,8 @@ Phase 13: Admin product categories and validation.
 - `3284b98 docs: define admin data shapes`
 - `17639d0 docs: align firestore rules with data shapes`
 - `2462ddb feat: add admin product editor`
-- Pending commit for admin product categories and validation.
+- `5e157ff feat: add product categories validation`
+- Pending commit for admin product photo upload.
 
 ## Deployments
 

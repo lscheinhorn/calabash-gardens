@@ -86,8 +86,24 @@ Editor controls:
 - Category dropdown populated from admin-managed `productCategories`.
 - Decimal text input for prices until checkout math is refactored safely.
 - Toggles for published, active, highlighted, and in-stock flags.
-- Image selector/uploader only after Storage rules and image workflow are approved.
+- Image uploader writes approved admin uploads to Firebase Storage and stores image references on Firestore product drafts.
 - The first product editor writes Firestore product drafts only; it does not update public static product data.
+
+Product image reference shape:
+
+```json
+{
+  "path": "product-images/vermont-grown-saffron-1710000000000-jar.webp",
+  "alt": "Small jar of saffron",
+  "sortOrder": 0
+}
+```
+
+Current image upload notes:
+
+- Product photo uploads require selecting or saving a Firestore product first.
+- Product photo paths must stay flat under `product-images/{fileName}` to match the current Storage rules.
+- Uploaded product photos are not connected to public storefront rendering yet.
 
 ## Product Categories
 

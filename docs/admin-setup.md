@@ -53,7 +53,8 @@ Minimum fields:
 - Approved admins can create and update Firestore product drafts.
 - Approved admins can create and update product categories in Firestore.
 - Product drafts must use a category from `productCategories`.
-- Event, site content, inventory, image, and checkout editors are not connected yet.
+- Approved admins can upload product photos to Firebase Storage and attach image references to Firestore product drafts.
+- Event, site content, inventory, and checkout editors are not connected yet.
 - Public product pages still read static product data.
 
 ## Next Guardrail
@@ -62,4 +63,4 @@ Before editor work begins, `firestore.rules` must be reviewed so only approved a
 
 The first admin user must be created manually in the Firebase console before the draft rules are deployed.
 
-Before image upload work begins, `storage.rules` must be reviewed so only approved admins can upload public site images.
+Before real product photo upload testing, `storage.rules` must be reviewed and deployed so only approved admins can upload public site images.
