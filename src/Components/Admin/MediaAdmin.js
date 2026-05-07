@@ -8,6 +8,10 @@ import {
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
+import {
+  getDownloadURL,
+  ref,
+} from "firebase/storage";
 
 const emptyFilters = {
   search: "",
@@ -92,12 +96,13 @@ const buildEditForm = (asset) => ({
   title: asset.title,
 });
 
-export default function MediaAdmin({ db }) {
+export default function MediaAdmin({ db, storage }) {
   const [assets, setAssets] = useState([]);
   const [filters, setFilters] = useState(emptyFilters);
   const [expandedAssetId, setExpandedAssetId] = useState("");
   const [editingAssetId, setEditingAssetId] = useState("");
   const [editingForm, setEditingForm] = useState(null);
+  const [assetUrlsByPath, setAssetUrlsByPath] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -120,6 +125,39 @@ export default function MediaAdmin({ db }) {
   useEffect(() => {
     loadMediaAssets();
   }, [loadMediaAssets]);
+
+  useEffect(() => {
+    let isCurrentLoad = true;
+
+    const loadAssetUrls = async () => {
+      if (!storage) {
+        setAssetUrlsByPath({});
+        return;
+      }
+
+      const storagePaths = Array.from(new Set(assets
+        .map((asset) => asset.storagePath)
+        .filter(Boolean)));
+
+      const assetUrlEntries = await Promise.all(storagePaths.map(async (storagePath) => {
+        try {
+          return [storagePath, await getDownloadURL(ref(storage, storagePath))];
+        } catch (error) {
+          return [storagePath, ""];
+        }
+      }));
+
+      if (isCurrentLoad) {
+        setAssetUrlsByPath(Object.fromEntries(assetUrlEntries));
+      }
+    };
+
+    loadAssetUrls();
+
+    return () => {
+      isCurrentLoad = false;
+    };
+  }, [assets, storage]);
 
   const filteredAssets = useMemo(() => (
     assets.filter((asset) => mediaAssetMatches(asset, filters))
@@ -217,7 +255,7 @@ export default function MediaAdmin({ db }) {
       <div className="admin_form_header">
         <div>
           <h3>Photos</h3>
-          <p className="admin_status">Metadata library only. Upload migration is not connected yet.</p>
+          <p className="admin_status">Storage-backed media library.</p>
         </div>
         <button className="admin_secondary_button" disabled={isLoading} onClick={loadMediaAssets} type="button">
           Refresh
@@ -294,6 +332,13 @@ export default function MediaAdmin({ db }) {
 
               {isExpanded ? (
                 <div className="admin_product_card_body">
+                  {assetUrlsByPath[asset.storagePath] ? (
+                    <img
+                      alt={asset.alt || asset.title}
+                      className="admin_media_preview"
+                      src={assetUrlsByPath[asset.storagePath]}
+                    />
+                  ) : null}
                   <dl className="admin_product_details admin_media_details">
                     <div>
                       <dt>ID</dt>

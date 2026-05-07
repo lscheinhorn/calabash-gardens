@@ -10,6 +10,7 @@ import {
   setDoc,
 } from "firebase/firestore";
 import {
+  getDownloadURL,
   ref,
   uploadBytes,
 } from "firebase/storage";
@@ -229,6 +230,7 @@ export default function ProductAdmin({ db, storage }) {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoInputKey, setPhotoInputKey] = useState(0);
   const [photoUploadChoice, setPhotoUploadChoice] = useState("optimize");
+  const [photoUrlsByPath, setPhotoUrlsByPath] = useState({});
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
@@ -286,6 +288,40 @@ export default function ProductAdmin({ db, storage }) {
     loadProducts();
     loadCategories();
   }, [loadCategories, loadProducts]);
+
+  useEffect(() => {
+    let isCurrentLoad = true;
+
+    const loadPhotoUrls = async () => {
+      if (!storage) {
+        setPhotoUrlsByPath({});
+        return;
+      }
+
+      const photoPaths = Array.from(new Set(products
+        .flatMap((product) => normalizePhotos(product.photos))
+        .map((photo) => photo.path)
+        .filter(Boolean)));
+
+      const photoUrlEntries = await Promise.all(photoPaths.map(async (photoPath) => {
+        try {
+          return [photoPath, await getDownloadURL(ref(storage, photoPath))];
+        } catch (error) {
+          return [photoPath, ""];
+        }
+      }));
+
+      if (isCurrentLoad) {
+        setPhotoUrlsByPath(Object.fromEntries(photoUrlEntries));
+      }
+    };
+
+    loadPhotoUrls();
+
+    return () => {
+      isCurrentLoad = false;
+    };
+  }, [products, storage]);
 
   const updateForm = (field, value) => {
     setForm((currentForm) => ({
@@ -1162,6 +1198,9 @@ export default function ProductAdmin({ db, storage }) {
                           <div className="admin_photo_list">
                             {productPhotos.length ? productPhotos.map((photo) => (
                               <div className="admin_photo_row" key={photo.path}>
+                                {photoUrlsByPath[photo.path] ? (
+                                  <img alt={photo.alt || product.title || photo.path} src={photoUrlsByPath[photo.path]} />
+                                ) : null}
                                 <span>{photo.alt || "No alt text"}</span>
                                 <small>{photo.path}</small>
                               </div>

@@ -151,7 +151,7 @@ export default function Admin() {
             <p>Editor not connected yet.</p>
           </div>
         </div>
-        <MediaAdmin db={db} />
+        <MediaAdmin db={db} storage={storage} />
         <ProductAdmin db={db} storage={storage} />
       </div>
     );

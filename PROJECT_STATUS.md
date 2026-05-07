@@ -55,13 +55,14 @@ Phase 19: Media library foundation.
 - Added a non-destructive media asset preparation step for oversized migration images on the active branch.
 - Added admin large-image optimization controls and a local media optimization review report on the active branch.
 - Added a guarded Firebase media migration importer on the active branch.
+- Added Storage-backed admin media previews on the active branch.
 
 ## In Progress Work
 
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
 - Review the zero-blocker media migration dry-run report before any real upload/import.
 - Review `docs/media-optimization-review.html` before uploading optimized migration images.
-- Verify imported media in Firebase Storage, Firestore `mediaAssets`, and admin product cards.
+- Verify imported media thumbnails in admin product cards and the Photos library.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -115,6 +116,7 @@ Phase 19: Media library foundation.
 - `firebase.json` is active for Storage rules only; Firebase Hosting remains outside this config.
 - Firebase Rules System service agent has the `Firebase Rules Firestore Service Agent` role, allowing Storage rules to check Firestore `adminUsers/{uid}`.
 - Confirmed media import uploaded 20 Storage objects, created 20 `mediaAssets` documents, and attached product photo refs to 11 Firestore products.
+- Admin product cards and Photos library resolve Storage download URLs for imported media previews.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
