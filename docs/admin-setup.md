@@ -52,6 +52,8 @@ Minimum fields:
 - The shell reads `adminUsers/{uid}` to confirm `active: true`.
 - Approved admins can create and update Firestore product drafts.
 - Approved admins can create and update product categories in Firestore.
+- New product IDs are suggested from the product title and locked after saving.
+- New category IDs are suggested from the category name and locked after saving.
 - Product drafts must use a category from `productCategories`.
 - Approved admins can upload product photos to Firebase Storage and attach image references to Firestore product drafts.
 - Event, site content, inventory, and checkout editors are not connected yet.

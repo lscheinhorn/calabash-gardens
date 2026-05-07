@@ -79,10 +79,13 @@ Current compatibility notes:
 - Current prices and shipping values are strings, not numbers.
 - Current product keys are generated from title with `createKey`; future IDs should be stable even if title changes.
 - Seeded Firestore product documents must not include fields outside this contract, because rules validate the full resulting document on update.
+- New product IDs are suggested from the first title. The ID is locked after saving; changing it later requires creating a replacement product.
+- New product IDs must not match an existing Firestore product document ID.
 
 Editor controls:
 
 - Text inputs for title, description fields, shipping, and option labels.
+- Product ID input suggested from title for new products and disabled for saved products.
 - Category dropdown populated from admin-managed `productCategories`.
 - Decimal text input for prices until checkout math is refactored safely.
 - Toggles for published, active, highlighted, and in-stock flags.
@@ -136,6 +139,8 @@ Current compatibility notes:
 - Some current products omit category; seeded Firestore products must either use an approved category or wait for a migration decision.
 - Product writes require a category ID that exists in this collection.
 - The product editor uses this collection for its category dropdown and validation.
+- New category IDs are suggested from the category name and locked after saving.
+- New category IDs must not match an existing Firestore category document ID.
 
 ## Events
 

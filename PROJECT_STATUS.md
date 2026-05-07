@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin product photo upload is in progress on branch `codex/admin-product-photo-upload`.
+Admin product ID suggestion guidance is in progress on branch `codex/admin-product-photo-upload`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin product photo upload is in progress on branch `codex/admin-product-photo-u
 
 ## Current Phase
 
-Phase 14: Admin product photo upload.
+Phase 15: Admin product and category ID suggestions.
 
 ## Done Work
 
@@ -43,10 +43,12 @@ Phase 14: Admin product photo upload.
 - Merged and deployed customer-request fixes.
 - Added backend-readiness guardrails and merged them into `main`.
 - Merged admin product categories and validation into `main`.
+- Added admin product photo upload on the active admin branch.
 
 ## In Progress Work
 
-- Add product photo upload to the admin product editor without changing protected static resource files.
+- Suggest product and category IDs from new product titles and category names.
+- Keep saved product and category IDs locked after creation.
 - Use subagents to review implementation scope and guardrail compliance.
 
 ## Planned Work
@@ -116,6 +118,7 @@ Phase 14: Admin product photo upload.
 - Admin product editor must not edit static product resource files.
 - Product category choices must come from `productCategories`; no free-typed categories in product forms.
 - Product image uploads should use flat `product-images/{fileName}` paths unless Storage rules are approved for a different path structure.
+- Product and category IDs should be suggested from the title/name when created and treated as locked after saving.
 
 ## Verification History
 
@@ -145,7 +148,8 @@ Phase 14: Admin product photo upload.
 - `17639d0 docs: align firestore rules with data shapes`
 - `2462ddb feat: add admin product editor`
 - `5e157ff feat: add product categories validation`
-- Pending commit for admin product photo upload.
+- `341ec93 feat: add admin product photo upload`
+- Pending commit for admin ID suggestions.
 
 ## Deployments
 

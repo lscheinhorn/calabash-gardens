@@ -80,6 +80,13 @@
   resize: vertical;
 }
 
+.admin_help_text {
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
 .admin_primary_button,
 .admin_secondary_button {
   border: 0;

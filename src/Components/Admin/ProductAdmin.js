@@ -112,6 +112,7 @@ export default function ProductAdmin({ db, storage }) {
   const [photoAlt, setPhotoAlt] = useState("");
   const [photoFile, setPhotoFile] = useState(null);
   const [photoInputKey, setPhotoInputKey] = useState(0);
+  const [isProductIdEdited, setIsProductIdEdited] = useState(false);
 
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
@@ -168,10 +169,31 @@ export default function ProductAdmin({ db, storage }) {
     }));
   };
 
+  const updateProductTitle = (value) => {
+    setForm((currentForm) => {
+      const nextForm = {
+        ...currentForm,
+        title: value,
+      };
+
+      if (!selectedProductId && !isProductIdEdited) {
+        nextForm.slug = slugify(value);
+      }
+
+      return nextForm;
+    });
+  };
+
+  const updateProductId = (value) => {
+    setIsProductIdEdited(true);
+    updateForm("slug", slugify(value));
+  };
+
   const resetForm = () => {
     setForm(emptyProduct);
     setSelectedProductId("");
     setSelectedProduct(null);
+    setIsProductIdEdited(false);
     setMessage("");
   };
 
@@ -188,7 +210,7 @@ export default function ProductAdmin({ db, storage }) {
       photos: normalizePhotos(product.photos),
     });
     setForm({
-      slug: product.slug || product.id,
+      slug: product.id,
       title: product.title || "",
       category: product.category || "",
       info: product.info || "",
@@ -206,6 +228,7 @@ export default function ProductAdmin({ db, storage }) {
     setPhotoMessage("");
     setPhotoAlt("");
     setPhotoFile(null);
+    setIsProductIdEdited(true);
     setPhotoInputKey((currentKey) => currentKey + 1);
   };
 
@@ -254,6 +277,10 @@ export default function ProductAdmin({ db, storage }) {
       return "Document ID, title, and shipping are required.";
     }
 
+    if (!selectedProductId && products.some((product) => product.id === productId)) {
+      return "That product ID already exists. Change the title or edit the existing product.";
+    }
+
     if (!form.category || !categoryIds.includes(form.category)) {
       return "Choose an approved category.";
     }
@@ -280,6 +307,10 @@ export default function ProductAdmin({ db, storage }) {
   const validateCategory = (categoryId) => {
     if (!categoryId || !categoryForm.name.trim()) {
       return "Category ID and name are required.";
+    }
+
+    if (!selectedCategoryId && categories.some((category) => category.id === categoryId)) {
+      return "That category ID already exists. Change the name or edit the existing category.";
     }
 
     if (categoryForm.sortOrder !== "" && !Number.isInteger(Number(categoryForm.sortOrder))) {
@@ -476,17 +507,21 @@ export default function ProductAdmin({ db, storage }) {
           Document ID
           <input
             disabled={Boolean(selectedProductId)}
-            onChange={(event) => updateForm("slug", slugify(event.target.value))}
+            onChange={(event) => updateProductId(event.target.value)}
             placeholder="vermont-grown-saffron"
             required={!selectedProductId}
             value={form.slug}
           />
+          <small className="admin_help_text">
+            Suggested from the title. This ID is locked after saving; use a new
+            product if the ID needs to change later.
+          </small>
         </label>
 
         <label>
           Title
           <input
-            onChange={(event) => updateForm("title", event.target.value)}
+            onChange={(event) => updateProductTitle(event.target.value)}
             required
             value={form.title}
           />
@@ -703,6 +738,10 @@ export default function ProductAdmin({ db, storage }) {
             placeholder="saffron"
             value={selectedCategoryId || slugify(categoryForm.name)}
           />
+          <small className="admin_help_text">
+            Suggested from the category name. This ID is locked after saving;
+            use a new category if the ID needs to change later.
+          </small>
         </label>
 
         <label>
