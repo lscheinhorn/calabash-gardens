@@ -53,6 +53,7 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 - Roles are stored but not enforced yet. Any active admin can manage other admin records in this draft.
 - Product, event, site content, and inventory writes use collection-specific validators aligned to `docs/admin-data-shapes.md`.
 - Media asset writes use a collection-specific validator aligned to the media library contract in `docs/admin-data-shapes.md`.
+- Media asset writes allow `migratedAt` so imported media metadata remains editable after migration.
 - Product and product category writes are constrained to the approved product category IDs.
 - `gifts` is an approved category document ID, but product writes can use it only for the preserved legacy gift-set product IDs.
 - Product, event, and content deletes are currently admin-allowed in the draft. The UI may still choose to deactivate instead of delete.

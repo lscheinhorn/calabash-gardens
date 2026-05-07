@@ -352,6 +352,11 @@
   padding-top: 14px;
 }
 
+.admin_attach_photo_panel {
+  border-top: 1px solid #e5deea;
+  padding-top: 14px;
+}
+
 .admin_photo_list {
   display: grid;
   gap: 8px;

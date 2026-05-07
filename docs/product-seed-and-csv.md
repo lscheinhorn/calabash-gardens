@@ -92,6 +92,7 @@ If the confirmed importer fails on the first Storage upload with `404 Not Found`
 If it fails with `storage/unauthorized` after Storage rules deploy, check the cross-service rules IAM permission. The Firebase Storage service agent needs the `Firebase Rules Firestore Service Agent` role so Storage rules can read `adminUsers/{uid}` in Firestore.
 
 After import, the admin product cards and Photos library should display Storage-backed previews for attached/imported media. Public product pages still use static images until a separate backend-read phase is approved.
+Product cards can also attach an existing active photo from the `other` media bin. Attaching moves that media asset into the `products` bin, links it to the selected product, preserves existing tags, and appends a product photo reference without uploading another file.
 
 ## Required Validation
 

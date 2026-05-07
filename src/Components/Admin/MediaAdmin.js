@@ -12,6 +12,11 @@ import {
   getDownloadURL,
   ref,
 } from "firebase/storage";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronDown,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 const emptyFilters = {
   search: "",
@@ -31,6 +36,14 @@ const statusOptions = [
   { id: "active", label: "Active" },
   { id: "archived", label: "Archived" },
 ];
+
+const CollapseIcon = ({ isExpanded }) => (
+  <FontAwesomeIcon
+    aria-hidden="true"
+    className="admin_collapse_icon"
+    icon={isExpanded ? faChevronDown : faChevronRight}
+  />
+);
 
 const normalizeTags = (tags) => (
   Array.isArray(tags) ? tags : []
@@ -103,6 +116,7 @@ export default function MediaAdmin({ db, storage }) {
   const [editingAssetId, setEditingAssetId] = useState("");
   const [editingForm, setEditingForm] = useState(null);
   const [assetUrlsByPath, setAssetUrlsByPath] = useState({});
+  const [isSectionExpanded, setIsSectionExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -257,169 +271,185 @@ export default function MediaAdmin({ db, storage }) {
           <h3>Photos</h3>
           <p className="admin_status">Storage-backed media library.</p>
         </div>
-        <button className="admin_secondary_button" disabled={isLoading} onClick={loadMediaAssets} type="button">
-          Refresh
-        </button>
+        <div className="admin_button_row">
+          <button className="admin_secondary_button" disabled={isLoading} onClick={loadMediaAssets} type="button">
+            Refresh
+          </button>
+          <button
+            aria-expanded={isSectionExpanded}
+            aria-label={`${isSectionExpanded ? "Collapse" : "Expand"} Photos`}
+            className="admin_icon_button"
+            onClick={() => setIsSectionExpanded((currentValue) => !currentValue)}
+            title={`${isSectionExpanded ? "Collapse" : "Expand"} Photos`}
+            type="button"
+          >
+            <CollapseIcon isExpanded={isSectionExpanded} />
+          </button>
+        </div>
       </div>
 
-      <div className="admin_filter_grid admin_media_filters">
-        <label>
-          Search
-          <input
-            onChange={(event) => updateFilter("search", event.target.value)}
-            placeholder="Title, tag, file, linked item"
-            value={filters.search}
-          />
-        </label>
-        <label>
-          Bin
-          <select onChange={(event) => updateFilter("bin", event.target.value)} value={filters.bin}>
-            <option value="all">All</option>
-            {binOptions.map((option) => (
-              <option key={option.id} value={option.id}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Status
-          <select onChange={(event) => updateFilter("status", event.target.value)} value={filters.status}>
-            <option value="all">All</option>
-            {statusOptions.map((option) => (
-              <option key={option.id} value={option.id}>{option.label}</option>
-            ))}
-          </select>
-        </label>
-        <label>
-          Tag
-          <input
-            onChange={(event) => updateFilter("tag", event.target.value)}
-            placeholder="saffron"
-            value={filters.tag}
-          />
-        </label>
-      </div>
-
-      {isLoading ? <p className="admin_status">Loading media...</p> : null}
-      {message ? <p className="admin_message">{message}</p> : null}
-      <p className="admin_status">{filteredAssets.length} of {assets.length} media assets shown.</p>
-
-      <div className="admin_media_grid">
-        {filteredAssets.map((asset) => {
-          const isExpanded = expandedAssetId === asset.id;
-          const isEditing = editingAssetId === asset.id;
-
-          return (
-            <article className="admin_media_card" key={asset.id}>
-              <button
-                aria-expanded={isExpanded}
-                aria-label={`${isExpanded ? "Collapse" : "Expand"} ${asset.title}`}
-                className="admin_product_card_header"
-                onClick={() => toggleAsset(asset)}
-                title={`${isExpanded ? "Collapse" : "Expand"} ${asset.title}`}
-                type="button"
-              >
-                <span>{asset.title}</span>
-                <small>{asset.bin}</small>
-              </button>
-
-              <div className="admin_product_meta">
-                <span>{asset.status}</span>
-                <span>{asset.linkedType === "none" ? "Unlinked" : `${asset.linkedType}: ${asset.linkedId}`}</span>
-                {asset.tags.slice(0, 3).map((tag) => (
-                  <span key={`${asset.id}-${tag}`}>{tag}</span>
+      {isSectionExpanded ? (
+        <>
+          <div className="admin_filter_grid admin_media_filters">
+            <label>
+              Search
+              <input
+                onChange={(event) => updateFilter("search", event.target.value)}
+                placeholder="Title, tag, file, linked item"
+                value={filters.search}
+              />
+            </label>
+            <label>
+              Bin
+              <select onChange={(event) => updateFilter("bin", event.target.value)} value={filters.bin}>
+                <option value="all">All</option>
+                {binOptions.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
                 ))}
-              </div>
+              </select>
+            </label>
+            <label>
+              Status
+              <select onChange={(event) => updateFilter("status", event.target.value)} value={filters.status}>
+                <option value="all">All</option>
+                {statusOptions.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Tag
+              <input
+                onChange={(event) => updateFilter("tag", event.target.value)}
+                placeholder="saffron"
+                value={filters.tag}
+              />
+            </label>
+          </div>
 
-              {isExpanded ? (
-                <div className="admin_product_card_body">
-                  {assetUrlsByPath[asset.storagePath] ? (
-                    <img
-                      alt={asset.alt || asset.title}
-                      className="admin_media_preview"
-                      src={assetUrlsByPath[asset.storagePath]}
-                    />
+          {isLoading ? <p className="admin_status">Loading media...</p> : null}
+          {message ? <p className="admin_message">{message}</p> : null}
+          <p className="admin_status">{filteredAssets.length} of {assets.length} media assets shown.</p>
+
+          <div className="admin_media_grid">
+            {filteredAssets.map((asset) => {
+              const isExpanded = expandedAssetId === asset.id;
+              const isEditing = editingAssetId === asset.id;
+
+              return (
+                <article className="admin_media_card" key={asset.id}>
+                  <button
+                    aria-expanded={isExpanded}
+                    aria-label={`${isExpanded ? "Collapse" : "Expand"} ${asset.title}`}
+                    className="admin_product_card_header"
+                    onClick={() => toggleAsset(asset)}
+                    title={`${isExpanded ? "Collapse" : "Expand"} ${asset.title}`}
+                    type="button"
+                  >
+                    <span>{asset.title}</span>
+                    <small>{asset.bin}</small>
+                  </button>
+
+                  <div className="admin_product_meta">
+                    <span>{asset.status}</span>
+                    <span>{asset.linkedType === "none" ? "Unlinked" : `${asset.linkedType}: ${asset.linkedId}`}</span>
+                    {asset.tags.slice(0, 3).map((tag) => (
+                      <span key={`${asset.id}-${tag}`}>{tag}</span>
+                    ))}
+                  </div>
+
+                  {isExpanded ? (
+                    <div className="admin_product_card_body">
+                      {assetUrlsByPath[asset.storagePath] ? (
+                        <img
+                          alt={asset.alt || asset.title}
+                          className="admin_media_preview"
+                          src={assetUrlsByPath[asset.storagePath]}
+                        />
+                      ) : null}
+                      <dl className="admin_product_details admin_media_details">
+                        <div>
+                          <dt>ID</dt>
+                          <dd>{asset.id}</dd>
+                        </div>
+                        <div>
+                          <dt>Storage Path</dt>
+                          <dd>{asset.storagePath || "Not uploaded yet"}</dd>
+                        </div>
+                        <div>
+                          <dt>Source Path</dt>
+                          <dd>{asset.sourcePath || "Manual/admin source"}</dd>
+                        </div>
+                      </dl>
+
+                      {!isEditing ? (
+                        <div className="admin_button_row">
+                          <button className="admin_primary_button" onClick={() => startEdit(asset)} type="button">
+                            Edit Metadata
+                          </button>
+                        </div>
+                      ) : (
+                        <form className="admin_inline_form" onSubmit={(event) => saveMediaAsset(event, asset)}>
+                          <label>
+                            Title
+                            <input
+                              onChange={(event) => updateEditingForm("title", event.target.value)}
+                              required
+                              value={editingForm.title}
+                            />
+                          </label>
+                          <label>
+                            Alt Text
+                            <input
+                              onChange={(event) => updateEditingForm("alt", event.target.value)}
+                              value={editingForm.alt}
+                            />
+                          </label>
+                          <div className="admin_split_fields">
+                            <label>
+                              Bin
+                              <select onChange={(event) => updateEditingForm("bin", event.target.value)} value={editingForm.bin}>
+                                {binOptions.map((option) => (
+                                  <option key={option.id} value={option.id}>{option.label}</option>
+                                ))}
+                              </select>
+                            </label>
+                            <label>
+                              Status
+                              <select onChange={(event) => updateEditingForm("status", event.target.value)} value={editingForm.status}>
+                                {statusOptions.map((option) => (
+                                  <option key={option.id} value={option.id}>{option.label}</option>
+                                ))}
+                              </select>
+                            </label>
+                          </div>
+                          <label>
+                            Tags
+                            <input
+                              onChange={(event) => updateEditingForm("tags", event.target.value)}
+                              placeholder="product, saffron"
+                              value={editingForm.tags}
+                            />
+                            <small className="admin_help_text">Comma-separated tags.</small>
+                          </label>
+                          <div className="admin_button_row">
+                            <button className="admin_primary_button" disabled={isSaving} type="submit">
+                              {isSaving ? "Saving..." : "Save Metadata"}
+                            </button>
+                            <button className="admin_secondary_button" onClick={cancelEdit} type="button">
+                              Cancel
+                            </button>
+                          </div>
+                        </form>
+                      )}
+                    </div>
                   ) : null}
-                  <dl className="admin_product_details admin_media_details">
-                    <div>
-                      <dt>ID</dt>
-                      <dd>{asset.id}</dd>
-                    </div>
-                    <div>
-                      <dt>Storage Path</dt>
-                      <dd>{asset.storagePath || "Not uploaded yet"}</dd>
-                    </div>
-                    <div>
-                      <dt>Source Path</dt>
-                      <dd>{asset.sourcePath || "Manual/admin source"}</dd>
-                    </div>
-                  </dl>
-
-                  {!isEditing ? (
-                    <div className="admin_button_row">
-                      <button className="admin_primary_button" onClick={() => startEdit(asset)} type="button">
-                        Edit Metadata
-                      </button>
-                    </div>
-                  ) : (
-                    <form className="admin_inline_form" onSubmit={(event) => saveMediaAsset(event, asset)}>
-                      <label>
-                        Title
-                        <input
-                          onChange={(event) => updateEditingForm("title", event.target.value)}
-                          required
-                          value={editingForm.title}
-                        />
-                      </label>
-                      <label>
-                        Alt Text
-                        <input
-                          onChange={(event) => updateEditingForm("alt", event.target.value)}
-                          value={editingForm.alt}
-                        />
-                      </label>
-                      <div className="admin_split_fields">
-                        <label>
-                          Bin
-                          <select onChange={(event) => updateEditingForm("bin", event.target.value)} value={editingForm.bin}>
-                            {binOptions.map((option) => (
-                              <option key={option.id} value={option.id}>{option.label}</option>
-                            ))}
-                          </select>
-                        </label>
-                        <label>
-                          Status
-                          <select onChange={(event) => updateEditingForm("status", event.target.value)} value={editingForm.status}>
-                            {statusOptions.map((option) => (
-                              <option key={option.id} value={option.id}>{option.label}</option>
-                            ))}
-                          </select>
-                        </label>
-                      </div>
-                      <label>
-                        Tags
-                        <input
-                          onChange={(event) => updateEditingForm("tags", event.target.value)}
-                          placeholder="product, saffron"
-                          value={editingForm.tags}
-                        />
-                        <small className="admin_help_text">Comma-separated tags.</small>
-                      </label>
-                      <div className="admin_button_row">
-                        <button className="admin_primary_button" disabled={isSaving} type="submit">
-                          {isSaving ? "Saving..." : "Save Metadata"}
-                        </button>
-                        <button className="admin_secondary_button" onClick={cancelEdit} type="button">
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
-                </div>
-              ) : null}
-            </article>
-          );
-        })}
-      </div>
+                </article>
+              );
+            })}
+          </div>
+        </>
+      ) : null}
     </section>
   );
 }

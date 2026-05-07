@@ -169,6 +169,7 @@ service cloud.firestore {
           'createdAt',
           'linkedId',
           'linkedType',
+          'migratedAt',
           'size',
           'source',
           'sourcePath',
@@ -197,6 +198,7 @@ service cloud.firestore {
         && (!('sourcePath' in request.resource.data) || request.resource.data.sourcePath is string)
         && (!('uploadedBy' in request.resource.data) || request.resource.data.uploadedBy is string)
         && (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp)
+        && (!('migratedAt' in request.resource.data) || request.resource.data.migratedAt is timestamp)
         && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
     }
 

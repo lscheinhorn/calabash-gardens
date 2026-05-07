@@ -112,6 +112,26 @@ const normalizePhotos = (photos) => {
     .filter(Boolean);
 };
 
+const normalizeMediaAsset = (snapshot) => {
+  const data = snapshot.data();
+
+  return {
+    id: snapshot.id,
+    alt: String(data.alt || ""),
+    bin: String(data.bin || "other"),
+    linkedId: String(data.linkedId || ""),
+    linkedType: String(data.linkedType || "none"),
+    status: String(data.status || "active"),
+    storagePath: String(data.storagePath || ""),
+    tags: Array.isArray(data.tags) ? data.tags.map((tag) => String(tag || "").trim()).filter(Boolean) : [],
+    title: String(data.title || snapshot.id),
+  };
+};
+
+const uniqueTags = (tags) => Array.from(new Set(tags
+  .map((tag) => String(tag || "").trim().toLowerCase())
+  .filter(Boolean)));
+
 const formatFileSize = (size) => {
   if (!size) {
     return "0 MB";
@@ -216,6 +236,7 @@ export default function ProductAdmin({ db, storage }) {
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [mediaAssets, setMediaAssets] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -231,6 +252,8 @@ export default function ProductAdmin({ db, storage }) {
   const [photoInputKey, setPhotoInputKey] = useState(0);
   const [photoUploadChoice, setPhotoUploadChoice] = useState("optimize");
   const [photoUrlsByPath, setPhotoUrlsByPath] = useState({});
+  const [selectedExistingMediaId, setSelectedExistingMediaId] = useState("");
+  const [isAttachingPhoto, setIsAttachingPhoto] = useState(false);
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
@@ -284,10 +307,21 @@ export default function ProductAdmin({ db, storage }) {
     }
   }, [db]);
 
+  const loadMediaAssets = useCallback(async () => {
+    try {
+      const mediaQuery = query(collection(db, "mediaAssets"), orderBy("title"));
+      const snapshot = await getDocs(mediaQuery);
+      setMediaAssets(snapshot.docs.map(normalizeMediaAsset));
+    } catch (error) {
+      setPhotoMessage("Media assets could not be loaded.");
+    }
+  }, [db]);
+
   useEffect(() => {
     loadProducts();
     loadCategories();
-  }, [loadCategories, loadProducts]);
+    loadMediaAssets();
+  }, [loadCategories, loadMediaAssets, loadProducts]);
 
   useEffect(() => {
     let isCurrentLoad = true;
@@ -395,6 +429,7 @@ export default function ProductAdmin({ db, storage }) {
     setPhotoAlt("");
     setPhotoFile(null);
     setPhotoUploadChoice("optimize");
+    setSelectedExistingMediaId("");
     setPhotoInputKey((currentKey) => currentKey + 1);
   };
 
@@ -751,6 +786,101 @@ export default function ProductAdmin({ db, storage }) {
     }
   };
 
+  const attachExistingPhoto = async (product) => {
+    if (!product?.id) {
+      setPhotoMessage("Open a saved product before attaching photos.");
+      return;
+    }
+
+    const mediaAsset = mediaAssets.find((asset) => asset.id === selectedExistingMediaId);
+
+    if (!mediaAsset) {
+      setPhotoMessage("Choose an existing photo to attach.");
+      return;
+    }
+
+    setIsAttachingPhoto(true);
+    setSelectedProductId(product.id);
+    setPhotoMessage("");
+
+    try {
+      const mediaTags = uniqueTags([
+        ...mediaAsset.tags,
+        "product",
+        product.id,
+        product.category,
+      ]);
+      let updatedPhotos = [];
+      let wasAlreadyAttached = false;
+
+      await runTransaction(db, async (transaction) => {
+        const productRef = doc(db, "products", product.id);
+        const mediaRef = doc(db, "mediaAssets", mediaAsset.id);
+        const productSnapshot = await transaction.get(productRef);
+        const latestProduct = productSnapshot.exists() ? productSnapshot.data() : {};
+        const latestPhotos = normalizePhotos(latestProduct.photos);
+
+        if (latestPhotos.some((photo) => photo.mediaAssetId === mediaAsset.id || photo.path === mediaAsset.storagePath)) {
+          wasAlreadyAttached = true;
+          updatedPhotos = latestPhotos;
+          return;
+        }
+
+        const nextPhoto = {
+          path: mediaAsset.storagePath,
+          alt: mediaAsset.alt,
+          mediaAssetId: mediaAsset.id,
+          sortOrder: latestPhotos.length,
+        };
+
+        updatedPhotos = [...latestPhotos, nextPhoto];
+
+        transaction.set(productRef, {
+          photos: updatedPhotos,
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+
+        transaction.set(mediaRef, {
+          bin: "products",
+          linkedId: product.id,
+          linkedType: "product",
+          tags: mediaTags,
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+      });
+
+      if (wasAlreadyAttached) {
+        setPhotoMessage("That photo is already attached to this product.");
+        return;
+      }
+
+      setProducts((currentProducts) => currentProducts.map((currentProduct) => (
+        currentProduct.id === product.id
+          ? { ...currentProduct, photos: updatedPhotos }
+          : currentProduct
+      )));
+      setMediaAssets((currentAssets) => currentAssets.map((currentAsset) => (
+        currentAsset.id === mediaAsset.id
+          ? {
+              ...currentAsset,
+              bin: "products",
+              linkedId: product.id,
+              linkedType: "product",
+              tags: mediaTags,
+            }
+          : currentAsset
+      )));
+      setSelectedExistingMediaId("");
+      setPhotoMessage("Existing photo attached to this product.");
+      await loadProducts();
+      await loadMediaAssets();
+    } catch (error) {
+      setPhotoMessage("Existing photo could not be attached.");
+    } finally {
+      setIsAttachingPhoto(false);
+    }
+  };
+
   const handleCategorySubmit = async (event) => {
     event.preventDefault();
 
@@ -945,6 +1075,11 @@ export default function ProductAdmin({ db, storage }) {
     ...categoryNames,
     [category.id]: category.name || category.id,
   }), {});
+  const attachableMediaAssets = mediaAssets.filter((asset) => (
+    asset.bin === "other"
+    && asset.status === "active"
+    && asset.storagePath
+  ));
 
   return (
     <div className="admin_editor_grid">
@@ -1263,6 +1398,36 @@ export default function ProductAdmin({ db, storage }) {
                           </button>
                           {isPhotoTarget && photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
                         </form>
+
+                        <div className="admin_embedded_form admin_attach_photo_panel">
+                          <div className="admin_form_header">
+                            <h4>Attach Existing Photo</h4>
+                            <span className="admin_status">{attachableMediaAssets.length} in Other</span>
+                          </div>
+                          <label>
+                            Photo From Other Bin
+                            <select
+                              disabled={isAttachingPhoto || attachableMediaAssets.length === 0}
+                              onChange={(event) => setSelectedExistingMediaId(event.target.value)}
+                              value={isPhotoTarget ? selectedExistingMediaId : ""}
+                            >
+                              <option value="">Choose photo</option>
+                              {attachableMediaAssets.map((asset) => (
+                                <option key={asset.id} value={asset.id}>
+                                  {asset.title}
+                                </option>
+                              ))}
+                            </select>
+                          </label>
+                          <button
+                            className="admin_secondary_button"
+                            disabled={isAttachingPhoto || !isPhotoTarget || !selectedExistingMediaId}
+                            onClick={() => attachExistingPhoto(product)}
+                            type="button"
+                          >
+                            {isAttachingPhoto && isPhotoTarget ? "Attaching..." : "Attach Photo"}
+                          </button>
+                        </div>
                       </div>
                     ) : null}
                   </article>
