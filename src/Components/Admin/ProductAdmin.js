@@ -254,6 +254,8 @@ export default function ProductAdmin({ db, storage }) {
   const [photoUrlsByPath, setPhotoUrlsByPath] = useState({});
   const [selectedExistingMediaId, setSelectedExistingMediaId] = useState("");
   const [isAttachingPhoto, setIsAttachingPhoto] = useState(false);
+  const [photoAltDrafts, setPhotoAltDrafts] = useState({});
+  const [isUpdatingProductPhoto, setIsUpdatingProductPhoto] = useState(false);
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
@@ -375,6 +377,13 @@ export default function ProductAdmin({ db, storage }) {
     setCategoryForm((currentForm) => ({
       ...currentForm,
       [field]: value,
+    }));
+  };
+
+  const updatePhotoAltDraft = (productId, photoPath, value) => {
+    setPhotoAltDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [`${productId}:${photoPath}`]: value,
     }));
   };
 
@@ -881,6 +890,140 @@ export default function ProductAdmin({ db, storage }) {
     }
   };
 
+  const updateProductPhotoList = async (product, changePhotos, successMessage) => {
+    if (!product?.id) {
+      setPhotoMessage("Open a saved product before changing photos.");
+      return null;
+    }
+
+    setIsUpdatingProductPhoto(true);
+    setSelectedProductId(product.id);
+    setPhotoMessage("");
+
+    try {
+      let updatedPhotos = [];
+
+      await runTransaction(db, async (transaction) => {
+        const productRef = doc(db, "products", product.id);
+        const productSnapshot = await transaction.get(productRef);
+        const latestProduct = productSnapshot.exists() ? productSnapshot.data() : {};
+        const latestPhotos = normalizePhotos(latestProduct.photos)
+          .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
+
+        updatedPhotos = changePhotos(latestPhotos)
+          .filter(Boolean)
+          .map((photo, index) => ({
+            ...photo,
+            sortOrder: index,
+          }));
+
+        transaction.set(productRef, {
+          photos: updatedPhotos,
+          updatedAt: serverTimestamp(),
+        }, { merge: true });
+      });
+
+      setProducts((currentProducts) => currentProducts.map((currentProduct) => (
+        currentProduct.id === product.id
+          ? { ...currentProduct, photos: updatedPhotos }
+          : currentProduct
+      )));
+      setPhotoMessage(successMessage);
+      await loadProducts();
+      return updatedPhotos;
+    } catch (error) {
+      setPhotoMessage("Product photo changes could not be saved.");
+      return null;
+    } finally {
+      setIsUpdatingProductPhoto(false);
+    }
+  };
+
+  const saveProductPhotoAlt = async (product, photo) => {
+    const draftKey = `${product.id}:${photo.path}`;
+    const nextAlt = (photoAltDrafts[draftKey] ?? photo.alt).trim();
+
+    const updatedPhotos = await updateProductPhotoList(product, (latestPhotos) => latestPhotos.map((latestPhoto) => (
+      latestPhoto.path === photo.path
+        ? { ...latestPhoto, alt: nextAlt }
+        : latestPhoto
+    )), "Photo alt text saved.");
+
+    if (!updatedPhotos) {
+      return;
+    }
+
+    setPhotoAltDrafts((currentDrafts) => {
+      const nextDrafts = { ...currentDrafts };
+      delete nextDrafts[draftKey];
+      return nextDrafts;
+    });
+  };
+
+  const moveProductPhoto = async (product, photo, direction) => {
+    await updateProductPhotoList(product, (latestPhotos) => {
+      const photoIndex = latestPhotos.findIndex((latestPhoto) => latestPhoto.path === photo.path);
+      const swapIndex = photoIndex + direction;
+
+      if (photoIndex < 0 || swapIndex < 0 || swapIndex >= latestPhotos.length) {
+        return latestPhotos;
+      }
+
+      const nextPhotos = [...latestPhotos];
+      [nextPhotos[photoIndex], nextPhotos[swapIndex]] = [nextPhotos[swapIndex], nextPhotos[photoIndex]];
+      return nextPhotos;
+    }, "Photo order saved.");
+  };
+
+  const detachProductPhoto = async (product, photo) => {
+    const updatedPhotos = await updateProductPhotoList(product, (latestPhotos) => (
+      latestPhotos.filter((latestPhoto) => latestPhoto.path !== photo.path)
+    ), "Photo detached from this product.");
+
+    if (!photo.mediaAssetId || !updatedPhotos) {
+      return;
+    }
+
+    try {
+      const productsSnapshot = await getDocs(collection(db, "products"));
+      const isUsedByAnotherProduct = productsSnapshot.docs.some((productSnapshot) => {
+        if (productSnapshot.id === product.id) {
+          return false;
+        }
+
+        return normalizePhotos(productSnapshot.data().photos).some((latestPhoto) => (
+          latestPhoto.mediaAssetId === photo.mediaAssetId || latestPhoto.path === photo.path
+        ));
+      });
+
+      if (!isUsedByAnotherProduct) {
+        await runTransaction(db, async (transaction) => {
+          const mediaRef = doc(db, "mediaAssets", photo.mediaAssetId);
+          const mediaSnapshot = await transaction.get(mediaRef);
+          const mediaData = mediaSnapshot.exists() ? mediaSnapshot.data() : {};
+
+          if (mediaData.linkedType && mediaData.linkedType !== "product") {
+            return;
+          }
+
+          if (mediaData.linkedId && mediaData.linkedId !== product.id) {
+            return;
+          }
+
+          transaction.set(mediaRef, {
+            bin: "other",
+            linkedId: "",
+            linkedType: "none",
+            updatedAt: serverTimestamp(),
+          }, { merge: true });
+        });
+        await loadMediaAssets();
+      }
+    } catch (error) {
+      setPhotoMessage("Photo detached, but the media bin could not be refreshed.");
+    }
+  };
+
   const handleCategorySubmit = async (event) => {
     event.preventDefault();
 
@@ -1158,7 +1301,8 @@ export default function ProductAdmin({ db, storage }) {
               {filteredProducts.map((product) => {
                 const isExpanded = expandedProductId === product.id;
                 const isEditing = editingProductId === product.id;
-                const productPhotos = normalizePhotos(product.photos);
+                const productPhotos = normalizePhotos(product.photos)
+                  .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
                 const isPhotoTarget = selectedProductId === product.id;
 
                 return (
@@ -1331,15 +1475,61 @@ export default function ProductAdmin({ db, storage }) {
                           </div>
 
                           <div className="admin_photo_list">
-                            {productPhotos.length ? productPhotos.map((photo) => (
+                            {productPhotos.length ? productPhotos.map((photo, photoIndex) => {
+                              const draftKey = `${product.id}:${photo.path}`;
+                              const draftAlt = photoAltDrafts[draftKey] ?? photo.alt;
+
+                              return (
                               <div className="admin_photo_row" key={photo.path}>
                                 {photoUrlsByPath[photo.path] ? (
                                   <img alt={photo.alt || product.title || photo.path} src={photoUrlsByPath[photo.path]} />
                                 ) : null}
-                                <span>{photo.alt || "No alt text"}</span>
+                                <label className="admin_photo_alt_field">
+                                  Alt Text
+                                  <input
+                                    disabled={isUpdatingProductPhoto}
+                                    onChange={(event) => updatePhotoAltDraft(product.id, photo.path, event.target.value)}
+                                    value={draftAlt}
+                                  />
+                                </label>
                                 <small>{photo.path}</small>
+                                <div className="admin_photo_actions">
+                                  <button
+                                    className="admin_secondary_button"
+                                    disabled={isUpdatingProductPhoto || photoIndex === 0}
+                                    onClick={() => moveProductPhoto(product, photo, -1)}
+                                    type="button"
+                                  >
+                                    Up
+                                  </button>
+                                  <button
+                                    className="admin_secondary_button"
+                                    disabled={isUpdatingProductPhoto || photoIndex === productPhotos.length - 1}
+                                    onClick={() => moveProductPhoto(product, photo, 1)}
+                                    type="button"
+                                  >
+                                    Down
+                                  </button>
+                                  <button
+                                    className="admin_secondary_button"
+                                    disabled={isUpdatingProductPhoto || draftAlt.trim() === photo.alt}
+                                    onClick={() => saveProductPhotoAlt(product, photo)}
+                                    type="button"
+                                  >
+                                    Save Alt
+                                  </button>
+                                  <button
+                                    className="admin_danger_button"
+                                    disabled={isUpdatingProductPhoto}
+                                    onClick={() => detachProductPhoto(product, photo)}
+                                    type="button"
+                                  >
+                                    Detach
+                                  </button>
+                                </div>
                               </div>
-                            )) : (
+                              );
+                            }) : (
                               <p className="admin_status">No photos attached yet.</p>
                             )}
                           </div>

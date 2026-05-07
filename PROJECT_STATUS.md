@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Media library foundation is in progress on branch `codex/product-image-manifest`.
+Admin media management is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Media library foundation is in progress on branch `codex/product-image-manifest`
 
 ## Current Phase
 
-Phase 19: Media library foundation.
+Phase 20: Product photo management inside admin product cards.
 
 ## Done Work
 
@@ -57,6 +57,7 @@ Phase 19: Media library foundation.
 - Added a guarded Firebase media migration importer on the active branch.
 - Added Storage-backed admin media previews on the active branch.
 - Added collapsible Photos library and product-card attach-from-Other media controls on the active branch.
+- Added product-card controls to edit attached photo alt text, reorder product photos, and detach photos without deleting Storage files on the active branch.
 
 ## In Progress Work
 
@@ -65,6 +66,7 @@ Phase 19: Media library foundation.
 - Review `docs/media-optimization-review.html` before uploading optimized migration images.
 - Verify imported media thumbnails in admin product cards and the Photos library.
 - Verify attaching an existing `other` bin photo to a product updates the product photo refs and media asset link metadata.
+- Verify product photo alt-text edits, reordering, and detach behavior in admin product cards.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
