@@ -61,7 +61,7 @@ Phase 19: Media library foundation.
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
 - Review the zero-blocker media migration dry-run report before any real upload/import.
 - Review `docs/media-optimization-review.html` before uploading optimized migration images.
-- Grant Firebase Storage cross-service rules access to Firestore, then rerun confirmed media import.
+- Verify imported media in Firebase Storage, Firestore `mediaAssets`, and admin product cards.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -113,7 +113,8 @@ Phase 19: Media library foundation.
 - Original admin photo uploads between 10 MB and 25 MB require reviewed/deployed Storage rules before they work live.
 - Media migration importer requires `--confirm` before Firebase writes and signs in with local-only approved admin credentials.
 - `firebase.json` is active for Storage rules only; Firebase Hosting remains outside this config.
-- Confirmed media import now reaches Firebase Storage but is blocked by `storage/unauthorized`; the Storage service agent needs the `Firebase Rules Firestore Service Agent` IAM role for cross-service Firestore checks.
+- Firebase Rules System service agent has the `Firebase Rules Firestore Service Agent` role, allowing Storage rules to check Firestore `adminUsers/{uid}`.
+- Confirmed media import uploaded 20 Storage objects, created 20 `mediaAssets` documents, and attached product photo refs to 11 Firestore products.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
@@ -194,6 +195,8 @@ Phase 19: Media library foundation.
 - 2026-05-07: `npm run import:media-migration -- --confirm` was attempted with approved network access. Firebase Auth succeeded, but the first Storage upload returned `404 Not Found`; no Firestore writes ran in the importer before this failure.
 - 2026-05-07: `npx firebase-tools deploy --only storage --project calabash-54fb5` deployed `storage.rules`.
 - 2026-05-07: Confirmed media import was retried after Storage rules deploy and failed on the first upload with `storage/unauthorized`; no Firestore writes ran.
+- 2026-05-07: Luke granted the Firebase Rules System service agent the `Firebase Rules Firestore Service Agent` role.
+- 2026-05-07: `npm run import:media-migration -- --confirm` completed successfully: 20 files uploaded, 20 `mediaAssets` documents created, 11 product targets updated, and 0 targets skipped.
 
 ## Commits
 
