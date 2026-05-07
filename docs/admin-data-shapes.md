@@ -47,6 +47,7 @@ products/{productSlugOrStableId}
 Required fields:
 
 - `title`: string.
+- `category`: string. Must match a document ID in `productCategories`.
 - `priceOptions`: array of price option objects.
 - `shipping`: string decimal value, matching current cart behavior.
 - `published`: boolean.
@@ -56,7 +57,6 @@ Required fields:
 
 Optional fields:
 
-- `category`: string. Some current products omit this value.
 - `info`: string.
 - `info1`: string.
 - `info2`: string.
@@ -74,7 +74,7 @@ Price option shape:
 
 Current compatibility notes:
 
-- Category must remain optional during migration unless Luke approves a default category.
+- Some current products omit category in static data. Firestore product docs created through admin must use an approved `productCategories` ID.
 - Some current product price options only contain `price` and no `option`.
 - Current prices and shipping values are strings, not numbers.
 - Current product keys are generated from title with `createKey`; future IDs should be stable even if title changes.
@@ -82,11 +82,44 @@ Current compatibility notes:
 
 Editor controls:
 
-- Text inputs for title, category, description fields, shipping, and option labels.
+- Text inputs for title, description fields, shipping, and option labels.
+- Category dropdown populated from admin-managed `productCategories`.
 - Decimal text input for prices until checkout math is refactored safely.
 - Toggles for published, active, highlighted, and in-stock flags.
 - Image selector/uploader only after Storage rules and image workflow are approved.
 - The first product editor writes Firestore product drafts only; it does not update public static product data.
+
+## Product Categories
+
+Collection: `productCategories`
+
+Suggested document ID:
+
+```text
+productCategories/{categorySlug}
+```
+
+Required fields:
+
+- `name`: string.
+- `active`: boolean.
+
+Optional fields:
+
+- `sortOrder`: number or null.
+
+Editor controls:
+
+- Text input for category name.
+- Stable document ID generated from the category name when creating.
+- Toggle for active/inactive.
+
+Current compatibility notes:
+
+- Current static product categories include values such as `Saffron`.
+- Some current products omit category; seeded Firestore products must either use an approved category or wait for a migration decision.
+- Product writes require a category ID that exists in this collection.
+- The product editor uses this collection for its category dropdown and validation.
 
 ## Events
 

@@ -51,6 +51,8 @@ Minimum fields:
 - The shell signs in with Firebase Auth.
 - The shell reads `adminUsers/{uid}` to confirm `active: true`.
 - Approved admins can create and update Firestore product drafts.
+- Approved admins can create and update product categories in Firestore.
+- Product drafts must use a category from `productCategories`.
 - Event, site content, inventory, image, and checkout editors are not connected yet.
 - Public product pages still read static product data.
 

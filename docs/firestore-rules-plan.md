@@ -31,6 +31,7 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 
 - `adminUsers`: signed-in users can read their own record; admins can read and manage admin records.
 - `products`: admin reads and writes only until public backend reads are approved.
+- `productCategories`: admin reads and writes only; product writes require an existing category document ID.
 - `events`: admin reads and writes only until public backend reads are approved.
 - `siteContent`: admin reads and writes only until public backend reads are approved.
 - `inventory`: admin-only reads and writes.

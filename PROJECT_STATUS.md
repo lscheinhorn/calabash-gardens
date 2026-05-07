@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin product editor is in progress on branch `codex/admin-product-editor`.
+Admin product categories and validation are in progress on branch `codex/admin-product-categories-validation`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin product editor is in progress on branch `codex/admin-product-editor`.
 
 ## Current Phase
 
-Phase 12: Admin product editor.
+Phase 13: Admin product categories and validation.
 
 ## Done Work
 
@@ -59,6 +59,7 @@ Phase 12: Admin product editor.
 - Merged Storage rules planning into `main`.
 - Merged admin data-shape planning into `main`.
 - Merged Firestore rules/data-shape alignment into `main`.
+- Merged admin product editor into `main`.
 
 ## Planned Work
 
@@ -71,8 +72,10 @@ Phase 12: Admin product editor.
 - Review checkout/order confirmation requirements.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
-- Review admin product editor before merge.
+- Review admin product categories and validation before merge.
 - Test `/admin` with Firebase env values and an approved admin user.
+- Add product photo upload after category validation is reviewed.
+- Seed current products into Firestore after category strategy is reviewed.
 - Plan seed/export strategy before backend content reads.
 
 ## Bugs
@@ -95,6 +98,7 @@ Phase 12: Admin product editor.
 - Admin data-shape contract is a planning document and is not a migration.
 - Draft Firestore rules are aligned with the data-shape contract but are still not deployed.
 - Product editor requires Firebase env values, deployed/reviewed rules, and an approved admin record for real testing.
+- Product writes require approved `productCategories` records.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -121,6 +125,7 @@ Phase 12: Admin product editor.
 - Admin editor forms must follow the documented data shapes unless Luke approves a change.
 - Firestore validators must be rechecked whenever editor fields change.
 - Admin product editor must not edit static product resource files.
+- Product category choices must come from `productCategories`; no free-typed categories in product forms.
 
 ## Verification History
 
@@ -147,7 +152,8 @@ Phase 12: Admin product editor.
 - `48f1e1d docs: draft storage rules`
 - `3284b98 docs: define admin data shapes`
 - `17639d0 docs: align firestore rules with data shapes`
-- Pending commit for admin product editor.
+- `2462ddb feat: add admin product editor`
+- Pending commit for admin product categories and validation.
 
 ## Deployments
 

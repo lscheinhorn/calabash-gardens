@@ -68,6 +68,7 @@
 }
 
 .admin_form input,
+.admin_form select,
 .admin_form textarea {
   border: 1px solid #b8a9c1;
   border-radius: 4px;
