@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin product card UI is in progress on branch `codex/admin-product-card-ui`.
+Admin product card UI is merged into `main` and deployed for live admin testing.
 
 ## Approved Tech Stack
 
@@ -48,10 +48,12 @@ Phase 17: Admin product card UI.
 - Added admin product seed/import foundation on the active admin branch.
 - Moved admin product photo upload and attached-photo display into expanded product cards on the active admin branch.
 - Replaced admin collapse/expand text controls with compact arrow controls on the active admin branch.
+- Merged and deployed admin product card UI for `/admin` testing.
 
 ## In Progress Work
 
-- Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload before merge review.
+- Luke and Jette need to test the live `/admin` login and provide feedback.
+- Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
 - Use subagents to review implementation scope and guardrail compliance.
 
 ## Planned Work
@@ -66,7 +68,6 @@ Phase 17: Admin product card UI.
 - Review accessibility, mobile layout, and content polish.
 - Approve backend stack and first implementation phase.
 - Test `/admin` with Firebase env values and an approved admin user.
-- Review admin product photo upload before merge.
 - Plan CSV import/export UI after the seed validator is reviewed.
 - Plan backend product reads after seeded data is reviewed.
 - Plan project-directory product image migration with a dry-run manifest before uploading existing static images.
@@ -150,6 +151,8 @@ Phase 17: Admin product card UI.
 - 2026-05-07: `npm run build` completed successfully after admin product card UI, with the same existing warnings.
 - 2026-05-07: `npm run build` completed successfully after moving product photo upload into product cards, with the same existing warnings.
 - 2026-05-07: `npm run build` completed successfully after admin collapse arrow UI polish, with the same existing warnings.
+- 2026-05-07: Post-merge `npm run build` completed successfully on `main`, with the same existing warnings.
+- 2026-05-07: `npm run deploy` completed successfully and reported `Published`.
 
 ## Commits
 
@@ -175,8 +178,11 @@ Phase 17: Admin product card UI.
 - `594b0a4 fix: clean apostrophes in admin ids`
 - `6271823 feat: add admin product seed foundation`
 - `a0deec5 feat: preserve gift sets in seed`
-- Pending commit for admin product card UI.
+- `e357186 feat: move product photos into cards`
+- `48a0f55 style: polish admin collapse controls`
+- `1046ec7 merge: admin product card ui`
 
 ## Deployments
 
 - 2026-05-05: Published customer-request fixes with `npm run deploy`.
+- 2026-05-07: Published admin product card UI for live `/admin` testing with `npm run deploy`.
