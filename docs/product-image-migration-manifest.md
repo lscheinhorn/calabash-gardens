@@ -12,28 +12,28 @@ Dry-run only. This file maps current static product image references to proposed
 - Missing source files: 0
 - Unreferenced files in product photo folder: 4
 
-Product IDs use the same slug rule as the admin seed tool. Proposed Storage paths are intentionally stable and do not include timestamps.
+Product IDs and media asset IDs use stable slug rules. Proposed Storage paths are intentionally stable and do not include timestamps.
 
-## Upload Candidates
+## Product Media Asset Candidates
 
-| Product | Product ID | Category | Active | Seed Status | Source File | Proposed Storage Path |
-| --- | --- | --- | --- | --- | --- | --- |
-| Calabash Gifts Set | calabash-gifts-set | Gifts | No | Included in seed | src/resources/images/product_photos/calabash_gifts_set.jpeg | product-images/calabash-gifts-set-01-calabash-gifts-set.jpeg |
-| Calabash Gift Set | calabash-gift-set | Gifts | No | Included in seed | src/resources/images/product_photos/calabash_gift_set.webp | product-images/calabash-gift-set-01-calabash-gift-set.webp |
-| Spa Day Gift Set | spa-day-gift-set | Gifts | No | Included in seed | src/resources/images/product_photos/spa_day_gift_set.webp | product-images/spa-day-gift-set-01-spa-day-gift-set.webp |
-| Erotic Gift Set | erotic-gift-set | Gifts | No | Included in seed | src/resources/images/product_photos/erotic_gift_set.webp | product-images/erotic-gift-set-01-erotic-gift-set.webp |
-| Saffron Maple Syrup | saffron-maple-syrup | Saffron | Yes | Included in seed | src/resources/images/product_photos/saffron_maple_syrup.webp | product-images/saffron-maple-syrup-01-saffron-maple-syrup.webp |
-| Saffron Simple Syrup | saffron-simple-syrup | Saffron | No | Included in seed | src/resources/images/product_photos/saffron_simple_syrup.jpg | product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg |
-| Vermont Grown Saffron | vermont-grown-saffron | Saffron | Yes | Included in seed | src/resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp | product-images/vermont-grown-saffron-01-0.5g-vermont-grown-saffron-1.webp |
-| Vermont Grown Saffron | vermont-grown-saffron | Saffron | Yes | Included in seed | src/resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp | product-images/vermont-grown-saffron-02-0.5g-vermont-grown-saffron-2.webp |
-| Vermont Grown Saffron | vermont-grown-saffron | Saffron | Yes | Included in seed | src/resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp | product-images/vermont-grown-saffron-03-0.5g-vermont-grown-saffron-3.webp |
-| Vermont Grown Saffron | vermont-grown-saffron | Saffron | Yes | Included in seed | src/resources/images/product_photos/1g_vt_grown_saffron.webp | product-images/vermont-grown-saffron-04-1g-vt-grown-saffron.webp |
-| Vermont Grown Saffron | vermont-grown-saffron | Saffron | Yes | Included in seed | src/resources/images/product_photos/2g_vt_grown_saffron_1.webp | product-images/vermont-grown-saffron-05-2g-vt-grown-saffron-1.webp |
-| Vermont Grown Saffron | vermont-grown-saffron | Saffron | Yes | Included in seed | src/resources/images/product_photos/2g_vt_grown_saffron_2.webp | product-images/vermont-grown-saffron-06-2g-vt-grown-saffron-2.webp |
-| Saffron Tincture | saffron-tincture | Saffron | Yes | Included in seed | src/resources/images/product_photos/saffron_tincture.webp | product-images/saffron-tincture-01-saffron-tincture.webp |
-| The Heart and Head 1/2 oz Loose Leaf Tea | the-heart-and-head-1-2-oz-loose-leaf-tea | Loose Leaf Tea | Yes | Included in seed | src/resources/images/product_photos/the_heart_and_the_head.jpg | product-images/the-heart-and-head-1-2-oz-loose-leaf-tea-01-the-heart-and-the-head.jpg |
-| Ageless Beauty Butter | ageless-beauty-butter | Body Care | Yes | Included in seed | src/resources/images/product_photos/ageless_beauty_body_butter.jpg | product-images/ageless-beauty-butter-01-ageless-beauty-body-butter.jpg |
-| Cold and Flu | cold-and-flu | Tinctures | Yes | Included in seed | src/resources/images/product_photos/cold_and_flu.jpg | product-images/cold-and-flu-01-cold-and-flu.jpg |
+| Media Asset ID | Title | Bin | Linked Type | Linked ID | Status | Alt | Tags | Source File | Proposed Storage Path |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| product-calabash-gifts-set-01 | Calabash Gifts Set | products | product | calabash-gifts-set | active |  | product, gifts, calabash-gifts-set | src/resources/images/product_photos/calabash_gifts_set.jpeg | product-images/calabash-gifts-set-01-calabash-gifts-set.jpeg |
+| product-calabash-gift-set-01 | Calabash Gift Set | products | product | calabash-gift-set | active |  | product, gifts, calabash-gift-set | src/resources/images/product_photos/calabash_gift_set.webp | product-images/calabash-gift-set-01-calabash-gift-set.webp |
+| product-spa-day-gift-set-01 | Spa Day Gift Set | products | product | spa-day-gift-set | active |  | product, gifts, spa-day-gift-set | src/resources/images/product_photos/spa_day_gift_set.webp | product-images/spa-day-gift-set-01-spa-day-gift-set.webp |
+| product-erotic-gift-set-01 | Erotic Gift Set | products | product | erotic-gift-set | active |  | product, gifts, erotic-gift-set | src/resources/images/product_photos/erotic_gift_set.webp | product-images/erotic-gift-set-01-erotic-gift-set.webp |
+| product-saffron-maple-syrup-01 | Saffron Maple Syrup | products | product | saffron-maple-syrup | active |  | product, saffron, saffron-maple-syrup | src/resources/images/product_photos/saffron_maple_syrup.webp | product-images/saffron-maple-syrup-01-saffron-maple-syrup.webp |
+| product-saffron-simple-syrup-01 | Saffron Simple Syrup | products | product | saffron-simple-syrup | active |  | product, saffron, saffron-simple-syrup | src/resources/images/product_photos/saffron_simple_syrup.jpg | product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg |
+| product-vermont-grown-saffron-01 | Vermont Grown Saffron | products | product | vermont-grown-saffron | active |  | product, saffron, vermont-grown-saffron | src/resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp | product-images/vermont-grown-saffron-01-0.5g-vermont-grown-saffron-1.webp |
+| product-vermont-grown-saffron-02 | Vermont Grown Saffron | products | product | vermont-grown-saffron | active |  | product, saffron, vermont-grown-saffron | src/resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp | product-images/vermont-grown-saffron-02-0.5g-vermont-grown-saffron-2.webp |
+| product-vermont-grown-saffron-03 | Vermont Grown Saffron | products | product | vermont-grown-saffron | active |  | product, saffron, vermont-grown-saffron | src/resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp | product-images/vermont-grown-saffron-03-0.5g-vermont-grown-saffron-3.webp |
+| product-vermont-grown-saffron-04 | Vermont Grown Saffron | products | product | vermont-grown-saffron | active |  | product, saffron, vermont-grown-saffron | src/resources/images/product_photos/1g_vt_grown_saffron.webp | product-images/vermont-grown-saffron-04-1g-vt-grown-saffron.webp |
+| product-vermont-grown-saffron-05 | Vermont Grown Saffron | products | product | vermont-grown-saffron | active |  | product, saffron, vermont-grown-saffron | src/resources/images/product_photos/2g_vt_grown_saffron_1.webp | product-images/vermont-grown-saffron-05-2g-vt-grown-saffron-1.webp |
+| product-vermont-grown-saffron-06 | Vermont Grown Saffron | products | product | vermont-grown-saffron | active |  | product, saffron, vermont-grown-saffron | src/resources/images/product_photos/2g_vt_grown_saffron_2.webp | product-images/vermont-grown-saffron-06-2g-vt-grown-saffron-2.webp |
+| product-saffron-tincture-01 | Saffron Tincture | products | product | saffron-tincture | active |  | product, saffron, saffron-tincture | src/resources/images/product_photos/saffron_tincture.webp | product-images/saffron-tincture-01-saffron-tincture.webp |
+| product-the-heart-and-head-1-2-oz-loose-leaf-tea-01 | The Heart and Head 1/2 oz Loose Leaf Tea | products | product | the-heart-and-head-1-2-oz-loose-leaf-tea | active |  | product, loose-leaf-tea, the-heart-and-head-1-2-oz-loose-leaf-tea | src/resources/images/product_photos/the_heart_and_the_head.jpg | product-images/the-heart-and-head-1-2-oz-loose-leaf-tea-01-the-heart-and-the-head.jpg |
+| product-ageless-beauty-butter-01 | Ageless Beauty Butter | products | product | ageless-beauty-butter | active |  | product, body-care, ageless-beauty-butter | src/resources/images/product_photos/ageless_beauty_body_butter.jpg | product-images/ageless-beauty-butter-01-ageless-beauty-body-butter.jpg |
+| product-cold-and-flu-01 | Cold and Flu | products | product | cold-and-flu | active |  | product, tinctures, cold-and-flu | src/resources/images/product_photos/cold_and_flu.jpg | product-images/cold-and-flu-01-cold-and-flu.jpg |
 
 ## Skipped Default Placeholders
 
@@ -104,14 +104,16 @@ These products currently point at the shared Calabash logo placeholder. They sho
 | Dream Weaver 1/2 oz | dream-weaver-1-2-oz | Ritual Smoking Blends | Yes | Included in seed | src/resources/images/large_logo_no_purple_square.png |
 | Original Blend 1/2 oz | original-blend-1-2-oz | Ritual Smoking Blends | Yes | Included in seed | src/resources/images/large_logo_no_purple_square.png |
 
-## Unreferenced Product Photo Files
+## Other Media Asset Candidates
 
-These files exist under `src/resources/images/product_photos/` but are not referenced by `src/resources/products.js` product photos. Do not delete or migrate them without separate review.
+These files exist under `src/resources/images/product_photos/` but are not referenced by `src/resources/products.js` product photos. They should migrate to the `other` bin as a holding area only after review.
 
-- src/resources/images/product_photos/IMG-1785.jpg
-- src/resources/images/product_photos/IMG-2623.JPG
-- src/resources/images/product_photos/event_night.jpg
-- src/resources/images/product_photos/saffron_tin.jpg
+| Media Asset ID | Title | Bin | Linked Type | Linked ID | Status | Alt | Tags | Source File | Proposed Storage Path |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| other-img-1785 | IMG 1785 | other | none |  | active |  | other, needs-review | src/resources/images/product_photos/IMG-1785.jpg | other-images/img-1785.jpg |
+| other-img-2623 | IMG 2623 | other | none |  | active |  | other, needs-review | src/resources/images/product_photos/IMG-2623.JPG | other-images/img-2623.jpg |
+| other-event-night | event night | other | none |  | active |  | other, needs-review | src/resources/images/product_photos/event_night.jpg | other-images/event-night.jpg |
+| other-saffron-tin | saffron tin | other | none |  | active |  | other, needs-review | src/resources/images/product_photos/saffron_tin.jpg | other-images/saffron-tin.jpg |
 
 ## Next Approval Gate
 

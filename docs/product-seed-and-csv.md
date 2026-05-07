@@ -39,6 +39,7 @@ The manifest is review-only:
 - it skips the shared default logo placeholder
 - it proposes deterministic flat Storage paths under `product-images/`
 - it lists unreferenced files in `src/resources/images/product_photos/`
+- it proposes `mediaAssets` metadata for product images and `other` bin candidates
 
 Do not build an upload phase until Luke approves the manifest decisions listed at the bottom of that file.
 

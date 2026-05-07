@@ -58,6 +58,7 @@ Minimum fields:
 - Firestore products show as collapsible admin cards with filters for search, category, published state, active state, and stock state.
 - Existing Firestore products edit inline from their product card; the New Product form is only for creating products.
 - Approved admins can upload product photos from an expanded product card to Firebase Storage and attach image references to Firestore product drafts.
+- Approved admins can view, filter, and edit media metadata in the Photos section.
 - Approved admins can validate and seed missing static products into Firestore drafts.
 - Event, site content, inventory, and checkout editors are not connected yet.
 - Public product pages still read static product data.

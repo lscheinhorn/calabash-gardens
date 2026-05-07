@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Product image migration dry-run manifest is in progress on branch `codex/product-image-manifest`.
+Media library foundation is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Product image migration dry-run manifest is in progress on branch `codex/product
 
 ## Current Phase
 
-Phase 18: Product image migration dry-run manifest.
+Phase 19: Media library foundation.
 
 ## Done Work
 
@@ -50,9 +50,11 @@ Phase 18: Product image migration dry-run manifest.
 - Replaced admin collapse/expand text controls with compact arrow controls on the active admin branch.
 - Merged and deployed admin product card UI for `/admin` testing.
 - Added a dry-run product image migration manifest generator on the active branch.
+- Added the admin media library foundation on the active branch.
 
 ## In Progress Work
 
+- Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -97,6 +99,8 @@ Phase 18: Product image migration dry-run manifest.
 - Product writes require approved `productCategories` records.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
 - Product image migration dry run found many shared default-logo placeholders; those should not be uploaded as individual product photos without approval.
+- Media library metadata can organize photos by bin and tags, but actual upload migration is still not connected.
+- Media asset rules validate `tags` as a list; admin UI normalizes tags to strings before writing.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
@@ -138,6 +142,7 @@ Phase 18: Product image migration dry-run manifest.
 - Existing Firestore product photos should be uploaded and reviewed from the expanded product card.
 - Project-directory product image migration must be planned as a separate dry-run manifest before uploading.
 - Product image migration dry run must not upload files, write Firestore data, or edit protected static resource files.
+- Media bins are Firestore metadata only; moving a media item between bins does not move the Storage object.
 - Product categories must come from the approved category list: Body Care, Culinary, Gifts, Loose Leaf Tea, Mambo Gede, Ritual Smoking Blends, Saffron, and Tinctures.
 - Gifts is reserved for the preserved legacy gift-set product IDs and should not be used for newly created products.
 - Product categories have active/inactive status; new products can use active categories only.
@@ -159,6 +164,8 @@ Phase 18: Product image migration dry-run manifest.
 - 2026-05-07: `npm run deploy` completed successfully and reported `Published`.
 - 2026-05-07: `npm run manifest:product-images` generated a dry-run manifest with 16 upload candidates, 62 skipped default placeholders, 0 missing source files, and 4 unreferenced product photo files.
 - 2026-05-07: `npm run build` completed successfully after adding the product image manifest generator, with the same existing warnings.
+- 2026-05-07: `npm run manifest:product-images` regenerated the media asset manifest with product and other-bin metadata candidates.
+- 2026-05-07: `npm run build` completed successfully after adding the media library foundation, with the same existing warnings.
 
 ## Commits
 

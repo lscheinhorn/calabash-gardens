@@ -36,6 +36,40 @@ const escapeMarkdown = (value) => String(value || "").replace(/\|/g, "\\|");
 
 const stripLineComments = (source) => source.replace(/^\s*\/\/.*$/gm, "");
 
+const removeExtension = (fileName) => fileName.replace(/\.[^.]+$/, "");
+
+const categoryTag = (category) => slugify(category || "uncategorized");
+
+const buildProductMediaAsset = (row) => ({
+  mediaAssetId: `product-${row.productId}-${String(row.photoIndex + 1).padStart(2, "0")}`,
+  bin: "products",
+  tags: ["product", categoryTag(row.category), row.productId],
+  linkedType: "product",
+  linkedId: row.productId,
+  title: row.title,
+  alt: "",
+  status: "active",
+  storagePath: row.proposedStoragePath,
+});
+
+const buildOtherMediaAsset = (sourcePath, index) => {
+  const fileName = path.basename(sourcePath);
+  const sourceSlug = slugify(removeExtension(fileName));
+
+  return {
+    mediaAssetId: `other-${sourceSlug || String(index + 1).padStart(2, "0")}`,
+    bin: "other",
+    tags: ["other", "needs-review"],
+    linkedType: "none",
+    linkedId: "",
+    title: removeExtension(fileName).replace(/[-_]+/g, " ").trim() || fileName,
+    alt: "",
+    status: "active",
+    sourcePath,
+    storagePath: `other-images/${safeFileName(fileName)}`,
+  };
+};
+
 const readStringLiteral = (source, startIndex) => {
   const quote = source[startIndex];
   let value = "";
@@ -247,6 +281,7 @@ const buildMarkdown = (rows) => {
   const skippedRows = rows.filter((row) => row.action !== "candidate");
   const missingRows = rows.filter((row) => !row.sourceExists);
   const unreferencedFiles = listUnreferencedProductPhotos(rows);
+  const otherRows = unreferencedFiles.map(buildOtherMediaAsset);
   const now = new Date().toISOString().slice(0, 10);
   const lines = [
     "# Product Image Migration Manifest",
@@ -263,23 +298,28 @@ const buildMarkdown = (rows) => {
     `- Missing source files: ${missingRows.length}`,
     `- Unreferenced files in product photo folder: ${unreferencedFiles.length}`,
     "",
-    "Product IDs use the same slug rule as the admin seed tool. Proposed Storage paths are intentionally stable and do not include timestamps.",
+    "Product IDs and media asset IDs use stable slug rules. Proposed Storage paths are intentionally stable and do not include timestamps.",
     "",
-    "## Upload Candidates",
+    "## Product Media Asset Candidates",
     "",
-    "| Product | Product ID | Category | Active | Seed Status | Source File | Proposed Storage Path |",
-    "| --- | --- | --- | --- | --- | --- | --- |",
+    "| Media Asset ID | Title | Bin | Linked Type | Linked ID | Status | Alt | Tags | Source File | Proposed Storage Path |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
   ];
 
   candidateRows.forEach((row) => {
+    const mediaAsset = buildProductMediaAsset(row);
+
     lines.push([
-      escapeMarkdown(row.title),
-      row.productId,
-      escapeMarkdown(row.category || "Uncategorized"),
-      row.isActive === true ? "Yes" : "No",
-      row.excludedFromSeed ? "Excluded from seed" : "Included in seed",
+      mediaAsset.mediaAssetId,
+      escapeMarkdown(mediaAsset.title),
+      mediaAsset.bin,
+      mediaAsset.linkedType,
+      mediaAsset.linkedId,
+      mediaAsset.status,
+      escapeMarkdown(mediaAsset.alt || ""),
+      mediaAsset.tags.join(", "),
       row.sourceExists ? row.sourcePath : `${row.sourcePath} (missing)`,
-      row.proposedStoragePath,
+      mediaAsset.storagePath,
     ].join(" | ").replace(/^/, "| ").replace(/$/, " |"));
   });
 
@@ -306,18 +346,31 @@ const buildMarkdown = (rows) => {
 
   lines.push(
     "",
-    "## Unreferenced Product Photo Files",
+    "## Other Media Asset Candidates",
     "",
-    "These files exist under `src/resources/images/product_photos/` but are not referenced by `src/resources/products.js` product photos. Do not delete or migrate them without separate review.",
+    "These files exist under `src/resources/images/product_photos/` but are not referenced by `src/resources/products.js` product photos. They should migrate to the `other` bin as a holding area only after review.",
     "",
+    "| Media Asset ID | Title | Bin | Linked Type | Linked ID | Status | Alt | Tags | Source File | Proposed Storage Path |",
+    "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
   );
 
-  if (unreferencedFiles.length) {
-    unreferencedFiles.forEach((sourcePath) => {
-      lines.push(`- ${sourcePath}`);
+  if (otherRows.length) {
+    otherRows.forEach((row) => {
+      lines.push([
+        row.mediaAssetId,
+        escapeMarkdown(row.title),
+        row.bin,
+        row.linkedType,
+        row.linkedId,
+        row.status,
+        escapeMarkdown(row.alt || ""),
+        row.tags.join(", "),
+        row.sourcePath,
+        row.storagePath,
+      ].join(" | ").replace(/^/, "| ").replace(/$/, " |"));
     });
   } else {
-    lines.push("- None");
+    lines.push("| None |  |  |  |  |  |  |  |  |  |");
   }
 
   lines.push(

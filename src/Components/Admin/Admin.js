@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
+import MediaAdmin from "./MediaAdmin";
 import ProductAdmin from "./ProductAdmin";
 
 const adminCollection = "adminUsers";
@@ -150,6 +151,7 @@ export default function Admin() {
             <p>Editor not connected yet.</p>
           </div>
         </div>
+        <MediaAdmin db={db} />
         <ProductAdmin db={db} storage={storage} />
       </div>
     );

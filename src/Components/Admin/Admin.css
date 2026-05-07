@@ -376,6 +376,28 @@
   overflow-wrap: anywhere;
 }
 
+.admin_media_filters {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin_media_grid {
+  display: grid;
+  gap: 10px;
+}
+
+.admin_media_card {
+  background: #ffffff;
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.admin_media_details {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .admin_seed_summary {
   background: #f9f8fa;
   border: 1px solid #e5deea;
@@ -412,6 +434,8 @@
 
   .admin_editor_grid,
   .admin_filter_grid,
+  .admin_media_filters,
+  .admin_media_details,
   .admin_product_details,
   .admin_split_fields,
   .admin_checkbox_grid {

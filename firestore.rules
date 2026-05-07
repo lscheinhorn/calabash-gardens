@@ -149,6 +149,57 @@ service cloud.firestore {
         && request.resource.data.stock is number;
     }
 
+    function validMediaBin(bin) {
+      return bin in ['products', 'events', 'site', 'other'];
+    }
+
+    function validMediaStatus(status) {
+      return status in ['active', 'archived'];
+    }
+
+    function validMediaLinkedType(linkedType) {
+      return linkedType in ['product', 'event', 'site', 'none'];
+    }
+
+    function validMediaAsset() {
+      return hasOnlyAllowedKeys([
+          'alt',
+          'bin',
+          'contentType',
+          'createdAt',
+          'linkedId',
+          'linkedType',
+          'size',
+          'source',
+          'sourcePath',
+          'status',
+          'storagePath',
+          'tags',
+          'title',
+          'updatedAt',
+          'uploadedBy'
+        ])
+        && hasRequiredKeys(['alt', 'bin', 'linkedId', 'linkedType', 'status', 'storagePath', 'tags', 'title'])
+        && request.resource.data.alt is string
+        && request.resource.data.bin is string
+        && validMediaBin(request.resource.data.bin)
+        && request.resource.data.linkedId is string
+        && request.resource.data.linkedType is string
+        && validMediaLinkedType(request.resource.data.linkedType)
+        && request.resource.data.status is string
+        && validMediaStatus(request.resource.data.status)
+        && request.resource.data.storagePath is string
+        && request.resource.data.tags is list
+        && request.resource.data.title is string
+        && (!('contentType' in request.resource.data) || request.resource.data.contentType is string)
+        && (!('size' in request.resource.data) || request.resource.data.size is number || request.resource.data.size == null)
+        && (!('source' in request.resource.data) || request.resource.data.source is string)
+        && (!('sourcePath' in request.resource.data) || request.resource.data.sourcePath is string)
+        && (!('uploadedBy' in request.resource.data) || request.resource.data.uploadedBy is string)
+        && (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp)
+        && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
+    }
+
     match /adminUsers/{userId} {
       allow get: if (signedIn() && request.auth.uid == userId) || isAdmin();
       allow list: if isAdmin();
@@ -189,6 +240,12 @@ service cloud.firestore {
     match /orders/{orderId} {
       allow get, list: if isAdmin();
       allow create, update, delete: if false;
+    }
+
+    match /mediaAssets/{mediaAssetId} {
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validMediaAsset();
+      allow delete: if isAdmin();
     }
 
     match /{document=**} {

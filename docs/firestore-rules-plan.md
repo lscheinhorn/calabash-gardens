@@ -35,6 +35,7 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 - `events`: admin reads and writes only until public backend reads are approved.
 - `siteContent`: admin reads and writes only until public backend reads are approved.
 - `inventory`: admin-only reads and writes.
+- `mediaAssets`: admin reads and writes only; stores image metadata, tags, bins, and link targets.
 - `orders`: admin reads only; client writes are denied until checkout/order persistence is designed.
 - Everything else is denied by default.
 
@@ -51,6 +52,7 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 - Public reads for `products`, `events`, and `siteContent` are intentionally disabled in the current draft. When public backend reads are approved, list queries must be constrained to the public-read fields; Firestore rules do not filter unsafe query results after the fact.
 - Roles are stored but not enforced yet. Any active admin can manage other admin records in this draft.
 - Product, event, site content, and inventory writes use collection-specific validators aligned to `docs/admin-data-shapes.md`.
+- Media asset writes use a collection-specific validator aligned to the media library contract in `docs/admin-data-shapes.md`.
 - Product and product category writes are constrained to the approved product category IDs.
 - `gifts` is an approved category document ID, but product writes can use it only for the preserved legacy gift-set product IDs.
 - Product, event, and content deletes are currently admin-allowed in the draft. The UI may still choose to deactivate instead of delete.

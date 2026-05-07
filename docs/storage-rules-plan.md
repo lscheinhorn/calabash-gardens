@@ -20,8 +20,10 @@ Approved admins can upload images to public image folders:
 - `product-images/{fileName}`
 - `event-images/{fileName}`
 - `site-content-images/{fileName}`
+- `other-images/{fileName}`
 
 Objects in those folders are publicly readable so product, event, and site content images can render on the public site after a future backend-read phase. Public listing is denied.
+The `other-images` folder is a holding area for reviewed admin media that is not yet linked to products, events, or site content.
 
 Admin-private files can be stored at:
 

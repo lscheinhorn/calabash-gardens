@@ -34,6 +34,62 @@ Use storage paths or URLs for future backend images. Do not store JavaScript `re
 
 Firestore rules use collection-specific validators for these shapes. Before any editor writes are enabled, review the exact final form fields against `firestore.rules`.
 
+## Media Assets
+
+Collection: `mediaAssets`
+
+Suggested document ID:
+
+```text
+mediaAssets/{stableMediaAssetId}
+```
+
+Required fields:
+
+- `title`: string.
+- `alt`: string.
+- `bin`: string. Must be one of `products`, `events`, `site`, or `other`.
+- `tags`: array of strings.
+- `storagePath`: string.
+- `linkedType`: string. Must be one of `product`, `event`, `site`, or `none`.
+- `linkedId`: string. Empty string when `linkedType` is `none`.
+- `status`: string. Must be `active` or `archived`.
+
+Optional fields:
+
+- `contentType`: string.
+- `size`: number.
+- `source`: string, such as `static-product-photo-migration`.
+- `sourcePath`: string, for migration traceability only.
+- `uploadedBy`: string admin user ID.
+- `createdAt`: server timestamp.
+- `updatedAt`: server timestamp.
+
+Media asset shape:
+
+```json
+{
+  "title": "Vermont Grown Saffron",
+  "alt": "",
+  "bin": "products",
+  "tags": ["product", "saffron", "vermont-grown-saffron"],
+  "storagePath": "product-images/vermont-grown-saffron-01-0.5g-vermont-grown-saffron-1.webp",
+  "linkedType": "product",
+  "linkedId": "vermont-grown-saffron",
+  "status": "active",
+  "source": "static-product-photo-migration",
+  "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp"
+}
+```
+
+Current media library notes:
+
+- The admin Photos section edits Firestore media metadata only.
+- Upload controls and migration writes are not connected yet.
+- Moving a photo between bins changes Firestore metadata only; it does not move Storage files.
+- The `other` bin is a holding area for images that need review before they are linked to products, events, or site content.
+- Public storefront pages still do not read `mediaAssets`.
+
 ## Products
 
 Collection: `products`
@@ -99,7 +155,8 @@ Product image reference shape:
 {
   "path": "product-images/vermont-grown-saffron-1710000000000-jar.webp",
   "alt": "Small jar of saffron",
-  "sortOrder": 0
+  "sortOrder": 0,
+  "mediaAssetId": "product-vermont-grown-saffron-01"
 }
 ```
 

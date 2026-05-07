@@ -101,6 +101,7 @@ const normalizePhotos = (photos) => {
       return {
         path: photo.path,
         alt: photo.alt || "",
+        mediaAssetId: photo.mediaAssetId || "",
         sortOrder: Number.isInteger(photo.sortOrder) ? photo.sortOrder : index,
       };
     })
