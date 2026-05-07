@@ -88,6 +88,8 @@ npm run import:media-migration -- --confirm
 The importer uses the normal Firebase client SDK and signs in as an approved admin, so Firestore and Storage rules still apply. It uploads missing Storage objects, creates missing `mediaAssets` documents, and appends missing product photo references without replacing existing product photos.
 It skips Storage objects, `mediaAssets` documents, and product photo refs that already exist.
 
+If the confirmed importer fails on the first Storage upload with `404 Not Found`, check Firebase Console for the project Storage setup. Firebase Storage must be enabled and available for the configured bucket before media upload migration can run.
+
 ## Required Validation
 
 The seed must block writes when:

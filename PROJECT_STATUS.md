@@ -62,6 +62,7 @@ Phase 19: Media library foundation.
 - Review the zero-blocker media migration dry-run report before any real upload/import.
 - Review `docs/media-optimization-review.html` before uploading optimized migration images.
 - Run `npm run import:media-migration` as a no-write importer check before any confirmed upload/import.
+- Firebase Storage must be enabled/available for project `calabash-54fb5` before the confirmed media import can complete.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -112,6 +113,7 @@ Phase 19: Media library foundation.
 - Admin product photo upload treats 10 MB as the performance threshold and 25 MB as the draft hard cap for rare original-upload overrides.
 - Original admin photo uploads between 10 MB and 25 MB require reviewed/deployed Storage rules before they work live.
 - Media migration importer requires `--confirm` before Firebase writes and signs in with local-only approved admin credentials.
+- Confirmed media import currently reaches Firebase Auth but Firebase Storage upload returns `404 Not Found` for the configured bucket.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
@@ -189,6 +191,7 @@ Phase 19: Media library foundation.
 - 2026-05-07: `npm run build` completed successfully after adding media migration asset preparation, with the same existing warnings.
 - 2026-05-07: `npm run review:media-optimization` generated a local side-by-side HTML review for optimized migration images.
 - 2026-05-07: `npm run import:media-migration` printed the guarded importer dry-run plan with no Firebase writes.
+- 2026-05-07: `npm run import:media-migration -- --confirm` was attempted with approved network access. Firebase Auth succeeded, but the first Storage upload returned `404 Not Found`; no Firestore writes ran in the importer before this failure.
 
 ## Commits
 
