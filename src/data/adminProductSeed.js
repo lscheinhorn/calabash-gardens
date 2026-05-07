@@ -1,6 +1,7 @@
 import { products as staticProducts } from "../resources/products";
 
 const decimalPattern = /^\d+\.\d{2}$/;
+const giftCategoryName = "Gifts";
 
 export const seedSlugify = (value) =>
   String(value || "")
@@ -14,6 +15,21 @@ const normalizeCategoryName = (category) => (
   category && String(category).trim() ? String(category).trim() : ""
 );
 
+const resolveCategoryName = (product) => {
+  const categoryName = normalizeCategoryName(product?.category);
+  const title = String(product?.title || "");
+
+  if (categoryName) {
+    return categoryName;
+  }
+
+  if (/\bgifts?\s+set\b|\bgift\s+set\b/i.test(title)) {
+    return giftCategoryName;
+  }
+
+  return "";
+};
+
 const normalizePriceOptions = (priceOptions) => (
   Array.isArray(priceOptions) ? priceOptions : []
 ).map((priceOption) => ({
@@ -24,7 +40,7 @@ const normalizePriceOptions = (priceOptions) => (
 const normalizeStaticProduct = (product, index) => {
   const title = String(product?.title || "").trim();
   const id = seedSlugify(title);
-  const categoryName = normalizeCategoryName(product?.category);
+  const categoryName = resolveCategoryName(product);
   const category = seedSlugify(categoryName);
 
   return {
@@ -115,7 +131,7 @@ export const buildProductSeed = () => {
       errors.push(`${productLabel}: Product ID "${product.id}" is duplicated.`);
     }
 
-    if (!product.source.category) {
+    if (!product.source.category && product.data.category !== seedSlugify(giftCategoryName)) {
       errors.push(`${productLabel}: Missing category; approve a category mapping before seeding.`);
     }
 
@@ -123,7 +139,7 @@ export const buildProductSeed = () => {
       categoryMap.set(product.data.category, {
         id: product.data.category,
         data: {
-          name: normalizeCategoryName(product.source.category),
+          name: resolveCategoryName(product.source),
           active: true,
           sortOrder: categoryMap.size,
         },

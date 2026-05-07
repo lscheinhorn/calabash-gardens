@@ -49,6 +49,8 @@ Phase 16: Admin product seed/import foundation.
 ## In Progress Work
 
 - Add a guarded admin seed tool for copying static products into Firestore drafts.
+- Map preserved inactive gift-set products to a real `Gifts` category for seed.
+- Keep storefront category filters limited to categories with active products.
 - Document future CSV import/export validation expectations.
 - Use subagents to review implementation scope and guardrail compliance.
 
@@ -65,7 +67,6 @@ Phase 16: Admin product seed/import foundation.
 - Approve backend stack and first implementation phase.
 - Test `/admin` with Firebase env values and an approved admin user.
 - Review admin product photo upload before merge.
-- Approve missing static product category mappings before full product seed.
 - Plan CSV import/export UI after the seed validator is reviewed.
 - Plan backend product reads after seeded data is reviewed.
 
@@ -92,7 +93,7 @@ Phase 16: Admin product seed/import foundation.
 - Product writes require approved `productCategories` records.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
-- Static product seed must block missing categories until Luke approves a mapping.
+- Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - CSV import/export should reuse the product seed validation contract instead of trusting spreadsheet validation.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.

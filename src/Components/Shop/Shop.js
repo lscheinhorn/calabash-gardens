@@ -1,17 +1,17 @@
 import './Shop.css'
 import { products } from '../../data/siteData'
 import Product from '../Product/Product'
-import { useState, useEffect   } from 'react'
+import { useMemo, useState } from 'react'
 
 export default function Shop () {
     const [ option, setOption ] = useState("All")
-    const [ options, setOptions ] = useState("All")
-    const [ categories, setCategories ] = useState([])
-    useEffect(() => {
-        setOptions(categories.map((option) => {
-            return <option value={ option } key={ option }>{ option }</option>
-        }))
-    }, [categories])
+    const activeProducts = useMemo(() => products.filter(product => product.isActive === true), [])
+    const categories = useMemo(() => {
+        return Array.from(new Set(activeProducts
+            .map(product => product.category)
+            .filter(Boolean)))
+    }, [activeProducts])
+
     return (
         <div className="">
             <div className="d-flex flex-column align-items-center">
@@ -21,21 +21,16 @@ export default function Shop () {
                     onChange={ (e) => { setOption( e.target.value ) }}
                     value={ option }
                 >
-                    { options }
+                    <option value="All">All</option>
+                    { categories.map((category) => {
+                        return <option value={ category } key={ category }>{ category }</option>
+                    })}
                 </select>
             </div>
             <div id="shop">
                 {   
-                    products.map( product => {
-                        if(Array.isArray(categories)) {
-                            if( !categories.includes( product.category ) ) {
-                                setCategories([
-                                    ...categories,
-                                    product.category
-                                ])
-                            }
-                        }
-                        if(product.isActive === true && (product.category === option || option === "All" ) ) {
+                    activeProducts.map( product => {
+                        if(product.category === option || option === "All" ) {
                             return <Product product={ product } key={ product.key } />
                         }
                         return null

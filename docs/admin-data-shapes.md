@@ -113,7 +113,8 @@ Static product seed notes:
 - Seeded products must pass the same field contract as manually edited Firestore products.
 - Seeded products skip existing Firestore product IDs instead of overwriting them.
 - Seeded products use `photos: []`; image migration/upload is a separate workflow.
-- Static products with missing runtime categories must not be seeded until Luke approves a category mapping.
+- Static gift-set products with missing runtime categories seed under `Gifts`.
+- Storefront category filters should show only categories with active products.
 
 ## Product Categories
 

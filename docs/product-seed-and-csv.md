@@ -31,15 +31,13 @@ The seed must block writes when:
 
 Missing categories require an explicit mapping decision before seed. Do not infer categories from comments in the static resource file.
 
-## Current Known Seed Blocker
+## Gift Set Category Mapping
 
-Some static gift-set products omit runtime `category` values. They appear to have commented category hints, but comments are not data and should not be used automatically.
+Some static gift-set products omit runtime `category` values. Luke approved preserving those products under a real `Gifts` category because Jette may want them later, while keeping them inactive/unpublished unless she turns them back on.
 
-Before the full static product list can be seeded, Luke should approve one of these choices:
+The seed tool maps missing-category gift-set products to `Gifts`.
 
-- map those products to a new `Gifts` category
-- map those products to another existing category
-- leave them out of seed until Jette updates them manually in admin
+The storefront category dropdown should only show categories that have active/public products. A preserved empty or inactive `Gifts` category should not appear to customers.
 
 ## Future CSV Workflow
 
