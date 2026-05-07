@@ -25,6 +25,15 @@ const emptyProduct = {
   sortOrder: "",
 };
 
+const emptyCategory = {
+  slug: "",
+  name: "",
+  active: true,
+  sortOrder: "",
+};
+
+const decimalPattern = /^\d+\.\d{2}$/;
+
 const slugify = (value) =>
   value
     .trim()
@@ -45,12 +54,18 @@ const normalizePriceOptions = (priceOptions) => {
 
 export default function ProductAdmin({ db }) {
   const [form, setForm] = useState(emptyProduct);
+  const [categoryForm, setCategoryForm] = useState(emptyCategory);
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingCategories, setIsLoadingCategories] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingCategory, setIsSavingCategory] = useState(false);
   const [message, setMessage] = useState("");
+  const [categoryMessage, setCategoryMessage] = useState("");
 
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
@@ -70,12 +85,38 @@ export default function ProductAdmin({ db }) {
     }
   }, [db]);
 
+  const loadCategories = useCallback(async () => {
+    setIsLoadingCategories(true);
+    setCategoryMessage("");
+
+    try {
+      const categoriesQuery = query(collection(db, "productCategories"), orderBy("name"));
+      const snapshot = await getDocs(categoriesQuery);
+      setCategories(snapshot.docs.map((categoryDoc) => ({
+        id: categoryDoc.id,
+        ...categoryDoc.data(),
+      })));
+    } catch (error) {
+      setCategoryMessage("Categories could not be loaded.");
+    } finally {
+      setIsLoadingCategories(false);
+    }
+  }, [db]);
+
   useEffect(() => {
     loadProducts();
-  }, [loadProducts]);
+    loadCategories();
+  }, [loadCategories, loadProducts]);
 
   const updateForm = (field, value) => {
     setForm((currentForm) => ({
+      ...currentForm,
+      [field]: value,
+    }));
+  };
+
+  const updateCategoryForm = (field, value) => {
+    setCategoryForm((currentForm) => ({
       ...currentForm,
       [field]: value,
     }));
@@ -86,6 +127,12 @@ export default function ProductAdmin({ db }) {
     setSelectedProductId("");
     setSelectedProduct(null);
     setMessage("");
+  };
+
+  const resetCategoryForm = () => {
+    setCategoryForm(emptyCategory);
+    setSelectedCategoryId("");
+    setCategoryMessage("");
   };
 
   const selectProduct = (product) => {
@@ -107,6 +154,17 @@ export default function ProductAdmin({ db }) {
       sortOrder: product.sortOrder ?? "",
     });
     setMessage("");
+  };
+
+  const selectCategory = (category) => {
+    setSelectedCategoryId(category.id);
+    setCategoryForm({
+      slug: category.id,
+      name: category.name || "",
+      active: category.active === true,
+      sortOrder: category.sortOrder ?? "",
+    });
+    setCategoryMessage("");
   };
 
   const updatePriceOption = (index, field, value) => {
@@ -134,6 +192,48 @@ export default function ProductAdmin({ db }) {
         priceOptionIndex !== index || currentForm.priceOptions.length === 1
       )),
     }));
+  };
+
+  const validateProduct = (productId) => {
+    const categoryIds = categories.map((category) => category.id);
+
+    if (!productId || !form.title.trim() || !form.shipping.trim()) {
+      return "Document ID, title, and shipping are required.";
+    }
+
+    if (!form.category || !categoryIds.includes(form.category)) {
+      return "Choose an approved category.";
+    }
+
+    if (!decimalPattern.test(form.shipping.trim())) {
+      return "Shipping must be a decimal like 17.00.";
+    }
+
+    if (form.sortOrder !== "" && !Number.isInteger(Number(form.sortOrder))) {
+      return "Sort order must be a whole number.";
+    }
+
+    const hasInvalidPrice = form.priceOptions.some((priceOption) => (
+      !decimalPattern.test(priceOption.price.trim())
+    ));
+
+    if (hasInvalidPrice) {
+      return "Every price must be a decimal like 15.00.";
+    }
+
+    return "";
+  };
+
+  const validateCategory = (categoryId) => {
+    if (!categoryId || !categoryForm.name.trim()) {
+      return "Category ID and name are required.";
+    }
+
+    if (categoryForm.sortOrder !== "" && !Number.isInteger(Number(categoryForm.sortOrder))) {
+      return "Category sort order must be a whole number.";
+    }
+
+    return "";
   };
 
   const buildProductPayload = (productId) => {
@@ -172,10 +272,10 @@ export default function ProductAdmin({ db }) {
     event.preventDefault();
 
     const productId = selectedProductId || slugify(form.slug);
-    const hasValidPrices = form.priceOptions.every((priceOption) => priceOption.price.trim());
+    const validationMessage = validateProduct(productId);
 
-    if (!productId || !form.title.trim() || !form.shipping.trim() || !hasValidPrices) {
-      setMessage("Document ID, title, shipping, and every price are required.");
+    if (validationMessage) {
+      setMessage(validationMessage);
       return;
     }
 
@@ -193,6 +293,43 @@ export default function ProductAdmin({ db }) {
       setMessage("Product could not be saved.");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleCategorySubmit = async (event) => {
+    event.preventDefault();
+
+    const categoryId = selectedCategoryId || slugify(categoryForm.name);
+    const validationMessage = validateCategory(categoryId);
+
+    if (validationMessage) {
+      setCategoryMessage(validationMessage);
+      return;
+    }
+
+    setIsSavingCategory(true);
+    setCategoryMessage("");
+
+    const payload = {
+      name: categoryForm.name.trim(),
+      active: categoryForm.active,
+      sortOrder: categoryForm.sortOrder === "" ? null : Number(categoryForm.sortOrder),
+      updatedAt: serverTimestamp(),
+    };
+
+    if (!selectedCategoryId) {
+      payload.createdAt = serverTimestamp();
+    }
+
+    try {
+      await setDoc(doc(db, "productCategories", categoryId), payload, { merge: true });
+      setSelectedCategoryId(categoryId);
+      setCategoryMessage("Category saved to Firestore.");
+      await loadCategories();
+    } catch (error) {
+      setCategoryMessage("Category could not be saved.");
+    } finally {
+      setIsSavingCategory(false);
     }
   };
 
@@ -228,10 +365,20 @@ export default function ProductAdmin({ db }) {
 
         <label>
           Category
-          <input
+          <select
             onChange={(event) => updateForm("category", event.target.value)}
+            required
             value={form.category}
-          />
+          >
+            <option value="">Choose category</option>
+            {categories
+              .filter((category) => category.active || category.id === form.category)
+              .map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+          </select>
         </label>
 
         <label>
@@ -360,6 +507,76 @@ export default function ProductAdmin({ db }) {
           ))}
         </div>
       </div>
+
+      <form className="admin_form admin_category_panel" onSubmit={handleCategorySubmit}>
+        <div className="admin_form_header">
+          <h3>{selectedCategoryId ? "Edit Category" : "Product Categories"}</h3>
+          <button className="admin_secondary_button" onClick={resetCategoryForm} type="button">
+            New
+          </button>
+        </div>
+
+        <label>
+          Category ID
+          <input
+            disabled={Boolean(selectedCategoryId)}
+            readOnly
+            placeholder="saffron"
+            value={selectedCategoryId || slugify(categoryForm.name)}
+          />
+        </label>
+
+        <label>
+          Category Name
+          <input
+            onChange={(event) => updateCategoryForm("name", event.target.value)}
+            required
+            value={categoryForm.name}
+          />
+        </label>
+
+        <label>
+          Sort Order
+          <input
+            inputMode="numeric"
+            onChange={(event) => updateCategoryForm("sortOrder", event.target.value)}
+            value={categoryForm.sortOrder}
+          />
+        </label>
+
+        <div className="admin_checkbox_grid">
+          <label>
+            <input
+              checked={categoryForm.active}
+              onChange={(event) => updateCategoryForm("active", event.target.checked)}
+              type="checkbox"
+            />
+            Active
+          </label>
+        </div>
+
+        <button className="admin_primary_button" disabled={isSavingCategory} type="submit">
+          {isSavingCategory ? "Saving..." : "Save Category"}
+        </button>
+
+        {categoryMessage ? <p className="admin_message">{categoryMessage}</p> : null}
+
+        {isLoadingCategories ? <p className="admin_status">Loading categories...</p> : null}
+
+        <div className="admin_product_list">
+          {categories.map((category) => (
+            <button
+              className="admin_product_row"
+              key={category.id}
+              onClick={() => selectCategory(category)}
+              type="button"
+            >
+              <span>{category.name || category.id}</span>
+              <small>{category.active ? "Active" : "Inactive"}</small>
+            </button>
+          ))}
+        </div>
+      </form>
     </div>
   );
 }
