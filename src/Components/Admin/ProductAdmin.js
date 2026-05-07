@@ -13,6 +13,11 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronDown,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 import {
   approvedProductCategories,
@@ -46,6 +51,14 @@ const emptyCategory = {
 
 const decimalPattern = /^\d+\.\d{2}$/;
 const maxImageSize = 10 * 1024 * 1024;
+
+const CollapseIcon = ({ isExpanded }) => (
+  <FontAwesomeIcon
+    aria-hidden="true"
+    className="admin_collapse_icon"
+    icon={isExpanded ? faChevronDown : faChevronRight}
+  />
+);
 
 const slugify = (value) =>
   value
@@ -812,8 +825,15 @@ export default function ProductAdmin({ db, storage }) {
             <button className="admin_secondary_button" disabled={isLoading} onClick={loadProducts} type="button">
               Refresh
             </button>
-            <button className="admin_secondary_button" onClick={() => toggleSection("products")} type="button">
-              {expandedSections.products ? "Collapse" : "Expand"}
+            <button
+              aria-expanded={expandedSections.products}
+              aria-label={`${expandedSections.products ? "Collapse" : "Expand"} Firestore Products`}
+              className="admin_icon_button"
+              onClick={() => toggleSection("products")}
+              title={`${expandedSections.products ? "Collapse" : "Expand"} Firestore Products`}
+              type="button"
+            >
+              <CollapseIcon isExpanded={expandedSections.products} />
             </button>
           </div>
         </div>
@@ -879,12 +899,17 @@ export default function ProductAdmin({ db, storage }) {
                 return (
                   <article className="admin_product_card" key={product.id}>
                     <button
+                      aria-expanded={isExpanded}
+                      aria-label={`${isExpanded ? "Collapse" : "Expand"} ${product.title || product.id}`}
                       className="admin_product_card_header"
                       onClick={() => toggleProductCard(product)}
+                      title={`${isExpanded ? "Collapse" : "Expand"} ${product.title || product.id}`}
                       type="button"
                     >
                       <span>{product.title || product.id}</span>
-                      <small>{isExpanded ? "Collapse" : "Expand"}</small>
+                      <small aria-hidden="true">
+                        <CollapseIcon isExpanded={isExpanded} />
+                      </small>
                     </button>
 
                     <div className="admin_product_meta">
@@ -1088,8 +1113,15 @@ export default function ProductAdmin({ db, storage }) {
       <section className="admin_panel">
         <div className="admin_form_header">
           <h3>New Product</h3>
-          <button className="admin_secondary_button" onClick={() => toggleSection("newProduct")} type="button">
-            {expandedSections.newProduct ? "Collapse" : "Expand"}
+          <button
+            aria-expanded={expandedSections.newProduct}
+            aria-label={`${expandedSections.newProduct ? "Collapse" : "Expand"} New Product`}
+            className="admin_icon_button"
+            onClick={() => toggleSection("newProduct")}
+            title={`${expandedSections.newProduct ? "Collapse" : "Expand"} New Product`}
+            type="button"
+          >
+            <CollapseIcon isExpanded={expandedSections.newProduct} />
           </button>
         </div>
 
@@ -1231,8 +1263,15 @@ export default function ProductAdmin({ db, storage }) {
             <button className="admin_secondary_button" onClick={resetCategoryForm} type="button">
               New
             </button>
-            <button className="admin_secondary_button" onClick={() => toggleSection("categories")} type="button">
-              {expandedSections.categories ? "Collapse" : "Expand"}
+            <button
+              aria-expanded={expandedSections.categories}
+              aria-label={`${expandedSections.categories ? "Collapse" : "Expand"} Product Categories`}
+              className="admin_icon_button"
+              onClick={() => toggleSection("categories")}
+              title={`${expandedSections.categories ? "Collapse" : "Expand"} Product Categories`}
+              type="button"
+            >
+              <CollapseIcon isExpanded={expandedSections.categories} />
             </button>
           </div>
         </div>
@@ -1330,8 +1369,15 @@ export default function ProductAdmin({ db, storage }) {
       <div className="admin_panel admin_seed_panel">
         <div className="admin_form_header">
           <h3>Seed Static Products</h3>
-          <button className="admin_secondary_button" onClick={() => toggleSection("seed")} type="button">
-            {expandedSections.seed ? "Collapse" : "Expand"}
+          <button
+            aria-expanded={expandedSections.seed}
+            aria-label={`${expandedSections.seed ? "Collapse" : "Expand"} Seed Static Products`}
+            className="admin_icon_button"
+            onClick={() => toggleSection("seed")}
+            title={`${expandedSections.seed ? "Collapse" : "Expand"} Seed Static Products`}
+            type="button"
+          >
+            <CollapseIcon isExpanded={expandedSections.seed} />
           </button>
         </div>
 

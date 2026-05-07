@@ -47,6 +47,7 @@ Phase 17: Admin product card UI.
 - Added admin product and category ID suggestions on the active admin branch.
 - Added admin product seed/import foundation on the active admin branch.
 - Moved admin product photo upload and attached-photo display into expanded product cards on the active admin branch.
+- Replaced admin collapse/expand text controls with compact arrow controls on the active admin branch.
 
 ## In Progress Work
 
@@ -148,6 +149,7 @@ Phase 17: Admin product card UI.
 - 2026-05-07: `npm run build` completed successfully after admin product photo upload, with the same existing warnings.
 - 2026-05-07: `npm run build` completed successfully after admin product card UI, with the same existing warnings.
 - 2026-05-07: `npm run build` completed successfully after moving product photo upload into product cards, with the same existing warnings.
+- 2026-05-07: `npm run build` completed successfully after admin collapse arrow UI polish, with the same existing warnings.
 
 ## Commits
 

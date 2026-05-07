@@ -166,6 +166,28 @@
   font-size: 16px;
 }
 
+.admin_icon_button {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e5deea;
+  border-radius: 999px;
+  color: #735284;
+  cursor: pointer;
+  display: inline-flex;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.admin_icon_button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin_collapse_icon {
+  font-size: 13px;
+}
+
 .admin_embedded_form,
 .admin_inline_form {
   display: grid;
@@ -269,6 +291,14 @@
   color: #735284;
   font-size: 13px;
   font-weight: 700;
+}
+
+.admin_product_card_header small {
+  align-items: center;
+  display: inline-flex;
+  height: 24px;
+  justify-content: center;
+  width: 24px;
 }
 
 .admin_product_meta {
