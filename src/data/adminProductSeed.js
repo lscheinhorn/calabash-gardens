@@ -1,0 +1,140 @@
+import { products as staticProducts } from "../resources/products";
+
+const decimalPattern = /^\d+\.\d{2}$/;
+
+export const seedSlugify = (value) =>
+  String(value || "")
+    .trim()
+    .toLowerCase()
+    .replace(/['‘’]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+
+const normalizeCategoryName = (category) => (
+  category && String(category).trim() ? String(category).trim() : ""
+);
+
+const normalizePriceOptions = (priceOptions) => (
+  Array.isArray(priceOptions) ? priceOptions : []
+).map((priceOption) => ({
+  option: String(priceOption?.option || "").trim(),
+  price: String(priceOption?.price || "").trim(),
+}));
+
+const normalizeStaticProduct = (product, index) => {
+  const title = String(product?.title || "").trim();
+  const id = seedSlugify(title);
+  const categoryName = normalizeCategoryName(product?.category);
+  const category = seedSlugify(categoryName);
+
+  return {
+    id,
+    data: {
+      title,
+      category,
+      info: String(product?.info || "").trim(),
+      info1: String(product?.info1 || "").trim(),
+      info2: String(product?.info2 || "").trim(),
+      shipping: String(product?.shipping || "").trim(),
+      priceOptions: normalizePriceOptions(product?.priceOptions),
+      published: product?.isActive === true,
+      isActive: product?.isActive === true,
+      inStock: product?.inStock !== false,
+      isHighlighted: product?.isHighlighted === true,
+      photos: [],
+      slug: id,
+      sortOrder: index,
+    },
+    source: product,
+  };
+};
+
+const validateProduct = (product) => {
+  const errors = [];
+
+  if (!product.id) {
+    errors.push("Product ID is empty.");
+  }
+
+  if (!product.data.title) {
+    errors.push("Title is required.");
+  }
+
+  if (!product.data.category) {
+    errors.push("Category ID is empty.");
+  }
+
+  if (!decimalPattern.test(product.data.shipping)) {
+    errors.push("Shipping must be a decimal like 17.00.");
+  }
+
+  if (!product.data.priceOptions.length) {
+    errors.push("At least one price option is required.");
+  }
+
+  product.data.priceOptions.forEach((priceOption, priceIndex) => {
+    if (!decimalPattern.test(priceOption.price)) {
+      errors.push(`Price option ${priceIndex + 1} must be a decimal like 15.00.`);
+    }
+  });
+
+  return errors;
+};
+
+const findDuplicateIds = (items) => {
+  const seen = new Set();
+  const duplicates = new Set();
+
+  items.forEach((item) => {
+    if (seen.has(item.id)) {
+      duplicates.add(item.id);
+    }
+
+    seen.add(item.id);
+  });
+
+  return duplicates;
+};
+
+export const buildProductSeed = () => {
+  const products = staticProducts.map(normalizeStaticProduct);
+  const productDuplicateIds = findDuplicateIds(products);
+  const categoryMap = new Map();
+  const errors = [];
+  const warnings = [];
+
+  products.forEach((product, index) => {
+    const productLabel = product.data.title || `Product ${index + 1}`;
+    const productErrors = validateProduct(product);
+
+    productErrors.forEach((error) => {
+      errors.push(`${productLabel}: ${error}`);
+    });
+
+    if (productDuplicateIds.has(product.id)) {
+      errors.push(`${productLabel}: Product ID "${product.id}" is duplicated.`);
+    }
+
+    if (!product.source.category) {
+      errors.push(`${productLabel}: Missing category; approve a category mapping before seeding.`);
+    }
+
+    if (product.data.category && !categoryMap.has(product.data.category)) {
+      categoryMap.set(product.data.category, {
+        id: product.data.category,
+        data: {
+          name: normalizeCategoryName(product.source.category),
+          active: true,
+          sortOrder: categoryMap.size,
+        },
+      });
+    }
+  });
+
+  return {
+    categories: Array.from(categoryMap.values()),
+    errors,
+    products,
+    warnings,
+  };
+};

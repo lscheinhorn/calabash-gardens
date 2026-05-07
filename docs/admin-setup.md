@@ -56,6 +56,7 @@ Minimum fields:
 - New category IDs are suggested from the category name and locked after saving.
 - Product drafts must use a category from `productCategories`.
 - Approved admins can upload product photos to Firebase Storage and attach image references to Firestore product drafts.
+- Approved admins can validate and seed missing static products into Firestore drafts.
 - Event, site content, inventory, and checkout editors are not connected yet.
 - Public product pages still read static product data.
 

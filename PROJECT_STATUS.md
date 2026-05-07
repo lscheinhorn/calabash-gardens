@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin product ID suggestion guidance is in progress on branch `codex/admin-product-photo-upload`.
+Admin product seed/import foundation is in progress on branch `codex/admin-product-seed-import`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin product ID suggestion guidance is in progress on branch `codex/admin-produ
 
 ## Current Phase
 
-Phase 15: Admin product and category ID suggestions.
+Phase 16: Admin product seed/import foundation.
 
 ## Done Work
 
@@ -44,11 +44,12 @@ Phase 15: Admin product and category ID suggestions.
 - Added backend-readiness guardrails and merged them into `main`.
 - Merged admin product categories and validation into `main`.
 - Added admin product photo upload on the active admin branch.
+- Added admin product and category ID suggestions on the active admin branch.
 
 ## In Progress Work
 
-- Suggest product and category IDs from new product titles and category names.
-- Keep saved product and category IDs locked after creation.
+- Add a guarded admin seed tool for copying static products into Firestore drafts.
+- Document future CSV import/export validation expectations.
 - Use subagents to review implementation scope and guardrail compliance.
 
 ## Planned Work
@@ -64,8 +65,9 @@ Phase 15: Admin product and category ID suggestions.
 - Approve backend stack and first implementation phase.
 - Test `/admin` with Firebase env values and an approved admin user.
 - Review admin product photo upload before merge.
-- Seed current products into Firestore after category strategy is reviewed.
-- Plan seed/export strategy before backend content reads.
+- Approve missing static product category mappings before full product seed.
+- Plan CSV import/export UI after the seed validator is reviewed.
+- Plan backend product reads after seeded data is reviewed.
 
 ## Bugs
 
@@ -90,6 +92,8 @@ Phase 15: Admin product and category ID suggestions.
 - Product writes require approved `productCategories` records.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
 - Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
+- Static product seed must block missing categories until Luke approves a mapping.
+- CSV import/export should reuse the product seed validation contract instead of trusting spreadsheet validation.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -119,6 +123,8 @@ Phase 15: Admin product and category ID suggestions.
 - Product category choices must come from `productCategories`; no free-typed categories in product forms.
 - Product image uploads should use flat `product-images/{fileName}` paths unless Storage rules are approved for a different path structure.
 - Product and category IDs should be suggested from the title/name when created and treated as locked after saving.
+- Product seeding must not overwrite existing Firestore products.
+- Product seeding must not store bundled JavaScript `require(...)` image values in Firestore.
 
 ## Verification History
 
@@ -149,7 +155,9 @@ Phase 15: Admin product and category ID suggestions.
 - `2462ddb feat: add admin product editor`
 - `5e157ff feat: add product categories validation`
 - `341ec93 feat: add admin product photo upload`
-- Pending commit for admin ID suggestions.
+- `6e64617 feat: suggest locked admin ids`
+- `594b0a4 fix: clean apostrophes in admin ids`
+- Pending commit for admin product seed/import foundation.
 
 ## Deployments
 

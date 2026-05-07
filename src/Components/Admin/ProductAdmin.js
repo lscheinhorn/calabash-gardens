@@ -5,6 +5,7 @@ import {
   getDocs,
   orderBy,
   query,
+  runTransaction,
   serverTimestamp,
   setDoc,
 } from "firebase/firestore";
@@ -12,6 +13,8 @@ import {
   ref,
   uploadBytes,
 } from "firebase/storage";
+
+import { buildProductSeed } from "../../data/adminProductSeed";
 
 const emptyProduct = {
   slug: "",
@@ -114,6 +117,8 @@ export default function ProductAdmin({ db, storage }) {
   const [photoFile, setPhotoFile] = useState(null);
   const [photoInputKey, setPhotoInputKey] = useState(0);
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
+  const [seedResult, setSeedResult] = useState(null);
+  const [isSeeding, setIsSeeding] = useState(false);
 
   const loadProducts = useCallback(async () => {
     setIsLoading(true);
@@ -494,6 +499,133 @@ export default function ProductAdmin({ db, storage }) {
     }
   };
 
+  const previewProductSeed = () => {
+    const seed = buildProductSeed();
+    const existingProductIds = new Set(products.map((product) => product.id));
+    const existingCategoryIds = new Set(categories.map((category) => category.id));
+
+    setSeedResult({
+      ...seed,
+      missingCategories: seed.categories.filter((category) => !existingCategoryIds.has(category.id)),
+      missingProducts: seed.products.filter((product) => !existingProductIds.has(product.id)),
+    });
+  };
+
+  const seedMissingProducts = async () => {
+    const seed = seedResult || buildProductSeed();
+    const existingProductIds = new Set(products.map((product) => product.id));
+    const existingCategoryIds = new Set(categories.map((category) => category.id));
+    const missingCategories = seed.categories.filter((category) => !existingCategoryIds.has(category.id));
+    const missingProducts = seed.products.filter((product) => !existingProductIds.has(product.id));
+
+    if (seed.errors.length) {
+      setSeedResult({
+        ...seed,
+        missingCategories,
+        missingProducts,
+      });
+      return;
+    }
+
+    if (!missingCategories.length && !missingProducts.length) {
+      setSeedResult({
+        ...seed,
+        missingCategories,
+        missingProducts,
+        message: "Everything from the static product list is already seeded.",
+      });
+      return;
+    }
+
+    setIsSeeding(true);
+
+    try {
+      const timestamp = serverTimestamp();
+      let seededCategoryCount = 0;
+      let seededProductCount = 0;
+
+      if (missingCategories.length) {
+        seededCategoryCount = await runTransaction(db, async (transaction) => {
+          const categoryReads = [];
+
+          for (const category of missingCategories) {
+            const categoryRef = doc(db, "productCategories", category.id);
+            const categorySnapshot = await transaction.get(categoryRef);
+            categoryReads.push({
+              category,
+              categoryRef,
+              categorySnapshot,
+            });
+          }
+
+          let createdCount = 0;
+
+          categoryReads.forEach(({ category, categoryRef, categorySnapshot }) => {
+            if (!categorySnapshot.exists()) {
+              transaction.set(categoryRef, {
+                ...category.data,
+                createdAt: timestamp,
+                updatedAt: timestamp,
+              });
+              createdCount += 1;
+            }
+          });
+
+          return createdCount;
+        });
+      }
+
+      if (missingProducts.length) {
+        seededProductCount = await runTransaction(db, async (transaction) => {
+          const productReads = [];
+
+          for (const product of missingProducts) {
+            const productRef = doc(db, "products", product.id);
+            const productSnapshot = await transaction.get(productRef);
+            productReads.push({
+              product,
+              productRef,
+              productSnapshot,
+            });
+          }
+
+          let createdCount = 0;
+
+          productReads.forEach(({ product, productRef, productSnapshot }) => {
+            if (!productSnapshot.exists()) {
+              transaction.set(productRef, {
+                ...product.data,
+                createdAt: timestamp,
+                updatedAt: timestamp,
+              });
+              createdCount += 1;
+            }
+          });
+
+          return createdCount;
+        });
+      }
+      await loadCategories();
+      await loadProducts();
+
+      setSeedResult({
+        ...seed,
+        missingCategories: [],
+        missingProducts: [],
+        message: `Seeded ${seededProductCount} products and ${seededCategoryCount} categories.`,
+      });
+    } catch (error) {
+      setSeedResult({
+        ...seed,
+        missingCategories,
+        missingProducts,
+        message: "Static products could not be seeded.",
+      });
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   return (
     <div className="admin_editor_grid">
       <form className="admin_form" onSubmit={handleSubmit}>
@@ -796,6 +928,66 @@ export default function ProductAdmin({ db, storage }) {
           ))}
         </div>
       </form>
+
+      <div className="admin_panel admin_seed_panel">
+        <div className="admin_form_header">
+          <h3>Seed Static Products</h3>
+        </div>
+
+        <p className="admin_status">
+          Validate and copy missing static products into Firestore. Existing
+          Firestore products are skipped, not overwritten.
+        </p>
+
+        <div className="admin_button_row">
+          <button className="admin_secondary_button" onClick={previewProductSeed} type="button">
+            Validate Seed
+          </button>
+          <button
+            className="admin_primary_button"
+            disabled={isSeeding || !seedResult || seedResult.errors.length > 0}
+            onClick={seedMissingProducts}
+            type="button"
+          >
+            {isSeeding ? "Seeding..." : "Seed Missing Products"}
+          </button>
+        </div>
+
+        {seedResult ? (
+          <div className="admin_seed_summary">
+            <strong>
+              {seedResult.errors.length ? "Seed blocked by validation errors." : (
+                `${seedResult.missingProducts.length} products and ${seedResult.missingCategories.length} categories ready to seed.`
+              )}
+            </strong>
+            <small>
+              Checked {seedResult.products.length} static products and{" "}
+              {seedResult.categories.length} categories.
+            </small>
+            {seedResult.message ? <p className="admin_message">{seedResult.message}</p> : null}
+            {seedResult.errors.length ? (
+              <div>
+                <strong>Errors</strong>
+                <ul>
+                  {seedResult.errors.map((error) => (
+                    <li key={error}>{error}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+            {seedResult.warnings.length ? (
+              <div>
+                <strong>Warnings</strong>
+                <ul>
+                  {seedResult.warnings.map((warning) => (
+                    <li key={warning}>{warning}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
     </div>
   );
 }

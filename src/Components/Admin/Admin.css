@@ -113,6 +113,12 @@
   opacity: 0.55;
 }
 
+.admin_button_row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .admin_placeholder_grid {
   display: grid;
   gap: 12px;
@@ -229,6 +235,25 @@
 .admin_photo_row small {
   color: #735284;
   overflow-wrap: anywhere;
+}
+
+.admin_seed_summary {
+  background: #f9f8fa;
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.admin_seed_summary small,
+.admin_seed_summary li {
+  color: #5f5366;
+}
+
+.admin_seed_summary ul {
+  margin: 6px 0 0;
+  padding-left: 20px;
 }
 
 @media screen and (max-width: 700px) {

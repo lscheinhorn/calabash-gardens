@@ -108,6 +108,13 @@ Current image upload notes:
 - Product photo paths must stay flat under `product-images/{fileName}` to match the current Storage rules.
 - Uploaded product photos are not connected to public storefront rendering yet.
 
+Static product seed notes:
+
+- Seeded products must pass the same field contract as manually edited Firestore products.
+- Seeded products skip existing Firestore product IDs instead of overwriting them.
+- Seeded products use `photos: []`; image migration/upload is a separate workflow.
+- Static products with missing runtime categories must not be seeded until Luke approves a category mapping.
+
 ## Product Categories
 
 Collection: `productCategories`
