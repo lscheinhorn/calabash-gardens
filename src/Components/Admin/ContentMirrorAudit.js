@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   collection,
+  doc,
   getDocs,
+  runTransaction,
+  serverTimestamp,
 } from "firebase/firestore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -111,6 +114,7 @@ export default function ContentMirrorAudit({ db }) {
   const [firestoreContentDocs, setFirestoreContentDocs] = useState([]);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSeeding, setIsSeeding] = useState(false);
   const [message, setMessage] = useState("");
 
   const loadFirestoreContent = useCallback(async () => {
@@ -139,6 +143,55 @@ export default function ContentMirrorAudit({ db }) {
   const report = useMemo(() => buildAuditReport(firestoreContentDocs), [firestoreContentDocs]);
   const issueCount = report.changed.length + report.extra.length + report.missing.length + report.seedWarnings.length;
 
+  const seedMissingContent = async () => {
+    const seed = buildContentSeed();
+    const missingContentDocs = seed.contentDocs.filter((contentDoc) => (
+      report.missing.some((missingDoc) => missingDoc.id === contentDoc.id)
+    ));
+
+    if (!missingContentDocs.length) {
+      setMessage("No missing site content documents to seed.");
+      return;
+    }
+
+    setIsSeeding(true);
+    setMessage("");
+
+    try {
+      let createdCount = 0;
+
+      for (const contentDoc of missingContentDocs) {
+        const contentRef = doc(db, "siteContent", contentDoc.id);
+        const didCreate = await runTransaction(db, async (transaction) => {
+          const currentContent = await transaction.get(contentRef);
+
+          if (currentContent.exists()) {
+            return false;
+          }
+
+          transaction.set(contentRef, {
+            ...contentDoc.data,
+            createdAt: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+
+          return true;
+        });
+
+        if (didCreate) {
+          createdCount += 1;
+        }
+      }
+
+      setMessage(`${createdCount} missing site content document${createdCount === 1 ? "" : "s"} seeded to Firestore.`);
+      await loadFirestoreContent();
+    } catch (error) {
+      setMessage("Missing site content could not be seeded.");
+    } finally {
+      setIsSeeding(false);
+    }
+  };
+
   return (
     <section className="admin_panel">
       <div className="admin_form_header">
@@ -152,7 +205,7 @@ export default function ContentMirrorAudit({ db }) {
           <button
             aria-label="Refresh content mirror audit"
             className="admin_secondary_button"
-            disabled={isLoading || !isExpanded}
+            disabled={isLoading || isSeeding || !isExpanded}
             onClick={loadFirestoreContent}
             type="button"
           >
@@ -175,6 +228,16 @@ export default function ContentMirrorAudit({ db }) {
         <>
           {message ? <p className="admin_message">{message}</p> : null}
           {isLoading ? <p className="admin_status">Loading content audit...</p> : null}
+          <div className="admin_button_row">
+            <button
+              className="admin_primary_button"
+              disabled={isLoading || isSeeding || report.missing.length === 0}
+              onClick={seedMissingContent}
+              type="button"
+            >
+              {isSeeding ? "Seeding..." : "Seed Missing Content"}
+            </button>
+          </div>
 
           <div className="admin_audit_summary" aria-label="Content mirror audit summary">
             <div>

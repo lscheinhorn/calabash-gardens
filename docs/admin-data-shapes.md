@@ -289,6 +289,7 @@ Current compatibility notes:
 - Firestore rules allow `sections` for site content documents.
 - The first content mirror audit is read-only and checks `home`, `banner`, `offerings`, `about`, and `team` against Firestore `siteContent`.
 - The content mirror audit does not write Firestore documents or change public site reads.
+- The guarded content seed action creates missing `siteContent` documents only; it checks each document before writing and skips any existing document to avoid overwriting admin edits.
 
 Editor controls:
 
