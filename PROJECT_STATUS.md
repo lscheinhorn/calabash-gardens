@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin content seeding is in progress on branch `codex/product-image-manifest`.
+Admin content editing is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin content seeding is in progress on branch `codex/product-image-manifest`.
 
 ## Current Phase
 
-Phase 23: Guarded site content seed flow.
+Phase 24: Firestore site content editor.
 
 ## Done Work
 
@@ -61,6 +61,7 @@ Phase 23: Guarded site content seed flow.
 - Added a read-only admin Product Mirror Audit panel comparing static product seed expectations with Firestore product documents on the active branch.
 - Added a read-only admin Content Mirror Audit panel comparing static site copy expectations with Firestore site content documents on the active branch.
 - Added a guarded admin action to seed missing Firestore `siteContent` documents from static content expectations without overwriting existing documents on the active branch.
+- Added an admin-only Site Content Editor for editing seeded Firestore `siteContent` documents without changing public static reads on the active branch.
 
 ## In Progress Work
 
@@ -73,6 +74,7 @@ Phase 23: Guarded site content seed flow.
 - Verify Product Mirror Audit reports missing, extra, different, and photo-review product records without writing data.
 - Verify Content Mirror Audit reports missing, extra, and different site-content records without writing data.
 - Verify Seed Missing Content creates only missing `siteContent` documents and skips existing documents.
+- Verify Site Content Editor saves Firestore `siteContent` sections and does not edit protected static content files.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.

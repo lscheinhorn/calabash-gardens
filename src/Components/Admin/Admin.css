@@ -311,6 +311,7 @@
   width: auto;
 }
 
+.admin_content_list,
 .admin_product_list {
   display: grid;
   gap: 8px;
@@ -338,6 +339,7 @@
   color: #735284;
 }
 
+.admin_content_card,
 .admin_product_card {
   background: #ffffff;
   border: 1px solid #e5deea;
@@ -366,6 +368,16 @@
   color: #735284;
   font-size: 13px;
   font-weight: 700;
+}
+
+.admin_checkbox_label {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+}
+
+.admin_checkbox_label input {
+  width: auto;
 }
 
 .admin_product_card_header small {
