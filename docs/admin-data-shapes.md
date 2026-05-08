@@ -287,6 +287,8 @@ Current compatibility notes:
 - `experienceBlurb` currently lives in `src/resources/events.js`, not `content.js`.
 - The first backend version should preserve the existing nested shape as closely as possible.
 - Firestore rules allow `sections` for site content documents.
+- The first content mirror audit is read-only and checks `home`, `banner`, `offerings`, `about`, and `team` against Firestore `siteContent`.
+- The content mirror audit does not write Firestore documents or change public site reads.
 
 Editor controls:
 

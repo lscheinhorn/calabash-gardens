@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
+import ContentMirrorAudit from "./ContentMirrorAudit";
 import MediaAdmin from "./MediaAdmin";
 import ProductAdmin from "./ProductAdmin";
 import ProductMirrorAudit from "./ProductMirrorAudit";
@@ -154,6 +155,7 @@ export default function Admin() {
         </div>
         <MediaAdmin db={db} storage={storage} />
         <ProductMirrorAudit db={db} />
+        <ContentMirrorAudit db={db} />
         <ProductAdmin db={db} storage={storage} />
       </div>
     );
