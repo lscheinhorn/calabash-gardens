@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin media management is in progress on branch `codex/product-image-manifest`.
+Admin product mirror auditing is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Admin media management is in progress on branch `codex/product-image-manifest`.
 
 ## Current Phase
 
-Phase 20: Product photo management inside admin product cards.
+Phase 21: Product Firestore mirror audit.
 
 ## Done Work
 
@@ -58,6 +58,7 @@ Phase 20: Product photo management inside admin product cards.
 - Added Storage-backed admin media previews on the active branch.
 - Added collapsible Photos library and product-card attach-from-Other media controls on the active branch.
 - Added product-card controls to edit attached photo alt text, reorder product photos, and detach photos without deleting Storage files on the active branch.
+- Added a read-only admin Product Mirror Audit panel comparing static product seed expectations with Firestore product documents on the active branch.
 
 ## In Progress Work
 
@@ -67,6 +68,7 @@ Phase 20: Product photo management inside admin product cards.
 - Verify imported media thumbnails in admin product cards and the Photos library.
 - Verify attaching an existing `other` bin photo to a product updates the product photo refs and media asset link metadata.
 - Verify product photo alt-text edits, reordering, and detach behavior in admin product cards.
+- Verify Product Mirror Audit reports missing, extra, different, and photo-review product records without writing data.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.

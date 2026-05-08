@@ -95,6 +95,8 @@ After import, the admin product cards and Photos library should display Storage-
 Product cards can also attach an existing active photo from the `other` media bin. Attaching moves that media asset into the `products` bin, links it to the selected product, preserves existing tags, and appends a product photo reference without uploading another file.
 Attached product photos can be managed from the product card: edit alt text, move photos up or down, or detach a photo from that product. Detaching removes only the product photo reference; it does not delete the Storage object. If the detached media asset is not used by any other product, the admin tool moves it back to the `other` media bin.
 
+The admin Product Mirror Audit is read-only. It compares the static product seed expectations against Firestore `products` and reports missing records, extra records, field differences, price differences, and product photo review warnings. It does not write Firestore data, upload files, edit protected static resources, or switch public product pages to Firestore.
+
 ## Required Validation
 
 The seed must block writes when:

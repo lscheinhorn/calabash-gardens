@@ -11,6 +11,7 @@ import {
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
 import MediaAdmin from "./MediaAdmin";
 import ProductAdmin from "./ProductAdmin";
+import ProductMirrorAudit from "./ProductMirrorAudit";
 
 const adminCollection = "adminUsers";
 
@@ -152,6 +153,7 @@ export default function Admin() {
           </div>
         </div>
         <MediaAdmin db={db} storage={storage} />
+        <ProductMirrorAudit db={db} />
         <ProductAdmin db={db} storage={storage} />
       </div>
     );
