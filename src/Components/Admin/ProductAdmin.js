@@ -259,9 +259,7 @@ export default function ProductAdmin({ db, storage }) {
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({
-    products: true,
-  });
+  const [expandedSections, setExpandedSections] = useState({});
   const [expandedProductId, setExpandedProductId] = useState("");
   const [editingProductId, setEditingProductId] = useState("");
   const [productCardMessage, setProductCardMessage] = useState("");
