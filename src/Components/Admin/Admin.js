@@ -14,6 +14,7 @@ import ContentMirrorAudit from "./ContentMirrorAudit";
 import MediaAdmin from "./MediaAdmin";
 import ProductAdmin from "./ProductAdmin";
 import ProductMirrorAudit from "./ProductMirrorAudit";
+import ProductPublicParityAudit from "./ProductPublicParityAudit";
 
 const adminCollection = "adminUsers";
 const adminThemeStorageKey = "calabashAdminTheme";
@@ -186,6 +187,7 @@ export default function Admin() {
         </div>
         <MediaAdmin db={db} storage={storage} />
         <ProductMirrorAudit db={db} />
+        <ProductPublicParityAudit db={db} />
         <ContentMirrorAudit db={db} />
         <ContentAdmin db={db} />
         <ProductAdmin db={db} storage={storage} />

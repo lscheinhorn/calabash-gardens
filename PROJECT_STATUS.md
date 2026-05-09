@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Public product backend-read prep is in progress on branch `codex/product-image-manifest`.
+Public product parity testing is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Public product backend-read prep is in progress on branch `codex/product-image-m
 
 ## Current Phase
 
-Phase 26: Read-only public product adapter foundation.
+Phase 27: Admin public product parity report.
 
 ## Done Work
 
@@ -64,6 +64,7 @@ Phase 26: Read-only public product adapter foundation.
 - Added an admin-only Site Content Editor for editing seeded Firestore `siteContent` documents without changing public static reads on the active branch.
 - Added admin dark/light theme toggle with dark mode as the default on the active branch.
 - Added a read-only Firestore-to-public-product adapter and parity report helper without switching public product pages to Firestore on the active branch.
+- Added an admin-only Public Product Parity panel that compares Firestore-normalized visible products against the current static shop output on the active branch.
 
 ## In Progress Work
 
@@ -79,6 +80,7 @@ Phase 26: Read-only public product adapter foundation.
 - Verify Site Content Editor saves Firestore `siteContent` sections and does not edit protected static content files.
 - Verify admin dark mode loads by default and the light/dark toggle persists locally.
 - Verify the public product adapter normalizes Firestore products to the existing static public product shape before any public read switch is approved.
+- Verify Public Product Parity reports whether Firestore-normalized visible products match static visible shop products without switching public reads.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
