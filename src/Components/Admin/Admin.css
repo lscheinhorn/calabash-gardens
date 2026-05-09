@@ -1,6 +1,9 @@
 .admin_page {
+  background: #ffffff;
+  color: #3d3343;
   display: flex;
   justify-content: center;
+  min-height: 100vh;
   padding: 48px 16px;
 }
 
@@ -582,6 +585,107 @@
 .admin_seed_summary ul {
   margin: 6px 0 0;
   padding-left: 20px;
+}
+
+.admin_theme_dark {
+  background: #17131b;
+  color: #f4eef7;
+}
+
+.admin_theme_dark .admin_header {
+  border-bottom-color: #4e3d58;
+}
+
+.admin_theme_dark .admin_header h1,
+.admin_theme_dark .admin_panel h2,
+.admin_theme_dark .admin_placeholder_grid h3,
+.admin_theme_dark .admin_form_header h3,
+.admin_theme_dark .admin_form_header h4,
+.admin_theme_dark .admin_audit_section h4 {
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_form,
+.admin_theme_dark .admin_panel,
+.admin_theme_dark .admin_status_panel,
+.admin_theme_dark .admin_audit_summary div,
+.admin_theme_dark .admin_audit_section,
+.admin_theme_dark .admin_placeholder_grid div,
+.admin_theme_dark .admin_content_card,
+.admin_theme_dark .admin_product_card,
+.admin_theme_dark .admin_product_row,
+.admin_theme_dark .admin_media_card,
+.admin_theme_dark .admin_seed_summary,
+.admin_theme_dark .admin_upload_notice,
+.admin_theme_dark .admin_photo_row {
+  background: #241d2a;
+  border-color: #4e3d58;
+}
+
+.admin_theme_dark .admin_embedded_form,
+.admin_theme_dark .admin_inline_form,
+.admin_theme_dark .admin_product_card_body,
+.admin_theme_dark .admin_product_meta,
+.admin_theme_dark .admin_product_details {
+  color: #f4eef7;
+}
+
+.admin_theme_dark label,
+.admin_theme_dark .admin_filter_grid label,
+.admin_theme_dark .admin_product_card_header,
+.admin_theme_dark .admin_product_row span,
+.admin_theme_dark .admin_photo_row span,
+.admin_theme_dark .admin_upload_notice span,
+.admin_theme_dark .admin_audit_section li,
+.admin_theme_dark .admin_product_details dd {
+  color: #f4eef7;
+}
+
+.admin_theme_dark input,
+.admin_theme_dark select,
+.admin_theme_dark textarea {
+  background: #18131d;
+  border-color: #6a5574;
+  color: #f8f4fb;
+}
+
+.admin_theme_dark input::placeholder,
+.admin_theme_dark textarea::placeholder {
+  color: #a995b4;
+}
+
+.admin_theme_dark .admin_status_panel span,
+.admin_theme_dark .admin_audit_summary span,
+.admin_theme_dark .admin_product_details dt,
+.admin_theme_dark .admin_seed_summary small,
+.admin_theme_dark .admin_seed_summary li,
+.admin_theme_dark .admin_help_text {
+  color: #cbbbd4;
+}
+
+.admin_theme_dark .admin_message,
+.admin_theme_dark .admin_status,
+.admin_theme_dark .admin_status_panel strong,
+.admin_theme_dark .admin_audit_summary strong,
+.admin_theme_dark .admin_product_row small,
+.admin_theme_dark .admin_product_card_header small,
+.admin_theme_dark .admin_product_meta span,
+.admin_theme_dark .admin_photo_row small,
+.admin_theme_dark .admin_audit_section small,
+.admin_theme_dark .admin_upload_notice small {
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_icon_button {
+  background: #18131d;
+  border-color: #6a5574;
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_audit_section code {
+  background: #18131d;
+  border-color: #6a5574;
+  color: #f3cf50;
 }
 
 @media screen and (max-width: 700px) {

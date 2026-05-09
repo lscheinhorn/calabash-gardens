@@ -16,6 +16,19 @@ import ProductAdmin from "./ProductAdmin";
 import ProductMirrorAudit from "./ProductMirrorAudit";
 
 const adminCollection = "adminUsers";
+const adminThemeStorageKey = "calabashAdminTheme";
+
+const loadInitialTheme = () => {
+  if (typeof window === "undefined") {
+    return "dark";
+  }
+
+  try {
+    return window.localStorage.getItem(adminThemeStorageKey) || "dark";
+  } catch (error) {
+    return "dark";
+  }
+};
 
 export default function Admin() {
   const [email, setEmail] = useState("");
@@ -25,6 +38,19 @@ export default function Admin() {
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [message, setMessage] = useState("");
+  const [theme, setTheme] = useState(loadInitialTheme);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(adminThemeStorageKey, theme);
+    } catch (error) {
+      // Local persistence is optional; the admin theme still works in memory.
+    }
+  }, [theme]);
 
   useEffect(() => {
     if (!auth) {
@@ -123,6 +149,10 @@ export default function Admin() {
     setIsApprovedAdmin(false);
   };
 
+  const toggleTheme = () => {
+    setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
+  };
+
   const renderDashboard = () => {
     if (isCheckingAdmin) {
       return <p className="admin_status">Checking admin access...</p>;
@@ -181,15 +211,20 @@ export default function Admin() {
   );
 
   return (
-    <main id="admin" className="admin_page">
+    <main id="admin" className={`admin_page admin_theme_${theme}`}>
       <section className="admin_shell">
         <div className="admin_header">
           <h1>Admin</h1>
-          {user ? (
-            <button className="admin_secondary_button" onClick={handleSignOut}>
-              Sign Out
+          <div className="admin_button_row">
+            <button className="admin_secondary_button" onClick={toggleTheme} type="button">
+              {theme === "dark" ? "Light Mode" : "Dark Mode"}
             </button>
-          ) : null}
+            {user ? (
+              <button className="admin_secondary_button" onClick={handleSignOut} type="button">
+                Sign Out
+              </button>
+            ) : null}
+          </div>
         </div>
 
         {renderStatusPanel()}
