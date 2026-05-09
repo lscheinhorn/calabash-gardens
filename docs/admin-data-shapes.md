@@ -137,6 +137,8 @@ Current compatibility notes:
 - Seeded Firestore product documents must not include fields outside this contract, because rules validate the full resulting document on update.
 - New product IDs are suggested from the first title. The ID is locked after saving; changing it later requires creating a replacement product.
 - New product IDs must not match an existing Firestore product document ID.
+- `src/data/publicProductAdapter.js` is the read-only bridge for future public product reads. It normalizes Firestore product documents back into the current public product shape, keeps static as the default source, and provides a parity report helper before any public switch is approved.
+- Public product pages still import static data through `src/data/siteData.js`; Firestore product reads are not active on the public site yet.
 
 Editor controls:
 
