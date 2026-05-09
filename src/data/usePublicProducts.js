@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
+import publicProductsCache from "../generated/public-products-cache.json";
 import { getProductByKey, products as staticProducts } from "./siteData";
 
 const publicProductsSource = process.env.REACT_APP_PUBLIC_PRODUCTS_SOURCE === "firestore"
@@ -12,6 +13,30 @@ const getStaticState = () => ({
   products: staticProducts,
   source: "static",
 });
+
+const getGeneratedCacheProducts = () => (
+  Array.isArray(publicProductsCache.products)
+    ? publicProductsCache.products
+    : []
+);
+
+const getFallbackState = () => {
+  const cachedProducts = getGeneratedCacheProducts();
+
+  if (cachedProducts.length) {
+    return {
+      error: "Firestore products could not be loaded. Generated product cache is being used.",
+      isLoading: false,
+      products: cachedProducts,
+      source: "generated-cache",
+    };
+  }
+
+  return {
+    ...getStaticState(),
+    error: "Firestore products could not be loaded. Static products are being used.",
+  };
+};
 
 export const usePublicProducts = () => {
   const [state, setState] = useState(getStaticState);
@@ -65,10 +90,7 @@ export const usePublicProducts = () => {
           return;
         }
 
-        setState({
-          ...getStaticState(),
-          error: "Firestore products could not be loaded. Static products are being used.",
-        });
+        setState(getFallbackState());
       });
 
     return () => {

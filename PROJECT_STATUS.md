@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Public product source switch testing is in progress on branch `codex/product-image-manifest`.
+Generated public product cache fallback is implemented on branch `codex/product-image-manifest` and is pending Luke review.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Public product source switch testing is in progress on branch `codex/product-ima
 
 ## Current Phase
 
-Phase 28: Public product source hook behind env flag.
+Phase 29: Generated public product cache fallback.
 
 ## Done Work
 
@@ -66,6 +66,8 @@ Phase 28: Public product source hook behind env flag.
 - Added a read-only Firestore-to-public-product adapter and parity report helper without switching public product pages to Firestore on the active branch.
 - Added an admin-only Public Product Parity panel that compares Firestore-normalized visible products against the current static shop output on the active branch.
 - Added public product hooks that keep static products as the default source and allow local Firestore product testing only when `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set on the active branch.
+- Added a manual deploy-time product cache generator that can write `src/generated/public-products-cache.json` from Firestore without editing protected static product files on the active branch.
+- Added generated-cache fallback behavior for the guarded public product hook when Firestore mode is enabled and live Firestore loading fails on the active branch.
 
 ## In Progress Work
 
@@ -83,6 +85,8 @@ Phase 28: Public product source hook behind env flag.
 - Verify the public product adapter normalizes Firestore products to the existing static public product shape before any public read switch is approved.
 - Verify Public Product Parity reports whether Firestore-normalized visible products match static visible shop products without switching public reads.
 - Verify shop, highlighted products, and product detail pages still render static products by default and only use Firestore behind the explicit env flag.
+- Verify the generated public product cache script against Firebase before making it part of any deploy workflow.
+- Verify Firestore mode uses the generated cache only as a fallback and preserves static products as the default public source.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -144,6 +148,8 @@ Phase 28: Public product source hook behind env flag.
 - Existing unapproved Firestore categories may need manual cleanup if they were already seeded before this guardrail.
 - CSV import/export should reuse the product seed validation contract instead of trusting spreadsheet validation.
 - Public product pages still do not read Firestore products; admin Firestore product labels reflect seeded/admin data only.
+- `src/generated/public-products-cache.json` is a generated fallback artifact only and may be stale unless refreshed from Firestore before deployment.
+- The generated product cache does not become active unless `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set and live Firestore loading fails.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -189,6 +195,8 @@ Phase 28: Public product source hook behind env flag.
 - Product categories have active/inactive status; new products can use active categories only.
 - Existing products can keep inactive categories during edits for preservation.
 - Gifts seeds inactive by default.
+- Generated public product cache refresh is a manual script for now; it is not wired into `build`, `predeploy`, or `deploy` until the deployment workflow is approved.
+- Generated cache data is not source-of-truth business content. Firestore is the source for the generated artifact, and static resource files remain protected during the transition.
 
 ## Verification History
 
@@ -220,6 +228,10 @@ Phase 28: Public product source hook behind env flag.
 - 2026-05-07: Confirmed media import was retried after Storage rules deploy and failed on the first upload with `storage/unauthorized`; no Firestore writes ran.
 - 2026-05-07: Luke granted the Firebase Rules System service agent the `Firebase Rules Firestore Service Agent` role.
 - 2026-05-07: `npm run import:media-migration -- --confirm` completed successfully: 20 files uploaded, 20 `mediaAssets` documents created, 11 product targets updated, and 0 targets skipped.
+- 2026-05-09: `npm run build` completed successfully after adding generated product cache fallback, with the same existing warnings.
+- 2026-05-09: `node --check scripts/generate-public-products-cache.js` passed.
+- 2026-05-09: `git diff --check` passed.
+- 2026-05-09: Protected content diff check returned no changes.
 
 ## Commits
 
@@ -252,6 +264,7 @@ Phase 28: Public product source hook behind env flag.
 - `315235f feat: add media library foundation`
 - `3bad712 docs: add media migration dry run`
 - `feat: prepare oversized media assets` (current branch)
+- `feat: add generated product cache fallback` (current branch)
 
 ## Deployments
 
