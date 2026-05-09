@@ -140,6 +140,7 @@ Current compatibility notes:
 - `src/data/publicProductAdapter.js` is the read-only bridge for future public product reads. It normalizes Firestore product documents back into the current public product shape, keeps static as the default source, and provides a parity report helper before any public switch is approved.
 - Public product pages still import static data through `src/data/siteData.js`; Firestore product reads are not active on the public site yet.
 - The admin Public Product Parity panel uses the adapter to compare Firestore-normalized visible products against currently visible static shop products before any public backend-read switch is approved.
+- `src/data/usePublicProducts.js` is the guarded public hook layer. It returns static products by default and loads Firestore products only when `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set. If Firestore loading fails, it falls back to static products.
 
 Editor controls:
 

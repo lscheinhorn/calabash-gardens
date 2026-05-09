@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Public product parity testing is in progress on branch `codex/product-image-manifest`.
+Public product source switch testing is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Public product parity testing is in progress on branch `codex/product-image-mani
 
 ## Current Phase
 
-Phase 27: Admin public product parity report.
+Phase 28: Public product source hook behind env flag.
 
 ## Done Work
 
@@ -65,6 +65,7 @@ Phase 27: Admin public product parity report.
 - Added admin dark/light theme toggle with dark mode as the default on the active branch.
 - Added a read-only Firestore-to-public-product adapter and parity report helper without switching public product pages to Firestore on the active branch.
 - Added an admin-only Public Product Parity panel that compares Firestore-normalized visible products against the current static shop output on the active branch.
+- Added public product hooks that keep static products as the default source and allow local Firestore product testing only when `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set on the active branch.
 
 ## In Progress Work
 
@@ -81,6 +82,7 @@ Phase 27: Admin public product parity report.
 - Verify admin dark mode loads by default and the light/dark toggle persists locally.
 - Verify the public product adapter normalizes Firestore products to the existing static public product shape before any public read switch is approved.
 - Verify Public Product Parity reports whether Firestore-normalized visible products match static visible shop products without switching public reads.
+- Verify shop, highlighted products, and product detail pages still render static products by default and only use Firestore behind the explicit env flag.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.

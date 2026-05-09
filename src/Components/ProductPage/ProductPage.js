@@ -1,37 +1,34 @@
 import './ProductPage.css'
 import { useParams } from 'react-router-dom'
-import { getProductByKey } from '../../data/siteData'
+import { usePublicProductByKey } from '../../data/usePublicProducts'
 import { addCartItem } from '../Cart/cartSlice'
 import { useDispatch } from 'react-redux'
 import {  Link } from 'react-router-dom'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 export default function ProductPage () {
     const dispatch = useDispatch()
     const { key } = useParams()
+    const { product } = usePublicProductByKey(key)
+    const safeProduct = useMemo(() => product || {
+        photos: [],
+        priceOptions: [{ price: "0.00" }],
+        key: "",
+        title: "",
+        info: "",
+        inStock: false
+    }, [product])
     
-    const getProduct = (productKey) => {
-        const product = getProductByKey(productKey)
-        if ( product ) {
-            return product
-        }
-        console.log("getProduct() function failed to find a product matching the key")
-        alert("There was a problem loading this page!")
-    }
-
-    
-    
-    const product = getProduct(key) 
-    
-    const photos = product.photos.map(photo => {
+    const photos = safeProduct.photos.map(photo => {
         return `${photo}`
     })
 
     const featured = photos[0]
-    const { title, info, link, priceOptions, inStock  } = product
+    const { title, info, link, priceOptions, inStock  } = safeProduct
 
     const [ priceOption, setPriceOption ] = useState( priceOptions[0] )
-    const [ productInfo, setProductInfo ] = useState({...product, price: priceOptions[0].price , key: product.key + "0"} )
+    const [ productInfo, setProductInfo ] = useState({...safeProduct, price: priceOptions[0].price , key: safeProduct.key + "0"} )
+    const [ photoIdx, setPhotoIdx ] = useState( 0 )
 
     const handleAddCartItem = () => {
         dispatch(addCartItem(productInfo))
@@ -46,15 +43,18 @@ export default function ProductPage () {
         // console.log({priceOption})
 
         setProductInfo({ 
-            ...product, 
+            ...safeProduct,
             price: priceOption.price,
             title: title + (priceOption.option ? " " + priceOption.option : ""),
-            key: product.key.slice(0, -1) + priceOptions.findIndex(({ option }) => { return option === priceOption.option }).toString()
+            key: safeProduct.key.slice(0, -1) + priceOptions.findIndex(({ option }) => { return option === priceOption.option }).toString()
         })
         // console.log("productInfo", productInfo )
-    }, [ priceOption, product, title, priceOptions  ])
-  
-    const [ photoIdx, setPhotoIdx ] = useState( 0 )
+    }, [ priceOption, safeProduct, title, priceOptions  ])
+
+    useEffect(() => {
+        setPriceOption(priceOptions[0])
+        setPhotoIdx(0)
+    }, [safeProduct.key, priceOptions])
 
     const handlePhotoLeft = () => {
         if(photoIdx === 0 ) {
@@ -68,6 +68,10 @@ export default function ProductPage () {
             return
         }
         setPhotoIdx(photoIdx + 1)
+    }
+
+    if (!product) {
+        return <p>There was a problem loading this page!</p>
     }
 
     return (

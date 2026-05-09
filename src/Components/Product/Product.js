@@ -66,6 +66,11 @@ export default function Product (props) {
 
     const [ photoIdx, setPhotoIdx ] = useState( 0 )
 
+    useEffect(() => {
+        setPriceOption(priceOptions[0])
+        setPhotoIdx(0)
+    }, [product.key, priceOptions])
+
     const handlePhotoLeft = () => {
         if(photoIdx === 0 ) {
             return

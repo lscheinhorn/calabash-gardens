@@ -1,16 +1,16 @@
 import './HighlightedProducts.css'
-import { getHighlightedProducts } from '../../data/siteData'
+import { useHighlightedProducts } from '../../data/usePublicProducts'
 import Product from '../Product/Product'
 import {  Link } from 'react-router-dom'
 
 export default function HighlightedProducts () {
-    
+    const { products } = useHighlightedProducts()
     
     return (
         <div className="text-center">
             <div id="highlighted-products">
                 {
-                    getHighlightedProducts().map( product => {
+                    products.map( product => {
                         return <Product product={ product } key={ product.key } />
                     })
                 }

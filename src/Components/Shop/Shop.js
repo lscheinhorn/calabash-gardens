@@ -1,11 +1,12 @@
 import './Shop.css'
-import { products } from '../../data/siteData'
+import { usePublicProducts } from '../../data/usePublicProducts'
 import Product from '../Product/Product'
 import { useMemo, useState } from 'react'
 
 export default function Shop () {
     const [ option, setOption ] = useState("All")
-    const activeProducts = useMemo(() => products.filter(product => product.isActive === true), [])
+    const { products } = usePublicProducts()
+    const activeProducts = useMemo(() => products.filter(product => product.isActive === true), [products])
     const categories = useMemo(() => {
         return Array.from(new Set(activeProducts
             .map(product => product.category)
