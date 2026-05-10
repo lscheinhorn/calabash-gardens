@@ -87,6 +87,7 @@ Phase 29: Generated public product cache fallback.
 - Verify shop, highlighted products, and product detail pages still render static products by default and only use Firestore behind the explicit env flag.
 - Verify the generated public product cache script against Firebase before making it part of any deploy workflow.
 - Verify Firestore mode uses the generated cache only as a fallback and preserves static products as the default public source.
+- Review generated product cache photo coverage before any public Firestore switch; the first refresh found many active products without Storage-backed photos.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -150,6 +151,7 @@ Phase 29: Generated public product cache fallback.
 - Public product pages still do not read Firestore products; admin Firestore product labels reflect seeded/admin data only.
 - `src/generated/public-products-cache.json` is a generated fallback artifact only and may be stale unless refreshed from Firestore before deployment.
 - The generated product cache does not become active unless `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set and live Firestore loading fails.
+- 2026-05-10 generated product cache refresh produced 74 products from Firestore, including 65 active products and 11 products with Storage-backed photo URLs.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -232,6 +234,9 @@ Phase 29: Generated public product cache fallback.
 - 2026-05-09: `node --check scripts/generate-public-products-cache.js` passed.
 - 2026-05-09: `git diff --check` passed.
 - 2026-05-09: Protected content diff check returned no changes.
+- 2026-05-10: `npm run generate:public-products-cache` completed with approved network access and generated 74 products from `firestore:calabash-54fb5`.
+- 2026-05-10: Generated cache validation found `productCount === products.length`, all required public product fields present, valid photo arrays, valid price option arrays, and valid boolean fields.
+- 2026-05-10: `npm run build` completed successfully after refreshing generated product cache, with the same existing warnings.
 
 ## Commits
 
