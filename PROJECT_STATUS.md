@@ -68,6 +68,7 @@ Phase 29: Generated public product cache fallback.
 - Added public product hooks that keep static products as the default source and allow local Firestore product testing only when `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set on the active branch.
 - Added a manual deploy-time product cache generator that can write `src/generated/public-products-cache.json` from Firestore without editing protected static product files on the active branch.
 - Added generated-cache fallback behavior for the guarded public product hook when Firestore mode is enabled and live Firestore loading fails on the active branch.
+- Added default product photo normalization so static, Firestore, and generated-cache products render the existing default image when a product has no photos on the active branch.
 
 ## In Progress Work
 
@@ -88,6 +89,7 @@ Phase 29: Generated public product cache fallback.
 - Verify the generated public product cache script against Firebase before making it part of any deploy workflow.
 - Verify Firestore mode uses the generated cache only as a fallback and preserves static products as the default public source.
 - Review generated product cache photo coverage before any public Firestore switch; the first refresh found many active products without Storage-backed photos.
+- Verify generated-cache products with empty photo arrays render the default Calabash logo image instead of an empty image source.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -152,6 +154,7 @@ Phase 29: Generated public product cache fallback.
 - `src/generated/public-products-cache.json` is a generated fallback artifact only and may be stale unless refreshed from Firestore before deployment.
 - The generated product cache does not become active unless `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set and live Firestore loading fails.
 - 2026-05-10 generated product cache refresh produced 74 products from Firestore, including 65 active products and 11 products with Storage-backed photo URLs.
+- Runtime product hooks now fill empty product photo arrays with the existing default image, but Firestore photo coverage still needs review before a public source switch because real product photos are preferred.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -237,6 +240,7 @@ Phase 29: Generated public product cache fallback.
 - 2026-05-10: `npm run generate:public-products-cache` completed with approved network access and generated 74 products from `firestore:calabash-54fb5`.
 - 2026-05-10: Generated cache validation found `productCount === products.length`, all required public product fields present, valid photo arrays, valid price option arrays, and valid boolean fields.
 - 2026-05-10: `npm run build` completed successfully after refreshing generated product cache, with the same existing warnings.
+- 2026-05-11: `npm run build` completed successfully after adding default product photo normalization, with the same existing warnings.
 
 ## Commits
 

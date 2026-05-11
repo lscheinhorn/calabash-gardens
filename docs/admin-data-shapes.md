@@ -143,6 +143,7 @@ Current compatibility notes:
 - `src/data/usePublicProducts.js` is the guarded public hook layer. It returns static products by default and loads Firestore products only when `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set.
 - `src/generated/public-products-cache.json` is a generated deploy artifact for backend-read fallback, not source-of-truth product content. It is refreshed manually from Firestore with `npm run generate:public-products-cache`.
 - If Firestore loading fails while the Firestore source flag is enabled, public product hooks use the generated product cache when it has products. If the generated cache is empty or missing products, they fall back to the current static product data.
+- Public product hooks normalize any product without photos to the existing default Calabash logo image before Product and ProductPage render it.
 
 Editor controls:
 

@@ -1,22 +1,38 @@
 import { useEffect, useMemo, useState } from "react";
 
 import publicProductsCache from "../generated/public-products-cache.json";
+import defaultProductPhoto from "../resources/images/large_logo_no_purple_square.png";
 import { getProductByKey, products as staticProducts } from "./siteData";
 
 const publicProductsSource = process.env.REACT_APP_PUBLIC_PRODUCTS_SOURCE === "firestore"
   ? "firestore"
   : "static";
 
+const withDefaultProductPhoto = (product) => (
+  product
+    ? ({
+      ...product,
+      photos: Array.isArray(product.photos) && product.photos.length
+        ? product.photos
+        : [defaultProductPhoto],
+    })
+    : product
+);
+
+const withDefaultProductPhotos = (products) => (
+  products.map((product) => withDefaultProductPhoto(product))
+);
+
 const getStaticState = () => ({
   error: "",
   isLoading: false,
-  products: staticProducts,
+  products: withDefaultProductPhotos(staticProducts),
   source: "static",
 });
 
 const getGeneratedCacheProducts = () => (
   Array.isArray(publicProductsCache.products)
-    ? publicProductsCache.products
+    ? withDefaultProductPhotos(publicProductsCache.products)
     : []
 );
 
@@ -81,7 +97,7 @@ export const usePublicProducts = () => {
         setState({
           error: "",
           isLoading: false,
-          products: firestoreProducts,
+          products: withDefaultProductPhotos(firestoreProducts),
           source: "firestore",
         });
       })
@@ -121,6 +137,6 @@ export const usePublicProductByKey = (productKey) => {
 
   return {
     ...publicProducts,
-    product: product || getProductByKey(productKey),
+    product: product || withDefaultProductPhoto(getProductByKey(productKey)),
   };
 };
