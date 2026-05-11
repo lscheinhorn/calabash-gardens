@@ -11,6 +11,7 @@ import {
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
 import ContentAdmin from "./ContentAdmin";
 import ContentMirrorAudit from "./ContentMirrorAudit";
+import EventMirrorAudit from "./EventMirrorAudit";
 import MediaAdmin from "./MediaAdmin";
 import ProductAdmin from "./ProductAdmin";
 import ProductMirrorAudit from "./ProductMirrorAudit";
@@ -178,16 +179,17 @@ export default function Admin() {
         <div className="admin_placeholder_grid">
           <div>
             <h3>Events</h3>
-            <p>Editor not connected yet.</p>
+            <p>Mirror audit and seed controls are available below.</p>
           </div>
           <div>
             <h3>Site Content</h3>
-            <p>Editor not connected yet.</p>
+            <p>Editor and mirror audit are available below.</p>
           </div>
         </div>
         <MediaAdmin db={db} storage={storage} />
         <ProductMirrorAudit db={db} />
         <ProductPublicParityAudit db={db} />
+        <EventMirrorAudit db={db} />
         <ContentMirrorAudit db={db} />
         <ContentAdmin db={db} />
         <ProductAdmin db={db} storage={storage} />

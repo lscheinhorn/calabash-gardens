@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Generated public product cache fallback is implemented on branch `codex/product-image-manifest` and is pending Luke review.
+Event/content Firestore parity foundation is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -15,11 +15,11 @@ Generated public product cache fallback is implemented on branch `codex/product-
 - PayPal React SDK for checkout
 - EmailJS for contact form
 - Static JS resource files for products, events, content, and event inventory
-- Firebase is present as an env-driven config module, with admin auth shell and product editor only
+- Firebase is present as an env-driven config module, with admin auth shell and guarded admin product/content/media tooling
 
 ## Current Phase
 
-Phase 29: Generated public product cache fallback.
+Phase 30: Event and experience content Firestore parity foundation.
 
 ## Done Work
 
@@ -69,6 +69,8 @@ Phase 29: Generated public product cache fallback.
 - Added a manual deploy-time product cache generator that can write `src/generated/public-products-cache.json` from Firestore without editing protected static product files on the active branch.
 - Added generated-cache fallback behavior for the guarded public product hook when Firestore mode is enabled and live Firestore loading fails on the active branch.
 - Added default product photo normalization so static, Firestore, and generated-cache products render the existing default image when a product has no photos on the active branch.
+- Added Firestore-safe event seed data and an admin Event Mirror Audit that can seed missing event documents without overwriting existing Firestore events on the active branch.
+- Added `experienceBlurb` to the guarded site content seed/editor path so Calabash Experience copy can be mirrored and edited in Firestore without changing public static reads on the active branch.
 
 ## In Progress Work
 
@@ -90,6 +92,9 @@ Phase 29: Generated public product cache fallback.
 - Verify Firestore mode uses the generated cache only as a fallback and preserves static products as the default public source.
 - Review generated product cache photo coverage before any public Firestore switch; the first refresh found many active products without Storage-backed photos.
 - Verify generated-cache products with empty photo arrays render the default Calabash logo image instead of an empty image source.
+- Verify Event Mirror Audit reports missing, extra, and different Firestore events without changing public event reads.
+- Verify Seed Missing Events creates only missing Firestore `events` documents and skips existing documents.
+- Verify `experienceBlurb` appears in Content Mirror Audit and Site Content Editor after seeding missing content.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -155,6 +160,8 @@ Phase 29: Generated public product cache fallback.
 - The generated product cache does not become active unless `REACT_APP_PUBLIC_PRODUCTS_SOURCE=firestore` is explicitly set and live Firestore loading fails.
 - 2026-05-10 generated product cache refresh produced 74 products from Firestore, including 65 active products and 11 products with Storage-backed photo URLs.
 - Runtime product hooks now fill empty product photo arrays with the existing default image, but Firestore photo coverage still needs review before a public source switch because real product photos are preferred.
+- Event seed intentionally leaves event photos and menu links empty because static event media uses bundled `require(...)` values that should not be stored directly in Firestore.
+- Event inventory remains static and separate from event documents in this phase.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -202,6 +209,7 @@ Phase 29: Generated public product cache fallback.
 - Gifts seeds inactive by default.
 - Generated public product cache refresh is a manual script for now; it is not wired into `build`, `predeploy`, or `deploy` until the deployment workflow is approved.
 - Generated cache data is not source-of-truth business content. Firestore is the source for the generated artifact, and static resource files remain protected during the transition.
+- Event Firestore seed is a missing-documents-only bridge; public event pages continue to read static data until parity, inventory, media, and rules are explicitly approved for public reads.
 
 ## Verification History
 
@@ -241,6 +249,8 @@ Phase 29: Generated public product cache fallback.
 - 2026-05-10: Generated cache validation found `productCount === products.length`, all required public product fields present, valid photo arrays, valid price option arrays, and valid boolean fields.
 - 2026-05-10: `npm run build` completed successfully after refreshing generated product cache, with the same existing warnings.
 - 2026-05-11: `npm run build` completed successfully after adding default product photo normalization, with the same existing warnings.
+- 2026-05-11: `node --check src/data/adminEventSeed.js` and `node --check src/data/adminContentSeed.js` passed.
+- 2026-05-11: `npm run build` completed successfully after adding event mirror audit and experience blurb content seed, with the same existing warnings.
 
 ## Commits
 

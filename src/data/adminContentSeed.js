@@ -1,4 +1,12 @@
 import { content } from "../resources/content";
+import { experienceBlurb } from "../resources/events";
+
+const experienceBlurbSections = {
+  paragraphs: Object.fromEntries(experienceBlurb.map((paragraph, index) => [
+    `paragraph_${index + 1}`,
+    paragraph,
+  ])),
+};
 
 const expectedContentDocs = [
   {
@@ -28,6 +36,11 @@ const expectedContentDocs = [
     sections: content.home.team,
     title: "Team",
   },
+  {
+    id: "experienceBlurb",
+    sections: experienceBlurbSections,
+    title: "Experience Blurb",
+  },
 ];
 
 const cloneSections = (sections) => JSON.parse(JSON.stringify(sections || {}));
@@ -43,7 +56,5 @@ export const buildContentSeed = () => ({
     title: contentDoc.title,
   })),
   errors: [],
-  warnings: [
-    "Experience blurb content is still tracked with events and should be audited in the events/content bridge phase.",
-  ],
+  warnings: [],
 });
