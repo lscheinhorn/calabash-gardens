@@ -5,6 +5,7 @@ This file is the live source of truth for Calabash Gardens project work.
 ## Current Status
 
 Draft/publish admin workflow foundation is in progress on branch `codex/draft-publish-foundation`.
+Firestore rules for the draft collections are deployed to `calabash-54fb5`, and draft save/preview/discard has been verified from the local admin UI.
 
 ## Approved Tech Stack
 
@@ -83,7 +84,9 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Updated product, event, and site content editors so content changes save to draft collections first, with explicit Publish Changes and Discard Draft controls.
 - Updated product photo upload, attach, reorder, alt edit, and detach controls so product photo references save through product drafts before they can affect live product documents.
 - Updated the admin Firestore Site Preview to load active drafts over live Firestore records while public routes and generated cache reads remain live-only/static-gated.
-- Updated draft Firestore rules and docs for `productDrafts`, `eventDrafts`, and `siteContentDrafts`; rules are not deployed yet.
+- Updated draft Firestore rules and docs for `productDrafts`, `eventDrafts`, and `siteContentDrafts`.
+- Added the Firestore rules pointer to `firebase.json` and deployed only Firestore rules to `calabash-54fb5`.
+- Verified a temporary `siteContentDrafts/home.banner` draft can be saved, rendered in the admin Firestore Site Preview, and discarded without publishing live content.
 
 ## In Progress Work
 
@@ -124,7 +127,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
 - Use subagents to review implementation scope and guardrail compliance.
-- Deploy updated Firestore rules only after Luke approves a rules deploy; until then, draft writes may fail against live Firebase rules, while draft reads fail softly to a live-only preview.
+- Verify Publish Changes from the admin UI in a controlled live-write test only after Luke explicitly approves a live Firestore content mutation.
 - Add clickable preview editing for site-content blocks after the draft/publish data flow is reviewed.
 
 ## Planned Work
@@ -158,11 +161,11 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Admin product editor writes to Firestore, but public product pages still use static data.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - Real admin testing still needs Firebase project values and approved admin user records.
-- Draft Firestore rules are not deployed.
 - Storage rules were deployed to `calabash-54fb5` on 2026-05-07.
 - Admin data-shape contract is a planning document and is not a migration.
-- Draft Firestore rules are aligned with the data-shape contract but are still not deployed.
-- Draft collection rules for `productDrafts`, `eventDrafts`, and `siteContentDrafts` are written locally but not deployed; admin draft reads fail softly to live-only preview until those rules are deployed.
+- Draft Firestore rules were deployed to `calabash-54fb5` on 2026-06-16.
+- Draft collection rules for `productDrafts`, `eventDrafts`, and `siteContentDrafts` are deployed; admin draft reads and writes require an approved admin user.
+- `.firebaserc` is currently commented out and triggers a Firebase CLI JSON warning. Firestore rules were deployed with the explicit `--project calabash-54fb5` flag, so the warning did not affect the deploy.
 - Product editor draft writes require Firebase env values, deployed/reviewed draft rules, and an approved admin record for real testing.
 - Product writes require approved `productCategories` records.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
@@ -315,6 +318,11 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - 2026-06-16: Direct admin editor writes to live `products`, `events`, and `siteContent` were removed from product/event/content editors; live writes now happen through explicit Publish Changes helpers, while seed/category setup paths remain live setup actions.
 - 2026-06-16: `git diff --check` passed after adding the draft/publish foundation.
 - 2026-06-16: Protected content diff check returned no changes after adding the draft/publish foundation.
+- 2026-06-16: `node -e "JSON.parse(require('fs').readFileSync('firebase.json', 'utf8'))"` passed after adding the Firestore rules pointer to `firebase.json`.
+- 2026-06-16: `git diff --check` passed before deploying Firestore rules.
+- 2026-06-16: `npx firebase-tools deploy --only firestore:rules --project calabash-54fb5` compiled and released `firestore.rules` successfully.
+- 2026-06-16: Browser verification saved a temporary Home Banner draft to `siteContentDrafts`, confirmed the Firestore Site Preview showed `Drafts` as `1` and rendered the draft title inside the iframe, then discarded the draft and confirmed the preview returned to `Drafts` as `0`.
+- 2026-06-16: Publish Changes was intentionally not browser-tested because that would mutate live Firestore content; the publish helper remains build-verified and should be tested with an explicitly approved live-write scenario.
 
 ## Commits
 
@@ -349,8 +357,12 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - `feat: prepare oversized media assets` (current branch)
 - `feat: add generated product cache fallback` (current branch)
 - `5ebb69e feat: add firestore admin preview parity`
+- `77b50be docs: add firebase ownership audit`
+- `b151a46 feat: add admin draft publish foundation`
+- `chore: enable firestore rules deploy config` (current branch)
 
 ## Deployments
 
 - 2026-05-05: Published customer-request fixes with `npm run deploy`.
 - 2026-05-07: Published admin product card UI for live `/admin` testing with `npm run deploy`.
+- 2026-06-16: Deployed Firestore rules only to `calabash-54fb5` with `npx firebase-tools deploy --only firestore:rules --project calabash-54fb5`.
