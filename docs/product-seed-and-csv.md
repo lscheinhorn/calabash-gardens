@@ -97,6 +97,20 @@ Attached product photos can be managed from the product card: edit alt text, mov
 
 The admin Product Mirror Audit is read-only. It compares the static product seed expectations against Firestore `products` and reports missing records, extra records, field differences, price differences, and product photo review warnings. It does not write Firestore data, upload files, edit protected static resources, or switch public product pages to Firestore.
 
+## Full Firebase Ownership Audit
+
+Use this command before broadening migration work beyond product photos:
+
+```sh
+npm run audit:firebase-ownership
+```
+
+The command writes `docs/firebase-ownership-audit.md` and `docs/firebase-ownership-audit.json`.
+
+The audit is read-only. It inventories product media, event photos/menu links, site images, unowned local images, expected `siteContent` documents, hard-coded UI copy surfaces, and external media links. It does not query Firebase, upload files, write Firestore documents, edit protected static resources, or switch public reads.
+
+Review that report before approving event media uploads, non-image document Storage rules, site-media ownership, inventory migration, or a public Firestore read switch.
+
 ## Required Validation
 
 The seed must block writes when:

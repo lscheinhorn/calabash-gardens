@@ -1,0 +1,1312 @@
+{
+  "generatedAt": "2026-06-16T20:15:07.600Z",
+  "notes": [
+    "Read-only local audit. No Firebase network calls, no uploads, no Firestore writes, no protected static resource edits.",
+    "Product image ownership reuses the existing product image migration manifest rules.",
+    "Event media links are planned separately from event text because static event seed intentionally left link/photos empty.",
+    "Document uploads need a new reviewed Storage rule before PDF/DOC menu assets can move to Firebase Storage."
+  ],
+  "summary": {
+    "codeOwnedCopySurfaces": 7,
+    "eventDocumentsNeedingRules": 8,
+    "eventMediaReferences": 20,
+    "eventPhotoReferences": 10,
+    "eventLinkReferences": 10,
+    "externalMediaReferences": 2,
+    "largeImageReview": 3,
+    "missingSources": 0,
+    "otherImageCandidates": 9,
+    "productDefaultPlaceholdersSkipped": 62,
+    "productMediaCandidates": 16,
+    "productOtherMediaCandidates": 4,
+    "sharedSourceReview": 4,
+    "siteContentDocsExpected": 6,
+    "siteMediaAssets": 8,
+    "storageCandidatesTotal": 57,
+    "uniqueEventMediaFiles": 16,
+    "uniqueSiteMediaFiles": 8
+  },
+  "expectedFirestoreOwnership": {
+    "existingAdminCollections": [
+      "products",
+      "productCategories",
+      "events",
+      "siteContent",
+      "mediaAssets"
+    ],
+    "stillNeedsPlanning": [
+      "event inventory / ticket stock",
+      "event menu documents",
+      "site settings / navigation / UI chrome copy",
+      "public-read rules and generated fallback refresh workflow"
+    ]
+  },
+  "productMedia": [
+    {
+      "bin": "products",
+      "contentType": "image/jpeg",
+      "fileSize": 1279850,
+      "linkedId": "calabash-gifts-set",
+      "linkedType": "product",
+      "mediaAssetId": "product-calabash-gifts-set-01",
+      "productId": "calabash-gifts-set",
+      "productTitle": "Calabash Gifts Set",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/calabash_gifts_set.jpeg",
+      "storagePath": "product-images/calabash-gifts-set-01-calabash-gifts-set.jpeg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 107208,
+      "linkedId": "calabash-gift-set",
+      "linkedType": "product",
+      "mediaAssetId": "product-calabash-gift-set-01",
+      "productId": "calabash-gift-set",
+      "productTitle": "Calabash Gift Set",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/calabash_gift_set.webp",
+      "storagePath": "product-images/calabash-gift-set-01-calabash-gift-set.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 83706,
+      "linkedId": "spa-day-gift-set",
+      "linkedType": "product",
+      "mediaAssetId": "product-spa-day-gift-set-01",
+      "productId": "spa-day-gift-set",
+      "productTitle": "Spa Day Gift Set",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/spa_day_gift_set.webp",
+      "storagePath": "product-images/spa-day-gift-set-01-spa-day-gift-set.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 97064,
+      "linkedId": "erotic-gift-set",
+      "linkedType": "product",
+      "mediaAssetId": "product-erotic-gift-set-01",
+      "productId": "erotic-gift-set",
+      "productTitle": "Erotic Gift Set",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/erotic_gift_set.webp",
+      "storagePath": "product-images/erotic-gift-set-01-erotic-gift-set.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 130194,
+      "linkedId": "saffron-maple-syrup",
+      "linkedType": "product",
+      "mediaAssetId": "product-saffron-maple-syrup-01",
+      "productId": "saffron-maple-syrup",
+      "productTitle": "Saffron Maple Syrup",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/saffron_maple_syrup.webp",
+      "storagePath": "product-images/saffron-maple-syrup-01-saffron-maple-syrup.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/jpeg",
+      "fileSize": 18087346,
+      "linkedId": "saffron-simple-syrup",
+      "linkedType": "product",
+      "mediaAssetId": "product-saffron-simple-syrup-01",
+      "productId": "saffron-simple-syrup",
+      "productTitle": "Saffron Simple Syrup",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/saffron_simple_syrup.jpg",
+      "storagePath": "product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg",
+      "storageRuleStatus": "supported image path; optimization review recommended over 10 MB"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 104694,
+      "linkedId": "vermont-grown-saffron",
+      "linkedType": "product",
+      "mediaAssetId": "product-vermont-grown-saffron-01",
+      "productId": "vermont-grown-saffron",
+      "productTitle": "Vermont Grown Saffron",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_1.webp",
+      "storagePath": "product-images/vermont-grown-saffron-01-0.5g-vermont-grown-saffron-1.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 106068,
+      "linkedId": "vermont-grown-saffron",
+      "linkedType": "product",
+      "mediaAssetId": "product-vermont-grown-saffron-02",
+      "productId": "vermont-grown-saffron",
+      "productTitle": "Vermont Grown Saffron",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_2.webp",
+      "storagePath": "product-images/vermont-grown-saffron-02-0.5g-vermont-grown-saffron-2.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 191330,
+      "linkedId": "vermont-grown-saffron",
+      "linkedType": "product",
+      "mediaAssetId": "product-vermont-grown-saffron-03",
+      "productId": "vermont-grown-saffron",
+      "productTitle": "Vermont Grown Saffron",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/0.5g_vermont_grown_saffron_3.webp",
+      "storagePath": "product-images/vermont-grown-saffron-03-0.5g-vermont-grown-saffron-3.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 44172,
+      "linkedId": "vermont-grown-saffron",
+      "linkedType": "product",
+      "mediaAssetId": "product-vermont-grown-saffron-04",
+      "productId": "vermont-grown-saffron",
+      "productTitle": "Vermont Grown Saffron",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/1g_vt_grown_saffron.webp",
+      "storagePath": "product-images/vermont-grown-saffron-04-1g-vt-grown-saffron.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 148114,
+      "linkedId": "vermont-grown-saffron",
+      "linkedType": "product",
+      "mediaAssetId": "product-vermont-grown-saffron-05",
+      "productId": "vermont-grown-saffron",
+      "productTitle": "Vermont Grown Saffron",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/2g_vt_grown_saffron_1.webp",
+      "storagePath": "product-images/vermont-grown-saffron-05-2g-vt-grown-saffron-1.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 106068,
+      "linkedId": "vermont-grown-saffron",
+      "linkedType": "product",
+      "mediaAssetId": "product-vermont-grown-saffron-06",
+      "productId": "vermont-grown-saffron",
+      "productTitle": "Vermont Grown Saffron",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/2g_vt_grown_saffron_2.webp",
+      "storagePath": "product-images/vermont-grown-saffron-06-2g-vt-grown-saffron-2.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/webp",
+      "fileSize": 91400,
+      "linkedId": "saffron-tincture",
+      "linkedType": "product",
+      "mediaAssetId": "product-saffron-tincture-01",
+      "productId": "saffron-tincture",
+      "productTitle": "Saffron Tincture",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/saffron_tincture.webp",
+      "storagePath": "product-images/saffron-tincture-01-saffron-tincture.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/jpeg",
+      "fileSize": 10269768,
+      "linkedId": "the-heart-and-head-1-2-oz-loose-leaf-tea",
+      "linkedType": "product",
+      "mediaAssetId": "product-the-heart-and-head-1-2-oz-loose-leaf-tea-01",
+      "productId": "the-heart-and-head-1-2-oz-loose-leaf-tea",
+      "productTitle": "The Heart and Head 1/2 oz Loose Leaf Tea",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/the_heart_and_the_head.jpg",
+      "storagePath": "product-images/the-heart-and-head-1-2-oz-loose-leaf-tea-01-the-heart-and-the-head.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/jpeg",
+      "fileSize": 8521883,
+      "linkedId": "ageless-beauty-butter",
+      "linkedType": "product",
+      "mediaAssetId": "product-ageless-beauty-butter-01",
+      "productId": "ageless-beauty-butter",
+      "productTitle": "Ageless Beauty Butter",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/ageless_beauty_body_butter.jpg",
+      "storagePath": "product-images/ageless-beauty-butter-01-ageless-beauty-body-butter.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "products",
+      "contentType": "image/jpeg",
+      "fileSize": 8136386,
+      "linkedId": "cold-and-flu",
+      "linkedType": "product",
+      "mediaAssetId": "product-cold-and-flu-01",
+      "productId": "cold-and-flu",
+      "productTitle": "Cold and Flu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/cold_and_flu.jpg",
+      "storagePath": "product-images/cold-and-flu-01-cold-and-flu.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    }
+  ],
+  "productOtherMedia": [
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 1026892,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-img-1785",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/IMG-1785.jpg",
+      "storagePath": "other-images/img-1785.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 1929965,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-img-2623",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/IMG-2623.JPG",
+      "storagePath": "other-images/img-2623.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 2242101,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-event-night",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/event_night.jpg",
+      "storagePath": "other-images/event-night.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 15689035,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-saffron-tin",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/saffron_tin.jpg",
+      "storagePath": "other-images/saffron-tin.jpg",
+      "storageRuleStatus": "supported image path; optimization review recommended over 10 MB"
+    }
+  ],
+  "eventMedia": [
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "calabash-experience-chef-mike-clancy",
+      "eventIndex": 0,
+      "eventTitle": "Calabash Experience, Chef Mike Clancy",
+      "field": "link",
+      "fileSize": 21756,
+      "linkedId": "calabash-experience-chef-mike-clancy",
+      "linkedType": "event",
+      "mediaAssetId": "event-calabash-experience-chef-mike-clancy-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/Menu.docx.pdf",
+      "storagePath": "event-documents/calabash-experience-chef-mike-clancy-menu-menu.docx.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "calabash-experience-chef-mike-clancy",
+      "eventIndex": 0,
+      "eventTitle": "Calabash Experience, Chef Mike Clancy",
+      "field": "photo",
+      "fileSize": 2242101,
+      "linkedId": "calabash-experience-chef-mike-clancy",
+      "linkedType": "event",
+      "mediaAssetId": "event-calabash-experience-chef-mike-clancy-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/product_photos/event_night.jpg",
+      "storagePath": "event-images/calabash-experience-chef-mike-clancy-01-event-night.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+      "eventIndex": 1,
+      "eventTitle": "Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet",
+      "field": "link",
+      "fileSize": 52513,
+      "linkedId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+      "linkedType": "event",
+      "mediaAssetId": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Ma-Der_Ma-Der_Menu.pdf",
+      "storagePath": "event-documents/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu-ma-der-ma-der-menu.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+      "eventIndex": 1,
+      "eventTitle": "Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet",
+      "field": "photo",
+      "fileSize": 1667388,
+      "linkedId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+      "linkedType": "event",
+      "mediaAssetId": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Moo_and_Mom_Fall_Joy_.jpg",
+      "storagePath": "event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-01-moo-and-mom-fall-joy-.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+      "eventIndex": 1,
+      "eventTitle": "Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet",
+      "field": "photo",
+      "fileSize": 603171,
+      "linkedId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+      "linkedType": "event",
+      "mediaAssetId": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-02",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Mary_and_boys.jpg",
+      "storagePath": "event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-02-mary-and-boys.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+      "eventIndex": 2,
+      "eventTitle": "Fleur De Mar \nby Chef Cole Conrad Cohen",
+      "field": "link",
+      "fileSize": 28989,
+      "linkedId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+      "linkedType": "event",
+      "mediaAssetId": "event-fleur-de-mar-by-chef-cole-conrad-cohen-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Fluer_De_Mar.pdf",
+      "storagePath": "event-documents/fleur-de-mar-by-chef-cole-conrad-cohen-menu-fluer-de-mar.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+      "eventIndex": 2,
+      "eventTitle": "Fleur De Mar \nby Chef Cole Conrad Cohen",
+      "field": "photo",
+      "fileSize": 373583,
+      "linkedId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+      "linkedType": "event",
+      "mediaAssetId": "event-fleur-de-mar-by-chef-cole-conrad-cohen-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/cole_photo.jpg",
+      "storagePath": "event-images/fleur-de-mar-by-chef-cole-conrad-cohen-01-cole-photo.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/png",
+      "eventId": "chuseok-by-mountain-song-kitchen",
+      "eventIndex": 3,
+      "eventTitle": "Chuseok \nby Mountain Song Kitchen",
+      "field": "link",
+      "fileSize": 600264,
+      "linkedId": "chuseok-by-mountain-song-kitchen",
+      "linkedType": "event",
+      "mediaAssetId": "event-chuseok-by-mountain-song-kitchen-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Mountain_Song_Menu.png",
+      "storagePath": "event-images/chuseok-by-mountain-song-kitchen-menu-mountain-song-menu.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "chuseok-by-mountain-song-kitchen",
+      "eventIndex": 3,
+      "eventTitle": "Chuseok \nby Mountain Song Kitchen",
+      "field": "photo",
+      "fileSize": 576935,
+      "linkedId": "chuseok-by-mountain-song-kitchen",
+      "linkedType": "event",
+      "mediaAssetId": "event-chuseok-by-mountain-song-kitchen-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Driscoll_and_Jesa.jpg",
+      "storagePath": "event-images/chuseok-by-mountain-song-kitchen-01-driscoll-and-jesa.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/png",
+      "eventId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+      "eventIndex": 4,
+      "eventTitle": "A Taste of Season in Vermont \nby Chefs Samantha Langevin and Jeannie Kovacs",
+      "field": "link",
+      "fileSize": 600264,
+      "linkedId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+      "linkedType": "event",
+      "mediaAssetId": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Mountain_Song_Menu.png",
+      "storagePath": "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu-mountain-song-menu.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+      "eventIndex": 4,
+      "eventTitle": "A Taste of Season in Vermont \nby Chefs Samantha Langevin and Jeannie Kovacs",
+      "field": "photo",
+      "fileSize": 576935,
+      "linkedId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+      "linkedType": "event",
+      "mediaAssetId": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Driscoll_and_Jesa.jpg",
+      "storagePath": "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-01-driscoll-and-jesa.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "calabash-experience-solstice-dance-party-saffron-bites",
+      "eventIndex": 5,
+      "eventTitle": "Calabash Experience, Solstice Dance Party, Saffron Bites",
+      "field": "link",
+      "fileSize": 55388,
+      "linkedId": "calabash-experience-solstice-dance-party-saffron-bites",
+      "linkedType": "event",
+      "mediaAssetId": "event-calabash-experience-solstice-dance-party-saffron-bites-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/young_brothers_band_bio.pdf",
+      "storagePath": "event-documents/calabash-experience-solstice-dance-party-saffron-bites-menu-young-brothers-band-bio.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "calabash-experience-solstice-dance-party-saffron-bites",
+      "eventIndex": 5,
+      "eventTitle": "Calabash Experience, Solstice Dance Party, Saffron Bites",
+      "field": "photo",
+      "fileSize": 55695,
+      "linkedId": "calabash-experience-solstice-dance-party-saffron-bites",
+      "linkedType": "event",
+      "mediaAssetId": "event-calabash-experience-solstice-dance-party-saffron-bites-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/young_brothers_band_photo.jpeg",
+      "storagePath": "event-images/calabash-experience-solstice-dance-party-saffron-bites-01-young-brothers-band-photo.jpeg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "deep-summer-dance-party-saffron-bites",
+      "eventIndex": 6,
+      "eventTitle": "Deep Summer Dance Party, Saffron Bites",
+      "field": "link",
+      "fileSize": 27707,
+      "linkedId": "deep-summer-dance-party-saffron-bites",
+      "linkedType": "event",
+      "mediaAssetId": "event-deep-summer-dance-party-saffron-bites-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/August 23rd Buffet Menu_.pdf",
+      "storagePath": "event-documents/deep-summer-dance-party-saffron-bites-menu-august-23rd-buffet-menu-.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "deep-summer-dance-party-saffron-bites",
+      "eventIndex": 6,
+      "eventTitle": "Deep Summer Dance Party, Saffron Bites",
+      "field": "photo",
+      "fileSize": 6821101,
+      "linkedId": "deep-summer-dance-party-saffron-bites",
+      "linkedType": "event",
+      "mediaAssetId": "event-deep-summer-dance-party-saffron-bites-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/FLAIL.JPG",
+      "storagePath": "event-images/deep-summer-dance-party-saffron-bites-01-flail.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/png",
+      "eventId": "deep-summer-dance-party-saffron-bites",
+      "eventIndex": 6,
+      "eventTitle": "Deep Summer Dance Party, Saffron Bites",
+      "field": "photo",
+      "fileSize": 1440685,
+      "linkedId": "deep-summer-dance-party-saffron-bites",
+      "linkedType": "event",
+      "mediaAssetId": "event-deep-summer-dance-party-saffron-bites-photo-02",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Faux in Love Poster .png",
+      "storagePath": "event-images/deep-summer-dance-party-saffron-bites-02-faux-in-love-poster-.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "calabash-experience-chad-lumbra",
+      "eventIndex": 7,
+      "eventTitle": "Calabash Experience, Chad Lumbra",
+      "field": "link",
+      "fileSize": 33689,
+      "linkedId": "calabash-experience-chad-lumbra",
+      "linkedType": "event",
+      "mediaAssetId": "event-calabash-experience-chad-lumbra-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/Chad Lumbra menu .pdf",
+      "storagePath": "event-documents/calabash-experience-chad-lumbra-menu-chad-lumbra-menu-.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    },
+    {
+      "bin": "events",
+      "contentType": "image/jpeg",
+      "eventId": "calabash-experience-chad-lumbra",
+      "eventIndex": 7,
+      "eventTitle": "Calabash Experience, Chad Lumbra",
+      "field": "photo",
+      "fileSize": 1760380,
+      "linkedId": "calabash-experience-chad-lumbra",
+      "linkedType": "event",
+      "mediaAssetId": "event-calabash-experience-chad-lumbra-photo-01",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/chad_photo.jpg",
+      "storagePath": "event-images/calabash-experience-chad-lumbra-01-chad-photo.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash",
+      "eventIndex": 8,
+      "eventTitle": "We Are More Alike Than Different, A Juneteenth Calabash Solstice Bash",
+      "field": "link",
+      "fileSize": 21756,
+      "linkedId": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash",
+      "linkedType": "event",
+      "mediaAssetId": "event-we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/Menu.docx.pdf",
+      "storagePath": "event-documents/we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu-menu.docx.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    },
+    {
+      "bin": "events",
+      "contentType": "application/pdf",
+      "eventId": "calabash-experience-home-grown",
+      "eventIndex": 9,
+      "eventTitle": "Calabash Experience, Home Grown",
+      "field": "link",
+      "fileSize": 21756,
+      "linkedId": "calabash-experience-home-grown",
+      "linkedType": "event",
+      "mediaAssetId": "event-calabash-experience-home-grown-menu",
+      "sourceExists": true,
+      "sourcePath": "src/resources/Menu.docx.pdf",
+      "storagePath": "event-documents/calabash-experience-home-grown-menu-menu.docx.pdf",
+      "storageRuleStatus": "needs new Storage rule for event documents"
+    }
+  ],
+  "siteMedia": [
+    {
+      "bin": "site",
+      "contentType": "image/webp",
+      "fileSize": 206430,
+      "linkedId": "banner",
+      "linkedType": "site",
+      "mediaAssetId": "site-background-farm",
+      "references": [
+        {
+          "referenceType": "css-url",
+          "sourceFile": "src/Components/Banner/Banner.css"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/background_farm.webp",
+      "storagePath": "site-content-images/background-farm.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "site",
+      "contentType": "image/png",
+      "fileSize": 337419,
+      "linkedId": "banner",
+      "linkedType": "site",
+      "mediaAssetId": "site-calabash-gardens-farm-mobile",
+      "references": [
+        {
+          "referenceType": "css-url",
+          "sourceFile": "src/Components/Banner/Banner.css"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/calabash-gardens-farm-mobile.png",
+      "storagePath": "site-content-images/calabash-gardens-farm-mobile.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "site",
+      "contentType": "image/png",
+      "fileSize": 107843,
+      "linkedId": "shared",
+      "linkedType": "site",
+      "mediaAssetId": "site-large-logo-no-purple-square",
+      "references": [
+        {
+          "referenceType": "js-import",
+          "sourceFile": "src/Components/Footer/Footer.js"
+        },
+        {
+          "referenceType": "js-import",
+          "sourceFile": "src/Components/Header/Header.js"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/large_logo_no_purple_square.png",
+      "storagePath": "site-content-images/large-logo-no-purple-square.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "site",
+      "contentType": "image/webp",
+      "fileSize": 557874,
+      "linkedId": "parallax",
+      "linkedType": "site",
+      "mediaAssetId": "site-parallax",
+      "references": [
+        {
+          "referenceType": "css-url",
+          "sourceFile": "src/Components/Parallax/Parallax.css"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/parallax.webp",
+      "storagePath": "site-content-images/parallax.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "site",
+      "contentType": "image/jpeg",
+      "fileSize": 50589,
+      "linkedId": "events",
+      "linkedType": "site",
+      "mediaAssetId": "site-parchment-background",
+      "references": [
+        {
+          "referenceType": "css-url",
+          "sourceFile": "src/Components/Events/Events.css"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/parchment_background.jpeg",
+      "storagePath": "site-content-images/parchment-background.jpeg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "site",
+      "contentType": "image/webp",
+      "fileSize": 27382,
+      "linkedId": "team",
+      "linkedType": "site",
+      "mediaAssetId": "site-president",
+      "references": [
+        {
+          "referenceType": "js-require",
+          "sourceFile": "src/Components/Team/Team.js"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/president.webp",
+      "storagePath": "site-content-images/president.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "site",
+      "contentType": "image/jpeg",
+      "fileSize": 472861,
+      "linkedId": "experience",
+      "linkedType": "site",
+      "mediaAssetId": "site-the-calabash-experience",
+      "references": [
+        {
+          "referenceType": "js-require",
+          "sourceFile": "src/Components/Experience/Experience.js"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/The_Calabash_Experience.jpg",
+      "storagePath": "site-content-images/the-calabash-experience.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "site",
+      "contentType": "image/webp",
+      "fileSize": 55630,
+      "linkedId": "team",
+      "linkedType": "site",
+      "mediaAssetId": "site-vice-president",
+      "references": [
+        {
+          "referenceType": "js-require",
+          "sourceFile": "src/Components/Team/Team.js"
+        }
+      ],
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/vice_president.webp",
+      "storagePath": "site-content-images/vice-president.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    }
+  ],
+  "otherImageCandidates": [
+    {
+      "bin": "other",
+      "contentType": "image/png",
+      "fileSize": 441970,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-calabash-gardens-farm-mobile-2",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/calabash-gardens-farm-mobile-2.png",
+      "storagePath": "other-images/calabash-gardens-farm-mobile-2.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 6107,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-cat-sample",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/cat-sample.jpeg",
+      "storagePath": "other-images/cat-sample.jpeg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 8260831,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-hands-1",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/hands_1.jpg",
+      "storagePath": "other-images/hands-1.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 11872650,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-hands-2",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/hands_2.jpg",
+      "storagePath": "other-images/hands-2.jpg",
+      "storageRuleStatus": "supported image path; optimization review recommended over 10 MB"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/png",
+      "fileSize": 116285,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-large-logo-no-purple",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/large_logo_no_purple.png",
+      "storagePath": "other-images/large-logo-no-purple.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/png",
+      "fileSize": 104818,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-large-logo-no-purple-wide",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/large_logo_no_purple_wide.png",
+      "storagePath": "other-images/large-logo-no-purple-wide.png",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 58693,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-products",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/products.jpg",
+      "storagePath": "other-images/products.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/webp",
+      "fileSize": 14586,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-purple-logo",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/purple_logo .webp",
+      "storagePath": "other-images/purple-logo-.webp",
+      "storageRuleStatus": "supported by current image Storage rules"
+    },
+    {
+      "bin": "other",
+      "contentType": "image/jpeg",
+      "fileSize": 1302799,
+      "linkedId": "",
+      "linkedType": "none",
+      "mediaAssetId": "other-samantha-and-jeannie",
+      "sourceExists": true,
+      "sourcePath": "src/resources/images/samantha_and_jeannie.jpg",
+      "storagePath": "other-images/samantha-and-jeannie.jpg",
+      "storageRuleStatus": "supported by current image Storage rules"
+    }
+  ],
+  "siteContentDocs": [
+    {
+      "id": "home",
+      "title": "Home Header",
+      "source": "src/resources/content.js: content.home.header",
+      "firebaseTarget": "siteContent/home"
+    },
+    {
+      "id": "banner",
+      "title": "Home Banner",
+      "source": "src/resources/content.js: content.home.banner",
+      "firebaseTarget": "siteContent/banner"
+    },
+    {
+      "id": "offerings",
+      "title": "Offerings",
+      "source": "src/resources/content.js: content.home.offerings",
+      "firebaseTarget": "siteContent/offerings"
+    },
+    {
+      "id": "about",
+      "title": "About",
+      "source": "src/resources/content.js: content.home.about",
+      "firebaseTarget": "siteContent/about"
+    },
+    {
+      "id": "team",
+      "title": "Team",
+      "source": "src/resources/content.js: content.home.team",
+      "firebaseTarget": "siteContent/team"
+    },
+    {
+      "id": "experienceBlurb",
+      "title": "Experience Blurb",
+      "source": "src/resources/events.js: experienceBlurb",
+      "firebaseTarget": "siteContent/experienceBlurb"
+    }
+  ],
+  "codeOwnedCopySurfaces": [
+    {
+      "area": "Navigation",
+      "files": [
+        "src/Components/Navbar/Navbar.js"
+      ],
+      "examples": [
+        "Home",
+        "Shop",
+        "The Calabash Experience",
+        "Contact Us"
+      ],
+      "recommendedOwner": "siteContent/navigation or siteSettings/navigation"
+    },
+    {
+      "area": "Shop chrome",
+      "files": [
+        "src/Components/Shop/Shop.js",
+        "src/Components/Product/Product.js"
+      ],
+      "examples": [
+        "Shop by category",
+        "Add To Cart",
+        "Out of Stock"
+      ],
+      "recommendedOwner": "siteContent/shopUi"
+    },
+    {
+      "area": "Product detail chrome",
+      "files": [
+        "src/Components/ProductPage/ProductPage.js"
+      ],
+      "examples": [
+        "Continue Shopping",
+        "Check out our tasting menu here",
+        "Read more"
+      ],
+      "recommendedOwner": "siteContent/productUi"
+    },
+    {
+      "area": "Cart and checkout chrome",
+      "files": [
+        "src/Components/Cart/Cart.js",
+        "src/Components/Cart/Checkout/Paypal.js"
+      ],
+      "examples": [
+        "Your cart is empty",
+        "Shipping",
+        "Thank you for your purchase"
+      ],
+      "recommendedOwner": "siteContent/cartUi"
+    },
+    {
+      "area": "Contact form chrome",
+      "files": [
+        "src/Components/Contact/Contact.js"
+      ],
+      "examples": [
+        "Send",
+        "Message sent",
+        "Message failed"
+      ],
+      "recommendedOwner": "siteContent/contactUi"
+    },
+    {
+      "area": "Event purchase chrome",
+      "files": [
+        "src/Components/Events/Events.js",
+        "src/Components/Event/Event.js"
+      ],
+      "examples": [
+        "Previous Experience",
+        "Next Experience",
+        "Adults",
+        "Children 12 & under",
+        "Go to Cart"
+      ],
+      "recommendedOwner": "siteContent/eventUi"
+    },
+    {
+      "area": "Embedded media copy and URLs",
+      "files": [
+        "src/Components/Media/Media.js"
+      ],
+      "examples": [
+        "YouTube embed URL",
+        "YouTube outbound link"
+      ],
+      "recommendedOwner": "siteContent/media or siteSettings/externalLinks"
+    }
+  ],
+  "externalMediaReferences": [
+    {
+      "ownerSuggestion": "siteSettings/externalLinks or siteContent/media",
+      "sourceFile": "src/Components/Media/Media.js",
+      "type": "youtube",
+      "url": "https://www.youtube.com/embed/6kM92Zkr2lk?si=TsQip8wOTTx7JA_s&amp;start=323&end=532&rel=0"
+    },
+    {
+      "ownerSuggestion": "siteSettings/externalLinks or siteContent/media",
+      "sourceFile": "src/Components/Media/Media.js",
+      "type": "youtube",
+      "url": "https://youtu.be/6kM92Zkr2lk?si=gARkuIvKEGVfIXJr"
+    }
+  ],
+  "blockers": {
+    "documentRuleBlockers": [
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "calabash-experience-chef-mike-clancy",
+        "eventIndex": 0,
+        "eventTitle": "Calabash Experience, Chef Mike Clancy",
+        "field": "link",
+        "fileSize": 21756,
+        "linkedId": "calabash-experience-chef-mike-clancy",
+        "linkedType": "event",
+        "mediaAssetId": "event-calabash-experience-chef-mike-clancy-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/Menu.docx.pdf",
+        "storagePath": "event-documents/calabash-experience-chef-mike-clancy-menu-menu.docx.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      },
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+        "eventIndex": 1,
+        "eventTitle": "Ma-Der! Ma-Der! \nLao Cuisine By Chef Mary and Phet",
+        "field": "link",
+        "fileSize": 52513,
+        "linkedId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+        "linkedType": "event",
+        "mediaAssetId": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/images/Ma-Der_Ma-Der_Menu.pdf",
+        "storagePath": "event-documents/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu-ma-der-ma-der-menu.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      },
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+        "eventIndex": 2,
+        "eventTitle": "Fleur De Mar \nby Chef Cole Conrad Cohen",
+        "field": "link",
+        "fileSize": 28989,
+        "linkedId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+        "linkedType": "event",
+        "mediaAssetId": "event-fleur-de-mar-by-chef-cole-conrad-cohen-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/images/Fluer_De_Mar.pdf",
+        "storagePath": "event-documents/fleur-de-mar-by-chef-cole-conrad-cohen-menu-fluer-de-mar.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      },
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "calabash-experience-solstice-dance-party-saffron-bites",
+        "eventIndex": 5,
+        "eventTitle": "Calabash Experience, Solstice Dance Party, Saffron Bites",
+        "field": "link",
+        "fileSize": 55388,
+        "linkedId": "calabash-experience-solstice-dance-party-saffron-bites",
+        "linkedType": "event",
+        "mediaAssetId": "event-calabash-experience-solstice-dance-party-saffron-bites-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/young_brothers_band_bio.pdf",
+        "storagePath": "event-documents/calabash-experience-solstice-dance-party-saffron-bites-menu-young-brothers-band-bio.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      },
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "deep-summer-dance-party-saffron-bites",
+        "eventIndex": 6,
+        "eventTitle": "Deep Summer Dance Party, Saffron Bites",
+        "field": "link",
+        "fileSize": 27707,
+        "linkedId": "deep-summer-dance-party-saffron-bites",
+        "linkedType": "event",
+        "mediaAssetId": "event-deep-summer-dance-party-saffron-bites-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/images/August 23rd Buffet Menu_.pdf",
+        "storagePath": "event-documents/deep-summer-dance-party-saffron-bites-menu-august-23rd-buffet-menu-.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      },
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "calabash-experience-chad-lumbra",
+        "eventIndex": 7,
+        "eventTitle": "Calabash Experience, Chad Lumbra",
+        "field": "link",
+        "fileSize": 33689,
+        "linkedId": "calabash-experience-chad-lumbra",
+        "linkedType": "event",
+        "mediaAssetId": "event-calabash-experience-chad-lumbra-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/images/Chad Lumbra menu .pdf",
+        "storagePath": "event-documents/calabash-experience-chad-lumbra-menu-chad-lumbra-menu-.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      },
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash",
+        "eventIndex": 8,
+        "eventTitle": "We Are More Alike Than Different, A Juneteenth Calabash Solstice Bash",
+        "field": "link",
+        "fileSize": 21756,
+        "linkedId": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash",
+        "linkedType": "event",
+        "mediaAssetId": "event-we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/Menu.docx.pdf",
+        "storagePath": "event-documents/we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu-menu.docx.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      },
+      {
+        "bin": "events",
+        "contentType": "application/pdf",
+        "eventId": "calabash-experience-home-grown",
+        "eventIndex": 9,
+        "eventTitle": "Calabash Experience, Home Grown",
+        "field": "link",
+        "fileSize": 21756,
+        "linkedId": "calabash-experience-home-grown",
+        "linkedType": "event",
+        "mediaAssetId": "event-calabash-experience-home-grown-menu",
+        "sourceExists": true,
+        "sourcePath": "src/resources/Menu.docx.pdf",
+        "storagePath": "event-documents/calabash-experience-home-grown-menu-menu.docx.pdf",
+        "storageRuleStatus": "needs new Storage rule for event documents"
+      }
+    ],
+    "largeImageReview": [
+      {
+        "bin": "products",
+        "contentType": "image/jpeg",
+        "fileSize": 18087346,
+        "linkedId": "saffron-simple-syrup",
+        "linkedType": "product",
+        "mediaAssetId": "product-saffron-simple-syrup-01",
+        "productId": "saffron-simple-syrup",
+        "productTitle": "Saffron Simple Syrup",
+        "sourceExists": true,
+        "sourcePath": "src/resources/images/product_photos/saffron_simple_syrup.jpg",
+        "storagePath": "product-images/saffron-simple-syrup-01-saffron-simple-syrup.jpg",
+        "storageRuleStatus": "supported image path; optimization review recommended over 10 MB"
+      },
+      {
+        "bin": "other",
+        "contentType": "image/jpeg",
+        "fileSize": 15689035,
+        "linkedId": "",
+        "linkedType": "none",
+        "mediaAssetId": "other-saffron-tin",
+        "sourceExists": true,
+        "sourcePath": "src/resources/images/product_photos/saffron_tin.jpg",
+        "storagePath": "other-images/saffron-tin.jpg",
+        "storageRuleStatus": "supported image path; optimization review recommended over 10 MB"
+      },
+      {
+        "bin": "other",
+        "contentType": "image/jpeg",
+        "fileSize": 11872650,
+        "linkedId": "",
+        "linkedType": "none",
+        "mediaAssetId": "other-hands-2",
+        "sourceExists": true,
+        "sourcePath": "src/resources/images/hands_2.jpg",
+        "storagePath": "other-images/hands-2.jpg",
+        "storageRuleStatus": "supported image path; optimization review recommended over 10 MB"
+      }
+    ],
+    "missingSources": [],
+    "sharedSourceReview": [
+      {
+        "sourcePath": "src/resources/images/Driscoll_and_Jesa.jpg",
+        "references": [
+          {
+            "bin": "events",
+            "field": "photo",
+            "linkedId": "chuseok-by-mountain-song-kitchen",
+            "linkedType": "event",
+            "mediaAssetId": "event-chuseok-by-mountain-song-kitchen-photo-01",
+            "storagePath": "event-images/chuseok-by-mountain-song-kitchen-01-driscoll-and-jesa.jpg"
+          },
+          {
+            "bin": "events",
+            "field": "photo",
+            "linkedId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+            "linkedType": "event",
+            "mediaAssetId": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-photo-01",
+            "storagePath": "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-01-driscoll-and-jesa.jpg"
+          }
+        ]
+      },
+      {
+        "sourcePath": "src/resources/images/Mountain_Song_Menu.png",
+        "references": [
+          {
+            "bin": "events",
+            "field": "link",
+            "linkedId": "chuseok-by-mountain-song-kitchen",
+            "linkedType": "event",
+            "mediaAssetId": "event-chuseok-by-mountain-song-kitchen-menu",
+            "storagePath": "event-images/chuseok-by-mountain-song-kitchen-menu-mountain-song-menu.png"
+          },
+          {
+            "bin": "events",
+            "field": "link",
+            "linkedId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+            "linkedType": "event",
+            "mediaAssetId": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu",
+            "storagePath": "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu-mountain-song-menu.png"
+          }
+        ]
+      },
+      {
+        "sourcePath": "src/resources/images/product_photos/event_night.jpg",
+        "references": [
+          {
+            "bin": "other",
+            "field": "",
+            "linkedId": "",
+            "linkedType": "none",
+            "mediaAssetId": "other-event-night",
+            "storagePath": "other-images/event-night.jpg"
+          },
+          {
+            "bin": "events",
+            "field": "photo",
+            "linkedId": "calabash-experience-chef-mike-clancy",
+            "linkedType": "event",
+            "mediaAssetId": "event-calabash-experience-chef-mike-clancy-photo-01",
+            "storagePath": "event-images/calabash-experience-chef-mike-clancy-01-event-night.jpg"
+          }
+        ]
+      },
+      {
+        "sourcePath": "src/resources/Menu.docx.pdf",
+        "references": [
+          {
+            "bin": "events",
+            "field": "link",
+            "linkedId": "calabash-experience-chef-mike-clancy",
+            "linkedType": "event",
+            "mediaAssetId": "event-calabash-experience-chef-mike-clancy-menu",
+            "storagePath": "event-documents/calabash-experience-chef-mike-clancy-menu-menu.docx.pdf"
+          },
+          {
+            "bin": "events",
+            "field": "link",
+            "linkedId": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash",
+            "linkedType": "event",
+            "mediaAssetId": "event-we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu",
+            "storagePath": "event-documents/we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu-menu.docx.pdf"
+          },
+          {
+            "bin": "events",
+            "field": "link",
+            "linkedId": "calabash-experience-home-grown",
+            "linkedType": "event",
+            "mediaAssetId": "event-calabash-experience-home-grown-menu",
+            "storagePath": "event-documents/calabash-experience-home-grown-menu-menu.docx.pdf"
+          }
+        ]
+      }
+    ]
+  }
+}

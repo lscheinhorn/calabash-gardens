@@ -89,6 +89,8 @@ Current media library notes:
 - Moving a photo between bins changes Firestore metadata only; it does not move Storage files.
 - The `other` bin is a holding area for images that need review before they are linked to products, events, or site content.
 - Public storefront pages still do not read `mediaAssets`.
+- The Firebase ownership audit maps product, event, site, and other media candidates before any broader upload phase. It is read-only and should be reviewed before changing Storage paths, rules, or public reads.
+- Event menu PDFs/DOC/DOCX files are not covered by the current image-only Storage upload rules and need a separate reviewed rule/data-shape decision before upload.
 
 ## Products
 
@@ -260,6 +262,7 @@ Current compatibility notes:
 - Current `eventDates` are display strings and are also used in cart key/title generation.
 - Current event `priceOptions` are string arrays such as `["60.00"]`, unlike product option objects.
 - Past events should remain stored for history, but should not be purchasable.
+- Static event photos and menu links are intentionally not copied by the current event seed. They should move only through an approved media/document migration that preserves stable Storage paths and `mediaAssets` metadata.
 
 Editor controls:
 
@@ -368,6 +371,7 @@ Current compatibility notes:
 - Current images are bundled with `require(...)`.
 - Future image references should be storage paths or public URLs.
 - Existing bundled images should remain untouched until a migration/upload phase is approved.
+- Current Storage rules allow image uploads under `product-images/`, `event-images/`, `site-content-images/`, `other-images/`, and `admin-private/`. Non-image event documents need a new reviewed path/rule before they can be uploaded.
 
 ## Orders
 

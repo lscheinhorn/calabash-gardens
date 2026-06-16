@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Event/content Firestore parity foundation is in progress on branch `codex/product-image-manifest`.
+Full Firebase ownership audit is in progress on branch `codex/product-image-manifest`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Event/content Firestore parity foundation is in progress on branch `codex/produc
 
 ## Current Phase
 
-Phase 30: Event and experience content Firestore parity foundation.
+Phase 31: Full Firebase ownership audit before remaining media/content CRUD migration.
 
 ## Done Work
 
@@ -77,6 +77,8 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Added a defensive parallax scroll guard so admin preview routing cannot throw when the parallax target is not mounted on the active branch.
 - Kept admin Firestore Site Preview navigation inside preview-mode routes, including Firestore-backed product detail previews, so deployed preview clicks do not fall through to static public routes on the active branch. The click interceptor runs in capture phase so public React Router links cannot handle the click first.
 - Seeded the missing Firestore event and site-content documents from the guarded admin mirror-audit controls: 10 missing `events` documents and the missing `siteContent/experienceBlurb` document were created without editing protected static files on the active branch.
+- Committed the admin Firestore preview parity checkpoint on the active branch.
+- Added a read-only full Firebase ownership audit command and generated Markdown/JSON reports mapping product media, event media/menu files, site media, other-bin candidates, expected site content docs, code-owned UI copy surfaces, and external media links before any broader Firebase write phase.
 
 ## In Progress Work
 
@@ -107,6 +109,12 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Verify preview frame scrolling does not emit parallax target errors when moving between preview/admin sections.
 - Verify clicking Shop, Events, product cards, Continue Shopping, Contact, and Cart inside the Firestore Site Preview stays under `/admin/preview/...` routes and does not show normal static public routes.
 - Event media/menu links and event inventory still need separate backend phases; seeded Firestore event documents intentionally have empty `photos` and `link` values and inventory remains static.
+- Review `docs/firebase-ownership-audit.md` before approving any remaining media upload, event document upload rules, site-media ownership changes, inventory migration, or public Firestore read switch.
+- Decide whether event menu/bio PDF/DOC assets should use a new `event-documents/{fileName}` Storage path and rule; the current audit found 8 event document/menu references needing rules.
+- Decide which 9 currently unowned images should upload to the `other` bin and which should remain local-only or unused.
+- Decide Firestore ownership for 7 code-owned UI/content surfaces: navigation, shop chrome, product detail chrome, cart/checkout chrome, contact chrome, event purchase chrome, and embedded media links.
+- Review 3 image files over the 10 MB performance threshold before any upload phase.
+- Review 4 shared source-file ownership decisions before upload/import so repeated static files are linked, moved in metadata, or intentionally copied instead of duplicated by accident.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -175,6 +183,11 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Event seed intentionally leaves event photos and menu links empty because static event media uses bundled `require(...)` values that should not be stored directly in Firestore.
 - Event inventory remains static and separate from event documents in this phase.
 - Event Editor preserves existing Firestore event photos but does not upload, attach, remove, or migrate event media yet.
+- Full Firebase ownership audit is read-only and local. It does not query Firebase, upload files, write Firestore documents, edit protected resource files, deploy rules, or switch public reads.
+- The ownership audit found 20 event media references: 10 photo refs and 10 menu/link refs. Eight menu/link refs are non-image documents that need a new reviewed Storage rule before upload.
+- The ownership audit found 8 site media assets currently referenced by components/CSS and 9 additional unowned local images that should be reviewed before being uploaded to the Other bin.
+- The ownership audit found 7 code-owned UI/content surfaces that need an owner decision before the full site can be considered true CRUD.
+- The ownership audit found 4 shared source-file cases that need reuse/linking decisions before any broad media upload/import.
 - Firestore Site Preview is admin-only and uses published Firestore records, so unpublished drafts may not appear in preview.
 - Preview Shop/Event cards still use public components that include cart controls; the preview does not deploy or switch public reads, but checkout isolation should be reviewed before broader testing.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
@@ -225,6 +238,7 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Generated public product cache refresh is a manual script for now; it is not wired into `build`, `predeploy`, or `deploy` until the deployment workflow is approved.
 - Generated cache data is not source-of-truth business content. Firestore is the source for the generated artifact, and static resource files remain protected during the transition.
 - Event Firestore seed is a missing-documents-only bridge; public event pages continue to read static data until parity, inventory, media, and rules are explicitly approved for public reads.
+- Firebase ownership audit reports are planning artifacts. They are not migration approval, not source-of-truth business content, and not a public read switch.
 
 ## Verification History
 
@@ -280,6 +294,10 @@ Phase 30: Event and experience content Firestore parity foundation.
 - 2026-06-16: Event Mirror Audit showed Static Events `10`, Firestore Events `10`, Exact Matches `10`, with only the two expected event warnings for media/menu links and inventory.
 - 2026-06-16: Content Mirror Audit showed Static Sections `6`, Firestore Docs `6`, Exact Matches `6`, Needs Review `0`.
 - 2026-06-16: Firestore Site Preview events route loaded seeded Firestore event content, including `Calabash Experience, Chad Lumbra`.
+- 2026-06-16: `node --check scripts/firebase-ownership-audit.js` passed.
+- 2026-06-16: `npm run audit:firebase-ownership` generated `docs/firebase-ownership-audit.md` and `docs/firebase-ownership-audit.json` with 57 total Storage candidates, 0 missing source files, 8 event document/menu rule blockers, 3 large-image review items, and 4 shared source-file review items.
+- 2026-06-16: `git diff --check` passed after adding the Firebase ownership audit.
+- 2026-06-16: Protected content diff check returned no changes after adding the Firebase ownership audit.
 
 ## Commits
 
@@ -313,6 +331,7 @@ Phase 30: Event and experience content Firestore parity foundation.
 - `3bad712 docs: add media migration dry run`
 - `feat: prepare oversized media assets` (current branch)
 - `feat: add generated product cache fallback` (current branch)
+- `5ebb69e feat: add firestore admin preview parity`
 
 ## Deployments
 
