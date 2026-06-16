@@ -11,6 +11,7 @@ import {
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
 import ContentAdmin from "./ContentAdmin";
 import ContentMirrorAudit from "./ContentMirrorAudit";
+import EventAdmin from "./EventAdmin";
 import EventMirrorAudit from "./EventMirrorAudit";
 import MediaAdmin from "./MediaAdmin";
 import ProductAdmin from "./ProductAdmin";
@@ -190,6 +191,7 @@ export default function Admin() {
         <ProductMirrorAudit db={db} />
         <ProductPublicParityAudit db={db} />
         <EventMirrorAudit db={db} />
+        <EventAdmin db={db} />
         <ContentMirrorAudit db={db} />
         <ContentAdmin db={db} />
         <ProductAdmin db={db} storage={storage} />

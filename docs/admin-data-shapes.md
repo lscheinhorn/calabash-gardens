@@ -300,6 +300,9 @@ Current compatibility notes:
 - The guarded content seed action creates missing `siteContent` documents only; it checks each document before writing and skips any existing document to avoid overwriting admin edits.
 - The first content editor edits seeded Firestore `siteContent` documents only. Public pages continue to read static content until a backend-read phase is approved.
 - The first event mirror audit compares static events to Firestore `events` documents and can seed missing event documents without overwriting existing Firestore edits. It intentionally leaves photos and menu links empty until event media migration is approved.
+- The first event editor edits Firestore `events` documents only. Public event pages continue to read static event data until backend event reads, media fallback, inventory, and checkout behavior are approved.
+- New event IDs are suggested from the event title and locked after saving. Creating a new event will not overwrite an existing Firestore event document with the same ID.
+- Event media and inventory are intentionally outside the first event editor; `photos` are preserved from existing Firestore documents and inventory remains static in this phase.
 
 Editor controls:
 

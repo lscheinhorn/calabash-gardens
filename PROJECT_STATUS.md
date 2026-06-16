@@ -71,6 +71,7 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Added default product photo normalization so static, Firestore, and generated-cache products render the existing default image when a product has no photos on the active branch.
 - Added Firestore-safe event seed data and an admin Event Mirror Audit that can seed missing event documents without overwriting existing Firestore events on the active branch.
 - Added `experienceBlurb` to the guarded site content seed/editor path so Calabash Experience copy can be mirrored and edited in Firestore without changing public static reads on the active branch.
+- Added a Firestore-only admin Event Editor for creating and editing event document fields without switching public event reads on the active branch.
 
 ## In Progress Work
 
@@ -94,6 +95,7 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Verify generated-cache products with empty photo arrays render the default Calabash logo image instead of an empty image source.
 - Verify Event Mirror Audit reports missing, extra, and different Firestore events without changing public event reads.
 - Verify Seed Missing Events creates only missing Firestore `events` documents and skips existing documents.
+- Verify Event Editor creates new Firestore events without overwriting existing IDs and saves edits using Firestore-safe date, list, decimal string, and boolean field shapes.
 - Verify `experienceBlurb` appears in Content Mirror Audit and Site Content Editor after seeding missing content.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
@@ -162,6 +164,7 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Runtime product hooks now fill empty product photo arrays with the existing default image, but Firestore photo coverage still needs review before a public source switch because real product photos are preferred.
 - Event seed intentionally leaves event photos and menu links empty because static event media uses bundled `require(...)` values that should not be stored directly in Firestore.
 - Event inventory remains static and separate from event documents in this phase.
+- Event Editor preserves existing Firestore event photos but does not upload, attach, remove, or migrate event media yet.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -251,6 +254,8 @@ Phase 30: Event and experience content Firestore parity foundation.
 - 2026-05-11: `npm run build` completed successfully after adding default product photo normalization, with the same existing warnings.
 - 2026-05-11: `node --check src/data/adminEventSeed.js` and `node --check src/data/adminContentSeed.js` passed.
 - 2026-05-11: `npm run build` completed successfully after adding event mirror audit and experience blurb content seed, with the same existing warnings.
+- 2026-06-16: `node --check src/data/adminEventSeed.js` passed before adding the event editor.
+- 2026-06-16: `npm run build` completed successfully after adding the Firestore-only Event Editor, with the same existing warnings.
 
 ## Commits
 
