@@ -4,8 +4,13 @@ import { getActiveEvents, experienceBlurb } from '../../data/siteData';
 import Event from '../Event/Event';
 import { useState, useEffect, useMemo } from 'react';
 
-export default function Events() {
-    const activeEvents = useMemo(() => getActiveEvents(), [])
+export default function Events({ eventsOverride = null, experienceBlurbOverride = null }) {
+    const activeEvents = useMemo(() => (
+        eventsOverride
+            ? eventsOverride.filter(event => event.isActive === true)
+            : getActiveEvents()
+    ), [eventsOverride])
+    const blurb = experienceBlurbOverride || experienceBlurb
     const [eventIdx, setEventIdx] = useState(activeEvents.length - 1);
 
     useEffect(() => {
@@ -34,7 +39,7 @@ export default function Events() {
         <div className="productPage_container">
             <div className="events">
                 <h1 style={{ textAlign: 'center' }}>The Calabash Experience</h1>
-                {experienceBlurb.map((p, index) => (
+                {blurb.map((p, index) => (
                     <p 
                         key={index}
                         style={{ textIndent: '2em' }}

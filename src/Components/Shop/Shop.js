@@ -3,9 +3,10 @@ import { usePublicProducts } from '../../data/usePublicProducts'
 import Product from '../Product/Product'
 import { useMemo, useState } from 'react'
 
-export default function Shop () {
+export default function Shop ({ productsOverride = null }) {
     const [ option, setOption ] = useState("All")
-    const { products } = usePublicProducts()
+    const publicProducts = usePublicProducts()
+    const products = productsOverride || publicProducts.products
     const activeProducts = useMemo(() => products.filter(product => product.isActive === true), [products])
     const categories = useMemo(() => {
         return Array.from(new Set(activeProducts

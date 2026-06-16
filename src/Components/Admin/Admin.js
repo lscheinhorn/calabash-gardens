@@ -13,6 +13,7 @@ import ContentAdmin from "./ContentAdmin";
 import ContentMirrorAudit from "./ContentMirrorAudit";
 import EventAdmin from "./EventAdmin";
 import EventMirrorAudit from "./EventMirrorAudit";
+import AdminPreview from "./AdminPreview";
 import MediaAdmin from "./MediaAdmin";
 import ProductAdmin from "./ProductAdmin";
 import ProductMirrorAudit from "./ProductMirrorAudit";
@@ -187,6 +188,7 @@ export default function Admin() {
             <p>Editor and mirror audit are available below.</p>
           </div>
         </div>
+        <AdminPreview db={db} storage={storage} />
         <MediaAdmin db={db} storage={storage} />
         <ProductMirrorAudit db={db} />
         <ProductPublicParityAudit db={db} />

@@ -32,6 +32,8 @@ Public product reads now pass through `src/data/usePublicProducts.js`. Static pr
 
 Admin event migration now has a read/seed/audit foundation. `src/data/adminEventSeed.js` converts static event records into Firestore-safe documents, and the admin Event Mirror Audit can create missing Firestore event documents without overwriting existing ones. The admin Event Editor can create and edit Firestore event document fields, but public event pages still read static events.
 
+The admin Firestore Site Preview is a rehearsal path for public backend reads. It loads published Firestore products, site content, and events through public adapters, normalizes them to the current static shapes, and passes them into the existing public components from inside `/admin`. Public routes continue to use their static defaults.
+
 ## Checkout
 
 Checkout uses `@paypal/react-paypal-js` in `src/Components/Paypal/Paypal.js`. Cart totals are calculated in the browser.

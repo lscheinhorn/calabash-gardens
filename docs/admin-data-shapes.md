@@ -303,6 +303,7 @@ Current compatibility notes:
 - The first event editor edits Firestore `events` documents only. Public event pages continue to read static event data until backend event reads, media fallback, inventory, and checkout behavior are approved.
 - New event IDs are suggested from the event title and locked after saving. Creating a new event will not overwrite an existing Firestore event document with the same ID.
 - Event media and inventory are intentionally outside the first event editor; `photos` are preserved from existing Firestore documents and inventory remains static in this phase.
+- The admin Firestore Site Preview renders Home, Shop, and Events previews with existing public components fed by Firestore-normalized data. It is admin-only and does not change public routes.
 
 Editor controls:
 

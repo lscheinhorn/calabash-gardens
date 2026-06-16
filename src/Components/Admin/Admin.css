@@ -197,6 +197,25 @@
   gap: 10px;
 }
 
+.admin_preview_tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.admin_site_preview {
+  background: #ffffff;
+  border: 1px solid #e5deea;
+  border-radius: 8px;
+  color: #3d3343;
+  max-height: 720px;
+  overflow: auto;
+}
+
+.admin_site_preview .above_nav {
+  position: static;
+}
+
 .admin_placeholder_grid {
   display: grid;
   gap: 12px;

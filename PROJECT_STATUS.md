@@ -72,6 +72,7 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Added Firestore-safe event seed data and an admin Event Mirror Audit that can seed missing event documents without overwriting existing Firestore events on the active branch.
 - Added `experienceBlurb` to the guarded site content seed/editor path so Calabash Experience copy can be mirrored and edited in Firestore without changing public static reads on the active branch.
 - Added a Firestore-only admin Event Editor for creating and editing event document fields without switching public event reads on the active branch.
+- Added an admin-only Firestore Site Preview for Home, Shop, and Events using existing public components with Firestore-normalized data on the active branch.
 
 ## In Progress Work
 
@@ -97,6 +98,7 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Verify Seed Missing Events creates only missing Firestore `events` documents and skips existing documents.
 - Verify Event Editor creates new Firestore events without overwriting existing IDs and saves edits using Firestore-safe date, list, decimal string, and boolean field shapes.
 - Verify `experienceBlurb` appears in Content Mirror Audit and Site Content Editor after seeding missing content.
+- Verify Firestore Site Preview loads published Firestore products, content, and events without changing public `/`, `/shop`, or `/events` routes.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -165,6 +167,8 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Event seed intentionally leaves event photos and menu links empty because static event media uses bundled `require(...)` values that should not be stored directly in Firestore.
 - Event inventory remains static and separate from event documents in this phase.
 - Event Editor preserves existing Firestore event photos but does not upload, attach, remove, or migrate event media yet.
+- Firestore Site Preview is admin-only and uses published Firestore records, so unpublished drafts may not appear in preview.
+- Preview Shop/Event cards still use public components that include cart controls; the preview does not deploy or switch public reads, but checkout isolation should be reviewed before broader testing.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
@@ -256,6 +260,8 @@ Phase 30: Event and experience content Firestore parity foundation.
 - 2026-05-11: `npm run build` completed successfully after adding event mirror audit and experience blurb content seed, with the same existing warnings.
 - 2026-06-16: `node --check src/data/adminEventSeed.js` passed before adding the event editor.
 - 2026-06-16: `npm run build` completed successfully after adding the Firestore-only Event Editor, with the same existing warnings.
+- 2026-06-16: `node --check src/data/publicContentAdapter.js` and `node --check src/data/publicEventAdapter.js` passed.
+- 2026-06-16: `npm run build` completed successfully after adding the admin Firestore Site Preview, with the same existing warnings.
 
 ## Commits
 

@@ -3,8 +3,9 @@ import { useHighlightedProducts } from '../../data/usePublicProducts'
 import Product from '../Product/Product'
 import {  Link } from 'react-router-dom'
 
-export default function HighlightedProducts () {
-    const { products } = useHighlightedProducts()
+export default function HighlightedProducts ({ productsOverride = null }) {
+    const publicProducts = useHighlightedProducts()
+    const products = productsOverride || publicProducts.products
     
     return (
         <div className="text-center">

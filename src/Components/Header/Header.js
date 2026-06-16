@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import largeLogo from '../../resources/images/large_logo_no_purple_square.png';
 
 
-export default function Header () {
+export default function Header ({ headerContent = content.home.header, showNav = true }) {
    
     return (
         <div>
@@ -18,20 +18,20 @@ export default function Header () {
                         />
                     </div>
                     <div className='title header_color'>
-                        <h1 className='header_color'>{ content.home.header.title }</h1>
-                        <p className='header_color'>{ content.home.header.subtitle }</p>
+                        <h1 className='header_color'>{ headerContent.title }</h1>
+                        <p className='header_color'>{ headerContent.subtitle }</p>
                     </div>
                     
                 </div>
                 <div className='get_in_touch header_color'>
                     <Link id="contact-Link" to="/contact">
-                        <button>{ content.home.header.button }</button>
+                        <button>{ headerContent.button }</button>
                     </Link>
 
                 </div>
             </div>
             
-            <Navbar />
+            {showNav ? <Navbar /> : null}
         </div>
     )
 }

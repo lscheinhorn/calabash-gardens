@@ -1,11 +1,14 @@
 import './Banner.css'
 import { content } from '../../data/siteData'
 
-export default function Banner () {
+export default function Banner ({ bannerContent = content.home.banner }) {
 
     document.querySelector("body").onscroll = function slowScroll() {  
         let scrolltotop = document.scrollingElement.scrollTop
         const target = document.getElementById("banner")
+        if (!target) {
+            return
+        }
         const xvalue = "center"
         const factor = .05;
         let yvalue = scrolltotop * factor - 400
@@ -14,15 +17,15 @@ export default function Banner () {
 
     return (
         <div id='banner'>
-            <h1>{ content.home.banner.title }</h1>
-            <h4>{ content.home.banner.subtitle_1 }<br>
-                </br>{ content.home.banner.subtitle_2 }
+            <h1>{ bannerContent.title }</h1>
+            <h4>{ bannerContent.subtitle_1 }<br>
+                </br>{ bannerContent.subtitle_2 }
             </h4>
             <div className='banner_p'>
-                <p>{ content.home.banner.paragraph }</p>
+                <p>{ bannerContent.paragraph }</p>
             </div>
             <div className='learn_more'>
-                <button>{ content.home.banner.button }</button>
+                <button>{ bannerContent.button }</button>
             </div>
         </div>
     )
