@@ -8,7 +8,7 @@
 }
 
 .admin_shell {
-  width: min(100%, 760px);
+  width: min(100%, 1240px);
 }
 
 .admin_header {
@@ -163,9 +163,14 @@
   border: 0;
   border-radius: 4px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font: inherit;
   font-weight: 700;
   padding: 10px 16px;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .admin_primary_button {
@@ -192,9 +197,22 @@
 }
 
 .admin_button_row {
+  align-items: center;
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.admin_form_header > .admin_button_row {
+  flex: 0 0 auto;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.admin_form_header > .admin_button_row .admin_icon_button {
+  flex: 0 0 auto;
 }
 
 .admin_preview_tabs {
@@ -203,17 +221,69 @@
   gap: 10px;
 }
 
+.admin_preview_viewports {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .admin_site_preview {
-  background: #ffffff;
+  background: #f9f8fa;
   border: 1px solid #e5deea;
   border-radius: 8px;
   color: #3d3343;
-  max-height: 720px;
-  overflow: auto;
+  display: grid;
+  gap: 12px;
+  overflow: hidden;
+  padding: 12px;
 }
 
-.admin_site_preview .above_nav {
-  position: static;
+.admin_site_preview_toolbar {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.admin_site_preview_toolbar span {
+  color: #5f5366;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.admin_site_preview_stage {
+  background: #d8d1dd;
+  border: 1px solid #d8d1dd;
+  border-radius: 6px;
+  overflow: auto;
+  padding: 12px;
+}
+
+.admin_site_preview_frame {
+  background: #ffffff;
+  border: 0;
+  display: block;
+  height: var(--admin-preview-height);
+  margin: 0 auto;
+  max-width: none;
+  width: var(--admin-preview-width);
+}
+
+.admin_preview_frame_status {
+  align-items: center;
+  color: #735284;
+  display: flex;
+  font-weight: 700;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 32px;
+  text-align: center;
+}
+
+.admin_preview_frame_site {
+  background: #ffffff;
+  color: #3d3343;
+  min-height: 100vh;
 }
 
 .admin_placeholder_grid {
@@ -634,10 +704,16 @@
 .admin_theme_dark .admin_product_card,
 .admin_theme_dark .admin_product_row,
 .admin_theme_dark .admin_media_card,
+.admin_theme_dark .admin_site_preview,
 .admin_theme_dark .admin_seed_summary,
 .admin_theme_dark .admin_upload_notice,
 .admin_theme_dark .admin_photo_row {
   background: #241d2a;
+  border-color: #4e3d58;
+}
+
+.admin_theme_dark .admin_site_preview_stage {
+  background: #18131d;
   border-color: #4e3d58;
 }
 
@@ -686,6 +762,7 @@
 
 .admin_theme_dark .admin_status_panel span,
 .admin_theme_dark .admin_audit_summary span,
+.admin_theme_dark .admin_site_preview_toolbar span,
 .admin_theme_dark .admin_product_details dt,
 .admin_theme_dark .admin_seed_summary small,
 .admin_theme_dark .admin_seed_summary li,
@@ -727,6 +804,20 @@
 
   .admin_placeholder_grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin_form_header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin_form_header > .admin_button_row {
+    justify-content: flex-start;
+  }
+
+  .admin_site_preview_toolbar {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .admin_status_panel {

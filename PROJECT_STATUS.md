@@ -73,6 +73,10 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Added `experienceBlurb` to the guarded site content seed/editor path so Calabash Experience copy can be mirrored and edited in Firestore without changing public static reads on the active branch.
 - Added a Firestore-only admin Event Editor for creating and editing event document fields without switching public event reads on the active branch.
 - Added an admin-only Firestore Site Preview for Home, Shop, and Events using existing public components with Firestore-normalized data on the active branch.
+- Reworked the admin Firestore Site Preview to render in an iframe-backed Desktop/Tablet/Mobile viewport and tightened admin section header action layout so collapse arrows stay to the right of refresh/action buttons on the active branch.
+- Added a defensive parallax scroll guard so admin preview routing cannot throw when the parallax target is not mounted on the active branch.
+- Kept admin Firestore Site Preview navigation inside preview-mode routes, including Firestore-backed product detail previews, so deployed preview clicks do not fall through to static public routes on the active branch. The click interceptor runs in capture phase so public React Router links cannot handle the click first.
+- Seeded the missing Firestore event and site-content documents from the guarded admin mirror-audit controls: 10 missing `events` documents and the missing `siteContent/experienceBlurb` document were created without editing protected static files on the active branch.
 
 ## In Progress Work
 
@@ -99,6 +103,10 @@ Phase 30: Event and experience content Firestore parity foundation.
 - Verify Event Editor creates new Firestore events without overwriting existing IDs and saves edits using Firestore-safe date, list, decimal string, and boolean field shapes.
 - Verify `experienceBlurb` appears in Content Mirror Audit and Site Content Editor after seeding missing content.
 - Verify Firestore Site Preview loads published Firestore products, content, and events without changing public `/`, `/shop`, or `/events` routes.
+- Verify Firestore Site Preview Desktop/Tablet/Mobile iframe viewports render the public components responsively and section collapse arrows stay to the right of refresh/action buttons.
+- Verify preview frame scrolling does not emit parallax target errors when moving between preview/admin sections.
+- Verify clicking Shop, Events, product cards, Continue Shopping, Contact, and Cart inside the Firestore Site Preview stays under `/admin/preview/...` routes and does not show normal static public routes.
+- Event media/menu links and event inventory still need separate backend phases; seeded Firestore event documents intentionally have empty `photos` and `link` values and inventory remains static.
 - Review `docs/product-image-migration-manifest.md` before approving any product image upload phase.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
@@ -262,6 +270,16 @@ Phase 30: Event and experience content Firestore parity foundation.
 - 2026-06-16: `npm run build` completed successfully after adding the Firestore-only Event Editor, with the same existing warnings.
 - 2026-06-16: `node --check src/data/publicContentAdapter.js` and `node --check src/data/publicEventAdapter.js` passed.
 - 2026-06-16: `npm run build` completed successfully after adding the admin Firestore Site Preview, with the same existing warnings.
+- 2026-06-16: `npm run build` completed successfully after adding the iframe-backed admin Firestore Site Preview viewports, with the same existing warnings.
+- 2026-06-16: `git diff --check` passed after the admin preview viewport update.
+- 2026-06-16: `npm run build` completed successfully after adding the parallax preview guard, with the same existing warnings.
+- 2026-06-16: `npm run build` completed successfully after keeping preview navigation inside preview-mode routes, with the same existing warnings.
+- 2026-06-16: Browser verification confirmed preview `Shop` clicks stay on `#/admin/preview/shop`, preview product clicks stay on `#/admin/preview/products/:key`, and `Continue Shopping` returns to `#/admin/preview/shop`.
+- 2026-06-16: `npm run build` completed successfully after switching preview link interception to capture phase, with the same existing warnings.
+- 2026-06-16: Seeded 10 missing Firestore `events` documents and 1 missing `siteContent` document (`experienceBlurb`) through the admin mirror-audit controls.
+- 2026-06-16: Event Mirror Audit showed Static Events `10`, Firestore Events `10`, Exact Matches `10`, with only the two expected event warnings for media/menu links and inventory.
+- 2026-06-16: Content Mirror Audit showed Static Sections `6`, Firestore Docs `6`, Exact Matches `6`, Needs Review `0`.
+- 2026-06-16: Firestore Site Preview events route loaded seeded Firestore event content, including `Calabash Experience, Chad Lumbra`.
 
 ## Commits
 

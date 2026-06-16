@@ -9,32 +9,60 @@ import Cart from './Components/Cart/Cart';
 import Contact from './Components/Contact/Contact';
 import Events from './Components/Events/Events'; 
 
-import { HashRouter, Routes, Route } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 
 const Admin = lazy(() => import('./Components/Admin/Admin'));
+const AdminPreviewFrame = lazy(() => import('./Components/Admin/AdminPreviewFrame'));
+
+function AppRoutes() {
+  const location = useLocation();
+  const isAdminPreviewFrame = location.pathname.startsWith('/admin/preview');
+
+  return (
+    <>
+      {!isAdminPreviewFrame ? <Header /> : null}
+      <Routes>
+        <Route path="/products/:key" element={<ProductPage />} />
+        <Route
+          path="/admin"
+          element={
+            <Suspense fallback={<main className="route_loading">Loading...</main>}>
+              <Admin />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/admin/preview/:previewTab"
+          element={
+            <Suspense fallback={<main className="route_loading">Loading preview...</main>}>
+              <AdminPreviewFrame />
+            </Suspense>
+          }
+        />
+        <Route
+          path="/admin/preview/products/:productKey"
+          element={
+            <Suspense fallback={<main className="route_loading">Loading preview...</main>}>
+              <AdminPreviewFrame />
+            </Suspense>
+          }
+        />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/cart" element={<Cart />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/events" element={<Events />} />
+        <Route path="/" element={<Main />} />
+      </Routes>
+      {!isAdminPreviewFrame ? <Footer /> : null}
+    </>
+  );
+}
 
 function App() {
   return (
     <div className="App app_wrap">
       <HashRouter>
-        <Header />
-        <Routes>
-          <Route path="/products/:key" element={<ProductPage />} />
-          <Route
-            path="/admin"
-            element={
-              <Suspense fallback={<main className="route_loading">Loading...</main>}>
-                <Admin />
-              </Suspense>
-            }
-          />
-          <Route path="/shop" element={<Shop />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/events" element={<Events />} /> 
-          <Route path="/" element={<Main />} />
-        </Routes>
-        <Footer />
+        <AppRoutes />
       </HashRouter>
     </div>
   );

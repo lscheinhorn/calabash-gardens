@@ -6,10 +6,12 @@ import { useDispatch } from 'react-redux'
 import {  Link } from 'react-router-dom'
 import { useState, useEffect, useMemo } from 'react'
 
-export default function ProductPage () {
+export default function ProductPage ({ productOverride = null, continueShoppingTo = "../shop" }) {
     const dispatch = useDispatch()
-    const { key } = useParams()
-    const { product } = usePublicProductByKey(key)
+    const params = useParams()
+    const productKey = params.key || params.productKey
+    const { product: loadedProduct } = usePublicProductByKey(productKey)
+    const product = productOverride || loadedProduct
     const safeProduct = useMemo(() => product || {
         photos: [],
         priceOptions: [{ price: "0.00" }],
@@ -116,7 +118,7 @@ export default function ProductPage () {
                 !inStock ? <p> Out of Stock </p> :
                 <button className="add_to_cart btn btn-outline-primary" onClick={ handleAddCartItem } >Add To Cart</button>
             }
-            <Link id="proguctPage-continue-shopping" className="continue-shopping  btn btn-secondary" to="../shop">Continue Shopping</Link>
+            <Link id="proguctPage-continue-shopping" className="continue-shopping  btn btn-secondary" to={continueShoppingTo}>Continue Shopping</Link>
 
         </div>
 

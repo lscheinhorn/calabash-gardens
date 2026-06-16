@@ -5,17 +5,27 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
-import About from "../About/About";
-import Banner from "../Banner/Banner";
-import Events from "../Events/Events";
-import Experience from "../Experience/Experience";
-import Header from "../Header/Header";
-import HighlightedProducts from "../HighlightedProducts/HighlightedProducts";
-import Shop from "../Shop/Shop";
-import Team from "../Team/Team";
 import { loadFirestoreSiteContentForPublic } from "../../data/publicContentAdapter";
 import { loadFirestoreEventsForPublic } from "../../data/publicEventAdapter";
 import { loadFirestoreProductsForPublic } from "../../data/publicProductAdapter";
+
+const previewViewports = {
+  desktop: {
+    height: 760,
+    label: "Desktop",
+    width: 1200,
+  },
+  tablet: {
+    height: 820,
+    label: "Tablet",
+    width: 768,
+  },
+  mobile: {
+    height: 780,
+    label: "Mobile",
+    width: 390,
+  },
+};
 
 const CollapseIcon = ({ isExpanded }) => (
   <FontAwesomeIcon
@@ -30,6 +40,8 @@ export default function AdminPreview({ db, storage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [previewTab, setPreviewTab] = useState("home");
+  const [previewViewport, setPreviewViewport] = useState("desktop");
+  const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
   const [previewData, setPreviewData] = useState({
     content: null,
     events: [],
@@ -62,6 +74,11 @@ export default function AdminPreview({ db, storage }) {
     }
   }, [db, storage]);
 
+  const refreshPreview = useCallback(() => {
+    setPreviewRefreshKey((currentValue) => currentValue + 1);
+    loadPreview();
+  }, [loadPreview]);
+
   useEffect(() => {
     if (isExpanded) {
       loadPreview();
@@ -74,37 +91,15 @@ export default function AdminPreview({ db, storage }) {
   const highlightedProducts = useMemo(() => (
     activeProducts.filter((product) => product.isHighlighted === true)
   ), [activeProducts]);
-  const homeContent = previewData.content?.home;
-
-  const renderPreviewTab = () => {
-    if (!homeContent) {
-      return <p className="admin_status">Load the preview to view Firestore-rendered pages.</p>;
+  const selectedViewport = previewViewports[previewViewport];
+  const previewSrc = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "";
     }
 
-    if (previewTab === "shop") {
-      return <Shop productsOverride={previewData.products} />;
-    }
-
-    if (previewTab === "events") {
-      return (
-        <Events
-          eventsOverride={previewData.events}
-          experienceBlurbOverride={previewData.experienceBlurb}
-        />
-      );
-    }
-
-    return (
-      <div className="main">
-        <Header headerContent={homeContent.header} showNav={false} />
-        <Banner bannerContent={homeContent.banner} />
-        <HighlightedProducts productsOverride={highlightedProducts} />
-        <Experience />
-        <About aboutContent={homeContent.about} />
-        <Team teamContent={homeContent.team} />
-      </div>
-    );
-  };
+    const baseUrl = window.location.href.split("#")[0];
+    return `${baseUrl}#/admin/preview/${previewTab}?refresh=${previewRefreshKey}`;
+  }, [previewRefreshKey, previewTab]);
 
   return (
     <section className="admin_panel">
@@ -119,7 +114,7 @@ export default function AdminPreview({ db, storage }) {
           <button
             className="admin_secondary_button"
             disabled={isLoading || !isExpanded}
-            onClick={loadPreview}
+            onClick={refreshPreview}
             type="button"
           >
             Refresh Preview
@@ -155,6 +150,19 @@ export default function AdminPreview({ db, storage }) {
             ))}
           </div>
 
+          <div className="admin_preview_viewports" aria-label="Preview viewport sizes">
+            {Object.entries(previewViewports).map(([viewportKey, viewport]) => (
+              <button
+                className={previewViewport === viewportKey ? "admin_primary_button" : "admin_secondary_button"}
+                key={viewportKey}
+                onClick={() => setPreviewViewport(viewportKey)}
+                type="button"
+              >
+                {viewport.label}
+              </button>
+            ))}
+          </div>
+
           <div className="admin_audit_summary" aria-label="Preview data summary">
             <div>
               <span>Products</span>
@@ -174,8 +182,38 @@ export default function AdminPreview({ db, storage }) {
             </div>
           </div>
 
-          <div className="admin_site_preview">
-            {renderPreviewTab()}
+          <div
+            className="admin_site_preview"
+            style={{
+              "--admin-preview-height": `${selectedViewport.height}px`,
+              "--admin-preview-width": `${selectedViewport.width}px`,
+            }}
+          >
+            <div className="admin_site_preview_toolbar">
+              <span>
+                {selectedViewport.label}: {selectedViewport.width}px
+              </span>
+              <a
+                className="admin_secondary_button"
+                href={previewSrc}
+                rel="noreferrer"
+                target="_blank"
+              >
+                Open Full Preview
+              </a>
+            </div>
+            <div className="admin_site_preview_stage">
+              {previewSrc ? (
+                <iframe
+                  className="admin_site_preview_frame"
+                  key={previewSrc}
+                  src={previewSrc}
+                  title={`Firestore ${previewTab} ${selectedViewport.label} preview`}
+                />
+              ) : (
+                <p className="admin_status">Preview is unavailable in this environment.</p>
+              )}
+            </div>
           </div>
         </>
       ) : null}
