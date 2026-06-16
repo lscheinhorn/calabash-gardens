@@ -26,6 +26,14 @@ import {
   legacyGiftProductIds,
   seedSlugify,
 } from "../../data/adminProductSeed";
+import {
+  activeAdminDrafts,
+  applyAdminDrafts,
+  discardAdminDraft,
+  loadAdminDrafts,
+  publishAdminDraft,
+  saveAdminDraft,
+} from "../../data/adminDrafts";
 
 const emptyProduct = {
   slug: "",
@@ -128,10 +136,6 @@ const normalizeMediaAsset = (snapshot) => {
   };
 };
 
-const uniqueTags = (tags) => Array.from(new Set(tags
-  .map((tag) => String(tag || "").trim().toLowerCase())
-  .filter(Boolean)));
-
 const formatFileSize = (size) => {
   if (!size) {
     return "0 MB";
@@ -230,11 +234,13 @@ const buildFormFromProduct = (product) => ({
   sortOrder: product.sortOrder ?? "",
 });
 
-export default function ProductAdmin({ db, storage }) {
+export default function ProductAdmin({ db, storage, userId = "" }) {
   const [form, setForm] = useState(emptyProduct);
   const [editingForm, setEditingForm] = useState(emptyProduct);
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
   const [products, setProducts] = useState([]);
+  const [liveProducts, setLiveProducts] = useState([]);
+  const [draftsById, setDraftsById] = useState({});
   const [categories, setCategories] = useState([]);
   const [mediaAssets, setMediaAssets] = useState([]);
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -277,11 +283,22 @@ export default function ProductAdmin({ db, storage }) {
 
     try {
       const productsQuery = query(collection(db, "products"), orderBy("title"));
-      const snapshot = await getDocs(productsQuery);
-      setProducts(snapshot.docs.map((productDoc) => ({
+      const [snapshot, drafts] = await Promise.all([
+        getDocs(productsQuery),
+        loadAdminDrafts({ db, targetCollection: "products" }),
+      ]);
+      const liveProductDocs = snapshot.docs.map((productDoc) => ({
         id: productDoc.id,
         ...productDoc.data(),
-      })));
+      }));
+
+      setLiveProducts(liveProductDocs);
+      setDraftsById(Object.fromEntries(activeAdminDrafts(drafts, "products").map((draft) => [
+        draft.targetId,
+        draft,
+      ])));
+      setProducts(applyAdminDrafts(liveProductDocs, drafts, "products")
+        .sort((firstProduct, secondProduct) => String(firstProduct.title || "").localeCompare(String(secondProduct.title || ""))));
     } catch (error) {
       setMessage("Products could not be loaded.");
     } finally {
@@ -647,6 +664,13 @@ export default function ProductAdmin({ db, storage }) {
     return payload;
   };
 
+  const buildProductDraftPayload = (product, photos = normalizePhotos(product.photos)) => (
+    buildProductPayload(product.id, buildFormFromProduct(product), {
+      ...product,
+      photos,
+    }, product._draftOnly === true, true)
+  );
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -662,16 +686,26 @@ export default function ProductAdmin({ db, storage }) {
     setMessage("");
 
     try {
+      if (products.some((product) => product.id === productId)) {
+        setMessage("That product ID already exists. Open the existing product card to edit it.");
+        return;
+      }
+
       const payload = buildProductPayload(productId, form, null, true);
 
-      await setDoc(doc(db, "products", productId), payload, {
-        merge: true,
+      await saveAdminDraft({
+        data: payload,
+        db,
+        targetCollection: "products",
+        targetId: productId,
+        userId,
       });
-      setMessage("Product saved to Firestore.");
       setSelectedProductId(productId);
+      resetForm();
+      setMessage("Product saved as a preview draft.");
       await loadProducts();
     } catch (error) {
-      setMessage("Product could not be saved.");
+      setMessage("Product draft could not be saved.");
     } finally {
       setIsSaving(false);
     }
@@ -691,15 +725,75 @@ export default function ProductAdmin({ db, storage }) {
     setProductCardMessage("");
 
     try {
-      const payload = buildProductPayload(product.id, editingForm, product, false, false);
+      const payload = buildProductPayload(product.id, editingForm, product, false, true);
 
-      await setDoc(doc(db, "products", product.id), payload, { merge: true });
-      setProductCardMessage("Product saved to Firestore.");
+      await saveAdminDraft({
+        data: payload,
+        db,
+        targetCollection: "products",
+        targetId: product.id,
+        userId,
+      });
+      setProductCardMessage("Product saved as a preview draft.");
       setEditingProductId("");
       setEditingForm(emptyProduct);
       await loadProducts();
     } catch (error) {
-      setProductCardMessage("Product could not be saved.");
+      setProductCardMessage("Product draft could not be saved.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const publishProductDraft = async (product) => {
+    const isEditingProduct = editingProductId === product.id;
+    const productForm = isEditingProduct ? editingForm : buildFormFromProduct(product);
+    const validationMessage = validateProduct(product.id, productForm, false);
+
+    if (validationMessage) {
+      setProductCardMessage(validationMessage);
+      return;
+    }
+
+    setIsSaving(true);
+    setProductCardMessage("");
+
+    try {
+      await publishAdminDraft({
+        data: buildProductPayload(product.id, productForm, product, product._draftOnly === true, true),
+        db,
+        targetCollection: "products",
+        targetId: product.id,
+        userId,
+      });
+      setProductCardMessage("Product published to live Firestore.");
+      setEditingProductId("");
+      setEditingForm(emptyProduct);
+      await loadProducts();
+    } catch (error) {
+      setProductCardMessage("Product could not be published.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const discardProductDraft = async (product) => {
+    setIsSaving(true);
+    setProductCardMessage("");
+
+    try {
+      await discardAdminDraft({
+        db,
+        targetCollection: "products",
+        targetId: product.id,
+        userId,
+      });
+      setProductCardMessage(`${product.title || product.id} draft discarded.`);
+      setEditingProductId("");
+      setEditingForm(emptyProduct);
+      await loadProducts();
+    } catch (error) {
+      setProductCardMessage("Product draft could not be discarded.");
     } finally {
       setIsSaving(false);
     }
@@ -770,10 +864,13 @@ export default function ProductAdmin({ db, storage }) {
         },
       ];
 
-      await setDoc(doc(db, "products", product.id), {
-        photos: updatedPhotos,
-        updatedAt: serverTimestamp(),
-      }, { merge: true });
+      await saveAdminDraft({
+        data: buildProductDraftPayload(product, updatedPhotos),
+        db,
+        targetCollection: "products",
+        targetId: product.id,
+        userId,
+      });
 
       setProducts((currentProducts) => currentProducts.map((currentProduct) => (
         currentProduct.id === product.id
@@ -784,7 +881,7 @@ export default function ProductAdmin({ db, storage }) {
       setPhotoFile(null);
       setPhotoUploadChoice("optimize");
       setPhotoInputKey((currentKey) => currentKey + 1);
-      setPhotoMessage(shouldOptimize ? "Photo optimized, uploaded, and attached to this product." : "Photo uploaded and attached to this product.");
+      setPhotoMessage(shouldOptimize ? "Photo optimized, uploaded, and attached to the product draft." : "Photo uploaded and attached to the product draft.");
       await loadProducts();
     } catch (error) {
       setPhotoMessage("Photo could not be uploaded.");
@@ -811,76 +908,39 @@ export default function ProductAdmin({ db, storage }) {
     setPhotoMessage("");
 
     try {
-      const mediaTags = uniqueTags([
-        ...mediaAsset.tags,
-        "product",
-        product.id,
-        product.category,
-      ]);
       let updatedPhotos = [];
-      let wasAlreadyAttached = false;
+      const latestPhotos = normalizePhotos(product.photos);
 
-      await runTransaction(db, async (transaction) => {
-        const productRef = doc(db, "products", product.id);
-        const mediaRef = doc(db, "mediaAssets", mediaAsset.id);
-        const productSnapshot = await transaction.get(productRef);
-        const latestProduct = productSnapshot.exists() ? productSnapshot.data() : {};
-        const latestPhotos = normalizePhotos(latestProduct.photos);
-
-        if (latestPhotos.some((photo) => photo.mediaAssetId === mediaAsset.id || photo.path === mediaAsset.storagePath)) {
-          wasAlreadyAttached = true;
-          updatedPhotos = latestPhotos;
-          return;
-        }
-
-        const nextPhoto = {
-          path: mediaAsset.storagePath,
-          alt: mediaAsset.alt,
-          mediaAssetId: mediaAsset.id,
-          sortOrder: latestPhotos.length,
-        };
-
-        updatedPhotos = [...latestPhotos, nextPhoto];
-
-        transaction.set(productRef, {
-          photos: updatedPhotos,
-          updatedAt: serverTimestamp(),
-        }, { merge: true });
-
-        transaction.set(mediaRef, {
-          bin: "products",
-          linkedId: product.id,
-          linkedType: "product",
-          tags: mediaTags,
-          updatedAt: serverTimestamp(),
-        }, { merge: true });
-      });
-
-      if (wasAlreadyAttached) {
+      if (latestPhotos.some((photo) => photo.mediaAssetId === mediaAsset.id || photo.path === mediaAsset.storagePath)) {
         setPhotoMessage("That photo is already attached to this product.");
         return;
       }
+
+      const nextPhoto = {
+        path: mediaAsset.storagePath,
+        alt: mediaAsset.alt,
+        mediaAssetId: mediaAsset.id,
+        sortOrder: latestPhotos.length,
+      };
+
+      updatedPhotos = [...latestPhotos, nextPhoto];
+
+      await saveAdminDraft({
+        data: buildProductDraftPayload(product, updatedPhotos),
+        db,
+        targetCollection: "products",
+        targetId: product.id,
+        userId,
+      });
 
       setProducts((currentProducts) => currentProducts.map((currentProduct) => (
         currentProduct.id === product.id
           ? { ...currentProduct, photos: updatedPhotos }
           : currentProduct
       )));
-      setMediaAssets((currentAssets) => currentAssets.map((currentAsset) => (
-        currentAsset.id === mediaAsset.id
-          ? {
-              ...currentAsset,
-              bin: "products",
-              linkedId: product.id,
-              linkedType: "product",
-              tags: mediaTags,
-            }
-          : currentAsset
-      )));
       setSelectedExistingMediaId("");
-      setPhotoMessage("Existing photo attached to this product.");
+      setPhotoMessage("Existing photo attached to the product draft.");
       await loadProducts();
-      await loadMediaAssets();
     } catch (error) {
       setPhotoMessage("Existing photo could not be attached.");
     } finally {
@@ -901,24 +961,22 @@ export default function ProductAdmin({ db, storage }) {
     try {
       let updatedPhotos = [];
 
-      await runTransaction(db, async (transaction) => {
-        const productRef = doc(db, "products", product.id);
-        const productSnapshot = await transaction.get(productRef);
-        const latestProduct = productSnapshot.exists() ? productSnapshot.data() : {};
-        const latestPhotos = normalizePhotos(latestProduct.photos)
-          .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
+      const latestPhotos = normalizePhotos(product.photos)
+        .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
 
-        updatedPhotos = changePhotos(latestPhotos)
-          .filter(Boolean)
-          .map((photo, index) => ({
-            ...photo,
-            sortOrder: index,
-          }));
+      updatedPhotos = changePhotos(latestPhotos)
+        .filter(Boolean)
+        .map((photo, index) => ({
+          ...photo,
+          sortOrder: index,
+        }));
 
-        transaction.set(productRef, {
-          photos: updatedPhotos,
-          updatedAt: serverTimestamp(),
-        }, { merge: true });
+      await saveAdminDraft({
+        data: buildProductDraftPayload(product, updatedPhotos),
+        db,
+        targetCollection: "products",
+        targetId: product.id,
+        userId,
       });
 
       setProducts((currentProducts) => currentProducts.map((currentProduct) => (
@@ -978,48 +1036,7 @@ export default function ProductAdmin({ db, storage }) {
       latestPhotos.filter((latestPhoto) => latestPhoto.path !== photo.path)
     ), "Photo detached from this product.");
 
-    if (!photo.mediaAssetId || !updatedPhotos) {
-      return;
-    }
-
-    try {
-      const productsSnapshot = await getDocs(collection(db, "products"));
-      const isUsedByAnotherProduct = productsSnapshot.docs.some((productSnapshot) => {
-        if (productSnapshot.id === product.id) {
-          return false;
-        }
-
-        return normalizePhotos(productSnapshot.data().photos).some((latestPhoto) => (
-          latestPhoto.mediaAssetId === photo.mediaAssetId || latestPhoto.path === photo.path
-        ));
-      });
-
-      if (!isUsedByAnotherProduct) {
-        await runTransaction(db, async (transaction) => {
-          const mediaRef = doc(db, "mediaAssets", photo.mediaAssetId);
-          const mediaSnapshot = await transaction.get(mediaRef);
-          const mediaData = mediaSnapshot.exists() ? mediaSnapshot.data() : {};
-
-          if (mediaData.linkedType && mediaData.linkedType !== "product") {
-            return;
-          }
-
-          if (mediaData.linkedId && mediaData.linkedId !== product.id) {
-            return;
-          }
-
-          transaction.set(mediaRef, {
-            bin: "other",
-            linkedId: "",
-            linkedType: "none",
-            updatedAt: serverTimestamp(),
-          }, { merge: true });
-        });
-        await loadMediaAssets();
-      }
-    } catch (error) {
-      setPhotoMessage("Photo detached, but the media bin could not be refreshed.");
-    }
+    return updatedPhotos;
   };
 
   const handleCategorySubmit = async (event) => {
@@ -1061,7 +1078,7 @@ export default function ProductAdmin({ db, storage }) {
 
   const previewProductSeed = () => {
     const seed = buildProductSeed();
-    const existingProductIds = new Set(products.map((product) => product.id));
+    const existingProductIds = new Set(liveProducts.map((product) => product.id));
     const existingCategoryIds = new Set(categories.map((category) => category.id));
 
     setSeedResult({
@@ -1073,7 +1090,7 @@ export default function ProductAdmin({ db, storage }) {
 
   const seedMissingProducts = async () => {
     const seed = seedResult || buildProductSeed();
-    const existingProductIds = new Set(products.map((product) => product.id));
+    const existingProductIds = new Set(liveProducts.map((product) => product.id));
     const existingCategoryIds = new Set(categories.map((category) => category.id));
     const missingCategories = seed.categories.filter((category) => !existingCategoryIds.has(category.id));
     const missingProducts = seed.products.filter((product) => !existingProductIds.has(product.id));
@@ -1302,6 +1319,7 @@ export default function ProductAdmin({ db, storage }) {
                 const productPhotos = normalizePhotos(product.photos)
                   .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
                 const isPhotoTarget = selectedProductId === product.id;
+                const hasDraft = Boolean(draftsById[product.id]);
 
                 return (
                   <article className="admin_product_card" key={product.id}>
@@ -1320,6 +1338,8 @@ export default function ProductAdmin({ db, storage }) {
                     </button>
 
                     <div className="admin_product_meta">
+                      <span>{hasDraft ? "Draft changes pending" : "Live product"}</span>
+                      {product._draftOnly ? <span>Draft-only new product</span> : null}
                       <span>{product.published ? "Published" : "Draft"}</span>
                       <span>{product.isActive ? "Active" : "Inactive"}</span>
                       <span>{product.inStock === false ? "Out of Stock" : "In Stock"}</span>
@@ -1353,6 +1373,22 @@ export default function ProductAdmin({ db, storage }) {
                           <div className="admin_button_row">
                             <button className="admin_primary_button" onClick={() => startProductEdit(product)} type="button">
                               Edit
+                            </button>
+                            <button
+                              className="admin_secondary_button"
+                              disabled={isSaving || !hasDraft}
+                              onClick={() => publishProductDraft(product)}
+                              type="button"
+                            >
+                              Publish Changes
+                            </button>
+                            <button
+                              className="admin_secondary_button"
+                              disabled={isSaving || !hasDraft}
+                              onClick={() => discardProductDraft(product)}
+                              type="button"
+                            >
+                              Discard Draft
                             </button>
                           </div>
                         ) : (
@@ -1456,7 +1492,23 @@ export default function ProductAdmin({ db, storage }) {
                             </div>
                             <div className="admin_button_row">
                               <button className="admin_primary_button" disabled={isSaving} type="submit">
-                                {isSaving ? "Saving..." : "Save Product"}
+                                {isSaving ? "Saving..." : "Save Draft"}
+                              </button>
+                              <button
+                                className="admin_secondary_button"
+                                disabled={isSaving}
+                                onClick={() => publishProductDraft(product)}
+                                type="button"
+                              >
+                                Publish Changes
+                              </button>
+                              <button
+                                className="admin_secondary_button"
+                                disabled={isSaving || !hasDraft}
+                                onClick={() => discardProductDraft(product)}
+                                type="button"
+                              >
+                                Discard Draft
                               </button>
                               <button className="admin_secondary_button" onClick={cancelProductEdit} type="button">
                                 Cancel
@@ -1760,7 +1812,7 @@ export default function ProductAdmin({ db, storage }) {
 
             <div className="admin_button_row">
               <button className="admin_primary_button" disabled={isSaving} type="submit">
-                {isSaving ? "Saving..." : "Save Product"}
+                {isSaving ? "Saving..." : "Save Draft"}
               </button>
               <button className="admin_secondary_button" onClick={resetForm} type="button">
                 Clear

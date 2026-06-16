@@ -1,6 +1,7 @@
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { getDownloadURL, ref } from "firebase/storage";
 
+import { applyAdminDrafts } from "./adminDrafts";
 import defaultEventPhoto from "../resources/images/large_logo_no_purple_square.png";
 import { createKey } from "./siteData";
 
@@ -106,13 +107,16 @@ export const normalizeFirestoreEventsForPublic = (firestoreEvents, options = {})
     .sort((firstEvent, secondEvent) => firstEvent.date - secondEvent.date || firstEvent.title.localeCompare(secondEvent.title))
 );
 
-export const loadFirestoreEventsForPublic = async ({ db, storage }) => {
+export const loadFirestoreEventsForPublic = async ({ db, storage, drafts = [] }) => {
   const eventsQuery = query(collection(db, "events"), orderBy("date"));
   const snapshot = await getDocs(eventsQuery);
-  const firestoreEvents = snapshot.docs.map((eventDoc) => ({
+  const liveFirestoreEvents = snapshot.docs.map((eventDoc) => ({
     id: eventDoc.id,
     ...eventDoc.data(),
   }));
+  const firestoreEvents = drafts.length
+    ? applyAdminDrafts(liveFirestoreEvents, drafts, "events")
+    : liveFirestoreEvents;
   const storageUrlByPath = await buildStorageUrlMap(storage, firestoreEvents);
 
   return normalizeFirestoreEventsForPublic(firestoreEvents, { storageUrlByPath });

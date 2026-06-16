@@ -5,6 +5,7 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
+import { activeAdminDrafts, loadAdminDrafts } from "../../data/adminDrafts";
 import { loadFirestoreSiteContentForPublic } from "../../data/publicContentAdapter";
 import { loadFirestoreEventsForPublic } from "../../data/publicEventAdapter";
 import { loadFirestoreProductsForPublic } from "../../data/publicProductAdapter";
@@ -48,16 +49,18 @@ export default function AdminPreview({ db, storage }) {
     experienceBlurb: [],
     products: [],
   });
+  const [draftCount, setDraftCount] = useState(0);
 
   const loadPreview = useCallback(async () => {
     setIsLoading(true);
     setMessage("");
 
     try {
+      const drafts = await loadAdminDrafts({ db });
       const [products, siteContent, events] = await Promise.all([
-        loadFirestoreProductsForPublic({ db, storage }),
-        loadFirestoreSiteContentForPublic({ db }),
-        loadFirestoreEventsForPublic({ db, storage }),
+        loadFirestoreProductsForPublic({ db, drafts, storage }),
+        loadFirestoreSiteContentForPublic({ db, drafts }),
+        loadFirestoreEventsForPublic({ db, drafts, storage }),
       ]);
 
       setPreviewData({
@@ -66,7 +69,8 @@ export default function AdminPreview({ db, storage }) {
         experienceBlurb: siteContent.experienceBlurb,
         products,
       });
-      setMessage("Preview loaded from published Firestore content.");
+      setDraftCount(activeAdminDrafts(drafts).length);
+      setMessage("Preview loaded with draft changes over live Firestore content.");
     } catch (error) {
       setMessage("Preview could not be loaded from Firestore.");
     } finally {
@@ -107,7 +111,7 @@ export default function AdminPreview({ db, storage }) {
         <div>
           <h3>Firestore Site Preview</h3>
           <p className="admin_status">
-            Admin-only preview using the public components with published Firestore data.
+            Admin-only preview using public components with draft changes over live Firestore data.
           </p>
         </div>
         <div className="admin_button_row">
@@ -179,6 +183,10 @@ export default function AdminPreview({ db, storage }) {
             <div>
               <span>Blurb Paragraphs</span>
               <strong>{previewData.experienceBlurb.length}</strong>
+            </div>
+            <div>
+              <span>Drafts</span>
+              <strong>{draftCount}</strong>
             </div>
           </div>
 

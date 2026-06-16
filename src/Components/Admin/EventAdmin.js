@@ -8,13 +8,21 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  setDoc,
 } from "firebase/firestore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
+
+import {
+  activeAdminDrafts,
+  applyAdminDrafts,
+  discardAdminDraft,
+  loadAdminDrafts,
+  publishAdminDraft,
+  saveAdminDraft,
+} from "../../data/adminDrafts";
 
 const emptyEvent = {
   slug: "",
@@ -232,8 +240,9 @@ const buildEventPayload = (form, { clearBlankOptionalFields = false } = {}) => {
   return payload;
 };
 
-export default function EventAdmin({ db }) {
+export default function EventAdmin({ db, userId = "" }) {
   const [events, setEvents] = useState([]);
+  const [draftsById, setDraftsById] = useState({});
   const [form, setForm] = useState(emptyEvent);
   const [editingFormsById, setEditingFormsById] = useState({});
   const [expandedEventId, setExpandedEventId] = useState("");
@@ -250,13 +259,29 @@ export default function EventAdmin({ db }) {
 
     try {
       const eventsQuery = query(collection(db, "events"), orderBy("date"));
-      const snapshot = await getDocs(eventsQuery);
-      const eventDocs = snapshot.docs.map((eventDoc) => ({
+      const [snapshot, drafts] = await Promise.all([
+        getDocs(eventsQuery),
+        loadAdminDrafts({ db, targetCollection: "events" }),
+      ]);
+      const liveEventDocs = snapshot.docs.map((eventDoc) => ({
         id: eventDoc.id,
         ...eventDoc.data(),
       }));
+      const eventDocs = applyAdminDrafts(liveEventDocs, drafts, "events")
+        .sort((firstEvent, secondEvent) => {
+          const firstDate = firstEvent.date?.toDate ? firstEvent.date.toDate() : firstEvent.date;
+          const secondDate = secondEvent.date?.toDate ? secondEvent.date.toDate() : secondEvent.date;
+          const firstTime = firstDate instanceof Date ? firstDate.getTime() : 0;
+          const secondTime = secondDate instanceof Date ? secondDate.getTime() : 0;
+
+          return firstTime - secondTime || String(firstEvent.title || "").localeCompare(String(secondEvent.title || ""));
+        });
 
       setEvents(eventDocs);
+      setDraftsById(Object.fromEntries(activeAdminDrafts(drafts, "events").map((draft) => [
+        draft.targetId,
+        draft,
+      ])));
       setEditingFormsById(Object.fromEntries(eventDocs.map((eventDoc) => [
         eventDoc.id,
         buildFormFromEvent(eventDoc),
@@ -321,11 +346,14 @@ export default function EventAdmin({ db }) {
         return;
       }
 
-      await setDoc(doc(db, "events", form.slug), {
-        ...buildEventPayload(form),
-        createdAt: serverTimestamp(),
+      await saveAdminDraft({
+        data: buildEventPayload(form),
+        db,
+        targetCollection: "events",
+        targetId: form.slug,
+        userId,
       });
-      setMessage(`${form.title} saved to Firestore events.`);
+      setMessage(`${form.title} saved as a preview draft.`);
       setForm(emptyEvent);
       setIsNewEventIdEdited(false);
       setIsNewEventExpanded(false);
@@ -356,11 +384,74 @@ export default function EventAdmin({ db }) {
     setMessage("");
 
     try {
-      await setDoc(doc(db, "events", eventId), buildEventPayload(editingForm, { clearBlankOptionalFields: true }), { merge: true });
-      setMessage(`${editingForm.title} saved to Firestore events.`);
+      await saveAdminDraft({
+        data: buildEventPayload(editingForm, { clearBlankOptionalFields: true }),
+        db,
+        targetCollection: "events",
+        targetId: eventId,
+        userId,
+      });
+      setMessage(`${editingForm.title} saved as a preview draft.`);
       await loadEvents();
     } catch (error) {
-      setMessage("Event could not be saved.");
+      setMessage("Event draft could not be saved.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const publishExistingEvent = async (eventId) => {
+    const editingForm = editingFormsById[eventId];
+
+    if (!editingForm) {
+      setMessage("Open an event before publishing.");
+      return;
+    }
+
+    const validationMessage = validateEventForm(editingForm, false);
+
+    if (validationMessage) {
+      setMessage(validationMessage);
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await publishAdminDraft({
+        data: buildEventPayload(editingForm, { clearBlankOptionalFields: true }),
+        db,
+        targetCollection: "events",
+        targetId: eventId,
+        userId,
+      });
+      setMessage(`${editingForm.title} published to live Firestore events.`);
+      await loadEvents();
+    } catch (error) {
+      setMessage("Event could not be published.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const discardExistingEventDraft = async (eventId) => {
+    const editingForm = editingFormsById[eventId];
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await discardAdminDraft({
+        db,
+        targetCollection: "events",
+        targetId: eventId,
+        userId,
+      });
+      setMessage(`${editingForm?.title || eventId} draft discarded.`);
+      await loadEvents();
+    } catch (error) {
+      setMessage("Event draft could not be discarded.");
     } finally {
       setIsSaving(false);
     }
@@ -372,7 +463,7 @@ export default function EventAdmin({ db }) {
         <div>
           <h3>Event Editor</h3>
           <p className="admin_status">
-            Edits Firestore events only. Public event pages still use static event data.
+            Saves event edits as drafts first. Publish Changes updates live Firestore events.
           </p>
         </div>
         <div className="admin_button_row">
@@ -429,6 +520,7 @@ export default function EventAdmin({ db }) {
                   }
                   updateNewForm(field, value);
                 }}
+                submitLabel="Save Draft"
               />
             ) : null}
           </article>
@@ -437,6 +529,7 @@ export default function EventAdmin({ db }) {
             {events.map((eventDoc) => {
               const isEventExpanded = expandedEventId === eventDoc.id;
               const editingForm = editingFormsById[eventDoc.id];
+              const hasDraft = Boolean(draftsById[eventDoc.id]);
 
               return (
                 <article className="admin_product_card" key={eventDoc.id}>
@@ -454,6 +547,8 @@ export default function EventAdmin({ db }) {
                     </small>
                   </button>
                   <div className="admin_product_meta">
+                    <span>{hasDraft ? "Draft changes pending" : "Live event"}</span>
+                    {eventDoc._draftOnly ? <span>Draft-only new event</span> : null}
                     <span>{eventDoc.published ? "Published" : "Draft"}</span>
                     <span>{eventDoc.isActive ? "Active" : "Inactive"}</span>
                     <span>{eventDoc.inStock ? "In Stock" : "Out of Stock"}</span>
@@ -474,7 +569,26 @@ export default function EventAdmin({ db }) {
                           saveExistingEvent(eventDoc.id);
                         }}
                         onUpdate={(field, value) => updateEditingForm(eventDoc.id, field, value)}
+                        submitLabel="Save Draft"
                       />
+                      <div className="admin_button_row">
+                        <button
+                          className="admin_secondary_button"
+                          disabled={isSaving}
+                          onClick={() => publishExistingEvent(eventDoc.id)}
+                          type="button"
+                        >
+                          Publish Changes
+                        </button>
+                        <button
+                          className="admin_secondary_button"
+                          disabled={isSaving || !hasDraft}
+                          onClick={() => discardExistingEventDraft(eventDoc.id)}
+                          type="button"
+                        >
+                          Discard Draft
+                        </button>
+                      </div>
                     </div>
                   ) : null}
                 </article>
@@ -493,6 +607,7 @@ function EventForm({
   isSaving,
   onSubmit,
   onUpdate,
+  submitLabel = "Save Draft",
 }) {
   return (
     <form className="admin_embedded_form" onSubmit={onSubmit}>
@@ -657,7 +772,7 @@ function EventForm({
       </div>
 
       <button className="admin_primary_button" disabled={isSaving} type="submit">
-        {isSaving ? "Saving..." : "Save Event"}
+        {isSaving ? "Saving..." : submitLabel}
       </button>
     </form>
   );

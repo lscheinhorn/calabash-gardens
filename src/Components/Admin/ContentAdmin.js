@@ -1,10 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   collection,
-  doc,
   getDocs,
-  serverTimestamp,
-  setDoc,
 } from "firebase/firestore";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -12,6 +9,14 @@ import {
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
 
+import {
+  activeAdminDrafts,
+  applyAdminDrafts,
+  discardAdminDraft,
+  loadAdminDrafts,
+  publishAdminDraft,
+  saveAdminDraft,
+} from "../../data/adminDrafts";
 import { buildContentSeed } from "../../data/adminContentSeed";
 
 const CollapseIcon = ({ isExpanded }) => (
@@ -83,8 +88,9 @@ const buildExpectedMeta = () => {
   }]));
 };
 
-export default function ContentAdmin({ db }) {
+export default function ContentAdmin({ db, userId = "" }) {
   const [contentDocs, setContentDocs] = useState([]);
+  const [draftsById, setDraftsById] = useState({});
   const [expandedDocId, setExpandedDocId] = useState("");
   const [formsById, setFormsById] = useState({});
   const [isExpanded, setIsExpanded] = useState(false);
@@ -100,12 +106,16 @@ export default function ContentAdmin({ db }) {
     setMessage("");
 
     try {
-      const snapshot = await getDocs(collection(db, "siteContent"));
-      const docs = snapshot.docs
+      const [snapshot, drafts] = await Promise.all([
+        getDocs(collection(db, "siteContent")),
+        loadAdminDrafts({ db, targetCollection: "siteContent" }),
+      ]);
+      const liveDocs = snapshot.docs
         .map((contentDoc) => ({
           id: contentDoc.id,
           ...contentDoc.data(),
-        }))
+        }));
+      const docs = applyAdminDrafts(liveDocs, drafts, "siteContent")
         .filter((contentDoc) => expectedContentIds.has(contentDoc.id))
         .sort((firstDoc, secondDoc) => {
           const firstOrder = Number.isFinite(firstDoc.sortOrder) ? firstDoc.sortOrder : expectedMeta.get(firstDoc.id)?.sortOrder ?? 999;
@@ -119,6 +129,10 @@ export default function ContentAdmin({ db }) {
         published: contentDoc.published === true,
         sortOrder: Number.isFinite(contentDoc.sortOrder) ? contentDoc.sortOrder : expectedMeta.get(contentDoc.id)?.sortOrder ?? null,
       }])));
+      setDraftsById(Object.fromEntries(activeAdminDrafts(drafts, "siteContent").map((draft) => [
+        draft.targetId,
+        draft,
+      ])));
     } catch (error) {
       setMessage("Site content could not be loaded.");
     } finally {
@@ -155,16 +169,29 @@ export default function ContentAdmin({ db }) {
     }));
   };
 
-  const saveContentDoc = async (contentDoc) => {
+  const buildContentPayload = (contentDoc) => {
     if (!expectedContentIds.has(contentDoc.id)) {
-      setMessage("This site content document is not part of the approved editor set.");
-      return;
+      return null;
     }
 
     const form = formsById[contentDoc.id];
 
     if (!form) {
-      setMessage("Open a content section before saving.");
+      return null;
+    }
+
+    return {
+      published: form.published,
+      sections: unflattenSections(form.flatSections),
+      sortOrder: Number.isFinite(Number(form.sortOrder)) ? Number(form.sortOrder) : null,
+    };
+  };
+
+  const saveContentDraft = async (contentDoc) => {
+    const payload = buildContentPayload(contentDoc);
+
+    if (!payload) {
+      setMessage("Open an approved content section before saving.");
       return;
     }
 
@@ -172,17 +199,68 @@ export default function ContentAdmin({ db }) {
     setMessage("");
 
     try {
-      await setDoc(doc(db, "siteContent", contentDoc.id), {
-        published: form.published,
-        sections: unflattenSections(form.flatSections),
-        sortOrder: form.sortOrder,
-        updatedAt: serverTimestamp(),
-      }, { merge: true });
+      await saveAdminDraft({
+        data: payload,
+        db,
+        targetCollection: "siteContent",
+        targetId: contentDoc.id,
+        userId,
+      });
 
-      setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} saved to Firestore.`);
+      setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} draft saved for preview.`);
       await loadContentDocs();
     } catch (error) {
-      setMessage("Site content could not be saved.");
+      setMessage("Site content draft could not be saved.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const publishContentDoc = async (contentDoc) => {
+    const payload = buildContentPayload(contentDoc);
+
+    if (!payload) {
+      setMessage("Open an approved content section before publishing.");
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await publishAdminDraft({
+        data: payload,
+        db,
+        targetCollection: "siteContent",
+        targetId: contentDoc.id,
+        userId,
+      });
+
+      setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} published to live Firestore content.`);
+      await loadContentDocs();
+    } catch (error) {
+      setMessage("Site content could not be published.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const discardContentDraft = async (contentDoc) => {
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await discardAdminDraft({
+        db,
+        targetCollection: "siteContent",
+        targetId: contentDoc.id,
+        userId,
+      });
+
+      setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} draft discarded.`);
+      await loadContentDocs();
+    } catch (error) {
+      setMessage("Site content draft could not be discarded.");
     } finally {
       setIsSaving(false);
     }
@@ -194,7 +272,7 @@ export default function ContentAdmin({ db }) {
         <div>
           <h3>Site Content Editor</h3>
           <p className="admin_status">
-            Edits Firestore site content only. Public pages still use static copy.
+            Saves site content edits as drafts first. Publish Changes updates live Firestore content.
           </p>
         </div>
         <div className="admin_button_row">
@@ -233,6 +311,7 @@ export default function ContentAdmin({ db }) {
               const form = formsById[contentDoc.id];
               const fields = Object.entries(form?.flatSections || {});
               const title = expectedMeta.get(contentDoc.id)?.title || contentDoc.id;
+              const hasDraft = Boolean(draftsById[contentDoc.id]);
 
               return (
                 <article className="admin_content_card" key={contentDoc.id}>
@@ -249,6 +328,10 @@ export default function ContentAdmin({ db }) {
                       <CollapseIcon isExpanded={isDocExpanded} />
                     </small>
                   </button>
+                  <div className="admin_product_meta">
+                    <span>{hasDraft ? "Draft changes pending" : "Live content"}</span>
+                    <span>{form?.published ? "Published when live" : "Hidden when live"}</span>
+                  </div>
 
                   {isDocExpanded ? (
                     <div className="admin_embedded_form">
@@ -282,14 +365,32 @@ export default function ContentAdmin({ db }) {
                         </label>
                       ))}
 
-                      <button
-                        className="admin_primary_button"
-                        disabled={isSaving}
-                        onClick={() => saveContentDoc(contentDoc)}
-                        type="button"
-                      >
-                        {isSaving ? "Saving..." : "Save Content"}
-                      </button>
+                      <div className="admin_button_row">
+                        <button
+                          className="admin_primary_button"
+                          disabled={isSaving}
+                          onClick={() => saveContentDraft(contentDoc)}
+                          type="button"
+                        >
+                          {isSaving ? "Saving..." : "Save Draft"}
+                        </button>
+                        <button
+                          className="admin_secondary_button"
+                          disabled={isSaving}
+                          onClick={() => publishContentDoc(contentDoc)}
+                          type="button"
+                        >
+                          Publish Changes
+                        </button>
+                        <button
+                          className="admin_secondary_button"
+                          disabled={isSaving || !hasDraft}
+                          onClick={() => discardContentDraft(contentDoc)}
+                          type="button"
+                        >
+                          Discard Draft
+                        </button>
+                      </div>
                     </div>
                   ) : null}
                 </article>

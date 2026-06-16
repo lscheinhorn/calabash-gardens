@@ -16,6 +16,7 @@ import ProductPage from "../ProductPage/ProductPage";
 import Shop from "../Shop/Shop";
 import Team from "../Team/Team";
 import { db, isFirebaseConfigured, storage } from "../../firebase-config";
+import { loadAdminDrafts } from "../../data/adminDrafts";
 import { loadFirestoreSiteContentForPublic } from "../../data/publicContentAdapter";
 import { loadFirestoreEventsForPublic } from "../../data/publicEventAdapter";
 import { loadFirestoreProductsForPublic } from "../../data/publicProductAdapter";
@@ -83,10 +84,11 @@ export default function AdminPreviewFrame() {
     setMessage("");
 
     try {
+      const drafts = await loadAdminDrafts({ db });
       const [products, siteContent, events] = await Promise.all([
-        loadFirestoreProductsForPublic({ db, storage }),
-        loadFirestoreSiteContentForPublic({ db }),
-        loadFirestoreEventsForPublic({ db, storage }),
+        loadFirestoreProductsForPublic({ db, drafts, storage }),
+        loadFirestoreSiteContentForPublic({ db, drafts }),
+        loadFirestoreEventsForPublic({ db, drafts, storage }),
       ]);
 
       setPreviewData({

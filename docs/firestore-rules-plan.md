@@ -31,9 +31,12 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 
 - `adminUsers`: signed-in users can read their own record; admins can read and manage admin records.
 - `products`: admin reads and writes only until public backend reads are approved.
+- `productDrafts`: admin reads and writes only; stores draft product edits before publish.
 - `productCategories`: admin reads and writes only; product writes require an existing approved category document ID.
 - `events`: admin reads and writes only until public backend reads are approved.
+- `eventDrafts`: admin reads and writes only; stores draft event edits before publish.
 - `siteContent`: admin reads and writes only until public backend reads are approved.
+- `siteContentDrafts`: admin reads and writes only; stores draft site-content edits before publish.
 - `inventory`: admin-only reads and writes.
 - `mediaAssets`: admin reads and writes only; stores image metadata, tags, bins, and link targets.
 - `orders`: admin reads only; client writes are denied until checkout/order persistence is designed.
@@ -52,6 +55,7 @@ The first admin user must be bootstrapped manually in the Firebase console befor
 - Public reads for `products`, `events`, and `siteContent` are intentionally disabled in the current draft. When public backend reads are approved, list queries must be constrained to the public-read fields; Firestore rules do not filter unsafe query results after the fact.
 - Roles are stored but not enforced yet. Any active admin can manage other admin records in this draft.
 - Product, event, site content, and inventory writes use collection-specific validators aligned to `docs/admin-data-shapes.md`.
+- Draft product, event, and site-content writes use the same public-facing field shapes plus draft metadata. Public reads do not use draft collections.
 - Media asset writes use a collection-specific validator aligned to the media library contract in `docs/admin-data-shapes.md`.
 - Media asset writes allow `migratedAt` so imported media metadata remains editable after migration.
 - Product and product category writes are constrained to the approved product category IDs.

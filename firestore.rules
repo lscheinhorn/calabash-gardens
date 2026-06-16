@@ -141,6 +141,136 @@ service cloud.firestore {
         && (request.resource.data.sections is map || request.resource.data.sections is list);
     }
 
+    function validDraftStatus(status) {
+      return status in ['draft', 'published', 'discarded'];
+    }
+
+    function validDraftMetadata(targetCollection, targetId) {
+      return request.resource.data.draftStatus is string
+        && validDraftStatus(request.resource.data.draftStatus)
+        && request.resource.data.draftTargetCollection == targetCollection
+        && request.resource.data.draftTargetId == targetId
+        && request.resource.data.draftUpdatedAt is timestamp
+        && request.resource.data.draftUpdatedBy is string
+        && (!('draftPublishedAt' in request.resource.data) || request.resource.data.draftPublishedAt is timestamp)
+        && (!('draftPublishedBy' in request.resource.data) || request.resource.data.draftPublishedBy is string)
+        && (!('draftDiscardedAt' in request.resource.data) || request.resource.data.draftDiscardedAt is timestamp)
+        && (!('draftDiscardedBy' in request.resource.data) || request.resource.data.draftDiscardedBy is string);
+    }
+
+    function validProductDraft(productId) {
+      return hasOnlyAllowedKeys([
+          'category',
+          'createdAt',
+          'draftDiscardedAt',
+          'draftDiscardedBy',
+          'draftPublishedAt',
+          'draftPublishedBy',
+          'draftStatus',
+          'draftTargetCollection',
+          'draftTargetId',
+          'draftUpdatedAt',
+          'draftUpdatedBy',
+          'info',
+          'info1',
+          'info2',
+          'inStock',
+          'isActive',
+          'isHighlighted',
+          'photos',
+          'priceOptions',
+          'published',
+          'shipping',
+          'slug',
+          'sortOrder',
+          'title',
+          'updatedAt'
+        ])
+        && hasRequiredKeys(['category', 'draftStatus', 'draftTargetCollection', 'draftTargetId', 'draftUpdatedAt', 'draftUpdatedBy', 'inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
+        && validDraftMetadata('products', productId)
+        && request.resource.data.category is string
+        && approvedProductCategory(request.resource.data.category)
+        && (request.resource.data.category != 'gifts' || legacyGiftProduct(productId))
+        && exists(/databases/$(database)/documents/productCategories/$(request.resource.data.category))
+        && request.resource.data.published is bool
+        && request.resource.data.inStock is bool
+        && request.resource.data.isActive is bool
+        && request.resource.data.photos is list
+        && request.resource.data.priceOptions is list
+        && request.resource.data.shipping is string
+        && request.resource.data.title is string;
+    }
+
+    function validEventDraft(eventId) {
+      return hasOnlyAllowedKeys([
+          'capacity',
+          'category',
+          'childTicket',
+          'createdAt',
+          'date',
+          'dietaryOptions',
+          'draftDiscardedAt',
+          'draftDiscardedBy',
+          'draftPublishedAt',
+          'draftPublishedBy',
+          'draftStatus',
+          'draftTargetCollection',
+          'draftTargetId',
+          'draftUpdatedAt',
+          'draftUpdatedBy',
+          'eventDates',
+          'eventType',
+          'info',
+          'inStock',
+          'isActive',
+          'link',
+          'photos',
+          'priceOptions',
+          'published',
+          'shipping',
+          'slug',
+          'sortOrder',
+          'title',
+          'updatedAt'
+        ])
+        && hasRequiredKeys(['category', 'date', 'draftStatus', 'draftTargetCollection', 'draftTargetId', 'draftUpdatedAt', 'draftUpdatedBy', 'eventDates', 'info', 'inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
+        && validDraftMetadata('events', eventId)
+        && request.resource.data.eventDates is list
+        && request.resource.data.category is string
+        && request.resource.data.date is timestamp
+        && request.resource.data.info is list
+        && request.resource.data.inStock is bool
+        && request.resource.data.isActive is bool
+        && request.resource.data.photos is list
+        && request.resource.data.priceOptions is list
+        && request.resource.data.published is bool
+        && request.resource.data.shipping is string
+        && request.resource.data.title is string;
+    }
+
+    function validSiteContentDraft(contentId) {
+      return hasOnlyAllowedKeys([
+          'createdAt',
+          'draftDiscardedAt',
+          'draftDiscardedBy',
+          'draftPublishedAt',
+          'draftPublishedBy',
+          'draftStatus',
+          'draftTargetCollection',
+          'draftTargetId',
+          'draftUpdatedAt',
+          'draftUpdatedBy',
+          'published',
+          'sections',
+          'sortOrder',
+          'updatedAt'
+        ])
+        && hasRequiredKeys(['draftStatus', 'draftTargetCollection', 'draftTargetId', 'draftUpdatedAt', 'draftUpdatedBy', 'published', 'sections'])
+        && validDraftMetadata('siteContent', contentId)
+        && request.resource.data.published is bool
+        && (request.resource.data.sections is map || request.resource.data.sections is list);
+    }
+
     function validInventory() {
       return hasOnlyAllowedKeys(['createdAt', 'dietaryVariant', 'eventDate', 'linkedId', 'linkedType', 'notes', 'stock', 'updatedAt'])
         && hasRequiredKeys(['linkedId', 'linkedType', 'stock'])
@@ -215,6 +345,12 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /productDrafts/{productId} {
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validProductDraft(productId);
+      allow delete: if isAdmin();
+    }
+
     match /productCategories/{categoryId} {
       allow get, list: if isAdmin();
       allow create, update: if isAdmin() && approvedProductCategory(categoryId) && validProductCategory();
@@ -227,9 +363,21 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /eventDrafts/{eventId} {
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validEventDraft(eventId);
+      allow delete: if isAdmin();
+    }
+
     match /siteContent/{contentId} {
       allow get, list: if isAdmin();
       allow create, update: if isAdmin() && validSiteContent();
+      allow delete: if isAdmin();
+    }
+
+    match /siteContentDrafts/{contentId} {
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validSiteContentDraft(contentId);
       allow delete: if isAdmin();
     }
 

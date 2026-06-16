@@ -1,6 +1,7 @@
 import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { getDownloadURL, ref } from "firebase/storage";
 
+import { applyAdminDrafts } from "./adminDrafts";
 import { createKey, products as staticProducts } from "../resources/products";
 
 export const publicProductsSource = process.env.REACT_APP_PUBLIC_PRODUCTS_SOURCE === "firestore"
@@ -130,13 +131,21 @@ const buildStorageUrlMap = async (storage, firestoreProducts) => {
   return Object.fromEntries(entries);
 };
 
-export const loadFirestoreProductsForPublic = async ({ db, storage, staticProductFallbacks = staticProducts }) => {
+export const loadFirestoreProductsForPublic = async ({
+  db,
+  drafts = [],
+  staticProductFallbacks = staticProducts,
+  storage,
+}) => {
   const productsQuery = query(collection(db, "products"), orderBy("title"));
   const productsSnapshot = await getDocs(productsQuery);
-  const firestoreProducts = productsSnapshot.docs.map((productDoc) => ({
+  const liveFirestoreProducts = productsSnapshot.docs.map((productDoc) => ({
     id: productDoc.id,
     ...productDoc.data(),
   }));
+  const firestoreProducts = drafts.length
+    ? applyAdminDrafts(liveFirestoreProducts, drafts, "products")
+    : liveFirestoreProducts;
   const [categoryNameById, storageUrlByPath] = await Promise.all([
     buildCategoryNameMap(db),
     buildStorageUrlMap(storage, firestoreProducts),

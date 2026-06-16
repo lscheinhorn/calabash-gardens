@@ -92,8 +92,10 @@ If the confirmed importer fails on the first Storage upload with `404 Not Found`
 If it fails with `storage/unauthorized` after Storage rules deploy, check the cross-service rules IAM permission. The Firebase Storage service agent needs the `Firebase Rules Firestore Service Agent` role so Storage rules can read `adminUsers/{uid}` in Firestore.
 
 After import, the admin product cards and Photos library should display Storage-backed previews for attached/imported media. Public product pages still use static images until a separate backend-read phase is approved.
-Product cards can also attach an existing active photo from the `other` media bin. Attaching moves that media asset into the `products` bin, links it to the selected product, preserves existing tags, and appends a product photo reference without uploading another file.
-Attached product photos can be managed from the product card: edit alt text, move photos up or down, or detach a photo from that product. Detaching removes only the product photo reference; it does not delete the Storage object. If the detached media asset is not used by any other product, the admin tool moves it back to the `other` media bin.
+Product cards can also attach an existing active photo from the `other` media bin to a product draft without uploading another file.
+Attached product photos can be managed from the product card: edit alt text, move photos up or down, or detach a photo from that product draft. Detaching removes only the draft product photo reference; it does not delete the Storage object or immediately change the media asset metadata.
+
+Draft/publish update: product card text edits and product photo references now save to `productDrafts` first. The Firestore Site Preview overlays those drafts onto live products. `Publish Changes` copies the draft-shaped product data to live `products`; `Discard Draft` leaves live products unchanged. Uploading a brand-new photo still creates the Storage object immediately, but the product does not use that photo publicly until the draft is published and public Firestore reads are approved.
 
 The admin Product Mirror Audit is read-only. It compares the static product seed expectations against Firestore `products` and reports missing records, extra records, field differences, price differences, and product photo review warnings. It does not write Firestore data, upload files, edit protected static resources, or switch public product pages to Firestore.
 

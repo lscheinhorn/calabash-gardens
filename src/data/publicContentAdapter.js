@@ -1,5 +1,6 @@
 import { collection, getDocs } from "firebase/firestore";
 
+import { applyAdminDrafts } from "./adminDrafts";
 import { content as staticContent, experienceBlurb as staticExperienceBlurb } from "./siteData";
 
 const clone = (value) => JSON.parse(JSON.stringify(value || {}));
@@ -61,12 +62,15 @@ export const normalizeSiteContentForPublic = (siteContentDocs, options = {}) => 
   };
 };
 
-export const loadFirestoreSiteContentForPublic = async ({ db }) => {
+export const loadFirestoreSiteContentForPublic = async ({ db, drafts = [] }) => {
   const snapshot = await getDocs(collection(db, "siteContent"));
-  const siteContentDocs = snapshot.docs.map((contentDoc) => ({
+  const liveSiteContentDocs = snapshot.docs.map((contentDoc) => ({
     id: contentDoc.id,
     ...contentDoc.data(),
   }));
+  const siteContentDocs = drafts.length
+    ? applyAdminDrafts(liveSiteContentDocs, drafts, "siteContent")
+    : liveSiteContentDocs;
 
   return normalizeSiteContentForPublic(siteContentDocs);
 };

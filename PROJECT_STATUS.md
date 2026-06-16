@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Full Firebase ownership audit is in progress on branch `codex/product-image-manifest`.
+Draft/publish admin workflow foundation is in progress on branch `codex/draft-publish-foundation`.
 
 ## Approved Tech Stack
 
@@ -19,7 +19,7 @@ Full Firebase ownership audit is in progress on branch `codex/product-image-mani
 
 ## Current Phase
 
-Phase 31: Full Firebase ownership audit before remaining media/content CRUD migration.
+Phase 32: Draft/publish foundation for admin edits and preview.
 
 ## Done Work
 
@@ -79,6 +79,11 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Seeded the missing Firestore event and site-content documents from the guarded admin mirror-audit controls: 10 missing `events` documents and the missing `siteContent/experienceBlurb` document were created without editing protected static files on the active branch.
 - Committed the admin Firestore preview parity checkpoint on the active branch.
 - Added a read-only full Firebase ownership audit command and generated Markdown/JSON reports mapping product media, event media/menu files, site media, other-bin candidates, expected site content docs, code-owned UI copy surfaces, and external media links before any broader Firebase write phase.
+- Added admin draft helpers and draft collections for products, events, and site content on the active branch.
+- Updated product, event, and site content editors so content changes save to draft collections first, with explicit Publish Changes and Discard Draft controls.
+- Updated product photo upload, attach, reorder, alt edit, and detach controls so product photo references save through product drafts before they can affect live product documents.
+- Updated the admin Firestore Site Preview to load active drafts over live Firestore records while public routes and generated cache reads remain live-only/static-gated.
+- Updated draft Firestore rules and docs for `productDrafts`, `eventDrafts`, and `siteContentDrafts`; rules are not deployed yet.
 
 ## In Progress Work
 
@@ -86,12 +91,12 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Review the zero-blocker media migration dry-run report before any real upload/import.
 - Review `docs/media-optimization-review.html` before uploading optimized migration images.
 - Verify imported media thumbnails in admin product cards and the Photos library.
-- Verify attaching an existing `other` bin photo to a product updates the product photo refs and media asset link metadata.
-- Verify product photo alt-text edits, reordering, and detach behavior in admin product cards.
+- Verify attaching an existing `other` bin photo to a product saves a draft product photo ref without mutating live `products` or `mediaAssets`.
+- Verify product photo alt-text edits, reordering, and detach behavior save to `productDrafts` and preview correctly.
 - Verify Product Mirror Audit reports missing, extra, different, and photo-review product records without writing data.
 - Verify Content Mirror Audit reports missing, extra, and different site-content records without writing data.
 - Verify Seed Missing Content creates only missing `siteContent` documents and skips existing documents.
-- Verify Site Content Editor saves Firestore `siteContent` sections and does not edit protected static content files.
+- Verify Site Content Editor saves drafts to `siteContentDrafts`, previews those drafts, publishes only through Publish Changes, and does not edit protected static content files.
 - Verify admin dark mode loads by default and the light/dark toggle persists locally.
 - Verify the public product adapter normalizes Firestore products to the existing static public product shape before any public read switch is approved.
 - Verify Public Product Parity reports whether Firestore-normalized visible products match static visible shop products without switching public reads.
@@ -104,7 +109,7 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Verify Seed Missing Events creates only missing Firestore `events` documents and skips existing documents.
 - Verify Event Editor creates new Firestore events without overwriting existing IDs and saves edits using Firestore-safe date, list, decimal string, and boolean field shapes.
 - Verify `experienceBlurb` appears in Content Mirror Audit and Site Content Editor after seeding missing content.
-- Verify Firestore Site Preview loads published Firestore products, content, and events without changing public `/`, `/shop`, or `/events` routes.
+- Verify Firestore Site Preview loads active draft records over live Firestore products, content, and events without changing public `/`, `/shop`, or `/events` routes.
 - Verify Firestore Site Preview Desktop/Tablet/Mobile iframe viewports render the public components responsively and section collapse arrows stay to the right of refresh/action buttons.
 - Verify preview frame scrolling does not emit parallax target errors when moving between preview/admin sections.
 - Verify clicking Shop, Events, product cards, Continue Shopping, Contact, and Cart inside the Firestore Site Preview stays under `/admin/preview/...` routes and does not show normal static public routes.
@@ -119,6 +124,8 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
 - Use subagents to review implementation scope and guardrail compliance.
+- Deploy updated Firestore rules only after Luke approves a rules deploy; until then, draft writes may fail against live Firebase rules, while draft reads fail softly to a live-only preview.
+- Add clickable preview editing for site-content blocks after the draft/publish data flow is reviewed.
 
 ## Planned Work
 
@@ -155,7 +162,8 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Storage rules were deployed to `calabash-54fb5` on 2026-05-07.
 - Admin data-shape contract is a planning document and is not a migration.
 - Draft Firestore rules are aligned with the data-shape contract but are still not deployed.
-- Product editor requires Firebase env values, deployed/reviewed rules, and an approved admin record for real testing.
+- Draft collection rules for `productDrafts`, `eventDrafts`, and `siteContentDrafts` are written locally but not deployed; admin draft reads fail softly to live-only preview until those rules are deployed.
+- Product editor draft writes require Firebase env values, deployed/reviewed draft rules, and an approved admin record for real testing.
 - Product writes require approved `productCategories` records.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
 - Product image migration dry run found many shared default-logo placeholders; those should not be uploaded as individual product photos without approval.
@@ -169,8 +177,8 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Firebase Rules System service agent has the `Firebase Rules Firestore Service Agent` role, allowing Storage rules to check Firestore `adminUsers/{uid}`.
 - Confirmed media import uploaded 20 Storage objects, created 20 `mediaAssets` documents, and attached product photo refs to 11 Firestore products.
 - Admin product cards and Photos library resolve Storage download URLs for imported media previews.
-- Product cards can attach active `other` bin media assets to a product without uploading a new file.
-- Uploaded product photos are stored on Firestore product drafts only; public product pages still use static images until a backend-read phase is approved.
+- Product cards can attach active `other` bin media assets to a product draft without uploading a new file.
+- Uploaded product photos create Storage objects immediately, but product references to those photos are stored on Firestore product drafts only until Publish Changes is used; public product pages still use static images until a backend-read phase is approved.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
 - Existing unapproved Firestore categories may need manual cleanup if they were already seeded before this guardrail.
@@ -182,13 +190,13 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Runtime product hooks now fill empty product photo arrays with the existing default image, but Firestore photo coverage still needs review before a public source switch because real product photos are preferred.
 - Event seed intentionally leaves event photos and menu links empty because static event media uses bundled `require(...)` values that should not be stored directly in Firestore.
 - Event inventory remains static and separate from event documents in this phase.
-- Event Editor preserves existing Firestore event photos but does not upload, attach, remove, or migrate event media yet.
+- Event Editor saves event field edits to `eventDrafts` first and preserves existing Firestore event photos; it does not upload, attach, remove, or migrate event media yet.
 - Full Firebase ownership audit is read-only and local. It does not query Firebase, upload files, write Firestore documents, edit protected resource files, deploy rules, or switch public reads.
 - The ownership audit found 20 event media references: 10 photo refs and 10 menu/link refs. Eight menu/link refs are non-image documents that need a new reviewed Storage rule before upload.
 - The ownership audit found 8 site media assets currently referenced by components/CSS and 9 additional unowned local images that should be reviewed before being uploaded to the Other bin.
 - The ownership audit found 7 code-owned UI/content surfaces that need an owner decision before the full site can be considered true CRUD.
 - The ownership audit found 4 shared source-file cases that need reuse/linking decisions before any broad media upload/import.
-- Firestore Site Preview is admin-only and uses published Firestore records, so unpublished drafts may not appear in preview.
+- Firestore Site Preview is admin-only and overlays active draft records on live Firestore records. If draft reads are denied by currently deployed rules, it falls back to live-only data.
 - Preview Shop/Event cards still use public components that include cart controls; the preview does not deploy or switch public reads, but checkout isolation should be reviewed before broader testing.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
@@ -239,6 +247,9 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - Generated cache data is not source-of-truth business content. Firestore is the source for the generated artifact, and static resource files remain protected during the transition.
 - Event Firestore seed is a missing-documents-only bridge; public event pages continue to read static data until parity, inventory, media, and rules are explicitly approved for public reads.
 - Firebase ownership audit reports are planning artifacts. They are not migration approval, not source-of-truth business content, and not a public read switch.
+- Admin product, event, and site-content edits should use draft collections first: `productDrafts`, `eventDrafts`, and `siteContentDrafts`.
+- Admin preview should render active drafts over live Firestore records; public routes and generated cache reads remain live-only until Luke approves the public source switch.
+- Publish Changes is the explicit action that copies draft-shaped data into live Firestore records. Save Draft must not make customer-facing content live.
 
 ## Verification History
 
@@ -298,6 +309,12 @@ Phase 31: Full Firebase ownership audit before remaining media/content CRUD migr
 - 2026-06-16: `npm run audit:firebase-ownership` generated `docs/firebase-ownership-audit.md` and `docs/firebase-ownership-audit.json` with 57 total Storage candidates, 0 missing source files, 8 event document/menu rule blockers, 3 large-image review items, and 4 shared source-file review items.
 - 2026-06-16: `git diff --check` passed after adding the Firebase ownership audit.
 - 2026-06-16: Protected content diff check returned no changes after adding the Firebase ownership audit.
+- 2026-06-16: `node --check` passed for `src/data/adminDrafts.js`, draft-aware public adapters, and changed admin components.
+- 2026-06-16: `npm run build` completed successfully after adding the draft/publish foundation, with the same existing warnings.
+- 2026-06-16: Browser smoke test confirmed `/admin` loads, Firestore Site Preview expands, draft-aware preview copy and Drafts count appear, and no preview load error is shown.
+- 2026-06-16: Direct admin editor writes to live `products`, `events`, and `siteContent` were removed from product/event/content editors; live writes now happen through explicit Publish Changes helpers, while seed/category setup paths remain live setup actions.
+- 2026-06-16: `git diff --check` passed after adding the draft/publish foundation.
+- 2026-06-16: Protected content diff check returned no changes after adding the draft/publish foundation.
 
 ## Commits
 

@@ -34,6 +34,34 @@ Use storage paths or URLs for future backend images. Do not store JavaScript `re
 
 Firestore rules use collection-specific validators for these shapes. Before any editor writes are enabled, review the exact final form fields against `firestore.rules`.
 
+## Draft And Publish Workflow
+
+Admin edits should use draft collections before any public Firestore read switch is approved:
+
+- `productDrafts`
+- `eventDrafts`
+- `siteContentDrafts`
+
+Draft documents use the same public-facing fields as their live target collection plus draft metadata:
+
+- `draftStatus`: `draft`, `published`, or `discarded`.
+- `draftTargetCollection`: `products`, `events`, or `siteContent`.
+- `draftTargetId`: matching target document ID.
+- `draftUpdatedAt`: server timestamp.
+- `draftUpdatedBy`: admin user ID string.
+- `draftPublishedAt` and `draftPublishedBy`: set when a draft is published.
+- `draftDiscardedAt` and `draftDiscardedBy`: set when a draft is discarded.
+
+Current admin workflow:
+
+- Save Draft writes to the matching draft collection only.
+- Firestore Site Preview loads live records with active draft records overlaid.
+- Publish Changes copies the current draft-shaped data to the live collection and marks the draft `published`.
+- Discard Draft marks the draft `discarded`; it does not delete live data.
+- Public routes and generated cache reads still use live collections only.
+
+Product photo uploads still upload the Storage object immediately, but the product document reference to that photo is draft-only until published. Attaching, reordering, alt editing, and detaching product photos update `productDrafts`, not live `products`.
+
 ## Media Assets
 
 Collection: `mediaAssets`
@@ -85,7 +113,8 @@ Media asset shape:
 Current media library notes:
 
 - The admin Photos section edits Firestore media metadata only.
-- Upload controls and migration writes are not connected yet.
+- Product photo upload controls exist, but product photo references now save through `productDrafts` until published.
+- Broad media migration writes are still gated by review and approval.
 - Moving a photo between bins changes Firestore metadata only; it does not move Storage files.
 - The `other` bin is a holding area for images that need review before they are linked to products, events, or site content.
 - Public storefront pages still do not read `mediaAssets`.

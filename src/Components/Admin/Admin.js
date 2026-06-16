@@ -193,10 +193,10 @@ export default function Admin() {
         <ProductMirrorAudit db={db} />
         <ProductPublicParityAudit db={db} />
         <EventMirrorAudit db={db} />
-        <EventAdmin db={db} />
+        <EventAdmin db={db} userId={user?.uid || ""} />
         <ContentMirrorAudit db={db} />
-        <ContentAdmin db={db} />
-        <ProductAdmin db={db} storage={storage} />
+        <ContentAdmin db={db} userId={user?.uid || ""} />
+        <ProductAdmin db={db} storage={storage} userId={user?.uid || ""} />
       </div>
     );
   };
