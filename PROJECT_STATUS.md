@@ -92,6 +92,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Preserved event optional-field removal intent during draft publish review by adding delete markers for live optional fields omitted from the saved event draft.
 - Moved Publish Review panels into the matching expanded product, event, or site-content card directly under the action row that opened review.
 - Hid internal draft metadata keys from the Event Editor unsupported-field warning.
+- Added a Firebase Auth password-reset flow to the admin sign-in form, with a generic non-enumerating response and disabled sending state, on the active branch.
 
 ## In Progress Work
 
@@ -134,6 +135,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Use subagents to review implementation scope and guardrail compliance.
 - Verify Confirm Publish Changes from the admin UI in a controlled live-write test only after Luke explicitly approves a live Firestore content mutation.
 - Add clickable preview editing for site-content blocks after the draft/publish data flow is reviewed.
+- Verify the admin password-reset button with Jette's real email only when Luke explicitly approves sending the reset email.
 
 ## Planned Work
 
@@ -258,6 +260,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Admin product, event, and site-content edits should use draft collections first: `productDrafts`, `eventDrafts`, and `siteContentDrafts`.
 - Admin preview should render active drafts over live Firestore records; public routes and generated cache reads remain live-only until Luke approves the public source switch.
 - Publish requires a saved draft, a live-vs-draft review, and a Confirm Publish Changes click. Save Draft must not make customer-facing content live, and unsaved open form edits must not publish.
+- Admin password reset should use Firebase Auth's email reset link flow from the sign-in form and must keep the UI response generic so the form does not reveal whether an email exists.
 
 ## Verification History
 
@@ -337,6 +340,11 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - 2026-06-17: `npm run build` completed successfully after moving Publish Review panels inline, with the same existing warnings.
 - 2026-06-17: Protected content diff check returned no changes after moving Publish Review panels inline.
 - 2026-06-17: Browser test on the existing `3000` server confirmed temporary event drafts can still be saved and discarded; that server was serving a stale pre-move bundle, so a fresh `3001` dev server was started from the current branch and compiled successfully, but browser auth did not carry to the new port. The fresh server was stopped after verification.
+- 2026-06-17: `node --check src/Components/Admin/Admin.js` passed after adding the admin password-reset flow.
+- 2026-06-17: `npm run build` completed successfully after adding the admin password-reset flow, with the same existing warnings.
+- 2026-06-17: `git diff --check` passed after adding the admin password-reset flow.
+- 2026-06-17: Protected content diff check returned no changes after adding the admin password-reset flow.
+- 2026-06-17: Fresh dev server on `127.0.0.1:3002` compiled successfully and returned `HTTP/1.1 200 OK`; no real password reset email was sent during verification.
 
 ## Commits
 
@@ -374,6 +382,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - `77b50be docs: add firebase ownership audit`
 - `b151a46 feat: add admin draft publish foundation`
 - `chore: enable firestore rules deploy config` (current branch)
+- `feat: add admin password reset flow` (current branch)
 
 ## Deployments
 

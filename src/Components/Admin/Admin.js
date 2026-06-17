@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import {
   onAuthStateChanged,
+  sendPasswordResetEmail,
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
@@ -40,6 +41,7 @@ export default function Admin() {
   const [user, setUser] = useState(null);
   const [isApprovedAdmin, setIsApprovedAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
+  const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [message, setMessage] = useState("");
   const [theme, setTheme] = useState(loadInitialTheme);
@@ -139,6 +141,32 @@ export default function Admin() {
       setMessage("Sign in failed. Check the email and password.");
     } finally {
       setIsSigningIn(false);
+    }
+  };
+
+  const handlePasswordReset = async () => {
+    const resetEmail = email.trim();
+
+    if (!canUseFirebase) {
+      setMessage("Firebase is not configured for this environment.");
+      return;
+    }
+
+    if (!resetEmail) {
+      setMessage("Enter the admin email address first.");
+      return;
+    }
+
+    setIsSendingPasswordReset(true);
+    setMessage("");
+
+    try {
+      await sendPasswordResetEmail(auth, resetEmail);
+    } catch (error) {
+      // Keep the response generic so the admin page does not reveal account status.
+    } finally {
+      setIsSendingPasswordReset(false);
+      setMessage("If that email has an admin account, a password reset link has been sent.");
     }
   };
 
@@ -253,7 +281,7 @@ export default function Admin() {
               Email
               <input
                 autoComplete="email"
-                disabled={!canUseFirebase || isSigningIn}
+                disabled={!canUseFirebase || isSigningIn || isSendingPasswordReset}
                 name="email"
                 onChange={(event) => setEmail(event.target.value)}
                 type="email"
@@ -265,7 +293,7 @@ export default function Admin() {
               Password
               <input
                 autoComplete="current-password"
-                disabled={!canUseFirebase || isSigningIn}
+                disabled={!canUseFirebase || isSigningIn || isSendingPasswordReset}
                 name="password"
                 onChange={(event) => setPassword(event.target.value)}
                 type="password"
@@ -273,13 +301,23 @@ export default function Admin() {
               />
             </label>
 
-            <button
-              className="admin_primary_button"
-              disabled={!canUseFirebase || isSigningIn || !email || !password}
-              type="submit"
-            >
-              {isSigningIn ? "Signing In..." : "Sign In"}
-            </button>
+            <div className="admin_button_row">
+              <button
+                className="admin_primary_button"
+                disabled={!canUseFirebase || isSigningIn || isSendingPasswordReset || !email || !password}
+                type="submit"
+              >
+                {isSigningIn ? "Signing In..." : "Sign In"}
+              </button>
+              <button
+                className="admin_secondary_button"
+                disabled={!canUseFirebase || isSigningIn || isSendingPasswordReset || !email.trim()}
+                onClick={handlePasswordReset}
+                type="button"
+              >
+                {isSendingPasswordReset ? "Sending Reset..." : "Forgot Password?"}
+              </button>
+            </div>
           </form>
         ) : (
           renderDashboard()
