@@ -1,6 +1,6 @@
 import "./Admin.css";
 
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import {
   onAuthStateChanged,
@@ -130,15 +130,6 @@ export default function Admin() {
     });
   }, [location.search]);
 
-  const handlePreviewContentEdit = useCallback((request) => {
-    setContentEditorFocus({
-      contentId: request.contentId,
-      fieldPath: request.fieldPath || "",
-      label: request.label || "",
-      requestId: Date.now(),
-    });
-  }, []);
-
   const adminAccessLabel = () => {
     if (!user) {
       return "Not signed in";
@@ -246,8 +237,8 @@ export default function Admin() {
         </div>
         <AdminPreview
           db={db}
-          onEditContent={handlePreviewContentEdit}
           storage={storage}
+          userId={user?.uid || ""}
         />
         <MediaAdmin db={db} storage={storage} />
         <ProductMirrorAudit db={db} />

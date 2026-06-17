@@ -20,7 +20,7 @@ Firestore rules for the draft collections are deployed to `calabash-54fb5`, and 
 
 ## Current Phase
 
-Phase 32: Draft/publish foundation for admin edits and preview.
+Phase 33: Preview-driven admin editing workflow.
 
 ## Done Work
 
@@ -94,6 +94,8 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Hid internal draft metadata keys from the Event Editor unsupported-field warning.
 - Added a Firebase Auth password-reset flow to the admin sign-in form, with a generic non-enumerating response and disabled sending state, on the active branch.
 - Added admin preview content edit mode: highlighted Firestore preview text can open the matching Site Content Editor card and focus the corresponding draft field without saving or publishing, on the active branch.
+- Added a preview edit drawer for site-content fields so clicking editable preview content opens the matching draft editor beside the iframe without scrolling the parent admin page, on branch `codex/preview-edit-drawer`.
+- Added `docs/admin-editing-workflow.md` to define admin-editable, code-owned, data-owned, and mixed ownership decisions for future site sections.
 
 ## In Progress Work
 
@@ -137,6 +139,8 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Verify Confirm Publish Changes from the admin UI in a controlled live-write test only after Luke explicitly approves a live Firestore content mutation.
 - Verify the admin password-reset button with Jette's real email only when Luke explicitly approves sending the reset email.
 - Verify Jette can use preview content edit mode comfortably across Desktop, Tablet, and Mobile preview sizes before broader content-edit training.
+- Add product preview edit drawer mode by reusing the existing Product Editor draft/publish helpers.
+- Add event preview edit drawer mode by reusing the existing Event Editor draft/publish helpers.
 
 ## Planned Work
 
@@ -263,6 +267,8 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Publish requires a saved draft, a live-vs-draft review, and a Confirm Publish Changes click. Save Draft must not make customer-facing content live, and unsaved open form edits must not publish.
 - Admin password reset should use Firebase Auth's email reset link flow from the sign-in form and must keep the UI response generic so the form does not reveal whether an email exists.
 - Admin preview content edit mode is a navigation/focus helper only. It may open a draft editor field, but edits still require Save Draft, Review Publish, and Confirm Publish before live Firestore content changes.
+- Future editable site sections require an explicit ownership decision before implementation: admin editable, code owned, data owned, or mixed.
+- Preview edit drawer is the approved UI pattern for preview-driven editing. It must reuse existing draft/publish helpers and must not create separate live write paths.
 
 ## Verification History
 
@@ -351,6 +357,8 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - 2026-06-17: `npm run build` completed successfully after adding admin preview content edit mode, with the same existing warnings.
 - 2026-06-17: Browser verification on `127.0.0.1:3002` confirmed Content Edit Mode creates 18 preview text markers, clicking the Banner title marker opens Site Content Editor, expands Home Banner, focuses the Title input, and shows the draft-safety message.
 - 2026-06-17: Browser verification on public `#/` confirmed normal public home renders with 0 `.admin_preview_edit_marker` elements.
+- 2026-06-17: Browser verification on `127.0.0.1:3002` confirmed clicking the Banner title preview marker opens the new preview edit drawer, focuses the Banner Title field inside the drawer, leaves the lower Site Content Editor collapsed, and keeps the preview panel in place.
+- 2026-06-17: Browser verification on public `#/` confirmed normal public home renders with 0 `.admin_preview_edit_marker` elements and 0 `.admin_preview_edit_drawer` elements after adding the drawer.
 
 ## Commits
 
@@ -390,6 +398,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - `chore: enable firestore rules deploy config` (current branch)
 - `feat: add admin password reset flow` (current branch)
 - `feat: add preview content edit focus` (current branch)
+- `feat: add preview content edit drawer` (current branch)
 
 ## Deployments
 

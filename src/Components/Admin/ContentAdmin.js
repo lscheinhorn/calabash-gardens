@@ -91,7 +91,14 @@ const buildExpectedMeta = () => {
 
 const fieldRefKey = (contentId, path) => `${contentId}:${path}`;
 
-export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
+export default function ContentAdmin({
+  db,
+  focusRequest = null,
+  onDraftChange = () => {},
+  userId = "",
+  variant = "full",
+}) {
+  const isDrawerMode = variant === "drawer";
   const [contentDocs, setContentDocs] = useState([]);
   const [draftsById, setDraftsById] = useState({});
   const [expandedDocId, setExpandedDocId] = useState("");
@@ -158,10 +165,10 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
   }, [db, expectedContentIds, expectedMeta]);
 
   useEffect(() => {
-    if (isExpanded) {
+    if (isExpanded || isDrawerMode) {
       loadContentDocs();
     }
-  }, [isExpanded, loadContentDocs]);
+  }, [isDrawerMode, isExpanded, loadContentDocs]);
 
   useEffect(() => {
     if (!focusRequest?.contentId) {
@@ -191,10 +198,12 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
         return;
       }
 
-      targetElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
+      if (!isDrawerMode) {
+        targetElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
 
       if (focusedField && typeof focusedField.focus === "function") {
         focusedField.focus({
@@ -206,7 +215,7 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
     return () => {
       window.cancelAnimationFrame(animationFrame);
     };
-  }, [buildFocusMessage, expandedDocId, focusRequest, formsById, isExpanded]);
+  }, [buildFocusMessage, expandedDocId, focusRequest, formsById, isDrawerMode, isExpanded]);
 
   const updatePublished = (contentId, value) => {
     setFormsById((currentForms) => ({
@@ -272,6 +281,7 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
       setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} draft saved for preview.`);
       setPublishReview(null);
       await loadContentDocs();
+      onDraftChange();
     } catch (error) {
       setMessage("Site content draft could not be saved.");
     } finally {
@@ -316,6 +326,7 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
       setMessage(`${publishReview.title} published to live Firestore content.`);
       setPublishReview(null);
       await loadContentDocs();
+      onDraftChange();
     } catch (error) {
       setMessage("Site content could not be published.");
     } finally {
@@ -338,6 +349,7 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
       setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} draft discarded.`);
       setPublishReview(null);
       await loadContentDocs();
+      onDraftChange();
     } catch (error) {
       setMessage("Site content draft could not be discarded.");
     } finally {
@@ -345,11 +357,16 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
     }
   };
 
+  const visibleContentDocs = isDrawerMode && focusRequest?.contentId
+    ? contentDocs.filter((contentDoc) => contentDoc.id === focusRequest.contentId)
+    : contentDocs;
+  const showEditorBody = isExpanded || isDrawerMode;
+
   return (
-    <section className="admin_panel" ref={sectionRef}>
+    <section className={isDrawerMode ? "admin_drawer_editor_inner" : "admin_panel"} ref={sectionRef}>
       <div className="admin_form_header">
         <div>
-          <h3>Site Content Editor</h3>
+          {isDrawerMode ? <h4>Site Content Editor</h4> : <h3>Site Content Editor</h3>}
           <p className="admin_status">
             Saves site content edits as drafts first. Publish Changes updates live Firestore content.
           </p>
@@ -357,35 +374,39 @@ export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
         <div className="admin_button_row">
           <button
             className="admin_secondary_button"
-            disabled={isLoading || isSaving || !isExpanded}
+            disabled={isLoading || isSaving || !showEditorBody}
             onClick={loadContentDocs}
             type="button"
           >
             Refresh
           </button>
-          <button
-            aria-expanded={isExpanded}
-            aria-label={`${isExpanded ? "Collapse" : "Expand"} site content editor`}
-            className="admin_icon_button"
-            onClick={() => setIsExpanded((currentValue) => !currentValue)}
-            title={`${isExpanded ? "Collapse" : "Expand"} site content editor`}
-            type="button"
-          >
-            <CollapseIcon isExpanded={isExpanded} />
-          </button>
+          {!isDrawerMode ? (
+            <button
+              aria-expanded={isExpanded}
+              aria-label={`${isExpanded ? "Collapse" : "Expand"} site content editor`}
+              className="admin_icon_button"
+              onClick={() => setIsExpanded((currentValue) => !currentValue)}
+              title={`${isExpanded ? "Collapse" : "Expand"} site content editor`}
+              type="button"
+            >
+              <CollapseIcon isExpanded={isExpanded} />
+            </button>
+          ) : null}
         </div>
       </div>
 
-      {isExpanded ? (
+      {showEditorBody ? (
         <>
           {message ? <p className="admin_message">{message}</p> : null}
           {isLoading ? <p className="admin_status">Loading site content...</p> : null}
-          {!isLoading && !contentDocs.length ? (
-            <p className="admin_status">No Firestore site content found. Seed missing content first.</p>
+          {!isLoading && !visibleContentDocs.length ? (
+            <p className="admin_status">
+              {isDrawerMode ? "The selected content section was not found." : "No Firestore site content found. Seed missing content first."}
+            </p>
           ) : null}
 
           <div className="admin_content_list">
-            {contentDocs.map((contentDoc) => {
+            {visibleContentDocs.map((contentDoc) => {
               const isDocExpanded = expandedDocId === contentDoc.id;
               const form = formsById[contentDoc.id];
               const fields = Object.entries(form?.flatSections || {});

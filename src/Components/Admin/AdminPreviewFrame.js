@@ -149,6 +149,41 @@ export default function AdminPreviewFrame() {
   }, [loadPreview, location.search]);
 
   useEffect(() => {
+    const previewRouteMessage = {
+      path: location.pathname,
+      type: "calabash-admin-preview-route",
+    };
+
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(previewRouteMessage, window.location.origin);
+    }
+
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(previewRouteMessage, window.location.origin);
+    }
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handlePreviewRefresh = (event) => {
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      if (event.data?.type !== "calabash-admin-refresh-preview-data") {
+        return;
+      }
+
+      loadPreview();
+    };
+
+    window.addEventListener("message", handlePreviewRefresh);
+
+    return () => {
+      window.removeEventListener("message", handlePreviewRefresh);
+    };
+  }, [loadPreview]);
+
+  useEffect(() => {
     const handlePreviewLinkClick = (event) => {
       const clickedElement = event.target instanceof Element ? event.target : null;
       const anchor = clickedElement?.closest("a[href]");

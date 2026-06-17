@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
@@ -9,6 +9,7 @@ import { activeAdminDrafts, loadAdminDrafts } from "../../data/adminDrafts";
 import { loadFirestoreSiteContentForPublic } from "../../data/publicContentAdapter";
 import { loadFirestoreEventsForPublic } from "../../data/publicEventAdapter";
 import { loadFirestoreProductsForPublic } from "../../data/publicProductAdapter";
+import ContentAdmin from "./ContentAdmin";
 
 const previewViewports = {
   desktop: {
@@ -44,11 +45,27 @@ const CollapseIcon = ({ isExpanded }) => (
   />
 );
 
-export default function AdminPreview({ db, onEditContent = () => {}, storage }) {
+const previewPathForTab = (tab) => `/admin/preview/${tab}`;
+const previewTabForPath = (path) => {
+  if (path.startsWith("/admin/preview/shop") || path.startsWith("/admin/preview/products")) {
+    return "shop";
+  }
+
+  if (path.startsWith("/admin/preview/events")) {
+    return "events";
+  }
+
+  return "home";
+};
+
+export default function AdminPreview({ db, storage, userId = "" }) {
+  const iframeRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [isContentEditMode, setIsContentEditMode] = useState(false);
+  const [editTarget, setEditTarget] = useState(null);
+  const [previewPath, setPreviewPath] = useState(previewPathForTab("home"));
   const [previewTab, setPreviewTab] = useState("home");
   const [previewViewport, setPreviewViewport] = useState("desktop");
   const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
@@ -88,8 +105,16 @@ export default function AdminPreview({ db, onEditContent = () => {}, storage }) 
   }, [db, storage]);
 
   const refreshPreview = useCallback(() => {
-    setPreviewRefreshKey((currentValue) => currentValue + 1);
     loadPreview();
+
+    if (iframeRef.current?.contentWindow && typeof window !== "undefined") {
+      iframeRef.current.contentWindow.postMessage({
+        type: "calabash-admin-refresh-preview-data",
+      }, window.location.origin);
+      return;
+    }
+
+    setPreviewRefreshKey((currentValue) => currentValue + 1);
   }, [loadPreview]);
 
   useEffect(() => {
@@ -104,6 +129,17 @@ export default function AdminPreview({ db, onEditContent = () => {}, storage }) 
         return;
       }
 
+      if (event.data?.type === "calabash-admin-preview-route") {
+        const nextPath = String(event.data.path || "");
+
+        if (nextPath.startsWith("/admin/preview")) {
+          setPreviewPath(nextPath);
+          setPreviewTab(previewTabForPath(nextPath));
+        }
+
+        return;
+      }
+
       if (event.data?.type !== "calabash-admin-edit-content") {
         return;
       }
@@ -114,10 +150,12 @@ export default function AdminPreview({ db, onEditContent = () => {}, storage }) 
         return;
       }
 
-      onEditContent({
-        contentId,
+      setEditTarget({
         fieldPath: String(event.data.fieldPath || ""),
-        label: String(event.data.label || ""),
+        id: contentId,
+        label: String(event.data.label || contentId),
+        requestId: Date.now(),
+        type: "content",
       });
     };
 
@@ -126,7 +164,57 @@ export default function AdminPreview({ db, onEditContent = () => {}, storage }) 
     return () => {
       window.removeEventListener("message", handlePreviewMessage);
     };
-  }, [onEditContent]);
+  }, []);
+
+  const openPreviewTab = (tab) => {
+    setPreviewTab(tab);
+    setPreviewPath(previewPathForTab(tab));
+  };
+
+  const renderEditDrawer = () => {
+    if (!editTarget) {
+      return null;
+    }
+
+    const title = editTarget.label || editTarget.id;
+
+    return (
+      <aside className="admin_preview_edit_drawer" aria-label="Preview edit drawer">
+        <div className="admin_form_header">
+          <div>
+            <h4>{title}</h4>
+            <p className="admin_status">
+              Save Draft updates the preview only. Publish still requires review and confirmation.
+            </p>
+          </div>
+          <button
+            aria-label="Close preview editor"
+            className="admin_secondary_button"
+            onClick={() => setEditTarget(null)}
+            type="button"
+          >
+            Close
+          </button>
+        </div>
+
+        {editTarget.type === "content" ? (
+          <ContentAdmin
+            db={db}
+            focusRequest={{
+              contentId: editTarget.id,
+              fieldPath: editTarget.fieldPath || "",
+              label: editTarget.label || "",
+              requestId: editTarget.requestId,
+            }}
+            onDraftChange={refreshPreview}
+            userId={userId}
+            variant="drawer"
+          />
+        ) : null}
+
+      </aside>
+    );
+  };
 
   const activeProducts = useMemo(() => (
     previewData.products.filter((product) => product.isActive === true)
@@ -149,8 +237,8 @@ export default function AdminPreview({ db, onEditContent = () => {}, storage }) 
       queryParams.set("edit", "content");
     }
 
-    return `${baseUrl}#/admin/preview/${previewTab}?${queryParams.toString()}`;
-  }, [isContentEditMode, previewRefreshKey, previewTab]);
+    return `${baseUrl}#${previewPath}?${queryParams.toString()}`;
+  }, [isContentEditMode, previewPath, previewRefreshKey]);
 
   return (
     <section className="admin_panel">
@@ -193,7 +281,7 @@ export default function AdminPreview({ db, onEditContent = () => {}, storage }) 
               <button
                 className={previewTab === tab ? "admin_primary_button" : "admin_secondary_button"}
                 key={tab}
-                onClick={() => setPreviewTab(tab)}
+                onClick={() => openPreviewTab(tab)}
                 type="button"
               >
                 {tab === "home" ? "Home" : tab === "shop" ? "Shop" : "Events"}
@@ -252,38 +340,42 @@ export default function AdminPreview({ db, onEditContent = () => {}, storage }) 
             </div>
           </div>
 
-          <div
-            className="admin_site_preview"
-            style={{
-              "--admin-preview-height": `${selectedViewport.height}px`,
-              "--admin-preview-width": `${selectedViewport.width}px`,
-            }}
-          >
-            <div className="admin_site_preview_toolbar">
-              <span>
-                {selectedViewport.label}: {selectedViewport.width}px
-              </span>
-              <a
-                className="admin_secondary_button"
-                href={previewSrc}
-                rel="noreferrer"
-                target="_blank"
-              >
-                Open Full Preview
-              </a>
+          <div className={editTarget ? "admin_preview_workspace admin_preview_workspace_with_drawer" : "admin_preview_workspace"}>
+            <div
+              className="admin_site_preview"
+              style={{
+                "--admin-preview-height": `${selectedViewport.height}px`,
+                "--admin-preview-width": `${selectedViewport.width}px`,
+              }}
+            >
+              <div className="admin_site_preview_toolbar">
+                <span>
+                  {selectedViewport.label}: {selectedViewport.width}px
+                </span>
+                <a
+                  className="admin_secondary_button"
+                  href={previewSrc}
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  Open Full Preview
+                </a>
+              </div>
+              <div className="admin_site_preview_stage">
+                {previewSrc ? (
+                  <iframe
+                    className="admin_site_preview_frame"
+                    key={previewSrc}
+                    ref={iframeRef}
+                    src={previewSrc}
+                    title={`Firestore ${previewTab} ${selectedViewport.label} preview`}
+                  />
+                ) : (
+                  <p className="admin_status">Preview is unavailable in this environment.</p>
+                )}
+              </div>
             </div>
-            <div className="admin_site_preview_stage">
-              {previewSrc ? (
-                <iframe
-                  className="admin_site_preview_frame"
-                  key={previewSrc}
-                  src={previewSrc}
-                  title={`Firestore ${previewTab} ${selectedViewport.label} preview`}
-                />
-              ) : (
-                <p className="admin_status">Preview is unavailable in this environment.</p>
-              )}
-            </div>
+            {renderEditDrawer()}
           </div>
         </>
       ) : null}
