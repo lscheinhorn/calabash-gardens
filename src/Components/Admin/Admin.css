@@ -676,6 +676,83 @@
   padding-left: 20px;
 }
 
+.admin_publish_review {
+  background: #fffdf5;
+  border: 1px solid #f3cf50;
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.admin_publish_review_summary {
+  display: grid;
+  gap: 4px;
+}
+
+.admin_publish_review_summary span {
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin_publish_review_summary strong {
+  color: #533a60;
+  overflow-wrap: anywhere;
+}
+
+.admin_publish_diff {
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  overflow: hidden;
+}
+
+.admin_publish_diff_header,
+.admin_publish_diff_row {
+  display: grid;
+  gap: 0;
+  grid-template-columns: minmax(120px, 0.65fr) repeat(2, minmax(0, 1fr));
+}
+
+.admin_publish_diff_header {
+  background: #f9f8fa;
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.admin_publish_diff_header span,
+.admin_publish_diff_row strong,
+.admin_publish_diff_row pre {
+  border-right: 1px solid #e5deea;
+  margin: 0;
+  padding: 10px;
+}
+
+.admin_publish_diff_header span:last-child,
+.admin_publish_diff_row pre:last-child {
+  border-right: 0;
+}
+
+.admin_publish_diff_row {
+  border-top: 1px solid #e5deea;
+}
+
+.admin_publish_diff_row strong {
+  color: #3d3343;
+  overflow-wrap: anywhere;
+}
+
+.admin_publish_diff_row pre {
+  color: #3d3343;
+  font: inherit;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
 .admin_theme_dark {
   background: #17131b;
   color: #f4eef7;
@@ -707,7 +784,8 @@
 .admin_theme_dark .admin_site_preview,
 .admin_theme_dark .admin_seed_summary,
 .admin_theme_dark .admin_upload_notice,
-.admin_theme_dark .admin_photo_row {
+.admin_theme_dark .admin_photo_row,
+.admin_theme_dark .admin_publish_review {
   background: #241d2a;
   border-color: #4e3d58;
 }
@@ -720,6 +798,19 @@
 .admin_theme_dark .admin_product_meta span {
   background: #18131d;
   border-color: #6a5574;
+}
+
+.admin_theme_dark .admin_publish_diff,
+.admin_theme_dark .admin_publish_diff_header span,
+.admin_theme_dark .admin_publish_diff_row,
+.admin_theme_dark .admin_publish_diff_row strong,
+.admin_theme_dark .admin_publish_diff_row pre {
+  border-color: #4e3d58;
+}
+
+.admin_theme_dark .admin_publish_diff_header {
+  background: #18131d;
+  color: #cbbbd4;
 }
 
 .admin_theme_dark .admin_product_card_body,
@@ -743,7 +834,10 @@
 .admin_theme_dark .admin_photo_row span,
 .admin_theme_dark .admin_upload_notice span,
 .admin_theme_dark .admin_audit_section li,
-.admin_theme_dark .admin_product_details dd {
+.admin_theme_dark .admin_product_details dd,
+.admin_theme_dark .admin_publish_diff_row strong,
+.admin_theme_dark .admin_publish_diff_row pre,
+.admin_theme_dark .admin_publish_review_summary strong {
   color: #f4eef7;
 }
 
@@ -763,6 +857,7 @@
 .admin_theme_dark .admin_status_panel span,
 .admin_theme_dark .admin_audit_summary span,
 .admin_theme_dark .admin_site_preview_toolbar span,
+.admin_theme_dark .admin_publish_review_summary span,
 .admin_theme_dark .admin_product_details dt,
 .admin_theme_dark .admin_seed_summary small,
 .admin_theme_dark .admin_seed_summary li,
@@ -818,6 +913,23 @@
   .admin_site_preview_toolbar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .admin_publish_diff_header {
+    display: none;
+  }
+
+  .admin_publish_diff_row {
+    grid-template-columns: 1fr;
+  }
+
+  .admin_publish_diff_row strong,
+  .admin_publish_diff_row pre {
+    border-right: 0;
+  }
+
+  .admin_publish_diff_row pre {
+    border-top: 1px solid #e5deea;
   }
 
   .admin_status_panel {

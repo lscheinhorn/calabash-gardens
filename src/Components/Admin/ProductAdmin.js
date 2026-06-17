@@ -34,6 +34,7 @@ import {
   publishAdminDraft,
   saveAdminDraft,
 } from "../../data/adminDrafts";
+import AdminPublishReview from "./AdminPublishReview";
 
 const emptyProduct = {
   slug: "",
@@ -269,6 +270,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
   const [expandedProductId, setExpandedProductId] = useState("");
   const [editingProductId, setEditingProductId] = useState("");
   const [productCardMessage, setProductCardMessage] = useState("");
+  const [publishReview, setPublishReview] = useState(null);
   const [productFilters, setProductFilters] = useState({
     search: "",
     category: "all",
@@ -700,6 +702,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
         targetId: productId,
         userId,
       });
+      setPublishReview(null);
       setSelectedProductId(productId);
       resetForm();
       setMessage("Product saved as a preview draft.");
@@ -734,6 +737,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
         targetId: product.id,
         userId,
       });
+      setPublishReview(null);
       setProductCardMessage("Product saved as a preview draft.");
       setEditingProductId("");
       setEditingForm(emptyProduct);
@@ -745,13 +749,25 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
     }
   };
 
-  const publishProductDraft = async (product) => {
-    const isEditingProduct = editingProductId === product.id;
-    const productForm = isEditingProduct ? editingForm : buildFormFromProduct(product);
-    const validationMessage = validateProduct(product.id, productForm, false);
+  const requestPublishProductDraft = (product) => {
+    const draft = draftsById[product.id];
 
-    if (validationMessage) {
-      setProductCardMessage(validationMessage);
+    if (!draft?.data) {
+      setProductCardMessage("Save a draft before reviewing publish changes.");
+      return;
+    }
+
+    setProductCardMessage("");
+    setPublishReview({
+      data: draft.data,
+      id: product.id,
+      liveData: liveProducts.find((liveProduct) => liveProduct.id === product.id) || null,
+      title: product.title || product.id,
+    });
+  };
+
+  const confirmPublishProductDraft = async () => {
+    if (!publishReview) {
       return;
     }
 
@@ -760,13 +776,14 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
 
     try {
       await publishAdminDraft({
-        data: buildProductPayload(product.id, productForm, product, product._draftOnly === true, true),
+        data: publishReview.data,
         db,
         targetCollection: "products",
-        targetId: product.id,
+        targetId: publishReview.id,
         userId,
       });
       setProductCardMessage("Product published to live Firestore.");
+      setPublishReview(null);
       setEditingProductId("");
       setEditingForm(emptyProduct);
       await loadProducts();
@@ -789,6 +806,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
         userId,
       });
       setProductCardMessage(`${product.title || product.id} draft discarded.`);
+      setPublishReview(null);
       setEditingProductId("");
       setEditingForm(emptyProduct);
       await loadProducts();
@@ -871,6 +889,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
         targetId: product.id,
         userId,
       });
+      setPublishReview(null);
 
       setProducts((currentProducts) => currentProducts.map((currentProduct) => (
         currentProduct.id === product.id
@@ -932,6 +951,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
         targetId: product.id,
         userId,
       });
+      setPublishReview(null);
 
       setProducts((currentProducts) => currentProducts.map((currentProduct) => (
         currentProduct.id === product.id
@@ -978,6 +998,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
         targetId: product.id,
         userId,
       });
+      setPublishReview(null);
 
       setProducts((currentProducts) => currentProducts.map((currentProduct) => (
         currentProduct.id === product.id
@@ -1311,6 +1332,17 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
 
             {isLoading ? <p className="admin_status">Loading products...</p> : null}
             <p className="admin_status">{filteredProducts.length} of {products.length} products shown.</p>
+            {publishReview ? (
+              <AdminPublishReview
+                draftData={publishReview.data}
+                isSaving={isSaving}
+                liveData={publishReview.liveData}
+                onCancel={() => setPublishReview(null)}
+                onConfirm={confirmPublishProductDraft}
+                title={publishReview.title}
+                typeLabel="product"
+              />
+            ) : null}
 
             <div className="admin_product_list">
               {filteredProducts.map((product) => {
@@ -1377,10 +1409,10 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
                             <button
                               className="admin_secondary_button"
                               disabled={isSaving || !hasDraft}
-                              onClick={() => publishProductDraft(product)}
+                              onClick={() => requestPublishProductDraft(product)}
                               type="button"
                             >
-                              Publish Changes
+                              Review Publish
                             </button>
                             <button
                               className="admin_secondary_button"
@@ -1496,11 +1528,11 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
                               </button>
                               <button
                                 className="admin_secondary_button"
-                                disabled={isSaving}
-                                onClick={() => publishProductDraft(product)}
+                                disabled={isSaving || !hasDraft}
+                                onClick={() => requestPublishProductDraft(product)}
                                 type="button"
                               >
-                                Publish Changes
+                                Review Publish
                               </button>
                               <button
                                 className="admin_secondary_button"

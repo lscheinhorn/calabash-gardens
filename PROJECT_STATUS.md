@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Draft/publish admin workflow foundation is in progress on branch `codex/draft-publish-foundation`.
+Draft/publish admin workflow safety hardening is in progress on branch `codex/draft-publish-review`.
 Firestore rules for the draft collections are deployed to `calabash-54fb5`, and draft save/preview/discard has been verified from the local admin UI.
 
 ## Approved Tech Stack
@@ -87,6 +87,9 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Updated draft Firestore rules and docs for `productDrafts`, `eventDrafts`, and `siteContentDrafts`.
 - Added the Firestore rules pointer to `firebase.json` and deployed only Firestore rules to `calabash-54fb5`.
 - Verified a temporary `siteContentDrafts/home.banner` draft can be saved, rendered in the admin Firestore Site Preview, and discarded without publishing live content.
+- Added an admin Publish Review step for products, events, and site content so Publish requires a saved draft, shows live-vs-draft differences, and then requires Confirm Publish Changes.
+- Updated product, event, and site-content publish paths to publish the saved draft payload instead of unsaved open form edits.
+- Preserved event optional-field removal intent during draft publish review by adding delete markers for live optional fields omitted from the saved event draft.
 
 ## In Progress Work
 
@@ -127,7 +130,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Luke and Jette need to test the live `/admin` login and provide feedback.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
 - Use subagents to review implementation scope and guardrail compliance.
-- Verify Publish Changes from the admin UI in a controlled live-write test only after Luke explicitly approves a live Firestore content mutation.
+- Verify Confirm Publish Changes from the admin UI in a controlled live-write test only after Luke explicitly approves a live Firestore content mutation.
 - Add clickable preview editing for site-content blocks after the draft/publish data flow is reviewed.
 
 ## Planned Work
@@ -252,7 +255,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Firebase ownership audit reports are planning artifacts. They are not migration approval, not source-of-truth business content, and not a public read switch.
 - Admin product, event, and site-content edits should use draft collections first: `productDrafts`, `eventDrafts`, and `siteContentDrafts`.
 - Admin preview should render active drafts over live Firestore records; public routes and generated cache reads remain live-only until Luke approves the public source switch.
-- Publish Changes is the explicit action that copies draft-shaped data into live Firestore records. Save Draft must not make customer-facing content live.
+- Publish requires a saved draft, a live-vs-draft review, and a Confirm Publish Changes click. Save Draft must not make customer-facing content live, and unsaved open form edits must not publish.
 
 ## Verification History
 
@@ -323,6 +326,11 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - 2026-06-16: `npx firebase-tools deploy --only firestore:rules --project calabash-54fb5` compiled and released `firestore.rules` successfully.
 - 2026-06-16: Browser verification saved a temporary Home Banner draft to `siteContentDrafts`, confirmed the Firestore Site Preview showed `Drafts` as `1` and rendered the draft title inside the iframe, then discarded the draft and confirmed the preview returned to `Drafts` as `0`.
 - 2026-06-16: Publish Changes was intentionally not browser-tested because that would mutate live Firestore content; the publish helper remains build-verified and should be tested with an explicitly approved live-write scenario.
+- 2026-06-16: `node --check` passed for `AdminPublishReview.js`, `ContentAdmin.js`, `EventAdmin.js`, and `ProductAdmin.js` after adding publish review.
+- 2026-06-16: `npm run build` completed successfully after adding publish review, with the same existing warnings.
+- 2026-06-16: Browser verification confirmed site-content Review Publish is disabled before a saved draft, then saved a temporary Home Banner draft, changed the open form without saving, and confirmed Review Publish showed the saved draft value rather than the unsaved field value. The temporary draft was canceled/discarded and the content returned to live values.
+- 2026-06-16: `git diff --check` passed after adding publish review.
+- 2026-06-16: Protected content diff check returned no changes after adding publish review.
 
 ## Commits
 

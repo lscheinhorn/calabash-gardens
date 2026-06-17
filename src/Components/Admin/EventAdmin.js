@@ -23,6 +23,7 @@ import {
   publishAdminDraft,
   saveAdminDraft,
 } from "../../data/adminDrafts";
+import AdminPublishReview from "./AdminPublishReview";
 
 const emptyEvent = {
   slug: "",
@@ -66,6 +67,12 @@ const allowedEventKeys = new Set([
   "title",
   "updatedAt",
 ]);
+const optionalEventPublishKeys = [
+  "capacity",
+  "eventType",
+  "link",
+  "sortOrder",
+];
 
 const CollapseIcon = ({ isExpanded }) => (
   <FontAwesomeIcon
@@ -240,9 +247,23 @@ const buildEventPayload = (form, { clearBlankOptionalFields = false } = {}) => {
   return payload;
 };
 
+const buildEventPublishPayload = (draftData, liveData) => {
+  const payload = { ...draftData };
+
+  optionalEventPublishKeys.forEach((key) => {
+    if (!(key in payload) && liveData && key in liveData) {
+      payload[key] = deleteField();
+    }
+  });
+
+  return payload;
+};
+
 export default function EventAdmin({ db, userId = "" }) {
   const [events, setEvents] = useState([]);
   const [draftsById, setDraftsById] = useState({});
+  const [liveEventsById, setLiveEventsById] = useState({});
+  const [publishReview, setPublishReview] = useState(null);
   const [form, setForm] = useState(emptyEvent);
   const [editingFormsById, setEditingFormsById] = useState({});
   const [expandedEventId, setExpandedEventId] = useState("");
@@ -267,6 +288,10 @@ export default function EventAdmin({ db, userId = "" }) {
         id: eventDoc.id,
         ...eventDoc.data(),
       }));
+      setLiveEventsById(Object.fromEntries(liveEventDocs.map((eventDoc) => [
+        eventDoc.id,
+        eventDoc,
+      ])));
       const eventDocs = applyAdminDrafts(liveEventDocs, drafts, "events")
         .sort((firstEvent, secondEvent) => {
           const firstDate = firstEvent.date?.toDate ? firstEvent.date.toDate() : firstEvent.date;
@@ -354,6 +379,7 @@ export default function EventAdmin({ db, userId = "" }) {
         userId,
       });
       setMessage(`${form.title} saved as a preview draft.`);
+      setPublishReview(null);
       setForm(emptyEvent);
       setIsNewEventIdEdited(false);
       setIsNewEventExpanded(false);
@@ -392,6 +418,7 @@ export default function EventAdmin({ db, userId = "" }) {
         userId,
       });
       setMessage(`${editingForm.title} saved as a preview draft.`);
+      setPublishReview(null);
       await loadEvents();
     } catch (error) {
       setMessage("Event draft could not be saved.");
@@ -400,18 +427,27 @@ export default function EventAdmin({ db, userId = "" }) {
     }
   };
 
-  const publishExistingEvent = async (eventId) => {
-    const editingForm = editingFormsById[eventId];
+  const requestPublishExistingEvent = (eventDoc) => {
+    const draft = draftsById[eventDoc.id];
 
-    if (!editingForm) {
-      setMessage("Open an event before publishing.");
+    if (!draft?.data) {
+      setMessage("Save a draft before reviewing publish changes.");
       return;
     }
 
-    const validationMessage = validateEventForm(editingForm, false);
+    setMessage("");
+    const liveData = liveEventsById[eventDoc.id] || null;
 
-    if (validationMessage) {
-      setMessage(validationMessage);
+    setPublishReview({
+      data: buildEventPublishPayload(draft.data, liveData),
+      id: eventDoc.id,
+      liveData,
+      title: eventDoc.title || eventDoc.id,
+    });
+  };
+
+  const confirmPublishExistingEvent = async () => {
+    if (!publishReview) {
       return;
     }
 
@@ -420,13 +456,14 @@ export default function EventAdmin({ db, userId = "" }) {
 
     try {
       await publishAdminDraft({
-        data: buildEventPayload(editingForm, { clearBlankOptionalFields: true }),
+        data: publishReview.data,
         db,
         targetCollection: "events",
-        targetId: eventId,
+        targetId: publishReview.id,
         userId,
       });
-      setMessage(`${editingForm.title} published to live Firestore events.`);
+      setMessage(`${publishReview.title} published to live Firestore events.`);
+      setPublishReview(null);
       await loadEvents();
     } catch (error) {
       setMessage("Event could not be published.");
@@ -449,6 +486,7 @@ export default function EventAdmin({ db, userId = "" }) {
         userId,
       });
       setMessage(`${editingForm?.title || eventId} draft discarded.`);
+      setPublishReview(null);
       await loadEvents();
     } catch (error) {
       setMessage("Event draft could not be discarded.");
@@ -491,6 +529,17 @@ export default function EventAdmin({ db, userId = "" }) {
       {isExpanded ? (
         <>
           {message ? <p className="admin_message">{message}</p> : null}
+          {publishReview ? (
+            <AdminPublishReview
+              draftData={publishReview.data}
+              isSaving={isSaving}
+              liveData={publishReview.liveData}
+              onCancel={() => setPublishReview(null)}
+              onConfirm={confirmPublishExistingEvent}
+              title={publishReview.title}
+              typeLabel="event"
+            />
+          ) : null}
           {isLoading ? <p className="admin_status">Loading events...</p> : null}
 
           <article className="admin_product_card">
@@ -574,11 +623,11 @@ export default function EventAdmin({ db, userId = "" }) {
                       <div className="admin_button_row">
                         <button
                           className="admin_secondary_button"
-                          disabled={isSaving}
-                          onClick={() => publishExistingEvent(eventDoc.id)}
+                          disabled={isSaving || !hasDraft}
+                          onClick={() => requestPublishExistingEvent(eventDoc)}
                           type="button"
                         >
-                          Publish Changes
+                          Review Publish
                         </button>
                         <button
                           className="admin_secondary_button"

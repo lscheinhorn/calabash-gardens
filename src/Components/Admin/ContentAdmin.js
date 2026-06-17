@@ -18,6 +18,7 @@ import {
   saveAdminDraft,
 } from "../../data/adminDrafts";
 import { buildContentSeed } from "../../data/adminContentSeed";
+import AdminPublishReview from "./AdminPublishReview";
 
 const CollapseIcon = ({ isExpanded }) => (
   <FontAwesomeIcon
@@ -93,6 +94,8 @@ export default function ContentAdmin({ db, userId = "" }) {
   const [draftsById, setDraftsById] = useState({});
   const [expandedDocId, setExpandedDocId] = useState("");
   const [formsById, setFormsById] = useState({});
+  const [liveContentById, setLiveContentById] = useState({});
+  const [publishReview, setPublishReview] = useState(null);
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -115,6 +118,10 @@ export default function ContentAdmin({ db, userId = "" }) {
           id: contentDoc.id,
           ...contentDoc.data(),
         }));
+      setLiveContentById(Object.fromEntries(liveDocs.map((contentDoc) => [
+        contentDoc.id,
+        contentDoc,
+      ])));
       const docs = applyAdminDrafts(liveDocs, drafts, "siteContent")
         .filter((contentDoc) => expectedContentIds.has(contentDoc.id))
         .sort((firstDoc, secondDoc) => {
@@ -208,6 +215,7 @@ export default function ContentAdmin({ db, userId = "" }) {
       });
 
       setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} draft saved for preview.`);
+      setPublishReview(null);
       await loadContentDocs();
     } catch (error) {
       setMessage("Site content draft could not be saved.");
@@ -216,11 +224,25 @@ export default function ContentAdmin({ db, userId = "" }) {
     }
   };
 
-  const publishContentDoc = async (contentDoc) => {
-    const payload = buildContentPayload(contentDoc);
+  const requestPublishContentDoc = (contentDoc) => {
+    const draft = draftsById[contentDoc.id];
 
-    if (!payload) {
-      setMessage("Open an approved content section before publishing.");
+    if (!draft?.data) {
+      setMessage("Save a draft before reviewing publish changes.");
+      return;
+    }
+
+    setMessage("");
+    setPublishReview({
+      data: draft.data,
+      id: contentDoc.id,
+      liveData: liveContentById[contentDoc.id] || null,
+      title: expectedMeta.get(contentDoc.id)?.title || contentDoc.id,
+    });
+  };
+
+  const confirmPublishContentDoc = async () => {
+    if (!publishReview) {
       return;
     }
 
@@ -229,14 +251,15 @@ export default function ContentAdmin({ db, userId = "" }) {
 
     try {
       await publishAdminDraft({
-        data: payload,
+        data: publishReview.data,
         db,
         targetCollection: "siteContent",
-        targetId: contentDoc.id,
+        targetId: publishReview.id,
         userId,
       });
 
-      setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} published to live Firestore content.`);
+      setMessage(`${publishReview.title} published to live Firestore content.`);
+      setPublishReview(null);
       await loadContentDocs();
     } catch (error) {
       setMessage("Site content could not be published.");
@@ -258,6 +281,7 @@ export default function ContentAdmin({ db, userId = "" }) {
       });
 
       setMessage(`${expectedMeta.get(contentDoc.id)?.title || contentDoc.id} draft discarded.`);
+      setPublishReview(null);
       await loadContentDocs();
     } catch (error) {
       setMessage("Site content draft could not be discarded.");
@@ -300,6 +324,17 @@ export default function ContentAdmin({ db, userId = "" }) {
       {isExpanded ? (
         <>
           {message ? <p className="admin_message">{message}</p> : null}
+          {publishReview ? (
+            <AdminPublishReview
+              draftData={publishReview.data}
+              isSaving={isSaving}
+              liveData={publishReview.liveData}
+              onCancel={() => setPublishReview(null)}
+              onConfirm={confirmPublishContentDoc}
+              title={publishReview.title}
+              typeLabel="site content section"
+            />
+          ) : null}
           {isLoading ? <p className="admin_status">Loading site content...</p> : null}
           {!isLoading && !contentDocs.length ? (
             <p className="admin_status">No Firestore site content found. Seed missing content first.</p>
@@ -376,11 +411,11 @@ export default function ContentAdmin({ db, userId = "" }) {
                         </button>
                         <button
                           className="admin_secondary_button"
-                          disabled={isSaving}
-                          onClick={() => publishContentDoc(contentDoc)}
+                          disabled={isSaving || !hasDraft}
+                          onClick={() => requestPublishContentDoc(contentDoc)}
                           type="button"
                         >
-                          Publish Changes
+                          Review Publish
                         </button>
                         <button
                           className="admin_secondary_button"
