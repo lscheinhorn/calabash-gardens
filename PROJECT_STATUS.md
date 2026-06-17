@@ -90,6 +90,8 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Added an admin Publish Review step for products, events, and site content so Publish requires a saved draft, shows live-vs-draft differences, and then requires Confirm Publish Changes.
 - Updated product, event, and site-content publish paths to publish the saved draft payload instead of unsaved open form edits.
 - Preserved event optional-field removal intent during draft publish review by adding delete markers for live optional fields omitted from the saved event draft.
+- Moved Publish Review panels into the matching expanded product, event, or site-content card directly under the action row that opened review.
+- Hid internal draft metadata keys from the Event Editor unsupported-field warning.
 
 ## In Progress Work
 
@@ -331,6 +333,10 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - 2026-06-16: Browser verification confirmed site-content Review Publish is disabled before a saved draft, then saved a temporary Home Banner draft, changed the open form without saving, and confirmed Review Publish showed the saved draft value rather than the unsaved field value. The temporary draft was canceled/discarded and the content returned to live values.
 - 2026-06-16: `git diff --check` passed after adding publish review.
 - 2026-06-16: Protected content diff check returned no changes after adding publish review.
+- 2026-06-17: `node --check` passed for `ContentAdmin.js`, `EventAdmin.js`, and `ProductAdmin.js` after moving Publish Review panels inline.
+- 2026-06-17: `npm run build` completed successfully after moving Publish Review panels inline, with the same existing warnings.
+- 2026-06-17: Protected content diff check returned no changes after moving Publish Review panels inline.
+- 2026-06-17: Browser test on the existing `3000` server confirmed temporary event drafts can still be saved and discarded; that server was serving a stale pre-move bundle, so a fresh `3001` dev server was started from the current branch and compiled successfully, but browser auth did not carry to the new port. The fresh server was stopped after verification.
 
 ## Commits
 

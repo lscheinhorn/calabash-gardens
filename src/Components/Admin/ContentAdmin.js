@@ -324,17 +324,6 @@ export default function ContentAdmin({ db, userId = "" }) {
       {isExpanded ? (
         <>
           {message ? <p className="admin_message">{message}</p> : null}
-          {publishReview ? (
-            <AdminPublishReview
-              draftData={publishReview.data}
-              isSaving={isSaving}
-              liveData={publishReview.liveData}
-              onCancel={() => setPublishReview(null)}
-              onConfirm={confirmPublishContentDoc}
-              title={publishReview.title}
-              typeLabel="site content section"
-            />
-          ) : null}
           {isLoading ? <p className="admin_status">Loading site content...</p> : null}
           {!isLoading && !contentDocs.length ? (
             <p className="admin_status">No Firestore site content found. Seed missing content first.</p>
@@ -347,6 +336,7 @@ export default function ContentAdmin({ db, userId = "" }) {
               const fields = Object.entries(form?.flatSections || {});
               const title = expectedMeta.get(contentDoc.id)?.title || contentDoc.id;
               const hasDraft = Boolean(draftsById[contentDoc.id]);
+              const isPublishReviewOpen = publishReview?.id === contentDoc.id;
 
               return (
                 <article className="admin_content_card" key={contentDoc.id}>
@@ -426,6 +416,17 @@ export default function ContentAdmin({ db, userId = "" }) {
                           Discard Draft
                         </button>
                       </div>
+                      {isPublishReviewOpen ? (
+                        <AdminPublishReview
+                          draftData={publishReview.data}
+                          isSaving={isSaving}
+                          liveData={publishReview.liveData}
+                          onCancel={() => setPublishReview(null)}
+                          onConfirm={confirmPublishContentDoc}
+                          title={publishReview.title}
+                          typeLabel="site content section"
+                        />
+                      ) : null}
                     </div>
                   ) : null}
                 </article>

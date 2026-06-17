@@ -152,7 +152,11 @@ const buildFormFromEvent = (eventDoc) => ({
   eventType: String(eventDoc.eventType || ""),
   capacity: Number.isFinite(eventDoc.capacity) ? String(eventDoc.capacity) : "",
   photos: normalizePhotos(eventDoc.photos),
-  unsupportedFields: Object.keys(eventDoc).filter((key) => key !== "id" && !allowedEventKeys.has(key)),
+  unsupportedFields: Object.keys(eventDoc).filter((key) => (
+    key !== "id"
+      && !key.startsWith("_")
+      && !allowedEventKeys.has(key)
+  )),
 });
 
 const validateEventForm = (form, isNewEvent) => {
@@ -529,17 +533,6 @@ export default function EventAdmin({ db, userId = "" }) {
       {isExpanded ? (
         <>
           {message ? <p className="admin_message">{message}</p> : null}
-          {publishReview ? (
-            <AdminPublishReview
-              draftData={publishReview.data}
-              isSaving={isSaving}
-              liveData={publishReview.liveData}
-              onCancel={() => setPublishReview(null)}
-              onConfirm={confirmPublishExistingEvent}
-              title={publishReview.title}
-              typeLabel="event"
-            />
-          ) : null}
           {isLoading ? <p className="admin_status">Loading events...</p> : null}
 
           <article className="admin_product_card">
@@ -579,6 +572,7 @@ export default function EventAdmin({ db, userId = "" }) {
               const isEventExpanded = expandedEventId === eventDoc.id;
               const editingForm = editingFormsById[eventDoc.id];
               const hasDraft = Boolean(draftsById[eventDoc.id]);
+              const isPublishReviewOpen = publishReview?.id === eventDoc.id;
 
               return (
                 <article className="admin_product_card" key={eventDoc.id}>
@@ -638,6 +632,17 @@ export default function EventAdmin({ db, userId = "" }) {
                           Discard Draft
                         </button>
                       </div>
+                      {isPublishReviewOpen ? (
+                        <AdminPublishReview
+                          draftData={publishReview.data}
+                          isSaving={isSaving}
+                          liveData={publishReview.liveData}
+                          onCancel={() => setPublishReview(null)}
+                          onConfirm={confirmPublishExistingEvent}
+                          title={publishReview.title}
+                          typeLabel="event"
+                        />
+                      ) : null}
                     </div>
                   ) : null}
                 </article>

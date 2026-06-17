@@ -1332,17 +1332,6 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
 
             {isLoading ? <p className="admin_status">Loading products...</p> : null}
             <p className="admin_status">{filteredProducts.length} of {products.length} products shown.</p>
-            {publishReview ? (
-              <AdminPublishReview
-                draftData={publishReview.data}
-                isSaving={isSaving}
-                liveData={publishReview.liveData}
-                onCancel={() => setPublishReview(null)}
-                onConfirm={confirmPublishProductDraft}
-                title={publishReview.title}
-                typeLabel="product"
-              />
-            ) : null}
 
             <div className="admin_product_list">
               {filteredProducts.map((product) => {
@@ -1352,6 +1341,18 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
                   .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
                 const isPhotoTarget = selectedProductId === product.id;
                 const hasDraft = Boolean(draftsById[product.id]);
+                const isPublishReviewOpen = publishReview?.id === product.id;
+                const productPublishReview = isPublishReviewOpen ? (
+                  <AdminPublishReview
+                    draftData={publishReview.data}
+                    isSaving={isSaving}
+                    liveData={publishReview.liveData}
+                    onCancel={() => setPublishReview(null)}
+                    onConfirm={confirmPublishProductDraft}
+                    title={publishReview.title}
+                    typeLabel="product"
+                  />
+                ) : null;
 
                 return (
                   <article className="admin_product_card" key={product.id}>
@@ -1402,27 +1403,30 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
                         </dl>
 
                         {!isEditing ? (
-                          <div className="admin_button_row">
-                            <button className="admin_primary_button" onClick={() => startProductEdit(product)} type="button">
-                              Edit
-                            </button>
-                            <button
-                              className="admin_secondary_button"
-                              disabled={isSaving || !hasDraft}
-                              onClick={() => requestPublishProductDraft(product)}
-                              type="button"
-                            >
-                              Review Publish
-                            </button>
-                            <button
-                              className="admin_secondary_button"
-                              disabled={isSaving || !hasDraft}
-                              onClick={() => discardProductDraft(product)}
-                              type="button"
-                            >
-                              Discard Draft
-                            </button>
-                          </div>
+                          <>
+                            <div className="admin_button_row">
+                              <button className="admin_primary_button" onClick={() => startProductEdit(product)} type="button">
+                                Edit
+                              </button>
+                              <button
+                                className="admin_secondary_button"
+                                disabled={isSaving || !hasDraft}
+                                onClick={() => requestPublishProductDraft(product)}
+                                type="button"
+                              >
+                                Review Publish
+                              </button>
+                              <button
+                                className="admin_secondary_button"
+                                disabled={isSaving || !hasDraft}
+                                onClick={() => discardProductDraft(product)}
+                                type="button"
+                              >
+                                Discard Draft
+                              </button>
+                            </div>
+                            {productPublishReview}
+                          </>
                         ) : (
                           <form className="admin_inline_form" onSubmit={(event) => handleProductCardSubmit(event, product)}>
                             <label>
@@ -1546,6 +1550,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
                                 Cancel
                               </button>
                             </div>
+                            {productPublishReview}
                             {productCardMessage ? <p className="admin_message">{productCardMessage}</p> : null}
                           </form>
                         )}
