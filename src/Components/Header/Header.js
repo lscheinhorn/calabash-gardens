@@ -4,8 +4,13 @@ import { content } from '../../data/siteData'
 import { Link } from 'react-router-dom'
 import largeLogo from '../../resources/images/large_logo_no_purple_square.png';
 
+const renderStaticContent = (fieldPath, label, children) => children;
 
-export default function Header ({ headerContent = content.home.header, showNav = true }) {
+export default function Header ({
+    headerContent = content.home.header,
+    renderEditableContent = renderStaticContent,
+    showNav = true
+}) {
    
     return (
         <div>
@@ -18,8 +23,12 @@ export default function Header ({ headerContent = content.home.header, showNav =
                         />
                     </div>
                     <div className='title header_color'>
-                        <h1 className='header_color'>{ headerContent.title }</h1>
-                        <p className='header_color'>{ headerContent.subtitle }</p>
+                        <h1 className='header_color'>
+                            { renderEditableContent('header.title', 'Header title', headerContent.title) }
+                        </h1>
+                        <p className='header_color'>
+                            { renderEditableContent('header.subtitle', 'Header subtitle', headerContent.subtitle) }
+                        </p>
                     </div>
                     
                 </div>

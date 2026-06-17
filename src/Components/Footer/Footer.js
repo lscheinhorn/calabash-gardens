@@ -3,7 +3,12 @@ import { content } from '../../data/siteData'
 import { Link } from 'react-router-dom'
 import largeLogo from '../../resources/images/large_logo_no_purple_square.png';
 
-export default function Footer ({ footerContent = content.home.header }) {
+const renderStaticContent = (fieldPath, label, children) => children;
+
+export default function Footer ({
+    footerContent = content.home.header,
+    renderEditableContent = renderStaticContent
+}) {
     return (
         <div className='footer footer_color'>
                 <div className='title_container footer_color' >
@@ -14,8 +19,12 @@ export default function Footer ({ footerContent = content.home.header }) {
                     />
                     </div>
                     <div className='title footer_color'>
-                        <h1 className='footer_color'>{ footerContent.title }</h1>
-                        <p className='footer_color'>{ footerContent.subtitle }</p>
+                        <h1 className='footer_color'>
+                            { renderEditableContent('header.title', 'Footer title', footerContent.title) }
+                        </h1>
+                        <p className='footer_color'>
+                            { renderEditableContent('header.subtitle', 'Footer subtitle', footerContent.subtitle) }
+                        </p>
                     </div>
                     
                 </div>

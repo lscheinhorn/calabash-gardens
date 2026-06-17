@@ -4,7 +4,13 @@ import { getActiveEvents, experienceBlurb } from '../../data/siteData';
 import Event from '../Event/Event';
 import { useState, useEffect, useMemo } from 'react';
 
-export default function Events({ eventsOverride = null, experienceBlurbOverride = null }) {
+const renderStaticContent = (fieldPath, label, children) => children;
+
+export default function Events({
+    eventsOverride = null,
+    experienceBlurbOverride = null,
+    renderExperienceBlurbContent = renderStaticContent
+}) {
     const activeEvents = useMemo(() => (
         eventsOverride
             ? eventsOverride.filter(event => event.isActive === true)
@@ -44,7 +50,11 @@ export default function Events({ eventsOverride = null, experienceBlurbOverride 
                         key={index}
                         style={{ textIndent: '2em' }}
                     >
-                        {p}
+                        {renderExperienceBlurbContent(
+                            `paragraphs.paragraph_${index + 1}`,
+                            `Experience blurb paragraph ${index + 1}`,
+                            p
+                        )}
                     </p>
                 ))}
                 <div style={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>

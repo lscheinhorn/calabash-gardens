@@ -55,6 +55,44 @@ const previewRouteForPublicPath = (publicPath) => {
   return "/admin/preview/home";
 };
 
+const EditablePreviewText = ({
+  children,
+  contentId,
+  fieldPath,
+  label,
+  onEdit,
+}) => {
+  const requestEdit = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onEdit({ contentId, fieldPath, label });
+  };
+
+  const handleKeyDown = (event) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    requestEdit(event);
+  };
+
+  return (
+    <span
+      className="admin_preview_edit_marker"
+      onClick={requestEdit}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      title={`Edit ${label}`}
+    >
+      {children}
+      <span aria-hidden="true" className="admin_preview_edit_badge">
+        Edit
+      </span>
+    </span>
+  );
+};
+
 export default function AdminPreviewFrame() {
   const { previewTab, productKey } = useParams();
   const location = useLocation();
@@ -72,6 +110,8 @@ export default function AdminPreviewFrame() {
     experienceBlurb: [],
     products: [],
   });
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const isContentEditMode = queryParams.get("edit") === "content";
 
   const loadPreview = useCallback(async () => {
     if (!isFirebaseConfigured || !db || !storage) {
@@ -129,11 +169,14 @@ export default function AdminPreviewFrame() {
 
       const publicPath = linkUrl.hash.replace(/^#/, "");
       const previewRoute = previewRouteForPublicPath(publicPath);
+      const nextPreviewRoute = isContentEditMode
+        ? `${previewRoute}?edit=content`
+        : previewRoute;
 
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
-      navigate(previewRoute);
+      navigate(nextPreviewRoute);
     };
 
     document.addEventListener("click", handlePreviewLinkClick, true);
@@ -141,7 +184,56 @@ export default function AdminPreviewFrame() {
     return () => {
       document.removeEventListener("click", handlePreviewLinkClick, true);
     };
+  }, [isContentEditMode, navigate]);
+
+  const requestContentEdit = useCallback((request) => {
+    const message = {
+      type: "calabash-admin-edit-content",
+      contentId: request.contentId,
+      fieldPath: request.fieldPath,
+      label: request.label,
+    };
+
+    if (window.parent && window.parent !== window) {
+      window.parent.postMessage(message, window.location.origin);
+      return;
+    }
+
+    if (window.opener && !window.opener.closed) {
+      window.opener.postMessage(message, window.location.origin);
+      window.opener.focus();
+      return;
+    }
+
+    const adminQueryParams = new URLSearchParams({
+      editContent: request.contentId,
+    });
+
+    if (request.fieldPath) {
+      adminQueryParams.set("fieldPath", request.fieldPath);
+    }
+
+    if (request.label) {
+      adminQueryParams.set("label", request.label);
+    }
+
+    navigate(`/admin?${adminQueryParams.toString()}`);
   }, [navigate]);
+
+  const createContentRenderer = useCallback((contentId) => (
+    (fieldPath, label, children) => (
+      isContentEditMode ? (
+        <EditablePreviewText
+          contentId={contentId}
+          fieldPath={fieldPath}
+          label={label}
+          onEdit={requestContentEdit}
+        >
+          {children}
+        </EditablePreviewText>
+      ) : children
+    )
+  ), [isContentEditMode, requestContentEdit]);
 
   const activeProducts = useMemo(() => (
     previewData.products.filter((product) => product.isActive === true)
@@ -153,6 +245,11 @@ export default function AdminPreviewFrame() {
     previewData.products.find((product) => product.key === productKey) || null
   ), [previewData.products, productKey]);
   const homeContent = previewData.content?.home;
+  const renderHeaderContent = useMemo(() => createContentRenderer("home"), [createContentRenderer]);
+  const renderBannerContent = useMemo(() => createContentRenderer("banner"), [createContentRenderer]);
+  const renderAboutContent = useMemo(() => createContentRenderer("about"), [createContentRenderer]);
+  const renderTeamContent = useMemo(() => createContentRenderer("team"), [createContentRenderer]);
+  const renderExperienceBlurbContent = useMemo(() => createContentRenderer("experienceBlurb"), [createContentRenderer]);
 
   const renderPreviewPage = () => {
     if (activeTab === "product") {
@@ -177,6 +274,7 @@ export default function AdminPreviewFrame() {
         <Events
           eventsOverride={previewData.events}
           experienceBlurbOverride={previewData.experienceBlurb}
+          renderExperienceBlurbContent={renderExperienceBlurbContent}
         />
       );
     }
@@ -194,14 +292,23 @@ export default function AdminPreviewFrame() {
 
     return (
       <div className="main">
-        <Banner bannerContent={homeContent?.banner} />
+        <Banner
+          bannerContent={homeContent?.banner}
+          renderEditableContent={renderBannerContent}
+        />
         <div>
           <HighlightedProducts productsOverride={highlightedProducts} />
           <Experience />
           <Media />
           <Parallax />
-          <About aboutContent={homeContent?.about} />
-          <Team teamContent={homeContent?.team} />
+          <About
+            aboutContent={homeContent?.about}
+            renderEditableContent={renderAboutContent}
+          />
+          <Team
+            renderEditableContent={renderTeamContent}
+            teamContent={homeContent?.team}
+          />
         </div>
       </div>
     );
@@ -225,9 +332,15 @@ export default function AdminPreviewFrame() {
 
   return (
     <div className="admin_preview_frame_site">
-      <Header headerContent={homeContent?.header} />
+      <Header
+        headerContent={homeContent?.header}
+        renderEditableContent={renderHeaderContent}
+      />
       {renderPreviewPage()}
-      <Footer footerContent={homeContent?.header} />
+      <Footer
+        footerContent={homeContent?.header}
+        renderEditableContent={renderHeaderContent}
+      />
     </div>
   );
 }

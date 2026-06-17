@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   collection,
   getDocs,
@@ -89,7 +89,9 @@ const buildExpectedMeta = () => {
   }]));
 };
 
-export default function ContentAdmin({ db, userId = "" }) {
+const fieldRefKey = (contentId, path) => `${contentId}:${path}`;
+
+export default function ContentAdmin({ db, focusRequest = null, userId = "" }) {
   const [contentDocs, setContentDocs] = useState([]);
   const [draftsById, setDraftsById] = useState({});
   const [expandedDocId, setExpandedDocId] = useState("");
@@ -100,9 +102,17 @@ export default function ContentAdmin({ db, userId = "" }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const fieldRefs = useRef({});
+  const sectionRef = useRef(null);
 
   const expectedMeta = useMemo(buildExpectedMeta, []);
   const expectedContentIds = useMemo(() => new Set(expectedMeta.keys()), [expectedMeta]);
+  const buildFocusMessage = useCallback((request) => {
+    const sectionTitle = expectedMeta.get(request.contentId)?.title || request.contentId;
+    const fieldTitle = request.label || (request.fieldPath ? titleForPath(request.fieldPath) : "");
+
+    return `Opened ${sectionTitle}${fieldTitle ? ` / ${fieldTitle}` : ""} from preview. Save Draft keeps changes out of the live site.`;
+  }, [expectedMeta]);
 
   const loadContentDocs = useCallback(async () => {
     setIsLoading(true);
@@ -152,6 +162,51 @@ export default function ContentAdmin({ db, userId = "" }) {
       loadContentDocs();
     }
   }, [isExpanded, loadContentDocs]);
+
+  useEffect(() => {
+    if (!focusRequest?.contentId) {
+      return;
+    }
+
+    setIsExpanded(true);
+    setExpandedDocId(focusRequest.contentId);
+    setPublishReview(null);
+    setMessage(buildFocusMessage(focusRequest));
+  }, [buildFocusMessage, focusRequest]);
+
+  useEffect(() => {
+    if (!focusRequest?.contentId || !isExpanded || expandedDocId !== focusRequest.contentId) {
+      return undefined;
+    }
+
+    setMessage(buildFocusMessage(focusRequest));
+
+    const animationFrame = window.requestAnimationFrame(() => {
+      const focusedField = focusRequest.fieldPath
+        ? fieldRefs.current[fieldRefKey(focusRequest.contentId, focusRequest.fieldPath)]
+        : null;
+      const targetElement = focusedField || sectionRef.current;
+
+      if (!targetElement) {
+        return;
+      }
+
+      targetElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+
+      if (focusedField && typeof focusedField.focus === "function") {
+        focusedField.focus({
+          preventScroll: true,
+        });
+      }
+    });
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+    };
+  }, [buildFocusMessage, expandedDocId, focusRequest, formsById, isExpanded]);
 
   const updatePublished = (contentId, value) => {
     setFormsById((currentForms) => ({
@@ -291,7 +346,7 @@ export default function ContentAdmin({ db, userId = "" }) {
   };
 
   return (
-    <section className="admin_panel">
+    <section className="admin_panel" ref={sectionRef}>
       <div className="admin_form_header">
         <div>
           <h3>Site Content Editor</h3>
@@ -370,13 +425,28 @@ export default function ContentAdmin({ db, userId = "" }) {
                         Published
                       </label>
 
-                      {fields.map(([path, value]) => (
-                        <label key={path}>
+                      {fields.map(([path, value]) => {
+                        const isFocusedField = focusRequest?.contentId === contentDoc.id
+                          && focusRequest?.fieldPath === path;
+
+                        return (
+                        <label
+                          className={isFocusedField ? "admin_focused_field" : undefined}
+                          key={path}
+                        >
                           {titleForPath(path)}
                           {shouldUseTextarea(path, value) ? (
                             <textarea
                               disabled={isSaving}
                               onChange={(event) => updateField(contentDoc.id, path, event.target.value)}
+                              ref={(field) => {
+                                if (field) {
+                                  fieldRefs.current[fieldRefKey(contentDoc.id, path)] = field;
+                                  return;
+                                }
+
+                                delete fieldRefs.current[fieldRefKey(contentDoc.id, path)];
+                              }}
                               rows={4}
                               value={value}
                             />
@@ -384,11 +454,20 @@ export default function ContentAdmin({ db, userId = "" }) {
                             <input
                               disabled={isSaving}
                               onChange={(event) => updateField(contentDoc.id, path, event.target.value)}
+                              ref={(field) => {
+                                if (field) {
+                                  fieldRefs.current[fieldRefKey(contentDoc.id, path)] = field;
+                                  return;
+                                }
+
+                                delete fieldRefs.current[fieldRefKey(contentDoc.id, path)];
+                              }}
                               value={value}
                             />
                           )}
                         </label>
-                      ))}
+                      );
+                      })}
 
                       <div className="admin_button_row">
                         <button

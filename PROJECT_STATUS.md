@@ -93,6 +93,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Moved Publish Review panels into the matching expanded product, event, or site-content card directly under the action row that opened review.
 - Hid internal draft metadata keys from the Event Editor unsupported-field warning.
 - Added a Firebase Auth password-reset flow to the admin sign-in form, with a generic non-enumerating response and disabled sending state, on the active branch.
+- Added admin preview content edit mode: highlighted Firestore preview text can open the matching Site Content Editor card and focus the corresponding draft field without saving or publishing, on the active branch.
 
 ## In Progress Work
 
@@ -134,8 +135,8 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Verify admin product cards, inline edits, category guardrails, seed behavior, and card-local photo upload on the live admin route.
 - Use subagents to review implementation scope and guardrail compliance.
 - Verify Confirm Publish Changes from the admin UI in a controlled live-write test only after Luke explicitly approves a live Firestore content mutation.
-- Add clickable preview editing for site-content blocks after the draft/publish data flow is reviewed.
 - Verify the admin password-reset button with Jette's real email only when Luke explicitly approves sending the reset email.
+- Verify Jette can use preview content edit mode comfortably across Desktop, Tablet, and Mobile preview sizes before broader content-edit training.
 
 ## Planned Work
 
@@ -261,6 +262,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - Admin preview should render active drafts over live Firestore records; public routes and generated cache reads remain live-only until Luke approves the public source switch.
 - Publish requires a saved draft, a live-vs-draft review, and a Confirm Publish Changes click. Save Draft must not make customer-facing content live, and unsaved open form edits must not publish.
 - Admin password reset should use Firebase Auth's email reset link flow from the sign-in form and must keep the UI response generic so the form does not reveal whether an email exists.
+- Admin preview content edit mode is a navigation/focus helper only. It may open a draft editor field, but edits still require Save Draft, Review Publish, and Confirm Publish before live Firestore content changes.
 
 ## Verification History
 
@@ -345,6 +347,10 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - 2026-06-17: `git diff --check` passed after adding the admin password-reset flow.
 - 2026-06-17: Protected content diff check returned no changes after adding the admin password-reset flow.
 - 2026-06-17: Fresh dev server on `127.0.0.1:3002` compiled successfully and returned `HTTP/1.1 200 OK`; no real password reset email was sent during verification.
+- 2026-06-17: `node --check` passed for `Admin.js`, `AdminPreview.js`, `AdminPreviewFrame.js`, `ContentAdmin.js`, `Header.js`, `Footer.js`, `Banner.js`, `About.js`, `Team.js`, and `Events.js` after adding admin preview content edit mode.
+- 2026-06-17: `npm run build` completed successfully after adding admin preview content edit mode, with the same existing warnings.
+- 2026-06-17: Browser verification on `127.0.0.1:3002` confirmed Content Edit Mode creates 18 preview text markers, clicking the Banner title marker opens Site Content Editor, expands Home Banner, focuses the Title input, and shows the draft-safety message.
+- 2026-06-17: Browser verification on public `#/` confirmed normal public home renders with 0 `.admin_preview_edit_marker` elements.
 
 ## Commits
 
@@ -383,6 +389,7 @@ Phase 32: Draft/publish foundation for admin edits and preview.
 - `b151a46 feat: add admin draft publish foundation`
 - `chore: enable firestore rules deploy config` (current branch)
 - `feat: add admin password reset flow` (current branch)
+- `feat: add preview content edit focus` (current branch)
 
 ## Deployments
 

@@ -286,6 +286,45 @@
   min-height: 100vh;
 }
 
+.admin_preview_edit_marker {
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgba(243, 207, 80, 0.78);
+  cursor: pointer;
+  position: relative;
+}
+
+.admin_preview_edit_marker:hover,
+.admin_preview_edit_marker:focus-visible {
+  background: rgba(243, 207, 80, 0.18);
+  box-shadow: 0 0 0 3px rgba(115, 82, 132, 0.82);
+  outline: 0;
+}
+
+.admin_preview_edit_badge {
+  background: #533a60;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 700;
+  left: 0;
+  line-height: 1;
+  opacity: 0;
+  padding: 3px 6px;
+  pointer-events: none;
+  position: absolute;
+  top: -18px;
+  transform: translateY(3px);
+  transition: opacity 140ms ease, transform 140ms ease;
+  white-space: nowrap;
+  z-index: 2;
+}
+
+.admin_preview_edit_marker:hover .admin_preview_edit_badge,
+.admin_preview_edit_marker:focus-visible .admin_preview_edit_badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .admin_placeholder_grid {
   display: grid;
   gap: 12px;
@@ -303,6 +342,10 @@
 .admin_status {
   color: #735284;
   font-weight: 700;
+}
+
+.admin_inline_status {
+  margin: 0;
 }
 
 .admin_editor_grid {
@@ -470,6 +513,13 @@
 
 .admin_checkbox_label input {
   width: auto;
+}
+
+.admin_focused_field {
+  background: #fffdf5;
+  border: 1px solid #f3cf50;
+  border-radius: 6px;
+  padding: 10px;
 }
 
 .admin_product_card_header small {
@@ -839,6 +889,11 @@
 .admin_theme_dark .admin_publish_diff_row pre,
 .admin_theme_dark .admin_publish_review_summary strong {
   color: #f4eef7;
+}
+
+.admin_theme_dark .admin_focused_field {
+  background: #302537;
+  border-color: #f3cf50;
 }
 
 .admin_theme_dark input,

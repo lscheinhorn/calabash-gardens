@@ -28,6 +28,14 @@ const previewViewports = {
   },
 };
 
+const editableContentIds = new Set([
+  "about",
+  "banner",
+  "experienceBlurb",
+  "home",
+  "team",
+]);
+
 const CollapseIcon = ({ isExpanded }) => (
   <FontAwesomeIcon
     aria-hidden="true"
@@ -36,10 +44,11 @@ const CollapseIcon = ({ isExpanded }) => (
   />
 );
 
-export default function AdminPreview({ db, storage }) {
+export default function AdminPreview({ db, onEditContent = () => {}, storage }) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [isContentEditMode, setIsContentEditMode] = useState(false);
   const [previewTab, setPreviewTab] = useState("home");
   const [previewViewport, setPreviewViewport] = useState("desktop");
   const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
@@ -89,6 +98,36 @@ export default function AdminPreview({ db, storage }) {
     }
   }, [isExpanded, loadPreview]);
 
+  useEffect(() => {
+    const handlePreviewMessage = (event) => {
+      if (event.origin !== window.location.origin) {
+        return;
+      }
+
+      if (event.data?.type !== "calabash-admin-edit-content") {
+        return;
+      }
+
+      const contentId = String(event.data.contentId || "");
+
+      if (!editableContentIds.has(contentId)) {
+        return;
+      }
+
+      onEditContent({
+        contentId,
+        fieldPath: String(event.data.fieldPath || ""),
+        label: String(event.data.label || ""),
+      });
+    };
+
+    window.addEventListener("message", handlePreviewMessage);
+
+    return () => {
+      window.removeEventListener("message", handlePreviewMessage);
+    };
+  }, [onEditContent]);
+
   const activeProducts = useMemo(() => (
     previewData.products.filter((product) => product.isActive === true)
   ), [previewData.products]);
@@ -102,8 +141,16 @@ export default function AdminPreview({ db, storage }) {
     }
 
     const baseUrl = window.location.href.split("#")[0];
-    return `${baseUrl}#/admin/preview/${previewTab}?refresh=${previewRefreshKey}`;
-  }, [previewRefreshKey, previewTab]);
+    const queryParams = new URLSearchParams({
+      refresh: String(previewRefreshKey),
+    });
+
+    if (isContentEditMode) {
+      queryParams.set("edit", "content");
+    }
+
+    return `${baseUrl}#/admin/preview/${previewTab}?${queryParams.toString()}`;
+  }, [isContentEditMode, previewRefreshKey, previewTab]);
 
   return (
     <section className="admin_panel">
@@ -165,6 +212,21 @@ export default function AdminPreview({ db, storage }) {
                 {viewport.label}
               </button>
             ))}
+          </div>
+
+          <div className="admin_button_row">
+            <button
+              className={isContentEditMode ? "admin_primary_button" : "admin_secondary_button"}
+              onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
+              type="button"
+            >
+              {isContentEditMode ? "Content Edit Mode On" : "Content Edit Mode"}
+            </button>
+            {isContentEditMode ? (
+              <p className="admin_status admin_inline_status">
+                Click highlighted site text in the preview to open the matching draft editor.
+              </p>
+            ) : null}
           </div>
 
           <div className="admin_audit_summary" aria-label="Preview data summary">

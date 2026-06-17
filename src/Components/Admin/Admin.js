@@ -1,6 +1,6 @@
 import "./Admin.css";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { doc, getDoc } from "firebase/firestore";
 import {
   onAuthStateChanged,
@@ -8,6 +8,7 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
+import { useLocation } from "react-router-dom";
 
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
 import ContentAdmin from "./ContentAdmin";
@@ -36,11 +37,13 @@ const loadInitialTheme = () => {
 };
 
 export default function Admin() {
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
   const [isApprovedAdmin, setIsApprovedAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
+  const [contentEditorFocus, setContentEditorFocus] = useState(null);
   const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [message, setMessage] = useState("");
@@ -110,6 +113,31 @@ export default function Admin() {
   }, [user]);
 
   const canUseFirebase = isFirebaseConfigured && auth && db && storage;
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const contentId = queryParams.get("editContent");
+
+    if (!contentId) {
+      return;
+    }
+
+    setContentEditorFocus({
+      contentId,
+      fieldPath: queryParams.get("fieldPath") || "",
+      label: queryParams.get("label") || "",
+      requestId: Date.now(),
+    });
+  }, [location.search]);
+
+  const handlePreviewContentEdit = useCallback((request) => {
+    setContentEditorFocus({
+      contentId: request.contentId,
+      fieldPath: request.fieldPath || "",
+      label: request.label || "",
+      requestId: Date.now(),
+    });
+  }, []);
 
   const adminAccessLabel = () => {
     if (!user) {
@@ -216,14 +244,22 @@ export default function Admin() {
             <p>Editor and mirror audit are available below.</p>
           </div>
         </div>
-        <AdminPreview db={db} storage={storage} />
+        <AdminPreview
+          db={db}
+          onEditContent={handlePreviewContentEdit}
+          storage={storage}
+        />
         <MediaAdmin db={db} storage={storage} />
         <ProductMirrorAudit db={db} />
         <ProductPublicParityAudit db={db} />
         <EventMirrorAudit db={db} />
         <EventAdmin db={db} userId={user?.uid || ""} />
         <ContentMirrorAudit db={db} />
-        <ContentAdmin db={db} userId={user?.uid || ""} />
+        <ContentAdmin
+          db={db}
+          focusRequest={contentEditorFocus}
+          userId={user?.uid || ""}
+        />
         <ProductAdmin db={db} storage={storage} userId={user?.uid || ""} />
       </div>
     );

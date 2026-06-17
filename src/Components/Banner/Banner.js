@@ -1,7 +1,12 @@
 import './Banner.css'
 import { content } from '../../data/siteData'
 
-export default function Banner ({ bannerContent = content.home.banner }) {
+const renderStaticContent = (fieldPath, label, children) => children;
+
+export default function Banner ({
+    bannerContent = content.home.banner,
+    renderEditableContent = renderStaticContent
+}) {
 
     document.querySelector("body").onscroll = function slowScroll() {  
         let scrolltotop = document.scrollingElement.scrollTop
@@ -17,12 +22,12 @@ export default function Banner ({ bannerContent = content.home.banner }) {
 
     return (
         <div id='banner'>
-            <h1>{ bannerContent.title }</h1>
-            <h4>{ bannerContent.subtitle_1 }<br>
-                </br>{ bannerContent.subtitle_2 }
+            <h1>{ renderEditableContent('title', 'Banner title', bannerContent.title) }</h1>
+            <h4>{ renderEditableContent('subtitle_1', 'Banner first subtitle', bannerContent.subtitle_1) }<br>
+                </br>{ renderEditableContent('subtitle_2', 'Banner second subtitle', bannerContent.subtitle_2) }
             </h4>
             <div className='banner_p'>
-                <p>{ bannerContent.paragraph }</p>
+                <p>{ renderEditableContent('paragraph', 'Banner paragraph', bannerContent.paragraph) }</p>
             </div>
             <div className='learn_more'>
                 <button>{ bannerContent.button }</button>
