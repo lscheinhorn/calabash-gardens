@@ -35,6 +35,8 @@ The admin preview is the map Jette uses to find content the same way a customer 
 - The preview route stays where Jette clicked.
 - The lower admin editor sections do not auto-scroll open for preview clicks.
 - Saving a draft refreshes the preview data without publishing.
+- The embedded admin preview keeps viewport size controls behind the view icon.
+- The pencil icon opens the full preview in edit mode, and the full preview has its own floating pencil toggle for edit mode on/off.
 
 ## Product And Event Editing
 

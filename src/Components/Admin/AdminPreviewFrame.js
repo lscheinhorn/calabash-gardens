@@ -1,6 +1,8 @@
 import "./Admin.css";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import About from "../About/About";
@@ -112,6 +114,7 @@ export default function AdminPreviewFrame() {
   });
   const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
   const isContentEditMode = queryParams.get("edit") === "content";
+  const isEmbeddedPreview = typeof window !== "undefined" && window.parent !== window;
 
   const loadPreview = useCallback(async () => {
     if (!isFirebaseConfigured || !db || !storage) {
@@ -255,6 +258,19 @@ export default function AdminPreviewFrame() {
     navigate(`/admin?${adminQueryParams.toString()}`);
   }, [navigate]);
 
+  const toggleContentEditMode = useCallback(() => {
+    const nextQueryParams = new URLSearchParams(location.search);
+
+    if (isContentEditMode) {
+      nextQueryParams.delete("edit");
+    } else {
+      nextQueryParams.set("edit", "content");
+    }
+
+    const nextQuery = nextQueryParams.toString();
+    navigate(`${location.pathname}${nextQuery ? `?${nextQuery}` : ""}`);
+  }, [isContentEditMode, location.pathname, location.search, navigate]);
+
   const createContentRenderer = useCallback((contentId) => (
     (fieldPath, label, children) => (
       isContentEditMode ? (
@@ -367,6 +383,18 @@ export default function AdminPreviewFrame() {
 
   return (
     <div className="admin_preview_frame_site">
+      {!isEmbeddedPreview ? (
+        <button
+          aria-label={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
+          aria-pressed={isContentEditMode}
+          className={isContentEditMode ? "admin_full_preview_edit_toggle admin_full_preview_edit_toggle_active" : "admin_full_preview_edit_toggle"}
+          onClick={toggleContentEditMode}
+          title={isContentEditMode ? "Turn edit mode off" : "Turn edit mode on"}
+          type="button"
+        >
+          <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
+        </button>
+      ) : null}
       <Header
         headerContent={homeContent?.header}
         renderEditableContent={renderHeaderContent}

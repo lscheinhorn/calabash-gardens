@@ -237,7 +237,6 @@ export default function Admin() {
         </div>
         <AdminPreview
           db={db}
-          storage={storage}
           userId={user?.uid || ""}
         />
         <MediaAdmin db={db} storage={storage} />

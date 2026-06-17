@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Draft/publish admin workflow safety hardening is in progress on branch `codex/draft-publish-review`.
-Firestore rules for the draft collections are deployed to `calabash-54fb5`, and draft save/preview/discard has been verified from the local admin UI.
+Preview-driven admin editing is in progress on branch `codex/preview-edit-drawer`.
+Firestore rules for the draft collections are deployed to `calabash-54fb5`, draft save/preview/discard has been verified from the local admin UI, and the preview editor is being refined without changing protected static content files.
 
 ## Approved Tech Stack
 
@@ -95,6 +95,7 @@ Phase 33: Preview-driven admin editing workflow.
 - Added a Firebase Auth password-reset flow to the admin sign-in form, with a generic non-enumerating response and disabled sending state, on the active branch.
 - Added admin preview content edit mode: highlighted Firestore preview text can open the matching Site Content Editor card and focus the corresponding draft field without saving or publishing, on the active branch.
 - Added a preview edit drawer for site-content fields so clicking editable preview content opens the matching draft editor beside the iframe without scrolling the parent admin page, on branch `codex/preview-edit-drawer`.
+- Simplified the admin Firestore Site Preview controls so viewport buttons live behind a view icon, the embedded preview no longer shows route buttons or dashboard stats, and the pencil opens the full preview in edit mode with a floating edit toggle.
 - Added `docs/admin-editing-workflow.md` to define admin-editable, code-owned, data-owned, and mixed ownership decisions for future site sections.
 
 ## In Progress Work
@@ -269,6 +270,7 @@ Phase 33: Preview-driven admin editing workflow.
 - Admin preview content edit mode is a navigation/focus helper only. It may open a draft editor field, but edits still require Save Draft, Review Publish, and Confirm Publish before live Firestore content changes.
 - Future editable site sections require an explicit ownership decision before implementation: admin editable, code owned, data owned, or mixed.
 - Preview edit drawer is the approved UI pattern for preview-driven editing. It must reuse existing draft/publish helpers and must not create separate live write paths.
+- Embedded Firestore preview chrome should stay minimal: viewport options are hidden behind the view icon, full-screen editing starts from the pencil icon, and full preview edit mode is toggled by the floating pencil button.
 
 ## Verification History
 
@@ -359,6 +361,13 @@ Phase 33: Preview-driven admin editing workflow.
 - 2026-06-17: Browser verification on public `#/` confirmed normal public home renders with 0 `.admin_preview_edit_marker` elements.
 - 2026-06-17: Browser verification on `127.0.0.1:3002` confirmed clicking the Banner title preview marker opens the new preview edit drawer, focuses the Banner Title field inside the drawer, leaves the lower Site Content Editor collapsed, and keeps the preview panel in place.
 - 2026-06-17: Browser verification on public `#/` confirmed normal public home renders with 0 `.admin_preview_edit_marker` elements and 0 `.admin_preview_edit_drawer` elements after adding the drawer.
+- 2026-06-17: `node --check` passed for `Admin.js`, `AdminPreview.js`, and `AdminPreviewFrame.js` after simplifying the preview edit controls.
+- 2026-06-17: Browser verification on `127.0.0.1:3002` confirmed the Firestore Site Preview starts collapsed, expands to show only the view icon and pencil/full-preview icon, hides Desktop/Tablet/Mobile behind the view icon, removes the preview route buttons and dashboard stats, and opens the full preview with `edit=content`.
+- 2026-06-17: Browser verification on the full preview confirmed the floating pencil toggles edit mode off, edit markers disappear, and the URL drops `edit=content` without leaving `/admin/preview/...`.
+- 2026-06-17: Browser verification on public `#/` confirmed normal public home renders with 0 `.admin_preview_edit_marker` elements and 0 `.admin_full_preview_edit_toggle` elements after simplifying preview edit controls.
+- 2026-06-17: `git diff --check` passed after simplifying preview edit controls.
+- 2026-06-17: Protected content diff check returned no changes after simplifying preview edit controls.
+- 2026-06-17: `npm run build` completed successfully after simplifying preview edit controls, with the same existing warnings.
 
 ## Commits
 
@@ -399,6 +408,7 @@ Phase 33: Preview-driven admin editing workflow.
 - `feat: add admin password reset flow` (current branch)
 - `feat: add preview content edit focus` (current branch)
 - `feat: add preview content edit drawer` (current branch)
+- `feat: simplify preview edit controls` (current branch)
 
 ## Deployments
 

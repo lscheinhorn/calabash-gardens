@@ -3,27 +3,31 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
   faChevronRight,
+  faDesktop,
+  faEye,
+  faMobileAlt,
+  faPencilAlt,
+  faTabletAlt,
 } from "@fortawesome/free-solid-svg-icons";
 
-import { activeAdminDrafts, loadAdminDrafts } from "../../data/adminDrafts";
-import { loadFirestoreSiteContentForPublic } from "../../data/publicContentAdapter";
-import { loadFirestoreEventsForPublic } from "../../data/publicEventAdapter";
-import { loadFirestoreProductsForPublic } from "../../data/publicProductAdapter";
 import ContentAdmin from "./ContentAdmin";
 
 const previewViewports = {
   desktop: {
     height: 760,
+    icon: faDesktop,
     label: "Desktop",
     width: 1200,
   },
   tablet: {
     height: 820,
+    icon: faTabletAlt,
     label: "Tablet",
     width: 768,
   },
   mobile: {
     height: 780,
+    icon: faMobileAlt,
     label: "Mobile",
     width: 390,
   },
@@ -58,70 +62,25 @@ const previewTabForPath = (path) => {
   return "home";
 };
 
-export default function AdminPreview({ db, storage, userId = "" }) {
+export default function AdminPreview({ db, userId = "" }) {
   const iframeRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isContentEditMode, setIsContentEditMode] = useState(false);
+  const [isViewportMenuOpen, setIsViewportMenuOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [previewPath, setPreviewPath] = useState(previewPathForTab("home"));
   const [previewTab, setPreviewTab] = useState("home");
   const [previewViewport, setPreviewViewport] = useState("desktop");
   const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
-  const [previewData, setPreviewData] = useState({
-    content: null,
-    events: [],
-    experienceBlurb: [],
-    products: [],
-  });
-  const [draftCount, setDraftCount] = useState(0);
-
-  const loadPreview = useCallback(async () => {
-    setIsLoading(true);
-    setMessage("");
-
-    try {
-      const drafts = await loadAdminDrafts({ db });
-      const [products, siteContent, events] = await Promise.all([
-        loadFirestoreProductsForPublic({ db, drafts, storage }),
-        loadFirestoreSiteContentForPublic({ db, drafts }),
-        loadFirestoreEventsForPublic({ db, drafts, storage }),
-      ]);
-
-      setPreviewData({
-        content: siteContent.content,
-        events,
-        experienceBlurb: siteContent.experienceBlurb,
-        products,
-      });
-      setDraftCount(activeAdminDrafts(drafts).length);
-      setMessage("Preview loaded with draft changes over live Firestore content.");
-    } catch (error) {
-      setMessage("Preview could not be loaded from Firestore.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [db, storage]);
 
   const refreshPreview = useCallback(() => {
-    loadPreview();
-
     if (iframeRef.current?.contentWindow && typeof window !== "undefined") {
       iframeRef.current.contentWindow.postMessage({
         type: "calabash-admin-refresh-preview-data",
       }, window.location.origin);
-      return;
     }
 
     setPreviewRefreshKey((currentValue) => currentValue + 1);
-  }, [loadPreview]);
-
-  useEffect(() => {
-    if (isExpanded) {
-      loadPreview();
-    }
-  }, [isExpanded, loadPreview]);
+  }, []);
 
   useEffect(() => {
     const handlePreviewMessage = (event) => {
@@ -165,11 +124,6 @@ export default function AdminPreview({ db, storage, userId = "" }) {
       window.removeEventListener("message", handlePreviewMessage);
     };
   }, []);
-
-  const openPreviewTab = (tab) => {
-    setPreviewTab(tab);
-    setPreviewPath(previewPathForTab(tab));
-  };
 
   const renderEditDrawer = () => {
     if (!editTarget) {
@@ -216,12 +170,6 @@ export default function AdminPreview({ db, storage, userId = "" }) {
     );
   };
 
-  const activeProducts = useMemo(() => (
-    previewData.products.filter((product) => product.isActive === true)
-  ), [previewData.products]);
-  const highlightedProducts = useMemo(() => (
-    activeProducts.filter((product) => product.isHighlighted === true)
-  ), [activeProducts]);
   const selectedViewport = previewViewports[previewViewport];
   const previewSrc = useMemo(() => {
     if (typeof window === "undefined") {
@@ -233,12 +181,21 @@ export default function AdminPreview({ db, storage, userId = "" }) {
       refresh: String(previewRefreshKey),
     });
 
-    if (isContentEditMode) {
-      queryParams.set("edit", "content");
+    return `${baseUrl}#${previewPath}?${queryParams.toString()}`;
+  }, [previewPath, previewRefreshKey]);
+  const fullEditPreviewSrc = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "";
     }
 
+    const baseUrl = window.location.href.split("#")[0];
+    const queryParams = new URLSearchParams({
+      edit: "content",
+      refresh: String(previewRefreshKey),
+    });
+
     return `${baseUrl}#${previewPath}?${queryParams.toString()}`;
-  }, [isContentEditMode, previewPath, previewRefreshKey]);
+  }, [previewPath, previewRefreshKey]);
 
   return (
     <section className="admin_panel">
@@ -250,14 +207,6 @@ export default function AdminPreview({ db, storage, userId = "" }) {
           </p>
         </div>
         <div className="admin_button_row">
-          <button
-            className="admin_secondary_button"
-            disabled={isLoading || !isExpanded}
-            onClick={refreshPreview}
-            type="button"
-          >
-            Refresh Preview
-          </button>
           <button
             aria-expanded={isExpanded}
             aria-label={`${isExpanded ? "Collapse" : "Expand"} Firestore site preview`}
@@ -273,71 +222,48 @@ export default function AdminPreview({ db, storage, userId = "" }) {
 
       {isExpanded ? (
         <>
-          {message ? <p className="admin_message">{message}</p> : null}
-          {isLoading ? <p className="admin_status">Loading Firestore preview...</p> : null}
-
-          <div className="admin_preview_tabs" aria-label="Preview sections">
-            {["home", "shop", "events"].map((tab) => (
+          <div className="admin_preview_toolbar" aria-label="Preview controls">
+            <div className="admin_preview_control_group">
               <button
-                className={previewTab === tab ? "admin_primary_button" : "admin_secondary_button"}
-                key={tab}
-                onClick={() => openPreviewTab(tab)}
+                aria-expanded={isViewportMenuOpen}
+                aria-label="Choose preview viewport"
+                className="admin_icon_button"
+                onClick={() => setIsViewportMenuOpen((currentValue) => !currentValue)}
+                title="Choose preview viewport"
                 type="button"
               >
-                {tab === "home" ? "Home" : tab === "shop" ? "Shop" : "Events"}
+                <FontAwesomeIcon aria-hidden="true" icon={faEye} />
               </button>
-            ))}
-          </div>
-
-          <div className="admin_preview_viewports" aria-label="Preview viewport sizes">
-            {Object.entries(previewViewports).map(([viewportKey, viewport]) => (
-              <button
-                className={previewViewport === viewportKey ? "admin_primary_button" : "admin_secondary_button"}
-                key={viewportKey}
-                onClick={() => setPreviewViewport(viewportKey)}
-                type="button"
-              >
-                {viewport.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="admin_button_row">
-            <button
-              className={isContentEditMode ? "admin_primary_button" : "admin_secondary_button"}
-              onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
-              type="button"
+              {isViewportMenuOpen ? (
+                <div className="admin_preview_viewport_menu" aria-label="Preview viewport sizes">
+                  {Object.entries(previewViewports).map(([viewportKey, viewport]) => (
+                    <button
+                      aria-pressed={previewViewport === viewportKey}
+                      className={previewViewport === viewportKey ? "admin_icon_button admin_icon_button_active" : "admin_icon_button"}
+                      key={viewportKey}
+                      onClick={() => {
+                        setPreviewViewport(viewportKey);
+                        setIsViewportMenuOpen(false);
+                      }}
+                      title={viewport.label}
+                      type="button"
+                    >
+                      <FontAwesomeIcon aria-hidden="true" icon={viewport.icon} />
+                    </button>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+            <a
+              aria-label="Open full preview in edit mode"
+              className="admin_icon_button"
+              href={fullEditPreviewSrc}
+              rel="noreferrer"
+              target="_blank"
+              title="Open full preview in edit mode"
             >
-              {isContentEditMode ? "Content Edit Mode On" : "Content Edit Mode"}
-            </button>
-            {isContentEditMode ? (
-              <p className="admin_status admin_inline_status">
-                Click highlighted site text in the preview to open the matching draft editor.
-              </p>
-            ) : null}
-          </div>
-
-          <div className="admin_audit_summary" aria-label="Preview data summary">
-            <div>
-              <span>Products</span>
-              <strong>{activeProducts.length}</strong>
-            </div>
-            <div>
-              <span>Highlighted</span>
-              <strong>{highlightedProducts.length}</strong>
-            </div>
-            <div>
-              <span>Events</span>
-              <strong>{previewData.events.filter((event) => event.isActive).length}</strong>
-            </div>
-            <div>
-              <span>Blurb Paragraphs</span>
-              <strong>{previewData.experienceBlurb.length}</strong>
-            </div>
-            <div>
-              <span>Drafts</span>
-              <strong>{draftCount}</strong>
-            </div>
+              <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
+            </a>
           </div>
 
           <div className={editTarget ? "admin_preview_workspace admin_preview_workspace_with_drawer" : "admin_preview_workspace"}>
@@ -348,19 +274,6 @@ export default function AdminPreview({ db, storage, userId = "" }) {
                 "--admin-preview-width": `${selectedViewport.width}px`,
               }}
             >
-              <div className="admin_site_preview_toolbar">
-                <span>
-                  {selectedViewport.label}: {selectedViewport.width}px
-                </span>
-                <a
-                  className="admin_secondary_button"
-                  href={previewSrc}
-                  rel="noreferrer"
-                  target="_blank"
-                >
-                  Open Full Preview
-                </a>
-              </div>
               <div className="admin_site_preview_stage">
                 {previewSrc ? (
                   <iframe
