@@ -95,7 +95,7 @@ Phase 33: Preview-driven admin editing workflow.
 - Added a Firebase Auth password-reset flow to the admin sign-in form, with a generic non-enumerating response and disabled sending state, on the active branch.
 - Added admin preview content edit mode: highlighted Firestore preview text can open the matching Site Content Editor card and focus the corresponding draft field without saving or publishing, on the active branch.
 - Added a preview edit drawer for site-content fields so clicking editable preview content opens the matching draft editor beside the iframe without scrolling the parent admin page, on branch `codex/preview-edit-drawer`.
-- Simplified the admin Firestore Site Preview controls so viewport buttons live behind a view icon, the embedded preview no longer shows route buttons or dashboard stats, and the pencil opens the full preview in edit mode with a floating edit toggle.
+- Simplified the admin Firestore Site Preview controls so viewport buttons live behind a view icon, the embedded preview no longer shows route buttons or dashboard stats, the pencil toggles edit mode in place, and expand opens a full-preview admin overlay with the same side edit drawer.
 - Added `docs/admin-editing-workflow.md` to define admin-editable, code-owned, data-owned, and mixed ownership decisions for future site sections.
 
 ## In Progress Work
@@ -270,7 +270,7 @@ Phase 33: Preview-driven admin editing workflow.
 - Admin preview content edit mode is a navigation/focus helper only. It may open a draft editor field, but edits still require Save Draft, Review Publish, and Confirm Publish before live Firestore content changes.
 - Future editable site sections require an explicit ownership decision before implementation: admin editable, code owned, data owned, or mixed.
 - Preview edit drawer is the approved UI pattern for preview-driven editing. It must reuse existing draft/publish helpers and must not create separate live write paths.
-- Embedded Firestore preview chrome should stay minimal: viewport options are hidden behind the view icon, full-screen editing starts from the pencil icon, and full preview edit mode is toggled by the floating pencil button.
+- Embedded Firestore preview chrome should stay minimal: viewport options are hidden behind the view icon, the pencil toggles preview edit mode in place, and full preview opens as an admin overlay so the side edit drawer remains available.
 
 ## Verification History
 
@@ -368,6 +368,15 @@ Phase 33: Preview-driven admin editing workflow.
 - 2026-06-17: `git diff --check` passed after simplifying preview edit controls.
 - 2026-06-17: Protected content diff check returned no changes after simplifying preview edit controls.
 - 2026-06-17: `npm run build` completed successfully after simplifying preview edit controls, with the same existing warnings.
+- 2026-06-18: `node --check` passed for `AdminPreview.js` and `AdminPreviewFrame.js` after fixing preview edit drawer routing.
+- 2026-06-18: Browser verification on `127.0.0.1:3001` confirmed the embedded preview pencil toggles edit mode in place, clicking the Banner title marker opens the side edit drawer and focuses the Title field, and the URL stays on `#/admin`.
+- 2026-06-18: Browser verification on `127.0.0.1:3001` confirmed expand opens a full-preview admin overlay, clicking the Banner title marker inside that overlay opens the side edit drawer inside the overlay, no duplicate outside drawer renders, and the URL stays on `#/admin`.
+- 2026-06-18: Browser verification confirmed standalone `/admin/preview/home?edit=content` marker clicks no longer navigate to `/admin?editContent=...`.
+- 2026-06-18: Browser verification on public `#/` confirmed normal public home renders with 0 `.admin_preview_edit_marker`, 0 `.admin_full_preview_overlay`, and 0 `.admin_full_preview_edit_toggle` elements after fixing preview edit drawer routing.
+- 2026-06-18: Added full-preview overlay initial close-button focus and Escape-to-close handling; the dev server hot-recompiled successfully afterward.
+- 2026-06-18: `git diff --check` passed after fixing preview edit drawer routing.
+- 2026-06-18: Protected content diff check returned no changes after fixing preview edit drawer routing.
+- 2026-06-18: `npm run build` completed successfully after fixing preview edit drawer routing, with the same existing warnings.
 
 ## Commits
 
@@ -409,6 +418,7 @@ Phase 33: Preview-driven admin editing workflow.
 - `feat: add preview content edit focus` (current branch)
 - `feat: add preview content edit drawer` (current branch)
 - `feat: simplify preview edit controls` (current branch)
+- `fix: keep preview edits in side drawer` (current branch)
 
 ## Deployments
 

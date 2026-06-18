@@ -242,21 +242,7 @@ export default function AdminPreviewFrame() {
       window.opener.focus();
       return;
     }
-
-    const adminQueryParams = new URLSearchParams({
-      editContent: request.contentId,
-    });
-
-    if (request.fieldPath) {
-      adminQueryParams.set("fieldPath", request.fieldPath);
-    }
-
-    if (request.label) {
-      adminQueryParams.set("label", request.label);
-    }
-
-    navigate(`/admin?${adminQueryParams.toString()}`);
-  }, [navigate]);
+  }, []);
 
   const toggleContentEditMode = useCallback(() => {
     const nextQueryParams = new URLSearchParams(location.search);

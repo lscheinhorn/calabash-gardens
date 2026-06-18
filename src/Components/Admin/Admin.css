@@ -367,6 +367,64 @@
   color: #ffffff;
 }
 
+.admin_full_preview_overlay {
+  background: #f9f8fa;
+  color: #3d3343;
+  display: grid;
+  gap: 12px;
+  grid-template-rows: auto minmax(0, 1fr);
+  inset: 0;
+  overflow: hidden;
+  padding: 16px;
+  position: fixed;
+  z-index: 1000;
+}
+
+.admin_full_preview_header {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+}
+
+.admin_full_preview_header h3 {
+  color: #735284;
+  margin: 0;
+}
+
+.admin_full_preview_overlay .admin_preview_workspace {
+  align-items: stretch;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin_full_preview_overlay .admin_preview_workspace_with_drawer {
+  grid-template-columns: minmax(0, 1fr) minmax(360px, 460px);
+}
+
+.admin_full_preview_frame_shell {
+  background: #d8d1dd;
+  border: 1px solid #d8d1dd;
+  border-radius: 8px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.admin_full_preview_frame {
+  background: #ffffff;
+  border: 0;
+  display: block;
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
+}
+
+.admin_full_preview_overlay .admin_preview_edit_drawer {
+  max-height: 100%;
+  position: static;
+}
+
 .admin_preview_edit_marker {
   border-radius: 4px;
   box-shadow: 0 0 0 2px rgba(243, 207, 80, 0.78);
@@ -1036,6 +1094,20 @@
   color: #ffffff;
 }
 
+.admin_theme_dark .admin_full_preview_overlay {
+  background: #18131d;
+  color: #f8f4fb;
+}
+
+.admin_theme_dark .admin_full_preview_header h3 {
+  color: #f8f4fb;
+}
+
+.admin_theme_dark .admin_full_preview_frame_shell {
+  background: #120f16;
+  border-color: #4e3d58;
+}
+
 .admin_theme_dark .admin_audit_section code {
   background: #18131d;
   border-color: #6a5574;
@@ -1074,6 +1146,25 @@
   .admin_preview_edit_drawer {
     max-height: none;
     position: static;
+  }
+
+  .admin_full_preview_overlay {
+    padding: 10px;
+  }
+
+  .admin_full_preview_header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin_full_preview_overlay .admin_preview_workspace,
+  .admin_full_preview_overlay .admin_preview_workspace_with_drawer {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
+  }
+
+  .admin_full_preview_frame_shell {
+    min-height: 70vh;
   }
 
   .admin_publish_diff_header {

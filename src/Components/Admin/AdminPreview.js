@@ -4,10 +4,12 @@ import {
   faChevronDown,
   faChevronRight,
   faDesktop,
+  faExpand,
   faEye,
   faMobileAlt,
   faPencilAlt,
   faTabletAlt,
+  faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 import ContentAdmin from "./ContentAdmin";
@@ -64,7 +66,11 @@ const previewTabForPath = (path) => {
 
 export default function AdminPreview({ db, userId = "" }) {
   const iframeRef = useRef(null);
+  const fullPreviewIframeRef = useRef(null);
+  const fullPreviewCloseButtonRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isContentEditMode, setIsContentEditMode] = useState(false);
+  const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
   const [isViewportMenuOpen, setIsViewportMenuOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [previewPath, setPreviewPath] = useState(previewPathForTab("home"));
@@ -73,10 +79,16 @@ export default function AdminPreview({ db, userId = "" }) {
   const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
 
   const refreshPreview = useCallback(() => {
-    if (iframeRef.current?.contentWindow && typeof window !== "undefined") {
-      iframeRef.current.contentWindow.postMessage({
-        type: "calabash-admin-refresh-preview-data",
-      }, window.location.origin);
+    if (typeof window !== "undefined") {
+      [iframeRef, fullPreviewIframeRef].forEach((previewRef) => {
+        if (!previewRef.current?.contentWindow) {
+          return;
+        }
+
+        previewRef.current.contentWindow.postMessage({
+          type: "calabash-admin-refresh-preview-data",
+        }, window.location.origin);
+      });
     }
 
     setPreviewRefreshKey((currentValue) => currentValue + 1);
@@ -124,6 +136,32 @@ export default function AdminPreview({ db, userId = "" }) {
       window.removeEventListener("message", handlePreviewMessage);
     };
   }, []);
+
+  useEffect(() => {
+    if (!isContentEditMode) {
+      setEditTarget(null);
+    }
+  }, [isContentEditMode]);
+
+  useEffect(() => {
+    if (!isFullPreviewOpen) {
+      return undefined;
+    }
+
+    fullPreviewCloseButtonRef.current?.focus();
+
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        setIsFullPreviewOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isFullPreviewOpen]);
 
   const renderEditDrawer = () => {
     if (!editTarget) {
@@ -181,21 +219,28 @@ export default function AdminPreview({ db, userId = "" }) {
       refresh: String(previewRefreshKey),
     });
 
-    return `${baseUrl}#${previewPath}?${queryParams.toString()}`;
-  }, [previewPath, previewRefreshKey]);
-  const fullEditPreviewSrc = useMemo(() => {
-    if (typeof window === "undefined") {
-      return "";
+    if (isContentEditMode) {
+      queryParams.set("edit", "content");
     }
 
-    const baseUrl = window.location.href.split("#")[0];
-    const queryParams = new URLSearchParams({
-      edit: "content",
-      refresh: String(previewRefreshKey),
-    });
-
     return `${baseUrl}#${previewPath}?${queryParams.toString()}`;
-  }, [previewPath, previewRefreshKey]);
+  }, [isContentEditMode, previewPath, previewRefreshKey]);
+  const previewWorkspaceClassName = editTarget
+    ? "admin_preview_workspace admin_preview_workspace_with_drawer"
+    : "admin_preview_workspace";
+  const renderPreviewIframe = ({ className = "admin_site_preview_frame", previewRef, title }) => (
+    previewSrc ? (
+      <iframe
+        className={className}
+        key={previewSrc}
+        ref={previewRef}
+        src={previewSrc}
+        title={title}
+      />
+    ) : (
+      <p className="admin_status">Preview is unavailable in this environment.</p>
+    )
+  );
 
   return (
     <section className="admin_panel">
@@ -254,19 +299,31 @@ export default function AdminPreview({ db, userId = "" }) {
                 </div>
               ) : null}
             </div>
-            <a
-              aria-label="Open full preview in edit mode"
-              className="admin_icon_button"
-              href={fullEditPreviewSrc}
-              rel="noreferrer"
-              target="_blank"
-              title="Open full preview in edit mode"
+            <button
+              aria-pressed={isContentEditMode}
+              aria-label={isContentEditMode ? "Turn preview edit mode off" : "Turn preview edit mode on"}
+              className={isContentEditMode ? "admin_icon_button admin_icon_button_active" : "admin_icon_button"}
+              onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
+              title={isContentEditMode ? "Turn preview edit mode off" : "Turn preview edit mode on"}
+              type="button"
             >
               <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
-            </a>
+            </button>
+            <button
+              aria-label="Open full preview"
+              className="admin_icon_button"
+              onClick={() => {
+                setIsExpanded(true);
+                setIsFullPreviewOpen(true);
+              }}
+              title="Open full preview"
+              type="button"
+            >
+              <FontAwesomeIcon aria-hidden="true" icon={faExpand} />
+            </button>
           </div>
 
-          <div className={editTarget ? "admin_preview_workspace admin_preview_workspace_with_drawer" : "admin_preview_workspace"}>
+          <div className={previewWorkspaceClassName}>
             <div
               className="admin_site_preview"
               style={{
@@ -275,21 +332,64 @@ export default function AdminPreview({ db, userId = "" }) {
               }}
             >
               <div className="admin_site_preview_stage">
-                {previewSrc ? (
-                  <iframe
-                    className="admin_site_preview_frame"
-                    key={previewSrc}
-                    ref={iframeRef}
-                    src={previewSrc}
-                    title={`Firestore ${previewTab} ${selectedViewport.label} preview`}
-                  />
-                ) : (
-                  <p className="admin_status">Preview is unavailable in this environment.</p>
-                )}
+                {renderPreviewIframe({
+                  previewRef: iframeRef,
+                  title: `Firestore ${previewTab} ${selectedViewport.label} preview`,
+                })}
               </div>
             </div>
-            {renderEditDrawer()}
+            {!isFullPreviewOpen ? renderEditDrawer() : null}
           </div>
+
+          {isFullPreviewOpen ? (
+            <div
+              aria-label="Full Firestore site preview"
+              aria-modal="true"
+              className="admin_full_preview_overlay"
+              role="dialog"
+            >
+              <div className="admin_full_preview_header">
+                <div>
+                  <h3>Firestore Site Preview</h3>
+                  <p className="admin_status">
+                    Navigate and edit draft content without leaving the preview.
+                  </p>
+                </div>
+                <div className="admin_button_row">
+                  <button
+                    aria-pressed={isContentEditMode}
+                    aria-label={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
+                    className={isContentEditMode ? "admin_icon_button admin_icon_button_active" : "admin_icon_button"}
+                    onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
+                    title={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
+                    type="button"
+                  >
+                    <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
+                  </button>
+                  <button
+                    aria-label="Close full preview"
+                    className="admin_icon_button"
+                    onClick={() => setIsFullPreviewOpen(false)}
+                    ref={fullPreviewCloseButtonRef}
+                    title="Close full preview"
+                    type="button"
+                  >
+                    <FontAwesomeIcon aria-hidden="true" icon={faTimes} />
+                  </button>
+                </div>
+              </div>
+              <div className={previewWorkspaceClassName}>
+                <div className="admin_full_preview_frame_shell">
+                  {renderPreviewIframe({
+                    className: "admin_full_preview_frame",
+                    previewRef: fullPreviewIframeRef,
+                    title: `Full Firestore ${previewTab} preview`,
+                  })}
+                </div>
+                {renderEditDrawer()}
+              </div>
+            </div>
+          ) : null}
         </>
       ) : null}
     </section>
