@@ -64,11 +64,11 @@ const previewTabForPath = (path) => {
   return "home";
 };
 
-export default function AdminPreview({ db, userId = "" }) {
+export default function AdminPreview({ db, defaultExpanded = false, userId = "" }) {
   const iframeRef = useRef(null);
   const fullPreviewIframeRef = useRef(null);
   const fullPreviewCloseButtonRef = useRef(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isContentEditMode, setIsContentEditMode] = useState(false);
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
   const [isViewportMenuOpen, setIsViewportMenuOpen] = useState(false);

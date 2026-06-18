@@ -263,7 +263,7 @@ const buildEventPublishPayload = (draftData, liveData) => {
   return payload;
 };
 
-export default function EventAdmin({ db, userId = "" }) {
+export default function EventAdmin({ db, defaultExpanded = false, userId = "" }) {
   const [events, setEvents] = useState([]);
   const [draftsById, setDraftsById] = useState({});
   const [liveEventsById, setLiveEventsById] = useState({});
@@ -271,7 +271,7 @@ export default function EventAdmin({ db, userId = "" }) {
   const [form, setForm] = useState(emptyEvent);
   const [editingFormsById, setEditingFormsById] = useState({});
   const [expandedEventId, setExpandedEventId] = useState("");
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isNewEventIdEdited, setIsNewEventIdEdited] = useState(false);

@@ -62,6 +62,70 @@
   overflow-wrap: anywhere;
 }
 
+.admin_dashboard {
+  display: grid;
+  gap: 16px;
+}
+
+.admin_dashboard_sections {
+  display: grid;
+  gap: 12px;
+}
+
+.admin_dashboard_section {
+  border: 1px solid #d8d1dd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.admin_dashboard_section_header {
+  align-items: center;
+  background: #f9f8fa;
+  border: 0;
+  color: #3d3343;
+  cursor: pointer;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 16px 18px;
+  text-align: left;
+  width: 100%;
+}
+
+.admin_dashboard_section_header:hover,
+.admin_dashboard_section_header:focus-visible {
+  background: #f1edf4;
+  outline: 0;
+}
+
+.admin_dashboard_section_text {
+  display: grid;
+  gap: 4px;
+}
+
+.admin_dashboard_section_text strong {
+  color: #735284;
+  font-size: 18px;
+}
+
+.admin_dashboard_section_text small {
+  color: #5f5366;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.admin_dashboard_section_body {
+  display: grid;
+  gap: 14px;
+  padding: 14px;
+}
+
+.admin_dashboard_section_body > .admin_panel,
+.admin_dashboard_section_body > .admin_full_width,
+.admin_dashboard_section_body > .admin_seed_panel {
+  margin: 0;
+}
+
 .admin_audit_summary {
   display: grid;
   gap: 10px;
@@ -282,6 +346,31 @@
 .admin_drawer_editor_inner {
   display: grid;
   gap: 14px;
+}
+
+.admin_focused_preview_editor {
+  display: grid;
+  gap: 14px;
+}
+
+.admin_focused_preview_editor label {
+  color: #3d3343;
+  display: grid;
+  font-weight: 700;
+  gap: 8px;
+}
+
+.admin_focused_preview_editor input,
+.admin_focused_preview_editor textarea {
+  border: 1px solid #d8d1dd;
+  border-radius: 6px;
+  color: #3d3343;
+  font: inherit;
+  padding: 10px 12px;
+}
+
+.admin_focused_preview_editor textarea {
+  resize: vertical;
 }
 
 .admin_site_preview {
@@ -963,6 +1052,7 @@
 .admin_theme_dark .admin_form,
 .admin_theme_dark .admin_panel,
 .admin_theme_dark .admin_status_panel,
+.admin_theme_dark .admin_dashboard_section,
 .admin_theme_dark .admin_audit_summary div,
 .admin_theme_dark .admin_audit_section,
 .admin_theme_dark .admin_preview_edit_drawer,
@@ -978,6 +1068,24 @@
 .admin_theme_dark .admin_publish_review {
   background: #241d2a;
   border-color: #4e3d58;
+}
+
+.admin_theme_dark .admin_dashboard_section_header {
+  background: #241d2a;
+  color: #f8f4fb;
+}
+
+.admin_theme_dark .admin_dashboard_section_header:hover,
+.admin_theme_dark .admin_dashboard_section_header:focus-visible {
+  background: #302537;
+}
+
+.admin_theme_dark .admin_dashboard_section_text strong {
+  color: #f8f4fb;
+}
+
+.admin_theme_dark .admin_dashboard_section_text small {
+  color: #cbbbd4;
 }
 
 .admin_theme_dark .admin_preview_edit_drawer h4 {

@@ -7,6 +7,7 @@ import { useLocation, useNavigate, useParams } from "react-router-dom";
 
 import About from "../About/About";
 import Banner from "../Banner/Banner";
+import Contact from "../Contact/Contact";
 import Events from "../Events/Events";
 import Experience from "../Experience/Experience";
 import Footer from "../Footer/Footer";
@@ -316,13 +317,14 @@ export default function AdminPreviewFrame() {
       );
     }
 
-    if (activeTab === "contact" || activeTab === "cart") {
+    if (activeTab === "contact") {
+      return <Contact isPreview />;
+    }
+
+    if (activeTab === "cart") {
       return (
         <main className="admin_preview_frame_status">
-          <p>
-            {activeTab === "contact" ? "Contact" : "Cart"} preview is not connected to
-            Firestore content yet.
-          </p>
+          <p>Cart preview is not connected to Firestore content yet.</p>
         </main>
       );
     }

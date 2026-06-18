@@ -96,6 +96,9 @@ Phase 33: Preview-driven admin editing workflow.
 - Added admin preview content edit mode: highlighted Firestore preview text can open the matching Site Content Editor card and focus the corresponding draft field without saving or publishing, on the active branch.
 - Added a preview edit drawer for site-content fields so clicking editable preview content opens the matching draft editor beside the iframe without scrolling the parent admin page, on branch `codex/preview-edit-drawer`.
 - Simplified the admin Firestore Site Preview controls so viewport buttons live behind a view icon, the embedded preview no longer shows route buttons or dashboard stats, the pencil toggles edit mode in place, and expand opens a full-preview admin overlay with the same side edit drawer.
+- Reorganized the admin dashboard into one-open-at-a-time top-level sections for Site Preview, Products, Events, Site Content, Photos, and Developer / Audit Tools, with audit panels grouped away from Jette-facing editing tools.
+- Updated preview side-drawer site-content editing so clicking a preview text field opens a focused single-field editor card with Save Draft, Publish, and Discard Draft instead of the full site-content document editor.
+- Added Contact page rendering to admin preview routes while preventing preview-mode contact submissions from sending EmailJS email.
 - Added `docs/admin-editing-workflow.md` to define admin-editable, code-owned, data-owned, and mixed ownership decisions for future site sections.
 
 ## In Progress Work
@@ -271,6 +274,7 @@ Phase 33: Preview-driven admin editing workflow.
 - Future editable site sections require an explicit ownership decision before implementation: admin editable, code owned, data owned, or mixed.
 - Preview edit drawer is the approved UI pattern for preview-driven editing. It must reuse existing draft/publish helpers and must not create separate live write paths.
 - Embedded Firestore preview chrome should stay minimal: viewport options are hidden behind the view icon, the pencil toggles preview edit mode in place, and full preview opens as an admin overlay so the side edit drawer remains available.
+- Jette-facing preview edits should use focused field cards. Full document diff/review and refresh-style tools are developer/admin fallback surfaces unless promoted deliberately.
 
 ## Verification History
 
@@ -377,6 +381,11 @@ Phase 33: Preview-driven admin editing workflow.
 - 2026-06-18: `git diff --check` passed after fixing preview edit drawer routing.
 - 2026-06-18: Protected content diff check returned no changes after fixing preview edit drawer routing.
 - 2026-06-18: `npm run build` completed successfully after fixing preview edit drawer routing, with the same existing warnings.
+- 2026-06-18: `node --check` passed for `Admin.js`, `AdminPreview.js`, `AdminPreviewFrame.js`, `ContentAdmin.js`, `Contact.js`, `EventAdmin.js`, `MediaAdmin.js`, and `ProductAdmin.js` after the admin dashboard cleanup and focused preview side-card update.
+- 2026-06-18: Dev server on `127.0.0.1:3001` hot-recompiled successfully after the admin dashboard cleanup and focused preview side-card update.
+- 2026-06-18: `git diff --check` passed after the admin dashboard cleanup and focused preview side-card update.
+- 2026-06-18: Protected content diff check returned no changes after the admin dashboard cleanup and focused preview side-card update.
+- 2026-06-18: `npm run build` completed successfully after the admin dashboard cleanup and focused preview side-card update, with the same existing warnings.
 
 ## Commits
 
@@ -419,6 +428,7 @@ Phase 33: Preview-driven admin editing workflow.
 - `feat: add preview content edit drawer` (current branch)
 - `feat: simplify preview edit controls` (current branch)
 - `fix: keep preview edits in side drawer` (current branch)
+- `feat: clean admin editing sections` (current branch)
 
 ## Deployments
 

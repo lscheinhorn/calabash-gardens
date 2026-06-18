@@ -2,7 +2,7 @@ import './Contact.css'
 import React, { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
  
-export default function Contact() {
+export default function Contact({ isPreview = false }) {
     const formRef = useRef();
     const [ form, setForm] = useState({
         from_name: "",
@@ -26,6 +26,10 @@ export default function Contact() {
 
     const sendEmail = (e) => {
         e.preventDefault() // prevents the page from loading
+        if (isPreview) {
+            return
+        }
+
         emailjs.sendForm('service_6n5ow3f', 'template_9y2c7vf', formRef.current, 'anRu1WXRFLGM58t0y')
         .then((result) => {
          // show the user a success message

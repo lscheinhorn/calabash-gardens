@@ -109,14 +109,14 @@ const buildEditForm = (asset) => ({
   title: asset.title,
 });
 
-export default function MediaAdmin({ db, storage }) {
+export default function MediaAdmin({ db, defaultExpanded = false, storage }) {
   const [assets, setAssets] = useState([]);
   const [filters, setFilters] = useState(emptyFilters);
   const [expandedAssetId, setExpandedAssetId] = useState("");
   const [editingAssetId, setEditingAssetId] = useState("");
   const [editingForm, setEditingForm] = useState(null);
   const [assetUrlsByPath, setAssetUrlsByPath] = useState({});
-  const [isSectionExpanded, setIsSectionExpanded] = useState(false);
+  const [isSectionExpanded, setIsSectionExpanded] = useState(defaultExpanded);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");

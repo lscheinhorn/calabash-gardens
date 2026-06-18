@@ -8,7 +8,11 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { useLocation } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronDown,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
 import ContentAdmin from "./ContentAdmin";
@@ -24,6 +28,42 @@ import ProductPublicParityAudit from "./ProductPublicParityAudit";
 const adminCollection = "adminUsers";
 const adminThemeStorageKey = "calabashAdminTheme";
 
+const CollapseIcon = ({ isExpanded }) => (
+  <FontAwesomeIcon
+    aria-hidden="true"
+    className="admin_collapse_icon"
+    icon={isExpanded ? faChevronDown : faChevronRight}
+  />
+);
+
+const AdminDashboardSection = ({
+  children,
+  description,
+  isOpen,
+  onToggle,
+  title,
+}) => (
+  <section className={isOpen ? "admin_dashboard_section admin_dashboard_section_open" : "admin_dashboard_section"}>
+    <button
+      aria-expanded={isOpen}
+      className="admin_dashboard_section_header"
+      onClick={onToggle}
+      type="button"
+    >
+      <span className="admin_dashboard_section_text">
+        <strong>{title}</strong>
+        {description ? <small>{description}</small> : null}
+      </span>
+      <CollapseIcon isExpanded={isOpen} />
+    </button>
+    {isOpen ? (
+      <div className="admin_dashboard_section_body">
+        {children}
+      </div>
+    ) : null}
+  </section>
+);
+
 const loadInitialTheme = () => {
   if (typeof window === "undefined") {
     return "dark";
@@ -37,17 +77,16 @@ const loadInitialTheme = () => {
 };
 
 export default function Admin() {
-  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [user, setUser] = useState(null);
   const [isApprovedAdmin, setIsApprovedAdmin] = useState(false);
   const [isCheckingAdmin, setIsCheckingAdmin] = useState(false);
-  const [contentEditorFocus, setContentEditorFocus] = useState(null);
   const [isSendingPasswordReset, setIsSendingPasswordReset] = useState(false);
   const [isSigningIn, setIsSigningIn] = useState(false);
   const [message, setMessage] = useState("");
   const [theme, setTheme] = useState(loadInitialTheme);
+  const [activeAdminSection, setActiveAdminSection] = useState("preview");
 
   useEffect(() => {
     if (typeof window === "undefined") {
@@ -113,22 +152,6 @@ export default function Admin() {
   }, [user]);
 
   const canUseFirebase = isFirebaseConfigured && auth && db && storage;
-
-  useEffect(() => {
-    const queryParams = new URLSearchParams(location.search);
-    const contentId = queryParams.get("editContent");
-
-    if (!contentId) {
-      return;
-    }
-
-    setContentEditorFocus({
-      contentId,
-      fieldPath: queryParams.get("fieldPath") || "",
-      label: queryParams.get("label") || "",
-      requestId: Date.now(),
-    });
-  }, [location.search]);
 
   const adminAccessLabel = () => {
     if (!user) {
@@ -204,6 +227,12 @@ export default function Admin() {
     setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   };
 
+  const toggleAdminSection = (sectionId) => {
+    setActiveAdminSection((currentSection) => (
+      currentSection === sectionId ? "" : sectionId
+    ));
+  };
+
   const renderDashboard = () => {
     if (isCheckingAdmin) {
       return <p className="admin_status">Checking admin access...</p>;
@@ -221,36 +250,87 @@ export default function Admin() {
       );
     }
 
+    const dashboardSections = [
+      {
+        children: (
+          <AdminPreview
+            db={db}
+            defaultExpanded
+            userId={user?.uid || ""}
+          />
+        ),
+        description: "Navigate the draft-aware site preview and edit site copy in context.",
+        id: "preview",
+        title: "Site Preview",
+      },
+      {
+        children: (
+          <ProductAdmin
+            db={db}
+            defaultExpandedSections={{ products: true }}
+            storage={storage}
+            userId={user?.uid || ""}
+          />
+        ),
+        description: "Create and edit product drafts, photos, categories, and publish-ready product data.",
+        id: "products",
+        title: "Products",
+      },
+      {
+        children: <EventAdmin db={db} defaultExpanded userId={user?.uid || ""} />,
+        description: "Create and edit event drafts before publishing live event content.",
+        id: "events",
+        title: "Events",
+      },
+      {
+        children: (
+          <ContentAdmin
+            db={db}
+            defaultExpanded
+            userId={user?.uid || ""}
+          />
+        ),
+        description: "Edit approved site text through draft-safe content records.",
+        id: "content",
+        title: "Site Content",
+      },
+      {
+        children: <MediaAdmin db={db} defaultExpanded storage={storage} />,
+        description: "Upload, tag, and attach photos used by the site.",
+        id: "photos",
+        title: "Photos",
+      },
+      {
+        children: (
+          <>
+            <ProductMirrorAudit db={db} />
+            <ProductPublicParityAudit db={db} />
+            <EventMirrorAudit db={db} />
+            <ContentMirrorAudit db={db} />
+          </>
+        ),
+        description: "Migration, parity, and setup checks for Luke while preparing the site.",
+        id: "developer",
+        title: "Developer / Audit Tools",
+      },
+    ];
+
     return (
-      <div className="admin_panel">
-        <h2>Dashboard</h2>
-        <p>Admin access is confirmed.</p>
-        <div className="admin_placeholder_grid">
-          <div>
-            <h3>Events</h3>
-            <p>Mirror audit and seed controls are available below.</p>
-          </div>
-          <div>
-            <h3>Site Content</h3>
-            <p>Editor and mirror audit are available below.</p>
-          </div>
+      <div className="admin_dashboard">
+        <p className="admin_status">Admin access is confirmed.</p>
+        <div className="admin_dashboard_sections">
+          {dashboardSections.map((section) => (
+            <AdminDashboardSection
+              description={section.description}
+              isOpen={activeAdminSection === section.id}
+              key={section.id}
+              onToggle={() => toggleAdminSection(section.id)}
+              title={section.title}
+            >
+              {section.children}
+            </AdminDashboardSection>
+          ))}
         </div>
-        <AdminPreview
-          db={db}
-          userId={user?.uid || ""}
-        />
-        <MediaAdmin db={db} storage={storage} />
-        <ProductMirrorAudit db={db} />
-        <ProductPublicParityAudit db={db} />
-        <EventMirrorAudit db={db} />
-        <EventAdmin db={db} userId={user?.uid || ""} />
-        <ContentMirrorAudit db={db} />
-        <ContentAdmin
-          db={db}
-          focusRequest={contentEditorFocus}
-          userId={user?.uid || ""}
-        />
-        <ProductAdmin db={db} storage={storage} userId={user?.uid || ""} />
       </div>
     );
   };

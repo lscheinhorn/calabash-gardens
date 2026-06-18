@@ -38,6 +38,24 @@ The admin preview is the map Jette uses to find content the same way a customer 
 - The embedded admin preview keeps viewport size controls behind the view icon.
 - The pencil icon toggles edit mode for the current preview without leaving the preview.
 - The expand icon opens a full-preview admin overlay that keeps the side edit drawer available.
+- Preview side cards should edit the clicked field or paragraph only, in the same order Jette sees it on the site.
+- Preview side cards use `Save Draft`, `Publish`, and `Discard Draft`; the preview itself is the primary review surface.
+- Manual refresh and audit/setup tools belong outside the Jette-facing preview editing flow.
+
+## Admin Sections
+
+The admin home should present Jette-facing work areas as top-level sections:
+
+- `Site Preview`
+- `Products`
+- `Events`
+- `Site Content`
+- `Photos`
+- `Developer / Audit Tools`
+
+Only one top-level section should be open at a time. The whole section header is clickable, and the arrow is only the visual expansion indicator.
+
+Migration, mirror, parity, and setup/audit tooling belongs under `Developer / Audit Tools` unless Luke explicitly asks to promote it into Jette's normal editing workflow.
 
 ## Product And Event Editing
 

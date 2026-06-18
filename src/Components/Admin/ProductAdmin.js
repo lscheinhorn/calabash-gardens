@@ -235,7 +235,12 @@ const buildFormFromProduct = (product) => ({
   sortOrder: product.sortOrder ?? "",
 });
 
-export default function ProductAdmin({ db, storage, userId = "" }) {
+export default function ProductAdmin({
+  db,
+  defaultExpandedSections = {},
+  storage,
+  userId = "",
+}) {
   const [form, setForm] = useState(emptyProduct);
   const [editingForm, setEditingForm] = useState(emptyProduct);
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
@@ -266,7 +271,7 @@ export default function ProductAdmin({ db, storage, userId = "" }) {
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
-  const [expandedSections, setExpandedSections] = useState({});
+  const [expandedSections, setExpandedSections] = useState(defaultExpandedSections);
   const [expandedProductId, setExpandedProductId] = useState("");
   const [editingProductId, setEditingProductId] = useState("");
   const [productCardMessage, setProductCardMessage] = useState("");

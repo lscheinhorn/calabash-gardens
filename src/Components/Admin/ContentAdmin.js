@@ -91,8 +91,13 @@ const buildExpectedMeta = () => {
 
 const fieldRefKey = (contentId, path) => `${contentId}:${path}`;
 
+const fieldLabelForRequest = (request) => (
+  request?.label || (request?.fieldPath ? titleForPath(request.fieldPath) : "Selected content")
+);
+
 export default function ContentAdmin({
   db,
+  defaultExpanded = false,
   focusRequest = null,
   onDraftChange = () => {},
   userId = "",
@@ -105,7 +110,7 @@ export default function ContentAdmin({
   const [formsById, setFormsById] = useState({});
   const [liveContentById, setLiveContentById] = useState({});
   const [publishReview, setPublishReview] = useState(null);
-  const [isExpanded, setIsExpanded] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -357,10 +362,129 @@ export default function ContentAdmin({
     }
   };
 
+  const publishSavedContentDraft = async (contentDoc) => {
+    const draft = draftsById[contentDoc.id];
+    const title = expectedMeta.get(contentDoc.id)?.title || contentDoc.id;
+
+    if (!draft?.data) {
+      setMessage("Save a draft before publishing.");
+      return;
+    }
+
+    setIsSaving(true);
+    setMessage("");
+
+    try {
+      await publishAdminDraft({
+        data: draft.data,
+        db,
+        targetCollection: "siteContent",
+        targetId: contentDoc.id,
+        userId,
+      });
+
+      setMessage(`${title} published to live Firestore content.`);
+      setPublishReview(null);
+      await loadContentDocs();
+      onDraftChange();
+    } catch (error) {
+      setMessage("Site content could not be published.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const visibleContentDocs = isDrawerMode && focusRequest?.contentId
     ? contentDocs.filter((contentDoc) => contentDoc.id === focusRequest.contentId)
     : contentDocs;
   const showEditorBody = isExpanded || isDrawerMode;
+
+  if (isDrawerMode && focusRequest?.fieldPath) {
+    const contentDoc = visibleContentDocs[0] || null;
+    const form = contentDoc ? formsById[contentDoc.id] : null;
+    const selectedValue = String(form?.flatSections?.[focusRequest.fieldPath] ?? "");
+    const selectedLabel = fieldLabelForRequest(focusRequest);
+    const hasDraft = Boolean(contentDoc && draftsById[contentDoc.id]);
+
+    return (
+      <section className="admin_drawer_editor_inner" ref={sectionRef}>
+        {message ? <p className="admin_message">{message}</p> : null}
+        {isLoading ? <p className="admin_status">Loading selected content...</p> : null}
+        {!isLoading && !contentDoc ? (
+          <p className="admin_status">The selected content field was not found.</p>
+        ) : null}
+
+        {contentDoc && form ? (
+          <div className="admin_focused_preview_editor">
+            <label className="admin_focused_field">
+              {selectedLabel}
+              {shouldUseTextarea(focusRequest.fieldPath, selectedValue) ? (
+                <textarea
+                  disabled={isSaving}
+                  onChange={(event) => updateField(contentDoc.id, focusRequest.fieldPath, event.target.value)}
+                  ref={(field) => {
+                    if (field) {
+                      fieldRefs.current[fieldRefKey(contentDoc.id, focusRequest.fieldPath)] = field;
+                      return;
+                    }
+
+                    delete fieldRefs.current[fieldRefKey(contentDoc.id, focusRequest.fieldPath)];
+                  }}
+                  rows={6}
+                  value={selectedValue}
+                />
+              ) : (
+                <input
+                  disabled={isSaving}
+                  onChange={(event) => updateField(contentDoc.id, focusRequest.fieldPath, event.target.value)}
+                  ref={(field) => {
+                    if (field) {
+                      fieldRefs.current[fieldRefKey(contentDoc.id, focusRequest.fieldPath)] = field;
+                      return;
+                    }
+
+                    delete fieldRefs.current[fieldRefKey(contentDoc.id, focusRequest.fieldPath)];
+                  }}
+                  value={selectedValue}
+                />
+              )}
+            </label>
+
+            <p className="admin_status">
+              Save Draft updates the preview. Publish makes the saved draft live.
+            </p>
+
+            <div className="admin_button_row">
+              <button
+                className="admin_primary_button"
+                disabled={isSaving}
+                onClick={() => saveContentDraft(contentDoc)}
+                type="button"
+              >
+                {isSaving ? "Saving..." : "Save Draft"}
+              </button>
+              <button
+                className="admin_secondary_button"
+                disabled={isSaving || !hasDraft}
+                onClick={() => publishSavedContentDraft(contentDoc)}
+                type="button"
+              >
+                {isSaving ? "Publishing..." : "Publish"}
+              </button>
+              <button
+                className="admin_secondary_button"
+                disabled={isSaving || !hasDraft}
+                onClick={() => discardContentDraft(contentDoc)}
+                type="button"
+              >
+                Discard Draft
+              </button>
+            </div>
+          </div>
+        ) : null}
+      </section>
+    );
+  }
 
   return (
     <section className={isDrawerMode ? "admin_drawer_editor_inner" : "admin_panel"} ref={sectionRef}>
