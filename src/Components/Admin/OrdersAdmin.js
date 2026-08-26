@@ -3,6 +3,8 @@ import {
   collection,
   getDocs,
 } from "firebase/firestore";
+import { httpsCallable } from "firebase/functions";
+import { functions as firebaseFunctions } from "../../firebase-config";
 
 const defaultFilters = {
   fulfillmentStatus: "all",
@@ -127,12 +129,36 @@ const sortOrdersByCreatedAt = (orders) => [...orders].sort((firstOrder, secondOr
   return secondDate - firstDate;
 });
 
+const recoveryStatuses = new Set([
+  "capture_pending",
+  "capture_unknown",
+  "captured_pending_finalize",
+  "needs_review",
+]);
+
+const normalizeCheckoutRecovery = (snapshot) => {
+  const data = snapshot.data() || {};
+  const recovery = data.recovery || {};
+
+  return {
+    id: snapshot.id,
+    reason: String(recovery.reason || "Payment status needs confirmation."),
+    required: recovery.required === true || recoveryStatuses.has(data.status),
+    sourceOrderId: String(data.sourceOrderId || ""),
+    status: String(data.status || "unknown"),
+    updatedAt: data.updatedAt || data.createdAt || null,
+  };
+};
+
 export default function OrdersAdmin({ db }) {
   const [filters, setFilters] = useState(defaultFilters);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [orders, setOrders] = useState([]);
+  const [reconcilingOrderId, setReconcilingOrderId] = useState("");
+  const [recoveries, setRecoveries] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState("");
+  const serverCheckoutEnabled = process.env.REACT_APP_PAYPAL_SERVER_CHECKOUT === "enabled";
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -141,8 +167,24 @@ export default function OrdersAdmin({ db }) {
     try {
       const snapshot = await getDocs(collection(db, "orders"));
       const nextOrders = sortOrdersByCreatedAt(snapshot.docs.map(normalizeOrder));
+      let nextRecoveries = [];
+
+      if (serverCheckoutEnabled) {
+        try {
+          const checkoutSnapshot = await getDocs(collection(db, "paypalCheckouts"));
+          nextRecoveries = checkoutSnapshot.docs
+            .map(normalizeCheckoutRecovery)
+            .filter((checkout) => checkout.required)
+            .sort((first, second) => (
+              (toDate(second.updatedAt)?.getTime() || 0) - (toDate(first.updatedAt)?.getTime() || 0)
+            ));
+        } catch (error) {
+          setMessage("Orders loaded, but payment review records could not be loaded.");
+        }
+      }
 
       setOrders(nextOrders);
+      setRecoveries(nextRecoveries);
       setSelectedOrderId((currentSelectedOrderId) => (
         nextOrders.some((order) => order.id === currentSelectedOrderId)
           ? currentSelectedOrderId
@@ -150,12 +192,13 @@ export default function OrdersAdmin({ db }) {
       ));
     } catch (error) {
       setOrders([]);
+      setRecoveries([]);
       setSelectedOrderId("");
       setMessage("Orders could not be loaded.");
     } finally {
       setIsLoading(false);
     }
-  }, [db]);
+  }, [db, serverCheckoutEnabled]);
 
   useEffect(() => {
     loadOrders();
@@ -166,6 +209,38 @@ export default function OrdersAdmin({ db }) {
       ...currentFilters,
       [field]: value,
     }));
+  };
+
+  const reconcileOrder = async (sourceOrderId) => {
+    if (!firebaseFunctions || !sourceOrderId) {
+      setMessage("Payment status checking is not configured.");
+      return;
+    }
+
+    setReconcilingOrderId(sourceOrderId);
+    setMessage("");
+
+    try {
+      const reconcilePayPalOrder = httpsCallable(firebaseFunctions, "reconcilePayPalOrder");
+      const result = await reconcilePayPalOrder({ orderID: sourceOrderId });
+      const status = result.data?.status;
+      let resultMessage;
+
+      if (status === "paid") {
+        resultMessage = "Payment confirmed and order finalized.";
+      } else if (status === "not_paid") {
+        resultMessage = "PayPal confirms this order was not paid.";
+      } else {
+        resultMessage = "Payment still needs review. No second payment should be requested.";
+      }
+
+      await loadOrders();
+      setMessage(resultMessage);
+    } catch (error) {
+      setMessage("Payment status could not be confirmed. Keep this order under review.");
+    } finally {
+      setReconcilingOrderId("");
+    }
   };
 
   const filteredOrders = useMemo(() => {
@@ -198,13 +273,7 @@ export default function OrdersAdmin({ db }) {
 
   return (
     <section className="admin_panel admin_full_width">
-      <div className="admin_form_header">
-        <div>
-          <h3>Orders</h3>
-          <p className="admin_status">
-            Read-only order ledger view. Orders appear here after the backend checkout/order phase writes them.
-          </p>
-        </div>
+      <div className="admin_button_row admin_orders_actions">
         <button className="admin_secondary_button" disabled={isLoading} onClick={loadOrders} type="button">
           {isLoading ? "Refreshing..." : "Refresh"}
         </button>
@@ -250,6 +319,31 @@ export default function OrdersAdmin({ db }) {
 
       {message ? <p className="admin_message">{message}</p> : null}
       {isLoading ? <p className="admin_status">Loading orders...</p> : null}
+
+      {recoveries.length ? (
+        <section className="admin_payment_review" aria-labelledby="payment-review-title">
+          <h4 id="payment-review-title">Payment Review</h4>
+          <div className="admin_payment_review_list">
+            {recoveries.map((recovery) => (
+              <div className="admin_payment_review_row" key={recovery.id}>
+                <span>
+                  <strong>{recovery.sourceOrderId || recovery.id}</strong>
+                  <small>{labelFor(recovery.status)} / {formatDateTime(recovery.updatedAt)}</small>
+                  <small>{recovery.reason}</small>
+                </span>
+                <button
+                  className="admin_secondary_button"
+                  disabled={reconcilingOrderId === recovery.sourceOrderId}
+                  onClick={() => reconcileOrder(recovery.sourceOrderId)}
+                  type="button"
+                >
+                  {reconcilingOrderId === recovery.sourceOrderId ? "Checking..." : "Check Status"}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       <p className="admin_status">{filteredOrders.length} of {orders.length} orders shown.</p>
 

@@ -18,6 +18,13 @@ Required variables:
 
 Do not commit `.env.local`.
 
+Optional guarded checkout variables:
+
+- `REACT_APP_PAYPAL_CLIENT_ID`: the matching PayPal sandbox or live browser client ID for the selected environment.
+- `REACT_APP_PAYPAL_SERVER_CHECKOUT`: keep blank during the transition; set to `enabled` only in an explicitly approved test or deployment environment.
+
+Server-only PayPal credentials belong in the Functions environment or approved secret storage described by `functions/.env.example`; they must never use the `REACT_APP_` prefix.
+
 ## Firebase Console Setup
 
 Needed before real admin testing:
@@ -60,13 +67,11 @@ Minimum fields:
 - Approved admins can upload product photos from an expanded product card to Firebase Storage and attach image references to Firestore product drafts.
 - Approved admins can view, filter, and edit media metadata in the Photos section.
 - Approved admins can validate and seed missing static products into Firestore drafts.
-- Event, site content, inventory, and checkout editors are not connected yet.
+- Approved admins can edit events, site content, and product/event inventory through Firestore-backed draft and inventory flows without changing protected static resource files.
+- The Orders section can list normalized Firestore orders and, when guarded server checkout is enabled, show unsettled PayPal checkout records for authenticated status checks.
+- The guarded PayPal server checkout is emulator-verified but remains disabled and undeployed for public use.
 - Public product pages still read static product data.
 
 ## Next Guardrail
 
-Before editor work begins, `firestore.rules` must be reviewed so only approved admins can write admin-managed content.
-
-The first admin user must be created manually in the Firebase console before the draft rules are deployed.
-
-Before real product photo upload testing, `storage.rules` must be reviewed and deployed so only approved admins can upload public site images.
+Before any production checkout switch, follow the deployment gates in `docs/phase35-checkout-verification.md`. This includes real PayPal sandbox validation, automatic recovery, refund/void handling, Functions and Firestore rule review, secret configuration, and explicit approval to deploy and enable the server path.

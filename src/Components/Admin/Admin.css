@@ -869,10 +869,56 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.admin_orders_actions {
+  justify-content: flex-end;
+}
+
 .admin_orders_layout {
   display: grid;
   gap: 14px;
   grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.admin_payment_review {
+  border-bottom: 1px solid #d8a72f;
+  border-top: 1px solid #d8a72f;
+  display: grid;
+  gap: 10px;
+  padding: 12px 0;
+}
+
+.admin_payment_review h4 {
+  color: #6d5200;
+  margin: 0;
+}
+
+.admin_payment_review_list {
+  display: grid;
+  gap: 8px;
+}
+
+.admin_payment_review_row {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.admin_payment_review_row span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.admin_payment_review_row strong,
+.admin_payment_review_row small {
+  overflow-wrap: anywhere;
+}
+
+.admin_payment_review_row small {
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .admin_orders_list,
@@ -1949,6 +1995,22 @@
   color: #f3cf50;
 }
 
+.admin_theme_dark .admin_payment_review {
+  border-color: #f3cf50;
+}
+
+.admin_theme_dark .admin_payment_review h4 {
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_payment_review_row strong {
+  color: #f8f4fb;
+}
+
+.admin_theme_dark .admin_payment_review_row small {
+  color: #cbbbd4;
+}
+
 .admin_theme_dark .admin_order_row_selected,
 .admin_theme_dark .admin_order_row:hover,
 .admin_theme_dark .admin_order_row:focus-visible {
@@ -2203,7 +2265,8 @@
 
   .admin_order_detail_header,
   .admin_order_item,
-  .admin_order_row {
+  .admin_order_row,
+  .admin_payment_review_row {
     display: grid;
   }
 

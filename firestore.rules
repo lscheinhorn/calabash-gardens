@@ -612,6 +612,11 @@ service cloud.firestore {
       allow create, update, delete: if false;
     }
 
+    match /paypalCheckouts/{checkoutId} {
+      allow get, list: if isAdmin();
+      allow create, update, delete: if false;
+    }
+
     match /inventoryMovements/{movementId} {
       allow get, list: if isAdmin();
       allow create: if isAdmin() && validInventoryMovement();

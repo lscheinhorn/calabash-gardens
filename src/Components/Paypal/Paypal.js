@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 import { httpsCallable } from "firebase/functions";
 import { selectCart } from '../Cart/cartSlice'
@@ -10,13 +10,48 @@ import { functions as firebaseFunctions } from '../../firebase-config'
 export default function Paypal(props) {
   const { shipping, total, subtotal } = props
  const [success, setSuccess] = useState(false);
+ const [checkoutLocked, setCheckoutLocked] = useState(false);
  const [errorMessage, setErrorMessage] = useState("");
+ const [processingMessage, setProcessingMessage] = useState("");
  const [orderID, setOrderID] = useState(false);
- const [payerInfo, setPayerInfo] = useState({});
  const [payer, setPayer] = useState({});
+ const checkoutAttemptIdRef = useRef("");
+ const checkoutTokenRef = useRef("");
 
  const cartItems = useSelector( selectCart )
  const useServerCheckout = process.env.REACT_APP_PAYPAL_SERVER_CHECKOUT === "enabled"
+
+ const createOpaqueValue = () => {
+   const browserCrypto = window.crypto;
+
+   if (!browserCrypto?.getRandomValues) {
+     throw new Error("Secure checkout authorization is unavailable in this browser.");
+   }
+
+   const bytes = new Uint8Array(32);
+   browserCrypto.getRandomValues(bytes);
+   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+ }
+
+ const checkoutIdentity = () => {
+   if (!checkoutAttemptIdRef.current) {
+     checkoutAttemptIdRef.current = createOpaqueValue();
+   }
+
+   if (!checkoutTokenRef.current) {
+     checkoutTokenRef.current = createOpaqueValue();
+   }
+
+   return {
+     checkoutAttemptId: checkoutAttemptIdRef.current,
+     checkoutToken: checkoutTokenRef.current,
+   }
+ }
+
+ const resetCheckoutIdentity = () => {
+   checkoutAttemptIdRef.current = "";
+   checkoutTokenRef.current = "";
+ }
 
  const checkoutPayload = () => ({
     cartItems,
@@ -38,7 +73,6 @@ export default function Paypal(props) {
     }
  })
 
- console.log("items", items)
  // creates a paypal order
  const createOrder = (data, actions) => {
    if (useServerCheckout) {
@@ -49,7 +83,13 @@ export default function Paypal(props) {
 
     const createPayPalOrder = httpsCallable(firebaseFunctions, "createPayPalOrder");
 
-    return createPayPalOrder(checkoutPayload()).then((result) => {
+    setErrorMessage("");
+    setProcessingMessage("");
+
+    return createPayPalOrder({
+      ...checkoutPayload(),
+      ...checkoutIdentity(),
+    }).then((result) => {
       const serverOrderID = result.data?.orderID;
 
       if (!serverOrderID) {
@@ -58,6 +98,11 @@ export default function Paypal(props) {
 
       setOrderID(serverOrderID);
       return serverOrderID;
+    }).catch((error) => {
+      resetCheckoutIdentity();
+      setCheckoutLocked(false);
+      setErrorMessage("Checkout could not be started. Please refresh your cart and try again.");
+      throw error;
     });
    }
 
@@ -95,7 +140,6 @@ export default function Paypal(props) {
     })
     .then((orderID) => {
       setOrderID(orderID);
-      console.log("orderID", orderID)
       return orderID;
     });
  };
@@ -110,47 +154,54 @@ export default function Paypal(props) {
 
     const capturePayPalOrder = httpsCallable(firebaseFunctions, "capturePayPalOrder");
 
+    setCheckoutLocked(true);
+    setErrorMessage("");
+    setProcessingMessage("Confirming your payment. Please keep this page open.");
+
     return capturePayPalOrder({
-      ...checkoutPayload(),
+      checkoutToken: checkoutTokenRef.current,
       orderID: data.orderID,
     }).then((result) => {
+      if (result.data?.status === "not_paid" && result.data?.retryAllowed === true) {
+        resetCheckoutIdentity();
+        setCheckoutLocked(false);
+        setProcessingMessage("");
+        setErrorMessage("Payment was not completed. Please choose a payment method and try again.");
+        return actions.restart ? actions.restart() : undefined;
+      }
+
+      if (result.data?.finalized !== true || result.data?.status !== "paid") {
+        setProcessingMessage(
+          "Your payment is still being confirmed. Please do not submit another payment. Calabash Gardens will review this order.",
+        );
+        return;
+      }
+
       const payer = result.data?.payer || {};
 
       setOrderID(result.data?.sourceOrderId || data.orderID);
       setPayer(payer);
-      setPayerInfo({});
       setSuccess(true);
+    }).catch(() => {
+      setCheckoutLocked(true);
+      setErrorMessage("");
+      setProcessingMessage(
+        "We could not confirm the final payment status. Please do not submit another payment. Calabash Gardens will review this order.",
+      );
     });
    }
 
    return actions.order.capture().then(function (details) {
      const { payer } = details;
-     console.log("payer", payer)
-     console.log("details", details)
      setPayer( payer )
-     setPayerInfo( details.purchase_units[0].shipping )
      setSuccess(true);
    });
  };
  //capture likely error
  const onError = () => {
+   setCheckoutLocked(false);
    setErrorMessage("An error occurred with your payment.");
 };
-
-//  useEffect(() => {
-//   console.log("errorMessage", errorMessage)
-//   alert(errorMessage, "Please check your information and try again")
-//   }, 
-//   [errorMessage] 
-// )
-
-useEffect(() => {
-    console.log("payerInfo from effect hook", payerInfo)
-    console.log("payer from effect hook", payer)
-
-    }, 
-    [payerInfo, payer] 
-)
 
  return (
   <>
@@ -160,22 +211,24 @@ useEffect(() => {
           <h1 style={{ textAlign: "center", color: "green"}}>Thank you for your order { payer.name?.given_name || payer.name?.full_name || "" }!</h1>
           <p style={{ textAlign: "center" , font: "bold" }}>Your Order ID is: { orderID }</p>
           <p style={{ textAlign: "center" , font: "bold", fontSize: "120%" }}>Please check your inbox{payer.email_address ? ` at ${payer.email_address}` : ""} for your order confirmation. If you didn't recieve a confirmation email please contact us directly through our contact form or email us at calabashgardens@gmail.com</p>
-
-          {/*<p style={{ textAlign: "center" , font: "bold" }}>If your product needs to be shipped it will be sent to {payerInfo.address.address_line_1} {payerInfo.address.address_line_2} {payerInfo.address.admin_area_2}, {payerInfo.address.admin_area_1} {payerInfo.address.postal_code}</p>*/}
-
         </> :
 
         <PayPalScriptProvider
           options={{
-            "client-id": keys.paypal.live
+            "client-id": process.env.REACT_APP_PAYPAL_CLIENT_ID || keys.paypal.live
           }}
         >
-        <PayPalButtons
-          style={{ layout: "vertical" }}
-          createOrder={createOrder}
-          onApprove={onApprove}
-          onError={useServerCheckout ? onError : undefined}
-        />
+        {!checkoutLocked ? (
+          <PayPalButtons
+            style={{ layout: "vertical" }}
+            createOrder={createOrder}
+            onApprove={onApprove}
+            onError={useServerCheckout ? onError : undefined}
+          />
+        ) : null}
+        {useServerCheckout && processingMessage ? (
+          <p aria-live="polite" style={{ textAlign: "center", color: "#7a5d00" }}>{processingMessage}</p>
+        ) : null}
         {useServerCheckout && errorMessage ? <p style={{ textAlign: "center", color: "red" }}>{errorMessage}</p> : null}
         </PayPalScriptProvider>
       }

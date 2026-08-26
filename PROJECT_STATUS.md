@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin inventory concurrency and event-bound waitlist rule hardening are at an emulator-verified, non-deployable checkpoint on branch `codex/waitlist-inventory-hardening`.
-Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data. The guarded PayPal Functions path remains disabled. The local waitlist rules are stricter but do not provide rate limiting or per-occurrence capacity, so the public waitlist is not production-ready.
+Server-owned PayPal checkout, recoverable order finalization, and the admin payment-review queue are at an emulator- and browser-verified, non-deployed checkpoint on branch `codex/paypal-order-ledger-hardening`.
+Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. The guarded server checkout remains disabled. Real PayPal sandbox validation, automatic recovery, refund/void reversals, deployment review, and explicit live-switch approval remain required.
 
 ## Approved Tech Stack
 
@@ -20,7 +20,7 @@ Firestore draft/admin editing works locally with an approved user, protected sta
 
 ## Current Phase
 
-Phase 34: Waitlist and inventory concurrency hardening.
+Phase 35: Server-owned PayPal checkout and order-ledger hardening.
 
 ## Done Work
 
@@ -137,6 +137,14 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - Verified inventory success and stale-edit conflict behavior through the real admin UI against emulators, including concurrent ticket-sale preservation, atomic no-partial-write rejection, and exact inventory movement records.
 - Verified the public waitlist rule matrix against the Firestore emulator: one eligible write succeeded and missing, inactive, not-full, disabled, unpublished, past, title-mismatched, and date-mismatched submissions were denied.
 - Scoped emulator cleanup to Phase 34 fixture IDs and verified it preserves unrelated local documents and Auth users; emulator mode now fails closed for non-demo projects and redirects Auth, Firestore, Functions, and Storage to loopback endpoints.
+- Added a token-bound `paypalCheckouts` session that persists the server-validated cart snapshot at PayPal order creation and prevents replacement browser cart data at capture.
+- Added PayPal preflight checks for approval, amount, currency, and checkout reference before inventory reservation, plus immutable commercial-snapshot validation against current Firestore data.
+- Added transactionally owned product/event reservations, a short capture lease, idempotent PayPal request IDs, and deterministic paid-order/inventory-movement finalization for duplicate and interrupted callbacks.
+- Made reservation release lease-atomic: admin reconciliation cannot release inventory owned by a newer active capture lease, and no caller may tell the buyer to retry unless its release transaction actually succeeded.
+- Added retained recovery states for pending or uncertain captures and exact reservation release only after a verified terminal non-payment state.
+- Added an authenticated admin `Check Status` workflow for unsettled PayPal checkout records without allowing a non-terminal approved payment to release inventory.
+- Added an emulator-only PayPal API override, deterministic local PayPal mock, and guarded Phase 35 verification harness covering validation, concurrency, idempotency, recovery, and provider mismatch cases.
+- Browser-verified one paid order and one uncertain-payment review record through the real admin Orders and Inventory sections against Firebase emulators; order totals, stock, seat counts, and retained reservation matched exactly.
 
 ## In Progress Work
 
@@ -182,14 +190,15 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - Verify the admin password-reset button with Jette's real email only when Luke explicitly approves sending the reset email.
 - Verify Jette can use preview content edit mode comfortably across Desktop, Tablet, and Mobile preview sizes before broader content-edit training.
 - Add event menu/document upload controls to the Event Editor before event media can be fully managed from preview edit mode.
-- Design real inventory/order/capacity decrement logic with server-side PayPal confirmation and Firestore transactions so successful checkout writes order records, decrements product variant stock, and updates computed event `ticketsSold`.
-- Finish the server-side PayPal validation/decrement phase before enabling server checkout publicly: reload Firestore products/events, recalculate prices/shipping from trusted data, enforce stock/capacity, write `inventoryMovements`, and update event `ticketsSold` in a transaction.
+- Run a real PayPal sandbox buyer/seller checkout after credentials are configured and Luke approves the external test.
+- Add automatic verified PayPal webhook or scheduled recovery so unsettled captures do not depend on an admin opening Orders and clicking `Check Status`.
+- Define and test refund, partial-refund, dispute, and void reversal movements before Firebase inventory is authoritative.
 - Keep production Inventory mutation testing deferred. Emulator verification now covers product stock, event capacity/holds, movement creation, concurrent ticket-sale preservation, and stale bulk-save rejection without touching live business data.
 - Replace anonymous public waitlist writes with a protected server endpoint plus App Check/CAPTCHA and throttling before treating the waitlist as production-ready.
 - Decide a per-occurrence event date/capacity shape before supporting accurate waitlists for multi-date events; the current event model has one canonical timestamp and event-wide counts.
 - Review and approve any Firestore rules-only deploy separately; this phase does not merge, push, deploy, or enable public Firestore storefront reads.
 - Decide whether to delete or simply exclude the obsolete inactive `Test basket` Firestore document. Its legacy `All` category is intentionally excluded from current seed/category rules, so current inventory writes against that document are rejected.
-- Verify the guarded PayPal Functions path in PayPal sandbox only after server env values are configured and Luke approves a test checkout; include duplicate callback, out-of-stock, over-capacity, and stale-cart tests.
+- Review Functions dependencies under Node 20, deploy Functions and matching Firestore rules only after approval, and enable server checkout only after the production gate review.
 - Browser click-through for the latest product photo UI refinement is still pending because the in-app browser connector timed out attaching to the local webview; localhost `3001` responded with `HTTP/1.1 200 OK`, and production build verification passed.
 
 ## Planned Work
@@ -219,13 +228,12 @@ Phase 34: Waitlist and inventory concurrency hardening.
 
 ## Risks And Open Questions
 
-- Checkout is client-side PayPal integration only; order persistence and fulfillment workflow are unclear.
-- PayPal returns capture details in the browser after purchase today, but those details are not persisted and should not become the authoritative inventory signal until a backend verifies and writes paid orders.
-- The new Firebase Functions PayPal scaffold is disabled by default and not public-checkout ready; it validates submitted cart items against Firestore and has decrement logic, but still needs sandbox payment testing, duplicate-callback testing, and failure/reconciliation review before public use.
-- The guarded PayPal capture scaffold currently accepts a new browser-supplied cart at capture time instead of loading the trusted cart snapshot used to create the PayPal order. It must bind capture to the server-validated create-order snapshot before enablement.
-- The guarded PayPal capture scaffold currently captures payment before its Firestore inventory/order transaction. A defined reservation or compensation/recovery design is required so a transaction conflict cannot charge a customer without a saved order.
+- Public checkout still uses the legacy client-side PayPal flow by default. The server-owned path is isolated behind two flags and has not been deployed or tested against real PayPal sandbox accounts.
+- Server checkout now binds capture to a token-protected trusted snapshot, reserves inventory before capture, and persists recoverable uncertain states, but automatic webhook/scheduled recovery is still required before public use.
+- Refunds, partial refunds, disputes, and voids do not yet create reversing inventory movements.
+- Anonymous checkout callables do not yet enforce App Check or another approved abuse-control/rate-limit layer.
+- The legacy browser checkout fallback must be removed or explicitly retired when Firebase orders become authoritative; a stale browser fallback must not silently accept payments outside the order ledger.
 - Luke approved adding the guarded Firebase Functions scaffold in this phase, but deploying Functions or enabling server checkout for the public site still requires separate approval.
-- Generating `functions/package-lock.json` reported 9 moderate npm audit findings in Firebase Functions dependencies and a local Node `23.7.0` vs Functions `node:20` engine warning; review before deploying Functions.
 - Square POS/market sales should reconcile through the same future order/inventory movement ledger, either by manual entry/CSV first or Square API/webhooks later.
 - Product variant stock metadata exists in Firestore, and the guarded server checkout path now decrements stock/capacity when enabled and deployed, but public checkout still needs PayPal sandbox verification before relying on it live.
 - Admin product editor writes to Firestore, but public product pages still use static data.
@@ -341,6 +349,8 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - Product inventory variants are identified by stable variant ID plus `priceOptionIndex`; array position alone is compatibility data and must not silently override an explicit or duplicate index.
 - Public waitlist rules may validate event eligibility, but anonymous abuse prevention and per-occurrence capacity require a later server-owned design.
 - Firebase emulator testing must use a `demo-*` project ID and fixed loopback Auth, Firestore, Functions, and Storage endpoints. The React emulator connector is development-only and requires the explicit `REACT_APP_FIREBASE_USE_EMULATORS=true` flag.
+- Server PayPal capture must remain bound to the persisted token-protected checkout snapshot. Inventory may be released only for a verified terminal non-payment state; pending, approved, timeout, and unknown states stay reserved for recovery.
+- Public server checkout requires both the Functions and React flags, reviewed secrets/rules, real PayPal sandbox verification, automatic recovery, and explicit deployment/live-switch approval.
 
 ## Verification History
 
@@ -509,6 +519,15 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - 2026-08-26: Final verification passed: 10 React/Jest tests, production build, Functions syntax check, emulator harness syntax check, `firebase.json` parse, Firestore rules dry-run compilation, `git diff --check`, protected-file diff check, and normal local admin `HTTP 200`. Build retained the same four existing unused-code warnings and Firebase CLI retained the known `.firebaserc` warning.
 - 2026-08-26: Independent read-only QA re-reviewed the fixes and returned PASS with no remaining actionable findings. It confirmed protected files unchanged, isolation guards passing, and temporary ports `3003`, `8080`, and `9099` stopped.
 - Docs checked: added `docs/phase34-emulator-verification.md` and updated `PROJECT_STATUS.md` for emulator setup, isolation, test steps, results, and remaining production blockers.
+- 2026-08-26: The Phase 35 deterministic checkout matrix passed 16 scenarios against the loopback PayPal mock and Firebase Auth, Firestore, and Functions emulators. It covered trusted totals, aggregate stock/capacity, past and multi-date event rejection, child-only tickets, create/capture idempotency, wrong-token and expired-session rejection, approval gating, immutable snapshots, capture races, four concurrent callbacks, amount/reference mismatch, pending and terminal failures, a delayed capture/admin-reconciliation lease race, interrupted finalization, lost provider responses, and authenticated reconciliation.
+- 2026-08-26: Independent security review found that reconciliation could use a stale pre-lease read and then release inventory owned by a newer capture. The release transaction now refuses ownerless release while an active lease exists, both callers require a successful release before returning `retryAllowed`, and the delayed-provider interleaving test proves reconciliation stays `processing` until the lease-owning terminal capture releases exactly once.
+- 2026-08-26: Focused independent re-review returned PASS: the lease race is closed, retry remains conditional on confirmed release, the emulator pause seam is inert outside the exact demo Functions emulator, and protected resource files remain unchanged.
+- 2026-08-26: Browser-controlled admin verification showed the paid PayPal order exactly once with `$135.00` subtotal, `$17.00` shipping, and `$152.00` total. Inventory showed product stock `10 -> 9` and event availability `21 of 30` with `7 sold / 2 held`.
+- 2026-08-26: Browser-controlled payment-review verification showed a separate uncertain `APPROVED` PayPal record, and `Check Status` kept it under review without releasing its reservation or advising a second payment. The reserved test product remained at `1 on hand`.
+- 2026-08-26: Final Phase 35 checks passed: 10 React/Jest tests, production build, Functions and new-script syntax checks, `firebase.json` parse, `git diff --check`, and protected-file diff check. Build retained the same existing unused-code warnings. Firestore rules compiled and loaded in the local emulator; a Firebase CLI remote dry-run against the intentionally nonexistent demo project stopped at project lookup without deploying anything.
+- 2026-08-26: `npm audit --omit=dev` for the existing Functions lockfile reported 12 production dependency findings (1 low, 10 moderate, 1 high). No dependencies or lockfiles were changed; upgrades remain a separate pre-deployment review under Node 20.
+- 2026-08-26: Phase 35 fixtures and the emulator-only admin were deleted, temporary ports `3003`, `5001`, `8080`, `8787`, and `9099` were stopped, and the normal local site remained available on `127.0.0.1:3001`.
+- Docs checked: added `docs/phase35-checkout-verification.md` and updated admin setup, order-ledger planning, decisions, current status, production gates, and verification history. No protected business content was edited.
 
 ## Commits
 
@@ -554,6 +573,7 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - `feat: clean admin editing sections` (current branch)
 - `feat: harden waitlists and inventory transactions` (current branch)
 - `test: verify waitlist and inventory emulators` (current branch)
+- `feat: harden server paypal checkout` (current branch)
 
 ## Deployments
 

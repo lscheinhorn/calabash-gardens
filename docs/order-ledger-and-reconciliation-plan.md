@@ -4,10 +4,10 @@ This plan defines the backend path for tracking all Calabash sales in one place 
 
 ## Current State
 
-- PayPal checkout is client-side in `src/Components/Paypal/Paypal.js`.
-- PayPal returns an order ID and capture details in the browser after approval, but the site only logs those details and shows a thank-you message.
+- Public PayPal checkout still uses the legacy client-side flow by default, so customer-facing behavior has not changed.
+- A guarded server-owned create/capture path exists behind `REACT_APP_PAYPAL_SERVER_CHECKOUT=enabled` and `PAYPAL_CHECKOUT_ENABLED=true`; it has been verified only against isolated Firebase emulators and a local PayPal mock.
 - Firestore `orders` rules currently deny client writes.
-- Event capacity can be represented in Firestore events, but `ticketsSold` is not authoritative until confirmed orders write it.
+- The guarded server path writes normalized paid orders and inventory movements and updates tracked product stock and event `ticketsSold` transactionally.
 - Product variants can carry Firebase inventory metadata (`sku`, `stockOnHand`, `lowStockThreshold`, and tracking flags) in the admin product draft flow.
 - Admin Inventory bulk saves now merge into freshly read product/event documents in one Firestore transaction, preserve concurrent fields that were not edited, and abort if an edited field changed since the screen loaded.
 - Local waitlist rules now bind entries to an eligible event, but the public waitlist still needs a protected server endpoint and a per-occurrence date/capacity model before production use.
@@ -111,24 +111,21 @@ Recommended flow:
 
 This prevents a user from spoofing an order write or changing totals in the browser.
 
-Implementation checkpoint carried forward through branch `codex/waitlist-inventory-hardening`:
+Implementation checkpoint on branch `codex/paypal-order-ledger-hardening`:
 
 - Luke approved building this scaffold as a guarded next phase. Enabling it for public checkout, deploying Functions, or treating it as inventory-safe still requires explicit approval.
-- A Firebase Functions source folder exists at `functions/`.
-- The browser checkout keeps the current PayPal SDK flow by default.
+- The browser checkout keeps the current PayPal SDK flow by default; the server path remains explicitly disabled for public use.
 - The experimental server path is gated by `REACT_APP_PAYPAL_SERVER_CHECKOUT=enabled` on the React side and `PAYPAL_CHECKOUT_ENABLED=true` on the Functions side.
 - Functions require server-only `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, and `PAYPAL_ENV`.
-- `createPayPalOrder` and `capturePayPalOrder` reload Firestore products/events, recalculate product/event line prices, enforce active availability, product variant stock, event capacity, and trusted shipping totals before creating/capturing through PayPal.
-- `capturePayPalOrder` can write a normalized `orders/{orderId}` document after capture.
-- `capturePayPalOrder` now writes `inventoryMovements`, decrements tracked product variant stock, and increments `events.ticketsSold` for capacity-tracked events in the same idempotent Firestore transaction that writes the order.
-- This checkpoint still needs PayPal sandbox testing before public use. Do not enable it for public checkout until sandbox checkout, duplicate-callback idempotency, oversell, refund, and failure/reconciliation scenarios are verified.
-
-Checkpoint blockers found during the 2026-08-26 review:
-
-- `createPayPalOrder` must persist the server-validated cart snapshot under the created PayPal order ID. `capturePayPalOrder` must load that trusted snapshot instead of accepting replacement cart contents from the browser.
-- The capture flow needs an approved reservation or compensation/recovery design. Capturing payment before a Firestore stock/order transaction can leave a customer charged if concurrent inventory changes make the transaction fail.
-- Admin inventory stock/capacity writes now read and merge current Firestore records transactionally. The separate PayPal capture blockers above remain unresolved and keep the Functions path disabled.
-- The Functions path remains disabled and non-deployable until these blockers are implemented and sandbox-tested.
+- `createPayPalOrder` reloads Firestore products/events, recalculates prices and shipping, validates stock/capacity, creates PayPal with a stable idempotency key, and persists a token-bound trusted checkout snapshot.
+- `capturePayPalOrder` accepts only the PayPal order ID and opaque checkout token. It reloads the saved snapshot and rejects replacement browser cart data.
+- Before reserving inventory, capture verifies PayPal approval, amount, currency, and the saved checkout reference. It also rejects a checkout whose commercial Firestore values changed after create.
+- Capture transactionally reserves tracked product units and event seats before calling PayPal. A short capture lease prevents duplicate callbacks and reconciliation races.
+- Completed captures finalize one normalized `orders/{orderId}` record and deterministic `inventoryMovements` exactly once. Pending or uncertain captures retain the reservation for recovery; only explicit terminal payment failure releases that exact reservation.
+- The admin Orders section displays unsettled checkout records and exposes an authenticated `Check Status` action that cannot release a non-terminal approved payment.
+- `docs/phase35-checkout-verification.md` records the deterministic emulator and browser test procedure and result.
+- This checkpoint still needs a real PayPal sandbox checkout, automatic webhook/scheduled recovery, refund/void reversal handling, dependency review under Node 20, rule/Function deployment approval, and explicit live enablement.
+- The legacy browser capture fallback must not remain as the silent production fallback after Firebase orders become authoritative.
 
 ### Phase C: PayPal Webhook Reconciliation
 
@@ -138,6 +135,8 @@ Add PayPal webhooks as a safety net after server-side capture.
 - Use PayPal event/order/capture IDs for idempotency.
 - Fill in missed updates, refunds, disputes, or manual PayPal changes.
 - Do not let webhooks double-count inventory movements.
+- Reuse the same snapshot verification, reservation ownership, and deterministic order/movement finalization helpers as callable reconciliation.
+- Do not release reservations for `APPROVED`, `PENDING`, provider timeout, or unknown states. Release only after a verified terminal non-payment state.
 
 ## Square Reconciliation Path
 
@@ -174,6 +173,7 @@ Current decision: keep Firestore as the Calabash admin ledger and inventory sour
 ## Rules And Security
 
 - Public users must not write `orders`, `inventoryMovements`, products, events, or inventory directly.
+- Public checkout callables require an approved abuse-control layer, such as enforced Firebase App Check plus monitored rate limits, before live enablement.
 - Admins can read orders and update fulfillment fields.
 - Server/backend writes payment facts, paid orders, and inventory movements.
 - Order IDs and source IDs must be idempotent.
@@ -206,6 +206,7 @@ Expected admin features:
 - Event `ticketsSold` increments exactly once per paid event line item.
 - Full events cannot be oversold by simultaneous checkout.
 - Admin order list shows the saved PayPal order.
+- Uncertain capture states remain visible and recoverable after the browser leaves.
 - Refund/void handling is defined before inventory counts are considered final.
 - Square sales can be represented without changing PayPal or website order shape.
 
