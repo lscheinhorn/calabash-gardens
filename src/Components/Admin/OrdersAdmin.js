@@ -1,12 +1,30 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faDownload } from "@fortawesome/free-solid-svg-icons";
 import {
   collection,
+  doc,
   getDocs,
   query,
+  runTransaction,
+  serverTimestamp,
   where,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
-import { functions as firebaseFunctions } from "../../firebase-config";
+import {
+  auth as firebaseAuth,
+  functions as firebaseFunctions,
+} from "../../firebase-config";
+import {
+  assertFulfillmentUnchanged,
+  FulfillmentConflictError,
+  fulfillmentFor,
+  fulfillmentHasChanges,
+  fulfillmentStatuses,
+  MAX_FULFILLMENT_NOTES_LENGTH,
+  ordersToCsv,
+  validatedFulfillmentDraft,
+} from "./ordersAdminModel";
 
 const defaultFilters = {
   fulfillmentStatus: "all",
@@ -101,7 +119,11 @@ const normalizeOrder = (snapshot) => {
     id: snapshot.id,
     createdAt: data.createdAt || null,
     customer,
+    fulfillmentNotes: String(data.fulfillmentNotes || ""),
+    fulfillmentRevision: Number.isInteger(data.fulfillmentRevision) ? data.fulfillmentRevision : 0,
     fulfillmentStatus: String(data.fulfillmentStatus || "new"),
+    fulfillmentUpdatedAt: data.fulfillmentUpdatedAt || null,
+    fulfillmentUpdatedBy: String(data.fulfillmentUpdatedBy || ""),
     items,
     paidAt: data.paidAt || null,
     paymentStatus: String(data.paymentStatus || data.status || "unknown"),
@@ -194,18 +216,28 @@ const dedupeRecoveries = (recoveries) => {
   return Array.from(byReviewKey.values());
 };
 
+const draftHasUnsavedChanges = (draft) => Boolean(
+  draft?.baseline
+  && (
+    draft.notes !== draft.baseline.notes
+    || draft.status !== draft.baseline.status
+  )
+);
+
 export default function OrdersAdmin({ db }) {
   const [filters, setFilters] = useState(defaultFilters);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [orders, setOrders] = useState([]);
+  const [fulfillmentDrafts, setFulfillmentDrafts] = useState({});
   const [reconcilingOrderId, setReconcilingOrderId] = useState("");
   const [recoveries, setRecoveries] = useState([]);
+  const [savingOrderId, setSavingOrderId] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState("");
   const serverCheckoutEnabled = process.env.REACT_APP_PAYPAL_SERVER_CHECKOUT === "enabled";
   const webhookReviewEnabled = process.env.REACT_APP_PAYPAL_WEBHOOK_REVIEW === "enabled";
 
-  const loadOrders = useCallback(async () => {
+  const loadOrders = useCallback(async ({ resetDraftIds = [] } = {}) => {
     setIsLoading(true);
     setMessage("");
 
@@ -223,10 +255,12 @@ export default function OrdersAdmin({ db }) {
             serverCheckoutEnabled
               ? getDocs(collection(db, "paypalCheckouts"))
               : Promise.resolve({ docs: [] }),
-            getDocs(query(
-              collection(db, "paypalWebhookEvents"),
-              where("reviewRequired", "==", true),
-            )),
+            webhookReviewEnabled
+              ? getDocs(query(
+                collection(db, "paypalWebhookEvents"),
+                where("reviewRequired", "==", true),
+              ))
+              : Promise.resolve({ docs: [] }),
           ]);
           const checkoutRecoveries = checkoutSnapshot.docs
             .map(normalizeCheckoutRecovery)
@@ -260,17 +294,43 @@ export default function OrdersAdmin({ db }) {
       }
 
       setOrders(nextOrders);
+      setFulfillmentDrafts((currentDrafts) => {
+        const resetIds = new Set(resetDraftIds);
+
+        return Object.fromEntries(nextOrders.map((order) => {
+          const fulfillment = fulfillmentFor(order);
+          const savedDraft = {
+            baseline: fulfillment,
+            notes: fulfillment.notes,
+            status: fulfillment.status,
+          };
+          const currentDraft = currentDrafts[order.id];
+          const currentMatchesSaved = currentDraft
+            && currentDraft.notes === fulfillment.notes
+            && currentDraft.status === fulfillment.status;
+
+          if (
+            currentDraft
+            && draftHasUnsavedChanges(currentDraft)
+            && !currentMatchesSaved
+            && !resetIds.has(order.id)
+          ) {
+            return [order.id, currentDraft];
+          }
+
+          return [order.id, savedDraft];
+        }));
+      });
       setRecoveries(nextRecoveries);
       setSelectedOrderId((currentSelectedOrderId) => (
         nextOrders.some((order) => order.id === currentSelectedOrderId)
           ? currentSelectedOrderId
           : nextOrders[0]?.id || ""
       ));
+      return true;
     } catch (error) {
-      setOrders([]);
-      setRecoveries([]);
-      setSelectedOrderId("");
       setMessage("Orders could not be loaded.");
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -310,8 +370,10 @@ export default function OrdersAdmin({ db }) {
         resultMessage = "Payment still needs review. No second payment should be requested.";
       }
 
-      await loadOrders();
-      setMessage(resultMessage);
+      const refreshed = await loadOrders();
+      setMessage(refreshed
+        ? resultMessage
+        : `${resultMessage} Orders could not be refreshed; use Refresh before continuing.`);
     } catch (error) {
       setMessage("Payment status could not be confirmed. Keep this order under review.");
     } finally {
@@ -346,11 +408,160 @@ export default function OrdersAdmin({ db }) {
   const sourceOptions = uniqueValues(orders, "source");
   const paymentStatusOptions = uniqueValues(orders, "paymentStatus");
   const fulfillmentStatusOptions = uniqueValues(orders, "fulfillmentStatus");
+  const selectedFulfillmentDraft = selectedOrder
+    ? fulfillmentDrafts[selectedOrder.id] || (() => {
+      const fulfillment = fulfillmentFor(selectedOrder);
+      return { baseline: fulfillment, notes: fulfillment.notes, status: fulfillment.status };
+    })()
+    : null;
+  let selectedFulfillmentChanged = false;
+  let selectedFulfillmentValid = false;
+
+  if (selectedOrder && selectedFulfillmentDraft) {
+    try {
+      selectedFulfillmentChanged = fulfillmentHasChanges(selectedOrder, selectedFulfillmentDraft);
+      validatedFulfillmentDraft(selectedFulfillmentDraft);
+      selectedFulfillmentValid = true;
+    } catch (error) {
+      selectedFulfillmentValid = false;
+    }
+  }
+
+  const updateFulfillmentDraft = (field, value) => {
+    if (!selectedOrder) {
+      return;
+    }
+
+    setFulfillmentDrafts((currentDrafts) => {
+      const fulfillment = fulfillmentFor(selectedOrder);
+      const current = currentDrafts[selectedOrder.id] || {
+        baseline: fulfillment,
+        notes: fulfillment.notes,
+        status: fulfillment.status,
+      };
+
+      return {
+        ...currentDrafts,
+        [selectedOrder.id]: { ...current, [field]: value },
+      };
+    });
+  };
+
+  const resetFulfillmentDraft = () => {
+    if (!selectedOrder) {
+      return;
+    }
+
+    const fulfillment = fulfillmentFor(selectedOrder);
+    setFulfillmentDrafts((currentDrafts) => ({
+      ...currentDrafts,
+      [selectedOrder.id]: {
+        baseline: fulfillment,
+        notes: fulfillment.notes,
+        status: fulfillment.status,
+      },
+    }));
+  };
+
+  const saveFulfillment = async () => {
+    if (!selectedOrder || !selectedFulfillmentDraft) {
+      return;
+    }
+
+    const adminUid = firebaseAuth?.currentUser?.uid || "";
+
+    if (!adminUid) {
+      setMessage("Your admin session is no longer available. Sign in again before saving.");
+      return;
+    }
+
+    let nextFulfillment;
+
+    try {
+      nextFulfillment = validatedFulfillmentDraft(selectedFulfillmentDraft);
+    } catch (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    setSavingOrderId(selectedOrder.id);
+    setMessage("");
+
+    try {
+      await runTransaction(db, async (transaction) => {
+        const orderRef = doc(db, "orders", selectedOrder.id);
+        const currentSnapshot = await transaction.get(orderRef);
+
+        if (!currentSnapshot.exists()) {
+          throw new Error("This order no longer exists.");
+        }
+
+        assertFulfillmentUnchanged({
+          baseline: selectedFulfillmentDraft.baseline,
+          current: currentSnapshot.data(),
+        });
+        transaction.update(orderRef, {
+          fulfillmentNotes: nextFulfillment.notes,
+          fulfillmentRevision: selectedFulfillmentDraft.baseline.revision + 1,
+          fulfillmentStatus: nextFulfillment.status,
+          fulfillmentUpdatedAt: serverTimestamp(),
+          fulfillmentUpdatedBy: adminUid,
+        });
+      });
+
+      const refreshed = await loadOrders({ resetDraftIds: [selectedOrder.id] });
+      setMessage(refreshed
+        ? "Fulfillment changes saved."
+        : "Fulfillment changes saved, but orders could not be refreshed. Use Refresh before editing again.");
+    } catch (error) {
+      if (error instanceof FulfillmentConflictError || error.name === "FulfillmentConflictError") {
+        const refreshed = await loadOrders({ resetDraftIds: [selectedOrder.id] });
+        setMessage(refreshed
+          ? "Fulfillment changed elsewhere. The latest saved values are now shown; review them before editing again."
+          : "Fulfillment changed elsewhere, but the latest values could not be loaded. Use Refresh before editing again.");
+      } else {
+        setMessage(error.message || "Fulfillment changes could not be saved.");
+      }
+    } finally {
+      setSavingOrderId("");
+    }
+  };
+
+  const downloadFilteredOrders = () => {
+    if (!filteredOrders.length) {
+      return;
+    }
+
+    const csv = ordersToCsv(filteredOrders);
+    const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `calabash-orders-${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setMessage(`${filteredOrders.length} order${filteredOrders.length === 1 ? "" : "s"} exported.`);
+  };
 
   return (
     <section className="admin_panel admin_full_width">
       <div className="admin_button_row admin_orders_actions">
-        <button className="admin_secondary_button" disabled={isLoading} onClick={loadOrders} type="button">
+        <button
+          className="admin_secondary_button"
+          disabled={!filteredOrders.length || isLoading}
+          onClick={downloadFilteredOrders}
+          title="Download the filtered orders as CSV"
+          type="button"
+        >
+          <FontAwesomeIcon icon={faDownload} /> Export CSV
+        </button>
+        <button
+          className="admin_secondary_button"
+          disabled={isLoading}
+          onClick={() => loadOrders()}
+          type="button"
+        >
           {isLoading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
@@ -479,6 +690,67 @@ export default function OrdersAdmin({ db }) {
                   <dd>{selectedOrder.customer.phone || "None"}</dd>
                 </div>
               </dl>
+
+              <section className="admin_order_block admin_order_fulfillment">
+                <h5>Fulfillment</h5>
+                <div className="admin_order_fulfillment_fields">
+                  <label>
+                    Status
+                    <select
+                      disabled={savingOrderId === selectedOrder.id}
+                      onChange={(event) => updateFulfillmentDraft("status", event.target.value)}
+                      value={selectedFulfillmentDraft?.status || "new"}
+                    >
+                      {fulfillmentStatuses.map((status) => (
+                        <option key={status} value={status}>{labelFor(status)}</option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    Internal notes
+                    <textarea
+                      disabled={savingOrderId === selectedOrder.id}
+                      maxLength={MAX_FULFILLMENT_NOTES_LENGTH}
+                      onChange={(event) => updateFulfillmentDraft("notes", event.target.value)}
+                      placeholder="Packing, pickup, or shipping notes"
+                      rows="4"
+                      value={selectedFulfillmentDraft?.notes || ""}
+                    />
+                  </label>
+                </div>
+                <div className="admin_order_fulfillment_footer">
+                  <small>
+                    {(selectedFulfillmentDraft?.notes || "").length} / {MAX_FULFILLMENT_NOTES_LENGTH}
+                  </small>
+                  <div className="admin_button_row">
+                    <button
+                      className="admin_secondary_button"
+                      disabled={!selectedFulfillmentChanged || savingOrderId === selectedOrder.id}
+                      onClick={resetFulfillmentDraft}
+                      type="button"
+                    >
+                      Reset
+                    </button>
+                    <button
+                      className="admin_primary_button"
+                      disabled={
+                        !selectedFulfillmentChanged
+                        || !selectedFulfillmentValid
+                        || savingOrderId === selectedOrder.id
+                      }
+                      onClick={saveFulfillment}
+                      type="button"
+                    >
+                      {savingOrderId === selectedOrder.id ? "Saving..." : "Save Changes"}
+                    </button>
+                  </div>
+                </div>
+                {selectedOrder.fulfillmentUpdatedAt ? (
+                  <small className="admin_help_text">
+                    Last updated {formatDateTime(selectedOrder.fulfillmentUpdatedAt)}
+                  </small>
+                ) : null}
+              </section>
 
               <section className="admin_order_block">
                 <h5>Items</h5>

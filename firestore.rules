@@ -294,6 +294,51 @@ service cloud.firestore {
         && (!('sourcePaymentId' in request.resource.data) || request.resource.data.sourcePaymentId == '');
     }
 
+    function validFulfillmentStatus(status) {
+      return status in [
+        'new',
+        'in_progress',
+        'fulfilled',
+        'picked_up',
+        'shipped',
+        'cancelled',
+        'needs_review'
+      ];
+    }
+
+    function currentFulfillmentRevision() {
+      return 'fulfillmentRevision' in resource.data
+          && resource.data.fulfillmentRevision is int
+        ? resource.data.fulfillmentRevision
+        : 0;
+    }
+
+    function validOrderFulfillmentUpdate() {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+          'fulfillmentNotes',
+          'fulfillmentRevision',
+          'fulfillmentStatus',
+          'fulfillmentUpdatedAt',
+          'fulfillmentUpdatedBy'
+        ])
+        && request.resource.data.keys().hasAll([
+          'fulfillmentNotes',
+          'fulfillmentRevision',
+          'fulfillmentStatus',
+          'fulfillmentUpdatedAt',
+          'fulfillmentUpdatedBy'
+        ])
+        && request.resource.data.fulfillmentNotes is string
+        && request.resource.data.fulfillmentNotes.size() <= 2000
+        && request.resource.data.fulfillmentRevision is int
+        && request.resource.data.fulfillmentRevision == currentFulfillmentRevision() + 1
+        && request.resource.data.fulfillmentStatus is string
+        && validFulfillmentStatus(request.resource.data.fulfillmentStatus)
+        && request.resource.data.fulfillmentUpdatedAt is timestamp
+        && request.resource.data.fulfillmentUpdatedAt == request.time
+        && request.resource.data.fulfillmentUpdatedBy == request.auth.uid;
+    }
+
     function validSiteContent() {
       return hasOnlyAllowedKeys(['createdAt', 'published', 'sections', 'sortOrder', 'updatedAt'])
         && hasRequiredKeys(['published', 'sections'])
@@ -618,7 +663,8 @@ service cloud.firestore {
 
     match /orders/{orderId} {
       allow get, list: if isAdmin();
-      allow create, update, delete: if false;
+      allow update: if isAdmin() && validOrderFulfillmentUpdate();
+      allow create, delete: if false;
     }
 
     match /paypalCheckouts/{checkoutId} {

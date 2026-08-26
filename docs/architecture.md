@@ -48,6 +48,6 @@ The contact form uses EmailJS from `src/Components/Contact/Contact.js`.
 
 ## Backend Foundation
 
-`src/firebase-config.js` provides an env-driven Firebase config foundation, and `/admin` provides Firebase sign-in with an allowlist check. Admin draft editors exist for products, events, and site content, alongside Inventory, Orders, Photos, preview, and audit tools. Public site data still defaults to static resources; the admin preview is the Firestore-backed rehearsal path.
+`src/firebase-config.js` provides an env-driven Firebase config foundation, and `/admin` provides Firebase sign-in with an allowlist check. Admin draft editors exist for products, events, and site content, alongside Inventory, Orders, Photos, preview, and audit tools. Orders permits only transactionally guarded fulfillment status/notes updates from the client; commercial and payment facts remain server-owned. Public site data still defaults to static resources; the admin preview is the Firestore-backed rehearsal path.
 
 The admin route is lazy-loaded from `src/App.js` so Firebase/admin code stays out of the main storefront bundle.

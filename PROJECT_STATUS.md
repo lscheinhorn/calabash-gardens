@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Server-owned PayPal checkout, verified webhook recovery, recoverable order finalization, and the admin payment-review queue are at an emulator- and browser-verified, non-deployed checkpoint on branch `codex/paypal-webhook-recovery`.
-Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. The guarded server checkout and webhook remain disabled. Real PayPal sandbox checkout/webhook validation, refund and inventory-disposition policy, deployment review, and explicit live-switch approval remain required.
+The admin Orders fulfillment workflow is at an emulator- and browser-verified, non-deployed checkpoint on branch `codex/order-fulfillment-admin`. Approved admins can transactionally update only fulfillment status and internal notes, stale revisions are rejected, and filtered orders export as spreadsheet-safe CSV.
+Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. Server-owned PayPal checkout and verified webhook recovery remain disabled and undeployed. Real PayPal sandbox checkout/webhook validation, refund and inventory-disposition policy, rule/Functions deployment review, and explicit live-switch approval remain required.
 
 ## Approved Tech Stack
 
@@ -20,7 +20,7 @@ Firestore draft/admin editing works locally with an approved user, protected sta
 
 ## Current Phase
 
-Phase 36: Verified PayPal webhook recovery and payment-change review.
+Phase 37: Restricted admin order fulfillment and filtered CSV export.
 
 ## Done Work
 
@@ -151,6 +151,9 @@ Phase 36: Verified PayPal webhook recovery and payment-change review.
 - Added admin-visible manual review for verified refund, reversal, pending-refund, pending-capture, declined-capture, mismatch, orphan, and paid-without-reservation cases without automatically restocking products, reopening event seats, or changing paid-order financial status.
 - Tightened Firestore client rules so admins retain the current manual Inventory adjustment flow but cannot create provider-looking movements, webhook inbox records, or payment references.
 - Added a deterministic Phase 36 webhook emulator harness that proves exact-body verification, duplicate/concurrent idempotency, transient retry recovery, capture mapping, no-auto-restock behavior, and the server/client rules boundary.
+- Added a restricted admin fulfillment editor for existing orders with fixed statuses, 2,000-character internal notes, transactional revision checks, stale-edit rejection, session-preserved unsaved drafts, and filtered spreadsheet-safe CSV export.
+- Tightened Firestore order rules so approved admins may update only fulfillment status, notes, revision, server timestamp, and authenticated updater UID; order create/delete and all payment/source/customer/shipping/item/total changes remain denied.
+- Added deterministic Phase 37 model/rules/browser verification covering two allowed updates, twenty denied cases, persisted UI saves, concurrent-admin conflict handling, CSV filtering/formula neutralization, dark/light styling, and mobile layout without touching production data.
 
 ## In Progress Work
 
@@ -235,6 +238,7 @@ Phase 36: Verified PayPal webhook recovery and payment-change review.
 ## Risks And Open Questions
 
 - Public checkout still uses the legacy client-side PayPal flow by default. The server-owned path is isolated behind two flags and has not been deployed or tested against real PayPal sandbox accounts.
+- Phase 37 Firestore order-update rules are verified locally but not deployed. The live admin remains read-only for orders until Luke separately approves a rules deployment.
 - Server checkout now binds capture to a token-protected trusted snapshot, reserves inventory before capture, persists recoverable uncertain states, and has a disabled verified webhook recovery path; the path still requires real PayPal sandbox delivery verification before public use.
 - Refunds, partial refunds, disputes, reversals, and voids are recorded for manual review but do not yet update the financial ledger, change order status, or create approved reversing inventory movements.
 - Anonymous checkout callables do not yet enforce App Check or another approved abuse-control/rate-limit layer.
@@ -357,6 +361,7 @@ Phase 36: Verified PayPal webhook recovery and payment-change review.
 - Firebase emulator testing must use a `demo-*` project ID and fixed loopback Auth, Firestore, Functions, and Storage endpoints. The React emulator connector is development-only and requires the explicit `REACT_APP_FIREBASE_USE_EMULATORS=true` flag.
 - Server PayPal capture must remain bound to the persisted token-protected checkout snapshot. Inventory may be released only for a verified terminal non-payment state; pending, approved, timeout, and unknown states stay reserved for recovery.
 - Public server checkout requires both the Functions and React flags, reviewed secrets/rules, real PayPal sandbox verification, automatic recovery, and explicit deployment/live-switch approval.
+- Admin order updates are limited to the five fulfillment workflow fields. `cancelled` is a fulfillment label only and must never imply a refund, void, inventory reversal, or event-seat release.
 
 ## Verification History
 
@@ -544,6 +549,15 @@ Phase 36: Verified PayPal webhook recovery and payment-change review.
 - 2026-08-26: Focused independent re-review returned PASS after the three fixes and reconfirmed that protected business content files remain unchanged.
 - 2026-08-26: Phase 36 fixtures and the emulator-only admin were deleted, temporary browser tabs were closed, temporary ports `3003`, `3004`, `5001`, `8080`, `8787`, and `9099` were stopped, and the normal local site remained available on `127.0.0.1:3001`.
 - Docs checked: added the Phase 36 plan and verification procedure and updated README, architecture, admin setup/data shapes, Phase 35 gates, order-ledger planning, current status, production gates, risks, and verification history. No protected business content was edited.
+- 2026-08-26: The Phase 37 Firestore rules matrix passed 2 allowed fulfillment updates and 20 denied cases, including payment/source/customer/shipping/item/total/timestamp mutation, invalid notes/status/updater/time/revision, fulfillment-field deletion, inactive/anonymous access, and order create/delete. Immutable payment and order facts remained unchanged.
+- 2026-08-26: Browser-controlled Phase 37 testing saved `In Progress` with internal notes, confirmed revision `1` directly and after reload, injected a concurrent revision `2` `Shipped` update, and confirmed the stale browser save was rejected and reloaded the concurrent values.
+- 2026-08-26: Filtered CSV testing confirmed a zero-result filter disables export and the one-row download includes the expected saved order while neutralizing formula-like customer/item cells. Dark/light views, a 390 x 844 mobile fulfillment editor, and browser diagnostics passed with no application warnings or errors.
+- 2026-08-26: A pending-network browser test confirmed fulfillment status, notes, and Save Changes disable while a save is unresolved. Failed refreshes preserve the last loaded orders/drafts, and save/conflict/reconcile messages no longer claim refreshed values were shown when a read fails.
+- 2026-08-26: All six Phase 36 webhook groups and the complete Phase 35 sixteen-scenario checkout matrix passed again after the order-rule change against isolated Firebase emulators and the loopback PayPal mock.
+- 2026-08-26: Final Phase 37 checks passed: 14 React/Jest tests, production build, Functions and changed-script syntax, `firebase.json` parse, `git diff --check`, protected-file diff, and local admin `HTTP 200`. The build retained the same four existing unused-code warnings.
+- 2026-08-26: Independent read-only review found refresh-state loss, mid-save edit loss, incomplete harness cleanup, and inaccurate failed-refresh messaging. All findings were fixed; the final focused rereview returned PASS with no remaining actionable P1/P2 findings.
+- 2026-08-26: Phase 37 fixtures and the emulator-only admin were deleted, temporary browser tabs were closed, temporary ports `3003`, `5001`, `8080`, `8787`, and `9099` were stopped, and the normal local site remained available on `127.0.0.1:3001`.
+- Docs checked: added the Phase 37 plan and verification procedure and updated architecture, admin setup/data shapes, order-ledger planning, current status, decisions, risks, and verification history. No protected business content was edited.
 
 ## Commits
 
@@ -588,6 +602,7 @@ Phase 36: Verified PayPal webhook recovery and payment-change review.
 - `fix: keep preview edits in side drawer` (current branch)
 - `feat: clean admin editing sections` (current branch)
 - `feat: harden waitlists and inventory transactions` (current branch)
+- `feat: add order fulfillment workflow` (current branch)
 - `test: verify waitlist and inventory emulators` (current branch)
 - `feat: harden server paypal checkout` (current branch)
 - `feat: add paypal webhook recovery` (current branch)

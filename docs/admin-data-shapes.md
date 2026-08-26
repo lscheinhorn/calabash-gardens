@@ -499,19 +499,23 @@ Collection: `orders`
 
 Order persistence is planned as a shared sales ledger for PayPal website sales, Square point-of-sale/imported sales, manual sales, refunds, and inventory adjustments.
 
-Rules currently deny client order writes. Payment/order facts should be written by a server/cloud function or another approved backend after PayPal/Square verification, not directly by the browser.
+Payment/order facts must be written by a server/cloud function or another approved backend after PayPal/Square verification, not directly by the browser. Approved admins may update only the fulfillment fields listed below on an existing order; client order creation and deletion remain denied.
 
 Admin Orders foundation and guarded recovery view:
 
 - The admin dashboard has a top-level `Orders` section.
-- The section is read-only in this phase.
 - It reads existing `orders` documents for approved admins only.
 - It filters client-side by source, payment status, fulfillment status, and search text.
 - It tolerates missing/partial order fields while the backend shape is still being built.
 - It shows an empty state until server-side PayPal capture, Square import, or manual order entry writes records.
+- Approved admins can update `fulfillmentStatus` and `fulfillmentNotes`. Each save also writes a server timestamp, the authenticated admin UID, and an incremented `fulfillmentRevision`.
+- Fulfillment saves use a transaction and reject stale revisions/status/notes instead of overwriting another admin's work. Refreshing or switching orders preserves unsaved fulfillment drafts in the current page session.
+- Firestore rules allow changes only to `fulfillmentStatus`, `fulfillmentNotes`, `fulfillmentRevision`, `fulfillmentUpdatedAt`, and `fulfillmentUpdatedBy`; payment, source, customer, shipping, item, total, create, and delete mutations remain denied.
+- The fixed fulfillment vocabulary is `new`, `in_progress`, `fulfilled`, `picked_up`, `shipped`, `cancelled`, and `needs_review`. `cancelled` is a fulfillment label only and does not refund, void, or change inventory.
+- The current filtered order list can be exported as quoted CSV. User-controlled cells are neutralized before spreadsheet use to prevent formula execution.
 - When guarded server checkout is explicitly enabled, it also reads unsettled `paypalCheckouts` and verified `paypalWebhookEvents` records into Payment Review.
 - Authenticated `Check Status` can reconcile an unsettled capture through the server Function. Refund and reversal records are manual-review-only and cannot restock products or release event seats from the browser.
-- It does not create, update, delete, fulfill, import, or export orders. The guarded reconciliation path and webhook remain disabled and undeployed for public use.
+- It does not create, delete, import, refund, void, or edit payment facts. The guarded reconciliation path and webhook remain disabled and undeployed for public use.
 - It does not change the default public checkout, cart, PayPal buttons, or static storefront reads.
 
 See `docs/order-ledger-and-reconciliation-plan.md` for the target order, inventory movement, PayPal capture, Square reconciliation, and broader admin Orders UI plan.

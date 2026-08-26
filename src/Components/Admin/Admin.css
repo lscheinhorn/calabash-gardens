@@ -870,6 +870,7 @@
 }
 
 .admin_orders_actions {
+  gap: 8px;
   justify-content: flex-end;
 }
 
@@ -974,6 +975,35 @@
   border: 1px solid #e5deea;
   border-radius: 6px;
   padding: 14px;
+}
+
+.admin_order_fulfillment {
+  border-bottom: 1px solid #e5deea;
+  border-top: 1px solid #e5deea;
+  padding: 12px 0;
+}
+
+.admin_order_fulfillment_fields {
+  display: grid;
+  gap: 10px;
+}
+
+.admin_order_fulfillment_fields textarea {
+  min-height: 92px;
+  resize: vertical;
+}
+
+.admin_order_fulfillment_footer {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.admin_order_fulfillment_footer > small {
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .admin_order_detail_header {
@@ -2008,6 +2038,14 @@
 }
 
 .admin_theme_dark .admin_payment_review_row small {
+  color: #cbbbd4;
+}
+
+.admin_theme_dark .admin_order_fulfillment {
+  border-color: #4e3d58;
+}
+
+.admin_theme_dark .admin_order_fulfillment_footer > small {
   color: #cbbbd4;
 }
 

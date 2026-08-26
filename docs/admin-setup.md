@@ -77,7 +77,7 @@ Minimum fields:
 - Approved admins can view, filter, and edit media metadata in the Photos section.
 - Approved admins can validate and seed missing static products into Firestore drafts.
 - Approved admins can edit events, site content, and product/event inventory through Firestore-backed draft and inventory flows without changing protected static resource files.
-- The Orders section can list normalized Firestore orders and, when guarded server checkout is enabled, show unsettled PayPal checkouts and verified webhook review records.
+- The Orders section can list and filter normalized Firestore orders, export the filtered list as CSV, and transactionally update only fulfillment status and internal notes. Firestore rules keep payment, source, customer, item, total, create, and delete operations server-owned. When guarded server checkout is enabled, Orders can also show unsettled PayPal checkouts and independently enabled verified webhook review records.
 - The guarded PayPal server checkout and independently gated webhook recovery path are emulator-verified but remain disabled and undeployed for public use.
 - Public product pages still read static product data.
 

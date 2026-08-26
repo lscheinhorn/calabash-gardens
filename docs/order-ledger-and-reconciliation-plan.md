@@ -6,7 +6,7 @@ This plan defines the backend path for tracking all Calabash sales in one place 
 
 - Public PayPal checkout still uses the legacy client-side flow by default, so customer-facing behavior has not changed.
 - A guarded server-owned create/capture path exists behind `REACT_APP_PAYPAL_SERVER_CHECKOUT=enabled` and `PAYPAL_CHECKOUT_ENABLED=true`; an independently gated verified webhook path exists behind `PAYPAL_WEBHOOK_ENABLED=true`. Both have been verified only against isolated Firebase emulators and a local PayPal mock.
-- Firestore `orders` rules currently deny client writes.
+- Firestore `orders` rules deny client create/delete and all commercial/payment mutations. Approved admins may update only the five fulfillment workflow fields on an existing order.
 - The guarded server path writes normalized paid orders and inventory movements and updates tracked product stock and event `ticketsSold` transactionally.
 - Product variants can carry Firebase inventory metadata (`sku`, `stockOnHand`, `lowStockThreshold`, and tracking flags) in the admin product draft flow.
 - Admin Inventory bulk saves now merge into freshly read product/event documents in one Firestore transaction, preserve concurrent fields that were not edited, and abort if an edited field changed since the screen loaded.
@@ -92,7 +92,17 @@ Build the Firestore order shape and an admin Orders section first.
 - Admins can filter by source, status, date, customer, product/event, and fulfillment status.
 - Admins can update fulfillment notes/status only.
 - Admins cannot edit PayPal payment facts.
-- Client writes remain denied unless a temporary, clearly marked testing rule is explicitly approved.
+- Firestore rules permit only fulfillment status, notes, revision, server timestamp, and authenticated updater UID changes on existing orders.
+
+Implementation checkpoint on branch `codex/order-fulfillment-admin`:
+
+- The selected order has a fixed-status fulfillment editor with 2,000-character internal notes.
+- Saves use a Firestore transaction and monotonic `fulfillmentRevision`; stale status/notes/revision baselines are rejected and reloaded.
+- Refreshing, payment reconciliation, and switching order cards preserve unsaved fulfillment drafts during the current page session. A failed refresh keeps the last loaded orders and drafts visible.
+- The Orders toolbar exports only the currently filtered rows as quoted CSV and neutralizes formula-like user-controlled cells.
+- Client rules deny order create/delete and every non-fulfillment mutation, including mixed requests that also contain an otherwise valid fulfillment update.
+- `docs/phase37-order-fulfillment-verification.md` records the isolated rules matrix and browser acceptance test.
+- These rule changes remain local and undeployed until Luke explicitly approves a rules deployment.
 
 ### Phase B: Server-Side PayPal Capture
 
@@ -187,7 +197,7 @@ Current decision: keep Firestore as the Calabash admin ledger and inventory sour
 
 - Public users must not write `orders`, `inventoryMovements`, products, events, or inventory directly.
 - Public checkout callables require an approved abuse-control layer, such as enforced Firebase App Check plus monitored rate limits, before live enablement.
-- Admins can read orders and update fulfillment fields.
+- Admins can read orders and update only the approved fulfillment fields. Each update must increment the revision exactly once, use `request.time`, and identify the authenticated admin UID.
 - Server/backend writes payment facts, paid orders, and inventory movements.
 - Order IDs and source IDs must be idempotent.
 - Approved refunds and voids must create new reversing movements instead of editing historical sale movement quantities. A payment notification alone is not approval to restock a physical product or reopen an event seat.
@@ -198,7 +208,7 @@ Current decision: keep Firestore as the Calabash admin ledger and inventory sour
 
 ## Admin Orders UI
 
-Expected admin features:
+Current admin features:
 
 - Collapsible Orders section.
 - Dark-mode friendly order list.
@@ -209,7 +219,13 @@ Expected admin features:
 - Payment/source block.
 - Shipping/pickup/fulfillment status and notes.
 - Export CSV.
+- Stale-edit rejection when another admin changes fulfillment first.
+
+Future admin features:
+
+- Date-range and product/event-specific filter controls beyond the current search/source/payment/fulfillment filters.
 - `Needs Review` queue for Square/manual rows that do not map cleanly.
+- Carrier, tracking number, and append-only fulfillment history only after their data shapes and workflow are approved.
 
 ## Acceptance Criteria Before Public Use
 
