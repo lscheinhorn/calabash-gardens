@@ -55,18 +55,37 @@ const apiBaseFrom = (env, HttpsError) => {
 };
 
 const createPayPalGateway = ({ env, fetchImpl, HttpsError, logger }) => {
-  const assertEnabled = () => {
-    if (env.PAYPAL_CHECKOUT_ENABLED !== "true") {
-      throw new HttpsError("failed-precondition", "Server PayPal checkout is not enabled.");
-    }
-
+  const assertCredentials = () => {
     if (!env.PAYPAL_CLIENT_ID || !env.PAYPAL_CLIENT_SECRET) {
       throw new HttpsError("failed-precondition", "PayPal server credentials are not configured.");
     }
   };
 
+  const assertEnabled = () => {
+    if (env.PAYPAL_CHECKOUT_ENABLED !== "true") {
+      throw new HttpsError("failed-precondition", "Server PayPal checkout is not enabled.");
+    }
+
+    assertCredentials();
+  };
+
+  const assertWebhookEnabled = () => {
+    if (env.PAYPAL_WEBHOOK_ENABLED !== "true") {
+      throw new HttpsError("failed-precondition", "The PayPal webhook is not enabled.");
+    }
+
+    assertCredentials();
+
+    if (!env.PAYPAL_WEBHOOK_ID || !env.PAYPAL_MERCHANT_ID) {
+      throw new HttpsError(
+        "failed-precondition",
+        "PayPal webhook and merchant identifiers are not configured.",
+      );
+    }
+  };
+
   const getAccessToken = async () => {
-    assertEnabled();
+    assertCredentials();
     const apiBase = apiBaseFrom(env, HttpsError);
     const credentials = Buffer.from(`${env.PAYPAL_CLIENT_ID}:${env.PAYPAL_CLIENT_SECRET}`).toString("base64");
     let response;
@@ -107,13 +126,17 @@ const createPayPalGateway = ({ env, fetchImpl, HttpsError, logger }) => {
     return { accessToken: payload.access_token, apiBase };
   };
 
-  const request = async (path, options = {}) => {
+  const requestWithAccessToken = async (path, options = {}) => {
     const { accessToken, apiBase } = await getAccessToken();
     let response;
 
     try {
       response = await fetchImpl(`${apiBase}${path}`, {
-        body: options.body ? JSON.stringify(options.body) : undefined,
+        body: Object.prototype.hasOwnProperty.call(options, "rawBody")
+          ? options.rawBody
+          : options.body
+            ? JSON.stringify(options.body)
+            : undefined,
         headers: {
           Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json",
@@ -157,9 +180,56 @@ const createPayPalGateway = ({ env, fetchImpl, HttpsError, logger }) => {
     return payload;
   };
 
+  const request = async (path, options = {}) => {
+    assertEnabled();
+    return requestWithAccessToken(path, options);
+  };
+
+  const requestForWebhook = async (path, options = {}) => {
+    assertWebhookEnabled();
+    return requestWithAccessToken(path, options);
+  };
+
+  const verifyWebhook = async ({ event, headers, rawEventBody }) => {
+    assertWebhookEnabled();
+
+    const verificationFields = {
+      auth_algo: cleanText(headers.authAlgo),
+      cert_url: cleanText(headers.certUrl),
+      transmission_id: cleanText(headers.transmissionId),
+      transmission_sig: cleanText(headers.transmissionSignature),
+      transmission_time: cleanText(headers.transmissionTime),
+      webhook_id: cleanText(env.PAYPAL_WEBHOOK_ID),
+    };
+
+    if (Object.values(verificationFields).some((value) => !value)) {
+      throw new HttpsError("invalid-argument", "Required PayPal webhook headers are missing.");
+    }
+
+    const exactEventBody = Buffer.isBuffer(rawEventBody)
+      ? rawEventBody.toString("utf8")
+      : String(rawEventBody || "");
+
+    if (!exactEventBody || !event || typeof event !== "object" || Array.isArray(event)) {
+      throw new HttpsError("invalid-argument", "The PayPal webhook body is invalid.");
+    }
+
+    // PayPal requires the event portion to be posted back byte-for-byte as received.
+    const verificationBody = `${JSON.stringify(verificationFields).slice(0, -1)},"webhook_event":${exactEventBody}}`;
+    const result = await requestWithAccessToken("/v1/notifications/verify-webhook-signature", {
+      method: "POST",
+      rawBody: verificationBody,
+    });
+
+    return result.verification_status === "SUCCESS";
+  };
+
   return {
     assertEnabled,
+    assertWebhookEnabled,
     request,
+    requestForWebhook,
+    verifyWebhook,
   };
 };
 

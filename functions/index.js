@@ -1,6 +1,6 @@
 const crypto = require("crypto");
 const logger = require("firebase-functions/logger");
-const { HttpsError, onCall } = require("firebase-functions/v2/https");
+const { HttpsError, onCall, onRequest } = require("firebase-functions/v2/https");
 const admin = require("firebase-admin");
 const { FieldValue, Timestamp } = require("firebase-admin/firestore");
 const { createPayPalGateway, PayPalGatewayError } = require("./paypalGateway");
@@ -40,9 +40,30 @@ const MAX_CART_ITEMS = 40;
 const MAX_ITEM_QUANTITY = 100;
 const CHECKOUT_SESSION_TTL_MS = 3 * 60 * 60 * 1000;
 const CAPTURE_LEASE_MS = 2 * 60 * 1000;
+const WEBHOOK_PROCESSING_LEASE_MS = 2 * 60 * 1000;
 const CHECKOUT_COLLECTION = "paypalCheckouts";
+const WEBHOOK_COLLECTION = "paypalWebhookEvents";
 const assertPaypalEnabled = paypalGateway.assertEnabled;
+const assertPaypalWebhookEnabled = paypalGateway.assertWebhookEnabled;
 const paypalRequest = paypalGateway.request;
+const paypalWebhookRequest = paypalGateway.requestForWebhook;
+const verifyPayPalWebhook = paypalGateway.verifyWebhook;
+
+const PAYPAL_CAPTURE_COMPLETED = "PAYMENT.CAPTURE.COMPLETED";
+const PAYPAL_REVIEW_EVENT_TYPES = new Set([
+  "PAYMENT.CAPTURE.DECLINED",
+  "PAYMENT.CAPTURE.PENDING",
+  "PAYMENT.CAPTURE.REFUNDED",
+  "PAYMENT.CAPTURE.REVERSED",
+  "PAYMENT.REFUND.FAILED",
+  "PAYMENT.REFUND.PENDING",
+]);
+const FINALIZED_PAYPAL_ORDER_STATUSES = new Set([
+  "paid",
+  "partially_refunded",
+  "refunded",
+  "reversed",
+]);
 
 const sha256 = (value) => crypto.createHash("sha256").update(String(value)).digest("hex");
 
@@ -84,6 +105,11 @@ const assertCheckoutToken = (session, checkoutToken) => {
 
 const checkoutDocIdFor = (orderID) => `paypal_${safeDocId(orderID)}`;
 const checkoutSessionRefFor = (orderID) => db.collection(CHECKOUT_COLLECTION).doc(checkoutDocIdFor(orderID));
+const isFinalizedPayPalOrder = (order, orderID) => (
+  order?.source === "paypal_web"
+  && order.sourceOrderId === orderID
+  && FINALIZED_PAYPAL_ORDER_STATUSES.has(order.status)
+);
 
 const isSafeFunctionsEmulator = () => {
   const projectId = cleanText(process.env.GCLOUD_PROJECT || process.env.GOOGLE_CLOUD_PROJECT);
@@ -767,7 +793,7 @@ const reserveCheckoutInventory = async ({ captureLeaseId, checkoutToken, orderID
     if (existingOrder.exists) {
       const order = existingOrder.data() || {};
 
-      if (order.source !== "paypal_web" || order.sourceOrderId !== orderID || order.status !== "paid") {
+      if (!isFinalizedPayPalOrder(order, orderID)) {
         throw new HttpsError("failed-precondition", "The existing order needs manual review.");
       }
 
@@ -917,6 +943,10 @@ const verifiedCaptureFor = ({ capture, checkout, orderID, snapshotHash }) => {
   const purchaseUnit = capture.purchase_units?.[0] || {};
   const capturePayment = capturePaymentFor(capture);
   const amount = capturePayment.amount || purchaseUnit.amount || {};
+  const expectedMerchantId = cleanText(process.env.PAYPAL_MERCHANT_ID);
+  const actualMerchantId = cleanText(
+    capturePayment.payee?.merchant_id || purchaseUnit.payee?.merchant_id,
+  );
 
   if (capture.id !== orderID || !isCompletedCapture(capture)) {
     throw new HttpsError("failed-precondition", "PayPal payment is not completed for this order.");
@@ -928,6 +958,10 @@ const verifiedCaptureFor = ({ capture, checkout, orderID, snapshotHash }) => {
 
   if (cleanText(purchaseUnit.custom_id || capturePayment.custom_id) !== snapshotHash) {
     throw new HttpsError("data-loss", "PayPal checkout reference does not match the trusted checkout.");
+  }
+
+  if (expectedMerchantId && actualMerchantId !== expectedMerchantId) {
+    throw new HttpsError("data-loss", "PayPal capture belongs to a different merchant.");
   }
 
   if (!capturePayment.id) {
@@ -945,10 +979,13 @@ const verifiedCaptureFor = ({ capture, checkout, orderID, snapshotHash }) => {
 const markCheckoutNeedsReview = async ({
   clearLease = false,
   code,
+  expectedLeaseId = "",
   reason,
   sessionRef,
   status = "needs_review",
 }) => {
+  let updated = false;
+
   await db.runTransaction(async (transaction) => {
     const sessionSnapshot = await transaction.get(sessionRef);
 
@@ -959,6 +996,10 @@ const markCheckoutNeedsReview = async ({
     const session = sessionSnapshot.data() || {};
 
     if (session.status === "paid" || session.inventoryState === "committed") {
+      return;
+    }
+
+    if (expectedLeaseId && session.captureLeaseId !== expectedLeaseId) {
       return;
     }
 
@@ -980,10 +1021,13 @@ const markCheckoutNeedsReview = async ({
     }
 
     transaction.update(sessionRef, updates);
+    updated = true;
   });
+
+  return updated;
 };
 
-const recordVerifiedCapture = async ({ captureFacts, sessionRef }) => {
+const recordVerifiedCapture = async ({ captureFacts, expectedLeaseId = "", sessionRef }) => {
   await db.runTransaction(async (transaction) => {
     const sessionSnapshot = await transaction.get(sessionRef);
 
@@ -995,6 +1039,17 @@ const recordVerifiedCapture = async ({ captureFacts, sessionRef }) => {
 
     if (session.status === "paid" || session.inventoryState === "committed") {
       return;
+    }
+
+    if (expectedLeaseId && session.captureLeaseId !== expectedLeaseId) {
+      throw new HttpsError("aborted", "Checkout recovery ownership changed. Please retry.");
+    }
+
+    if (
+      cleanText(session.paypal?.captureId)
+      && session.paypal.captureId !== captureFacts.captureId
+    ) {
+      throw new HttpsError("data-loss", "Checkout references a different PayPal capture.");
     }
 
     transaction.update(sessionRef, {
@@ -1020,13 +1075,28 @@ const recordVerifiedCapture = async ({ captureFacts, sessionRef }) => {
   });
 };
 
+const paymentReferenceRefForCapture = (captureId) => db.collection("paymentReferences")
+  .doc(`paypal_capture_${safeDocId(captureId)}`);
+
+const paymentReferenceDocument = ({ captureId, orderDocId, orderID }) => ({
+  orderId: orderDocId,
+  provider: "paypal",
+  providerCaptureId: captureId,
+  providerOrderId: orderID,
+  referenceType: "capture",
+  updatedAt: FieldValue.serverTimestamp(),
+});
+
 const finalizeCapturedCheckout = async ({ capture, orderDocId, orderRef, sessionRef }) => {
+  const captureId = assertPayPalResourceId(capturePaymentFor(capture).id, "capture");
+  const paymentReferenceRef = paymentReferenceRefForCapture(captureId);
   let savedOrderData = null;
 
   await db.runTransaction(async (transaction) => {
-    const [sessionSnapshot, existingOrder] = await Promise.all([
+    const [sessionSnapshot, existingOrder, paymentReferenceSnapshot] = await Promise.all([
       transaction.get(sessionRef),
       transaction.get(orderRef),
+      transaction.get(paymentReferenceRef),
     ]);
 
     if (!sessionSnapshot.exists) {
@@ -1034,11 +1104,27 @@ const finalizeCapturedCheckout = async ({ capture, orderDocId, orderRef, session
     }
 
     const session = sessionSnapshot.data() || {};
+    const existingPaymentReference = paymentReferenceSnapshot.data() || {};
+
+    if (
+      paymentReferenceSnapshot.exists
+      && (
+        existingPaymentReference.provider !== "paypal"
+        || existingPaymentReference.providerCaptureId !== captureId
+        || existingPaymentReference.providerOrderId !== session.sourceOrderId
+        || existingPaymentReference.orderId !== orderDocId
+      )
+    ) {
+      throw new HttpsError("data-loss", "PayPal capture reference belongs to another order.");
+    }
 
     if (existingOrder.exists) {
       const order = existingOrder.data() || {};
 
-      if (order.source !== "paypal_web" || order.sourceOrderId !== session.sourceOrderId || order.status !== "paid") {
+      if (
+        !isFinalizedPayPalOrder(order, session.sourceOrderId)
+        || cleanText(order.sourcePaymentId) !== captureId
+      ) {
         throw new HttpsError("failed-precondition", "The existing order needs manual review.");
       }
 
@@ -1057,6 +1143,15 @@ const finalizeCapturedCheckout = async ({ capture, orderDocId, orderRef, session
           updatedAt: FieldValue.serverTimestamp(),
         });
       }
+
+      transaction.set(paymentReferenceRef, {
+        ...paymentReferenceDocument({
+          captureId,
+          orderDocId,
+          orderID: session.sourceOrderId,
+        }),
+        createdAt: existingPaymentReference.createdAt || FieldValue.serverTimestamp(),
+      });
 
       savedOrderData = order;
       return;
@@ -1079,6 +1174,14 @@ const finalizeCapturedCheckout = async ({ capture, orderDocId, orderRef, session
       snapshotHash: session.snapshotHash,
     });
     transaction.set(orderRef, orderDocument);
+    transaction.set(paymentReferenceRef, {
+      ...paymentReferenceDocument({
+        captureId,
+        orderDocId,
+        orderID: session.sourceOrderId,
+      }),
+      createdAt: existingPaymentReference.createdAt || FieldValue.serverTimestamp(),
+    });
     checkout.items.forEach((item, index) => {
       const movementRef = db.collection("inventoryMovements")
         .doc(`${orderDocId}_${safeDocId(item.lineItemId || `line-${index + 1}`)}`);
@@ -1188,15 +1291,17 @@ const orderDocumentForCapture = ({ capture, checkout, snapshotHash }) => {
   };
 };
 
-const assertPayPalOrderId = (value) => {
-  const orderID = cleanText(value);
+const assertPayPalResourceId = (value, label = "resource") => {
+  const resourceId = cleanText(value);
 
-  if (!/^[a-zA-Z0-9-]{6,100}$/.test(orderID)) {
-    throw new HttpsError("invalid-argument", "PayPal order ID is invalid.");
+  if (!/^[a-zA-Z0-9-]{6,140}$/.test(resourceId)) {
+    throw new HttpsError("invalid-argument", `PayPal ${label} ID is invalid.`);
   }
 
-  return orderID;
+  return resourceId;
 };
+
+const assertPayPalOrderId = (value) => assertPayPalResourceId(value, "order");
 
 const requestIdFor = (prefix, value) => `${prefix}-${sha256(value).slice(0, 30)}`;
 
@@ -1305,7 +1410,7 @@ const loadAuthorizedCheckoutSession = async ({ checkoutToken, orderID }) => {
   if (orderSnapshot.exists) {
     const order = orderSnapshot.data() || {};
 
-    if (order.source !== "paypal_web" || order.sourceOrderId !== orderID || order.status !== "paid") {
+    if (!isFinalizedPayPalOrder(order, orderID)) {
       throw new HttpsError("failed-precondition", "The existing order needs manual review.");
     }
 
@@ -1808,4 +1913,596 @@ exports.reconcilePayPalOrder = onCall(async (request) => {
       sessionRef,
     },
   });
+});
+
+class WebhookRetryError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "WebhookRetryError";
+  }
+}
+
+const webhookEventRefFor = (eventId) => db.collection(WEBHOOK_COLLECTION).doc(eventId);
+
+const webhookEventFactsFor = (event, rawBody) => {
+  const eventId = assertPayPalResourceId(event?.id, "webhook event");
+  const eventType = cleanText(event?.event_type);
+
+  if (!/^[A-Z0-9._-]{3,120}$/.test(eventType)) {
+    throw new HttpsError("invalid-argument", "PayPal webhook event type is invalid.");
+  }
+
+  const resource = event?.resource && typeof event.resource === "object"
+    ? event.resource
+    : {};
+  const relatedIds = resource.supplementary_data?.related_ids || {};
+  const resourceId = cleanText(resource.id);
+  const relatedOrderId = cleanText(relatedIds.order_id);
+  const relatedCaptureId = cleanText(relatedIds.capture_id);
+  const sourcePaymentId = eventType.startsWith("PAYMENT.CAPTURE.")
+    ? resourceId
+    : relatedCaptureId;
+
+  if (resourceId) {
+    assertPayPalResourceId(resourceId, "webhook resource");
+  }
+
+  if (relatedOrderId) {
+    assertPayPalOrderId(relatedOrderId);
+  }
+
+  if (sourcePaymentId) {
+    assertPayPalResourceId(sourcePaymentId, "capture");
+  }
+
+  return {
+    bodyHash: sha256(Buffer.isBuffer(rawBody) ? rawBody : String(rawBody || "")),
+    eventCreatedAt: truncate(event?.create_time, 80),
+    eventId,
+    eventType,
+    resourceId,
+    sourceOrderId: relatedOrderId,
+    sourcePaymentId,
+  };
+};
+
+const claimPayPalWebhookEvent = async (facts) => {
+  const eventRef = webhookEventRefFor(facts.eventId);
+  const leaseId = crypto.randomBytes(24).toString("hex");
+  const leaseExpiresAt = Timestamp.fromMillis(Date.now() + WEBHOOK_PROCESSING_LEASE_MS);
+  let result = null;
+
+  await db.runTransaction(async (transaction) => {
+    const eventSnapshot = await transaction.get(eventRef);
+    const existing = eventSnapshot.data() || {};
+
+    if (["ignored", "processed", "review"].includes(existing.processingState)) {
+      result = {
+        claimed: false,
+        eventRef,
+        state: existing.processingState,
+      };
+      return;
+    }
+
+    if (
+      existing.processingState === "processing"
+      && millisFromTimestamp(existing.processingLeaseExpiresAt) > Date.now()
+    ) {
+      result = { claimed: false, eventRef, state: "processing" };
+      return;
+    }
+
+    transaction.set(eventRef, {
+      attemptCount: Number(existing.attemptCount || 0) + 1,
+      bodyHash: existing.bodyHash || facts.bodyHash,
+      createdAt: existing.createdAt || FieldValue.serverTimestamp(),
+      eventCreatedAt: facts.eventCreatedAt,
+      eventType: facts.eventType,
+      failureReason: "",
+      lastAttemptAt: FieldValue.serverTimestamp(),
+      processingLeaseExpiresAt: leaseExpiresAt,
+      processingLeaseId: leaseId,
+      processingState: "processing",
+      provider: "paypal",
+      receivedAt: existing.receivedAt || FieldValue.serverTimestamp(),
+      resourceId: facts.resourceId,
+      reviewCode: "",
+      reviewReason: "",
+      reviewRequired: false,
+      sourceOrderId: facts.sourceOrderId,
+      sourcePaymentId: facts.sourcePaymentId,
+      updatedAt: FieldValue.serverTimestamp(),
+    }, { merge: true });
+    result = { claimed: true, eventRef, leaseId, state: "processing" };
+  });
+
+  return result;
+};
+
+const finishPayPalWebhookEvent = async ({ claim, facts, outcome }) => {
+  let completed = false;
+
+  await db.runTransaction(async (transaction) => {
+    const eventSnapshot = await transaction.get(claim.eventRef);
+    const eventRecord = eventSnapshot.data() || {};
+
+    if (!eventSnapshot.exists || eventRecord.processingLeaseId !== claim.leaseId) {
+      return;
+    }
+
+    transaction.update(claim.eventRef, {
+      failureReason: "",
+      processedAt: FieldValue.serverTimestamp(),
+      processingLeaseExpiresAt: FieldValue.delete(),
+      processingLeaseId: FieldValue.delete(),
+      processingState: outcome.state,
+      resourceId: outcome.resourceId || facts.resourceId,
+      reviewCode: outcome.code || "",
+      reviewKey: outcome.reviewKey || "",
+      reviewReason: outcome.reason || "",
+      reviewRequired: outcome.state === "review",
+      sourceOrderId: outcome.sourceOrderId || facts.sourceOrderId,
+      sourcePaymentId: outcome.sourcePaymentId || facts.sourcePaymentId,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    completed = true;
+  });
+
+  return completed;
+};
+
+const failPayPalWebhookEvent = async ({ claim, error }) => {
+  await db.runTransaction(async (transaction) => {
+    const eventSnapshot = await transaction.get(claim.eventRef);
+    const eventRecord = eventSnapshot.data() || {};
+
+    if (!eventSnapshot.exists || eventRecord.processingLeaseId !== claim.leaseId) {
+      return;
+    }
+
+    transaction.update(claim.eventRef, {
+      failureReason: truncate(error.message || "Webhook processing failed.", 240),
+      lastFailedAt: FieldValue.serverTimestamp(),
+      processingLeaseExpiresAt: FieldValue.delete(),
+      processingLeaseId: FieldValue.delete(),
+      processingState: "failed",
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+};
+
+const releaseWebhookCheckoutLease = async ({ leaseId, sessionRef }) => {
+  await db.runTransaction(async (transaction) => {
+    const sessionSnapshot = await transaction.get(sessionRef);
+
+    if (!sessionSnapshot.exists || sessionSnapshot.data()?.captureLeaseId !== leaseId) {
+      return;
+    }
+
+    transaction.update(sessionRef, {
+      captureLeaseAcquiredAt: FieldValue.delete(),
+      captureLeaseExpiresAt: FieldValue.delete(),
+      captureLeaseId: FieldValue.delete(),
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+  });
+};
+
+const acquireWebhookCheckoutLease = async ({ captureId, leaseId, orderID }) => {
+  const orderDocId = checkoutDocIdFor(orderID);
+  const orderRef = db.collection("orders").doc(orderDocId);
+  const sessionRef = checkoutSessionRefFor(orderID);
+  const leaseExpiresAt = Timestamp.fromMillis(Date.now() + CAPTURE_LEASE_MS);
+  let result = null;
+
+  await db.runTransaction(async (transaction) => {
+    const [orderSnapshot, sessionSnapshot] = await Promise.all([
+      transaction.get(orderRef),
+      transaction.get(sessionRef),
+    ]);
+
+    if (orderSnapshot.exists) {
+      const order = orderSnapshot.data() || {};
+
+      if (
+        isFinalizedPayPalOrder(order, orderID)
+        && cleanText(order.sourcePaymentId) === captureId
+      ) {
+        result = { kind: "processed", orderDocId, orderRef, sessionRef };
+      } else {
+        result = {
+          code: "paid_order_reference_mismatch",
+          kind: "review",
+          orderDocId,
+          orderRef,
+          reason: "A paid order exists, but its PayPal identifiers do not match this webhook.",
+          sessionRef,
+        };
+      }
+      return;
+    }
+
+    if (!sessionSnapshot.exists) {
+      result = {
+        code: "checkout_session_missing",
+        kind: "review",
+        orderDocId,
+        orderRef,
+        reason: "PayPal reports a completed payment without a matching checkout session.",
+        sessionRef: null,
+      };
+      return;
+    }
+
+    const session = sessionSnapshot.data() || {};
+
+    if (session.provider !== "paypal" || session.sourceOrderId !== orderID) {
+      result = {
+        code: "checkout_reference_mismatch",
+        kind: "review",
+        orderDocId,
+        orderRef,
+        reason: "The checkout session does not match the PayPal webhook order.",
+        sessionRef,
+      };
+      return;
+    }
+
+    if (
+      cleanText(session.paypal?.captureId)
+      && session.paypal.captureId !== captureId
+    ) {
+      result = {
+        code: "capture_reference_mismatch",
+        kind: "review",
+        orderDocId,
+        orderRef,
+        reason: "The checkout session references a different PayPal capture.",
+        sessionRef,
+      };
+      return;
+    }
+
+    if (session.inventoryState !== "reserved") {
+      result = {
+        code: "paid_without_reservation",
+        kind: "review",
+        orderDocId,
+        orderRef,
+        reason: "PayPal reports a completed payment without a matching inventory reservation.",
+        sessionRef,
+      };
+      return;
+    }
+
+    if (hasActiveCaptureLease(session) && session.captureLeaseId !== leaseId) {
+      result = { kind: "busy", orderDocId, orderRef, sessionRef };
+      return;
+    }
+
+    transaction.update(sessionRef, {
+      captureLeaseAcquiredAt: FieldValue.serverTimestamp(),
+      captureLeaseExpiresAt: leaseExpiresAt,
+      captureLeaseId: leaseId,
+      updatedAt: FieldValue.serverTimestamp(),
+    });
+    result = {
+      checkout: session.checkout,
+      kind: "acquired",
+      orderDocId,
+      orderRef,
+      session: {
+        ...session,
+        captureLeaseExpiresAt: leaseExpiresAt,
+        captureLeaseId: leaseId,
+      },
+      sessionRef,
+    };
+  });
+
+  return result;
+};
+
+const completedWebhookReviewOutcome = ({ code, facts, reason }) => ({
+  code,
+  reason,
+  resourceId: facts.resourceId,
+  reviewKey: `${facts.eventType}:${facts.sourcePaymentId || facts.resourceId}`,
+  sourceOrderId: facts.sourceOrderId,
+  sourcePaymentId: facts.sourcePaymentId,
+  state: "review",
+});
+
+const processCompletedCaptureWebhook = async ({ facts, webhookLeaseId }) => {
+  if (!facts.sourceOrderId || !facts.sourcePaymentId) {
+    return completedWebhookReviewOutcome({
+      code: "completed_identifiers_missing",
+      facts,
+      reason: "The completed PayPal webhook is missing its order or capture identifier.",
+    });
+  }
+
+  const checkoutLeaseId = `webhook_${webhookLeaseId}`;
+  const context = await acquireWebhookCheckoutLease({
+    captureId: facts.sourcePaymentId,
+    leaseId: checkoutLeaseId,
+    orderID: facts.sourceOrderId,
+  });
+
+  if (context.kind === "processed") {
+    return {
+      code: "already_finalized",
+      reason: "",
+      resourceId: facts.resourceId,
+      reviewKey: "",
+      sourceOrderId: facts.sourceOrderId,
+      sourcePaymentId: facts.sourcePaymentId,
+      state: "processed",
+    };
+  }
+
+  if (context.kind === "busy") {
+    throw new WebhookRetryError("Checkout capture is still owned by another active process.");
+  }
+
+  if (context.kind === "review") {
+    if (context.sessionRef) {
+      await markCheckoutNeedsReview({
+        code: context.code,
+        reason: context.reason,
+        sessionRef: context.sessionRef,
+      });
+    }
+
+    return completedWebhookReviewOutcome({
+      code: context.code,
+      facts,
+      reason: context.reason,
+    });
+  }
+
+  let capture;
+
+  try {
+    capture = await paypalWebhookRequest(
+      `/v2/checkout/orders/${encodeURIComponent(facts.sourceOrderId)}`,
+      { method: "GET" },
+    );
+  } catch (error) {
+    await releaseWebhookCheckoutLease({
+      leaseId: checkoutLeaseId,
+      sessionRef: context.sessionRef,
+    });
+    throw new WebhookRetryError("PayPal order retrieval failed during webhook recovery.");
+  }
+
+  let captureFacts;
+
+  try {
+    verifyPayPalOrderSnapshot({
+      checkout: context.checkout,
+      order: capture,
+      orderID: facts.sourceOrderId,
+      snapshotHash: context.session.snapshotHash,
+    });
+    captureFacts = verifiedCaptureFor({
+      capture,
+      checkout: context.checkout,
+      orderID: facts.sourceOrderId,
+      snapshotHash: context.session.snapshotHash,
+    });
+
+    if (captureFacts.captureId !== facts.sourcePaymentId) {
+      throw new HttpsError("data-loss", "PayPal returned a different capture for this webhook.");
+    }
+  } catch (error) {
+    const updated = await markCheckoutNeedsReview({
+      clearLease: true,
+      code: error.code || "webhook_capture_verification_failed",
+      expectedLeaseId: checkoutLeaseId,
+      reason: error.message || "Webhook capture verification failed.",
+      sessionRef: context.sessionRef,
+    });
+
+    if (!updated) {
+      throw new WebhookRetryError("Checkout recovery ownership changed during verification.");
+    }
+
+    return completedWebhookReviewOutcome({
+      code: error.code || "webhook_capture_verification_failed",
+      facts,
+      reason: error.message || "Webhook capture verification failed.",
+    });
+  }
+
+  try {
+    await recordVerifiedCapture({
+      captureFacts,
+      expectedLeaseId: checkoutLeaseId,
+      sessionRef: context.sessionRef,
+    });
+    await finalizeCapturedCheckout({
+      capture,
+      orderDocId: context.orderDocId,
+      orderRef: context.orderRef,
+      sessionRef: context.sessionRef,
+    });
+  } catch (error) {
+    logger.error("Verified PayPal webhook could not finalize checkout", {
+      error: error.message,
+      orderID: facts.sourceOrderId,
+    });
+    await markCheckoutNeedsReview({
+      clearLease: true,
+      code: error.code || "webhook_finalization_failed",
+      reason: "A verified payment still needs order-ledger finalization.",
+      sessionRef: context.sessionRef,
+      status: "captured_pending_finalize",
+    });
+    throw new WebhookRetryError("Verified payment could not be finalized.");
+  }
+
+  return {
+    code: "capture_finalized",
+    reason: "",
+    resourceId: facts.resourceId,
+    reviewKey: "",
+    sourceOrderId: facts.sourceOrderId,
+    sourcePaymentId: facts.sourcePaymentId,
+    state: "processed",
+  };
+};
+
+const reviewReasonForWebhookEvent = (eventType) => ({
+  "PAYMENT.CAPTURE.DECLINED": "PayPal reports a declined capture. Confirm payment status before releasing a reservation.",
+  "PAYMENT.CAPTURE.PENDING": "PayPal reports a pending capture. Do not request a second payment.",
+  "PAYMENT.CAPTURE.REFUNDED": "PayPal reports a refund. Inventory and event seats were not changed automatically.",
+  "PAYMENT.CAPTURE.REVERSED": "PayPal reports a reversed capture. Inventory and event seats were not changed automatically.",
+  "PAYMENT.REFUND.FAILED": "PayPal reports a failed refund. Review the payment before changing inventory.",
+  "PAYMENT.REFUND.PENDING": "PayPal reports a pending refund. Inventory and event seats were not changed automatically.",
+}[eventType] || "This verified PayPal payment event needs manual review.");
+
+const resolveWebhookReviewIdentifiers = async (facts) => {
+  let sourceOrderId = facts.sourceOrderId;
+
+  if (!sourceOrderId && facts.sourcePaymentId) {
+    const referenceSnapshot = await paymentReferenceRefForCapture(facts.sourcePaymentId).get();
+    const reference = referenceSnapshot.data() || {};
+
+    if (
+      referenceSnapshot.exists
+      && reference.provider === "paypal"
+      && reference.providerCaptureId === facts.sourcePaymentId
+    ) {
+      sourceOrderId = cleanText(reference.providerOrderId);
+    }
+  }
+
+  return {
+    code: facts.eventType.toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""),
+    reason: reviewReasonForWebhookEvent(facts.eventType),
+    resourceId: facts.resourceId,
+    reviewKey: `${facts.eventType}:${facts.sourcePaymentId || facts.resourceId}`,
+    sourceOrderId,
+    sourcePaymentId: facts.sourcePaymentId,
+    state: "review",
+  };
+};
+
+const webhookHeadersFor = (request) => ({
+  authAlgo: request.get("paypal-auth-algo"),
+  certUrl: request.get("paypal-cert-url"),
+  transmissionId: request.get("paypal-transmission-id"),
+  transmissionSignature: request.get("paypal-transmission-sig"),
+  transmissionTime: request.get("paypal-transmission-time"),
+});
+
+const sendWebhookJson = (response, status, payload) => {
+  response.set("Cache-Control", "no-store");
+  response.status(status).json(payload);
+};
+
+exports.paypalWebhook = onRequest(async (request, response) => {
+  if (request.method !== "POST") {
+    response.set("Allow", "POST");
+    sendWebhookJson(response, 405, { received: false });
+    return;
+  }
+
+  let event;
+  let facts;
+  let claim;
+
+  try {
+    assertPaypalWebhookEnabled();
+    event = request.body;
+
+    if (!event || typeof event !== "object" || Array.isArray(event)) {
+      throw new HttpsError("invalid-argument", "The PayPal webhook body is invalid.");
+    }
+
+    const verified = await verifyPayPalWebhook({
+      event,
+      headers: webhookHeadersFor(request),
+      rawEventBody: request.rawBody,
+    });
+
+    if (!verified) {
+      sendWebhookJson(response, 401, { received: false });
+      return;
+    }
+
+    facts = webhookEventFactsFor(event, request.rawBody);
+    claim = await claimPayPalWebhookEvent(facts);
+
+    if (!claim.claimed) {
+      const status = claim.state === "processing" ? 409 : 200;
+      sendWebhookJson(response, status, {
+        duplicate: status === 200,
+        received: status === 200,
+        state: claim.state,
+      });
+      return;
+    }
+
+    let outcome;
+
+    if (facts.eventType === PAYPAL_CAPTURE_COMPLETED) {
+      outcome = await processCompletedCaptureWebhook({
+        facts,
+        webhookLeaseId: claim.leaseId,
+      });
+    } else if (PAYPAL_REVIEW_EVENT_TYPES.has(facts.eventType)) {
+      outcome = await resolveWebhookReviewIdentifiers(facts);
+    } else {
+      outcome = {
+        code: "event_not_subscribed",
+        reason: "",
+        resourceId: facts.resourceId,
+        reviewKey: "",
+        sourceOrderId: facts.sourceOrderId,
+        sourcePaymentId: facts.sourcePaymentId,
+        state: "ignored",
+      };
+    }
+
+    const completed = await finishPayPalWebhookEvent({ claim, facts, outcome });
+
+    if (!completed) {
+      sendWebhookJson(response, 409, { received: false, state: "ownership_changed" });
+      return;
+    }
+
+    sendWebhookJson(response, 200, {
+      received: true,
+      state: outcome.state,
+    });
+  } catch (error) {
+    if (claim?.claimed) {
+      await failPayPalWebhookEvent({ claim, error });
+    }
+
+    logger.error("PayPal webhook processing failed", {
+      error: error.message,
+      eventId: facts?.eventId || "unverified",
+    });
+
+    if (error instanceof WebhookRetryError || error instanceof PayPalGatewayError) {
+      sendWebhookJson(response, 503, { received: false });
+      return;
+    }
+
+    if (error instanceof HttpsError && error.code === "invalid-argument") {
+      sendWebhookJson(response, 400, { received: false });
+      return;
+    }
+
+    if (error instanceof HttpsError && error.code === "failed-precondition") {
+      sendWebhookJson(response, 503, { received: false });
+      return;
+    }
+
+    sendWebhookJson(response, 500, { received: false });
+  }
 });

@@ -138,7 +138,7 @@ Stop the temporary React server, Firebase emulators, and PayPal mock with `Ctrl-
 Do not deploy or enable this checkout path until all of the following are approved and complete:
 
 - Run a real PayPal sandbox checkout with dedicated sandbox buyer and seller accounts.
-- Add and verify automatic PayPal webhook or scheduled recovery for captures that remain unsettled when the buyer leaves the page.
+- Complete the real PayPal sandbox registration and signed-delivery test for the disabled webhook recovery path described in `docs/phase36-webhook-verification.md`.
 - Define refund, partial-refund, dispute, and void reversal movements.
 - Add approved abuse protection for anonymous checkout callables, such as Firebase App Check plus monitored rate limits, before exposing them publicly.
 - Review Firebase Functions dependencies under Node 20 and resolve deployment-relevant audit findings.

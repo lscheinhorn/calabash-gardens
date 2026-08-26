@@ -150,6 +150,9 @@ const clearFixtures = async () => {
   await deleteMatchingDocuments("inventoryMovements", (document) => (
     String(document.data()?.linkedId || "").startsWith(fixturePrefix)
   ));
+  await deleteMatchingDocuments("paymentReferences", (document) => (
+    String(document.data()?.providerOrderId || "").startsWith("PHASE35ORDER")
+  ));
   await adminDb.doc(`adminUsers/${adminUid}`).delete();
 
   try {

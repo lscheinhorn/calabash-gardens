@@ -36,7 +36,11 @@ The admin Firestore Site Preview is a rehearsal path for public backend reads. I
 
 ## Checkout
 
-Checkout uses `@paypal/react-paypal-js` in `src/Components/Paypal/Paypal.js`. Cart totals are calculated in the browser.
+Checkout uses `@paypal/react-paypal-js` in `src/Components/Paypal/Paypal.js`. The public default remains the legacy browser PayPal flow.
+
+A disabled server-owned path is guarded by both React and Functions flags. Firebase callable Functions reload Firestore products/events, calculate trusted totals, reserve inventory, create/capture PayPal orders, and write normalized orders plus deterministic inventory movements. An independently disabled HTTP webhook verifies PayPal signatures against the exact received event bytes and can recover an interrupted completed capture through the same trusted snapshot and finalization path. Refund and reversal notifications enter admin review only; they do not automatically change inventory.
+
+The server checkout and webhook have been verified only against the exact demo Firebase emulators and a loopback PayPal mock. They have not been deployed or enabled for public use.
 
 ## Contact
 
@@ -44,6 +48,6 @@ The contact form uses EmailJS from `src/Components/Contact/Contact.js`.
 
 ## Backend Foundation
 
-`src/firebase-config.js` provides an env-driven Firebase config foundation, and `/admin` provides a Firebase sign-in shell with an allowlist check. Public site data still comes from static resources. Admin draft editors exist for products, events, and site content, but draft Firestore rules must be deployed before real draft writes can be tested against live Firebase.
+`src/firebase-config.js` provides an env-driven Firebase config foundation, and `/admin` provides Firebase sign-in with an allowlist check. Admin draft editors exist for products, events, and site content, alongside Inventory, Orders, Photos, preview, and audit tools. Public site data still defaults to static resources; the admin preview is the Firestore-backed rehearsal path.
 
 The admin route is lazy-loaded from `src/App.js` so Firebase/admin code stays out of the main storefront bundle.

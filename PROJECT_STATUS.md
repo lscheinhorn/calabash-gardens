@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Server-owned PayPal checkout, recoverable order finalization, and the admin payment-review queue are at an emulator- and browser-verified, non-deployed checkpoint on branch `codex/paypal-order-ledger-hardening`.
-Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. The guarded server checkout remains disabled. Real PayPal sandbox validation, automatic recovery, refund/void reversals, deployment review, and explicit live-switch approval remain required.
+Server-owned PayPal checkout, verified webhook recovery, recoverable order finalization, and the admin payment-review queue are at an emulator- and browser-verified, non-deployed checkpoint on branch `codex/paypal-webhook-recovery`.
+Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. The guarded server checkout and webhook remain disabled. Real PayPal sandbox checkout/webhook validation, refund and inventory-disposition policy, deployment review, and explicit live-switch approval remain required.
 
 ## Approved Tech Stack
 
@@ -20,7 +20,7 @@ Firestore draft/admin editing works locally with an approved user, protected sta
 
 ## Current Phase
 
-Phase 35: Server-owned PayPal checkout and order-ledger hardening.
+Phase 36: Verified PayPal webhook recovery and payment-change review.
 
 ## Done Work
 
@@ -145,6 +145,12 @@ Phase 35: Server-owned PayPal checkout and order-ledger hardening.
 - Added an authenticated admin `Check Status` workflow for unsettled PayPal checkout records without allowing a non-terminal approved payment to release inventory.
 - Added an emulator-only PayPal API override, deterministic local PayPal mock, and guarded Phase 35 verification harness covering validation, concurrency, idempotency, recovery, and provider mismatch cases.
 - Browser-verified one paid order and one uncertain-payment review record through the real admin Orders and Inventory sections against Firebase emulators; order totals, stock, seat counts, and retained reservation matched exactly.
+- Added an independently gated HTTP PayPal webhook endpoint that verifies signatures with the exact raw event bytes before any event-content business write.
+- Added expected merchant/payee verification, a server-owned `paypalWebhookEvents` processing inbox, short webhook and checkout recovery leases, retry-safe delivery handling, and deterministic capture-to-order payment references.
+- Reused the Phase 35 trusted checkout snapshot, provider re-fetch, reservation ownership, and deterministic finalization path so a completed webhook can recover an interrupted capture exactly once without inventing late inventory changes.
+- Added admin-visible manual review for verified refund, reversal, pending-refund, pending-capture, declined-capture, mismatch, orphan, and paid-without-reservation cases without automatically restocking products, reopening event seats, or changing paid-order financial status.
+- Tightened Firestore client rules so admins retain the current manual Inventory adjustment flow but cannot create provider-looking movements, webhook inbox records, or payment references.
+- Added a deterministic Phase 36 webhook emulator harness that proves exact-body verification, duplicate/concurrent idempotency, transient retry recovery, capture mapping, no-auto-restock behavior, and the server/client rules boundary.
 
 ## In Progress Work
 
@@ -191,7 +197,7 @@ Phase 35: Server-owned PayPal checkout and order-ledger hardening.
 - Verify Jette can use preview content edit mode comfortably across Desktop, Tablet, and Mobile preview sizes before broader content-edit training.
 - Add event menu/document upload controls to the Event Editor before event media can be fully managed from preview edit mode.
 - Run a real PayPal sandbox buyer/seller checkout after credentials are configured and Luke approves the external test.
-- Add automatic verified PayPal webhook or scheduled recovery so unsettled captures do not depend on an admin opening Orders and clicking `Check Status`.
+- Register and verify the disabled webhook against a real PayPal sandbox REST app only after Luke approves the external test and server secret setup.
 - Define and test refund, partial-refund, dispute, and void reversal movements before Firebase inventory is authoritative.
 - Keep production Inventory mutation testing deferred. Emulator verification now covers product stock, event capacity/holds, movement creation, concurrent ticket-sale preservation, and stale bulk-save rejection without touching live business data.
 - Replace anonymous public waitlist writes with a protected server endpoint plus App Check/CAPTCHA and throttling before treating the waitlist as production-ready.
@@ -229,8 +235,8 @@ Phase 35: Server-owned PayPal checkout and order-ledger hardening.
 ## Risks And Open Questions
 
 - Public checkout still uses the legacy client-side PayPal flow by default. The server-owned path is isolated behind two flags and has not been deployed or tested against real PayPal sandbox accounts.
-- Server checkout now binds capture to a token-protected trusted snapshot, reserves inventory before capture, and persists recoverable uncertain states, but automatic webhook/scheduled recovery is still required before public use.
-- Refunds, partial refunds, disputes, and voids do not yet create reversing inventory movements.
+- Server checkout now binds capture to a token-protected trusted snapshot, reserves inventory before capture, persists recoverable uncertain states, and has a disabled verified webhook recovery path; the path still requires real PayPal sandbox delivery verification before public use.
+- Refunds, partial refunds, disputes, reversals, and voids are recorded for manual review but do not yet update the financial ledger, change order status, or create approved reversing inventory movements.
 - Anonymous checkout callables do not yet enforce App Check or another approved abuse-control/rate-limit layer.
 - The legacy browser checkout fallback must be removed or explicitly retired when Firebase orders become authoritative; a stale browser fallback must not silently accept payments outside the order ledger.
 - Luke approved adding the guarded Firebase Functions scaffold in this phase, but deploying Functions or enabling server checkout for the public site still requires separate approval.
@@ -528,6 +534,16 @@ Phase 35: Server-owned PayPal checkout and order-ledger hardening.
 - 2026-08-26: `npm audit --omit=dev` for the existing Functions lockfile reported 12 production dependency findings (1 low, 10 moderate, 1 high). No dependencies or lockfiles were changed; upgrades remain a separate pre-deployment review under Node 20.
 - 2026-08-26: Phase 35 fixtures and the emulator-only admin were deleted, temporary ports `3003`, `5001`, `8080`, `8787`, and `9099` were stopped, and the normal local site remained available on `127.0.0.1:3001`.
 - Docs checked: added `docs/phase35-checkout-verification.md` and updated admin setup, order-ledger planning, decisions, current status, production gates, and verification history. No protected business content was edited.
+- 2026-08-26: The Phase 36 deterministic webhook matrix passed all six groups against the loopback PayPal mock and Firebase Auth, Firestore, and Functions emulators. It proved invalid-signature rejection, exact pretty-printed body verification, durable ignored events, four concurrent completed deliveries, one-time capture recovery, deterministic capture references, mismatch/orphan/no-reservation review, transient provider retry, refund/reversal review without inventory reversal, and server-only provider records.
+- 2026-08-26: The complete Phase 35 16-scenario checkout matrix passed again after webhook integration, including the delayed capture/reconciliation lease race and all trusted-snapshot, idempotency, reservation, provider-mismatch, and recovery cases.
+- 2026-08-26: Browser-controlled Phase 36 admin verification showed one recovered paid order with `$135.00` subtotal, `$17.00` shipping, and `$152.00` total; a refund labeled `Manual review only`; and a paid-without-reservation record whose `Check Status` action did not request a second payment or decrement stock late. Inventory remained `4 on hand` for the no-reservation product and `21 of 30 available` with `7 sold / 2 held` for the recovered event.
+- 2026-08-26: Independent review found three P2 hardening gaps: webhook reviews depended on the checkout client flag, Orders read the full webhook history, and the shared finalizer did not repeat the capture-ID check before writing a payment reference. A separate admin webhook-review flag, a `reviewRequired == true` query, and the finalizer capture-ID assertion fixed all three.
+- 2026-08-26: Browser-controlled follow-up verified Payment Review in two modes. With checkout and webhook review enabled, capture reconciliation remained available; with checkout disabled and only webhook review enabled, verified completion/refund reviews remained visible and correctly showed manual-only handling. Both pages had no application errors.
+- 2026-08-26: Final Phase 36 application checks passed: 10 React/Jest tests, production build, Functions and changed-script syntax checks, `firebase.json` parse, `git diff --check`, protected-file diff check, and Firestore rule behavior through the emulator. Build retained the same four existing unused-code warnings.
+- 2026-08-26: The Functions production-dependency audit remains unchanged at 12 findings (1 low, 10 moderate, 1 high). No dependency or lockfile was changed because the available full remediation includes a breaking Firebase Admin upgrade and remains a separate Node 20 pre-deployment phase.
+- 2026-08-26: Focused independent re-review returned PASS after the three fixes and reconfirmed that protected business content files remain unchanged.
+- 2026-08-26: Phase 36 fixtures and the emulator-only admin were deleted, temporary browser tabs were closed, temporary ports `3003`, `3004`, `5001`, `8080`, `8787`, and `9099` were stopped, and the normal local site remained available on `127.0.0.1:3001`.
+- Docs checked: added the Phase 36 plan and verification procedure and updated README, architecture, admin setup/data shapes, Phase 35 gates, order-ledger planning, current status, production gates, risks, and verification history. No protected business content was edited.
 
 ## Commits
 
@@ -574,6 +590,7 @@ Phase 35: Server-owned PayPal checkout and order-ledger hardening.
 - `feat: harden waitlists and inventory transactions` (current branch)
 - `test: verify waitlist and inventory emulators` (current branch)
 - `feat: harden server paypal checkout` (current branch)
+- `feat: add paypal webhook recovery` (current branch)
 
 ## Deployments
 

@@ -2,6 +2,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   collection,
   getDocs,
+  query,
+  where,
 } from "firebase/firestore";
 import { httpsCallable } from "firebase/functions";
 import { functions as firebaseFunctions } from "../../firebase-config";
@@ -114,7 +116,7 @@ const normalizeOrder = (snapshot) => {
 };
 
 const labelFor = (value) => String(value || "unknown")
-  .replace(/_/g, " ")
+  .replace(/[._]/g, " ")
   .replace(/\b\w/g, (letter) => letter.toUpperCase());
 
 const uniqueValues = (orders, field) => Array.from(new Set(orders
@@ -141,13 +143,55 @@ const normalizeCheckoutRecovery = (snapshot) => {
   const recovery = data.recovery || {};
 
   return {
+    canCheckStatus: Boolean(data.sourceOrderId),
     id: snapshot.id,
+    kind: "checkout",
     reason: String(recovery.reason || "Payment status needs confirmation."),
     required: recovery.required === true || recoveryStatuses.has(data.status),
+    reviewKey: `checkout:${String(data.sourceOrderId || snapshot.id)}`,
     sourceOrderId: String(data.sourceOrderId || ""),
     status: String(data.status || "unknown"),
     updatedAt: data.updatedAt || data.createdAt || null,
   };
+};
+
+const normalizeWebhookRecovery = (snapshot) => {
+  const data = snapshot.data() || {};
+  const eventType = String(data.eventType || "paypal_webhook");
+  const sourceOrderId = String(data.sourceOrderId || "");
+  const canCheckStatus = [
+    "PAYMENT.CAPTURE.COMPLETED",
+    "PAYMENT.CAPTURE.DECLINED",
+    "PAYMENT.CAPTURE.PENDING",
+  ].includes(eventType) && Boolean(sourceOrderId);
+
+  return {
+    canCheckStatus,
+    id: snapshot.id,
+    kind: "webhook",
+    reason: String(data.reviewReason || "A verified PayPal event needs manual review."),
+    required: data.processingState === "review" && data.reviewRequired === true,
+    reviewKey: String(data.reviewKey || `${eventType}:${data.resourceId || snapshot.id}`),
+    sourceOrderId,
+    status: eventType,
+    updatedAt: data.updatedAt || data.processedAt || data.receivedAt || null,
+  };
+};
+
+const sortRecoveries = (recoveries) => [...recoveries].sort((first, second) => (
+  (toDate(second.updatedAt)?.getTime() || 0) - (toDate(first.updatedAt)?.getTime() || 0)
+));
+
+const dedupeRecoveries = (recoveries) => {
+  const byReviewKey = new Map();
+
+  sortRecoveries(recoveries).forEach((recovery) => {
+    if (!byReviewKey.has(recovery.reviewKey)) {
+      byReviewKey.set(recovery.reviewKey, recovery);
+    }
+  });
+
+  return Array.from(byReviewKey.values());
 };
 
 export default function OrdersAdmin({ db }) {
@@ -159,6 +203,7 @@ export default function OrdersAdmin({ db }) {
   const [recoveries, setRecoveries] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState("");
   const serverCheckoutEnabled = process.env.REACT_APP_PAYPAL_SERVER_CHECKOUT === "enabled";
+  const webhookReviewEnabled = process.env.REACT_APP_PAYPAL_WEBHOOK_REVIEW === "enabled";
 
   const loadOrders = useCallback(async () => {
     setIsLoading(true);
@@ -167,17 +212,48 @@ export default function OrdersAdmin({ db }) {
     try {
       const snapshot = await getDocs(collection(db, "orders"));
       const nextOrders = sortOrdersByCreatedAt(snapshot.docs.map(normalizeOrder));
+      const finalizedSourceOrderIds = new Set(nextOrders
+        .map((order) => order.sourceOrderId)
+        .filter(Boolean));
       let nextRecoveries = [];
 
-      if (serverCheckoutEnabled) {
+      if (serverCheckoutEnabled || webhookReviewEnabled) {
         try {
-          const checkoutSnapshot = await getDocs(collection(db, "paypalCheckouts"));
-          nextRecoveries = checkoutSnapshot.docs
+          const [checkoutSnapshot, webhookSnapshot] = await Promise.all([
+            serverCheckoutEnabled
+              ? getDocs(collection(db, "paypalCheckouts"))
+              : Promise.resolve({ docs: [] }),
+            getDocs(query(
+              collection(db, "paypalWebhookEvents"),
+              where("reviewRequired", "==", true),
+            )),
+          ]);
+          const checkoutRecoveries = checkoutSnapshot.docs
             .map(normalizeCheckoutRecovery)
-            .filter((checkout) => checkout.required)
-            .sort((first, second) => (
-              (toDate(second.updatedAt)?.getTime() || 0) - (toDate(first.updatedAt)?.getTime() || 0)
-            ));
+            .filter((checkout) => checkout.required);
+          const checkoutRecoveryOrderIds = new Set(checkoutRecoveries
+            .map((checkout) => checkout.sourceOrderId)
+            .filter(Boolean));
+          const webhookRecoveries = webhookSnapshot.docs
+            .map(normalizeWebhookRecovery)
+            .filter((webhook) => (
+              webhook.required
+              && !(
+                webhook.canCheckStatus
+                && (
+                  checkoutRecoveryOrderIds.has(webhook.sourceOrderId)
+                  || finalizedSourceOrderIds.has(webhook.sourceOrderId)
+                )
+              )
+            ))
+            .map((webhook) => ({
+              ...webhook,
+              canCheckStatus: serverCheckoutEnabled && webhook.canCheckStatus,
+            }));
+          nextRecoveries = dedupeRecoveries([
+            ...checkoutRecoveries,
+            ...webhookRecoveries,
+          ]);
         } catch (error) {
           setMessage("Orders loaded, but payment review records could not be loaded.");
         }
@@ -198,7 +274,7 @@ export default function OrdersAdmin({ db }) {
     } finally {
       setIsLoading(false);
     }
-  }, [db, serverCheckoutEnabled]);
+  }, [db, serverCheckoutEnabled, webhookReviewEnabled]);
 
   useEffect(() => {
     loadOrders();
@@ -325,20 +401,22 @@ export default function OrdersAdmin({ db }) {
           <h4 id="payment-review-title">Payment Review</h4>
           <div className="admin_payment_review_list">
             {recoveries.map((recovery) => (
-              <div className="admin_payment_review_row" key={recovery.id}>
+              <div className="admin_payment_review_row" key={`${recovery.kind}:${recovery.id}`}>
                 <span>
                   <strong>{recovery.sourceOrderId || recovery.id}</strong>
                   <small>{labelFor(recovery.status)} / {formatDateTime(recovery.updatedAt)}</small>
                   <small>{recovery.reason}</small>
                 </span>
-                <button
-                  className="admin_secondary_button"
-                  disabled={reconcilingOrderId === recovery.sourceOrderId}
-                  onClick={() => reconcileOrder(recovery.sourceOrderId)}
-                  type="button"
-                >
-                  {reconcilingOrderId === recovery.sourceOrderId ? "Checking..." : "Check Status"}
-                </button>
+                {recovery.canCheckStatus ? (
+                  <button
+                    className="admin_secondary_button"
+                    disabled={reconcilingOrderId === recovery.sourceOrderId}
+                    onClick={() => reconcileOrder(recovery.sourceOrderId)}
+                    type="button"
+                  >
+                    {reconcilingOrderId === recovery.sourceOrderId ? "Checking..." : "Check Status"}
+                  </button>
+                ) : <small>Manual review only</small>}
               </div>
             ))}
           </div>

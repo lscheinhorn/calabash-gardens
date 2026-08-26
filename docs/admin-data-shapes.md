@@ -501,7 +501,7 @@ Order persistence is planned as a shared sales ledger for PayPal website sales, 
 
 Rules currently deny client order writes. Payment/order facts should be written by a server/cloud function or another approved backend after PayPal/Square verification, not directly by the browser.
 
-Admin Orders foundation:
+Admin Orders foundation and guarded recovery view:
 
 - The admin dashboard has a top-level `Orders` section.
 - The section is read-only in this phase.
@@ -509,8 +509,10 @@ Admin Orders foundation:
 - It filters client-side by source, payment status, fulfillment status, and search text.
 - It tolerates missing/partial order fields while the backend shape is still being built.
 - It shows an empty state until server-side PayPal capture, Square import, or manual order entry writes records.
-- It does not create, update, delete, fulfill, import, export, or reconcile orders yet.
-- It does not change checkout, cart, PayPal buttons, product inventory counts, event capacity, or public storefront reads.
+- When guarded server checkout is explicitly enabled, it also reads unsettled `paypalCheckouts` and verified `paypalWebhookEvents` records into Payment Review.
+- Authenticated `Check Status` can reconcile an unsettled capture through the server Function. Refund and reversal records are manual-review-only and cannot restock products or release event seats from the browser.
+- It does not create, update, delete, fulfill, import, or export orders. The guarded reconciliation path and webhook remain disabled and undeployed for public use.
+- It does not change the default public checkout, cart, PayPal buttons, or static storefront reads.
 
 See `docs/order-ledger-and-reconciliation-plan.md` for the target order, inventory movement, PayPal capture, Square reconciliation, and broader admin Orders UI plan.
 

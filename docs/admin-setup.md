@@ -22,8 +22,17 @@ Optional guarded checkout variables:
 
 - `REACT_APP_PAYPAL_CLIENT_ID`: the matching PayPal sandbox or live browser client ID for the selected environment.
 - `REACT_APP_PAYPAL_SERVER_CHECKOUT`: keep blank during the transition; set to `enabled` only in an explicitly approved test or deployment environment.
+- `REACT_APP_PAYPAL_WEBHOOK_REVIEW`: keep blank during the transition; set to `enabled` only where the admin should load verified webhook review records. This does not enable the server webhook.
 
 Server-only PayPal credentials belong in the Functions environment or approved secret storage described by `functions/.env.example`; they must never use the `REACT_APP_` prefix.
+
+The disabled webhook path has a separate server gate and configuration:
+
+- `PAYPAL_WEBHOOK_ENABLED`: keep `false` until deployment and webhook registration are explicitly approved.
+- `PAYPAL_WEBHOOK_ID`: the ID PayPal assigns to the webhook registered for the exact deployed Functions HTTPS URL.
+- `PAYPAL_MERCHANT_ID`: the intended Calabash PayPal merchant/payee ID used to reject captures for another receiver.
+
+`PAYPAL_CHECKOUT_ENABLED` does not enable the webhook, and `PAYPAL_WEBHOOK_ENABLED` does not enable browser checkout. Keep both disabled in production until all gates are approved.
 
 ## Firebase Console Setup
 
@@ -68,10 +77,10 @@ Minimum fields:
 - Approved admins can view, filter, and edit media metadata in the Photos section.
 - Approved admins can validate and seed missing static products into Firestore drafts.
 - Approved admins can edit events, site content, and product/event inventory through Firestore-backed draft and inventory flows without changing protected static resource files.
-- The Orders section can list normalized Firestore orders and, when guarded server checkout is enabled, show unsettled PayPal checkout records for authenticated status checks.
-- The guarded PayPal server checkout is emulator-verified but remains disabled and undeployed for public use.
+- The Orders section can list normalized Firestore orders and, when guarded server checkout is enabled, show unsettled PayPal checkouts and verified webhook review records.
+- The guarded PayPal server checkout and independently gated webhook recovery path are emulator-verified but remain disabled and undeployed for public use.
 - Public product pages still read static product data.
 
 ## Next Guardrail
 
-Before any production checkout switch, follow the deployment gates in `docs/phase35-checkout-verification.md`. This includes real PayPal sandbox validation, automatic recovery, refund/void handling, Functions and Firestore rule review, secret configuration, and explicit approval to deploy and enable the server path.
+Before any production checkout switch, follow the deployment gates in `docs/phase35-checkout-verification.md` and `docs/phase36-webhook-verification.md`. This includes real PayPal sandbox checkout and webhook validation, refund/void policy, Functions and Firestore rule review, secret configuration, abuse controls, and explicit approval to deploy and enable the server path.

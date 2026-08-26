@@ -5,7 +5,7 @@ This plan defines the backend path for tracking all Calabash sales in one place 
 ## Current State
 
 - Public PayPal checkout still uses the legacy client-side flow by default, so customer-facing behavior has not changed.
-- A guarded server-owned create/capture path exists behind `REACT_APP_PAYPAL_SERVER_CHECKOUT=enabled` and `PAYPAL_CHECKOUT_ENABLED=true`; it has been verified only against isolated Firebase emulators and a local PayPal mock.
+- A guarded server-owned create/capture path exists behind `REACT_APP_PAYPAL_SERVER_CHECKOUT=enabled` and `PAYPAL_CHECKOUT_ENABLED=true`; an independently gated verified webhook path exists behind `PAYPAL_WEBHOOK_ENABLED=true`. Both have been verified only against isolated Firebase emulators and a local PayPal mock.
 - Firestore `orders` rules currently deny client writes.
 - The guarded server path writes normalized paid orders and inventory movements and updates tracked product stock and event `ticketsSold` transactionally.
 - Product variants can carry Firebase inventory metadata (`sku`, `stockOnHand`, `lowStockThreshold`, and tracking flags) in the admin product draft flow.
@@ -124,7 +124,7 @@ Implementation checkpoint on branch `codex/paypal-order-ledger-hardening`:
 - Completed captures finalize one normalized `orders/{orderId}` record and deterministic `inventoryMovements` exactly once. Pending or uncertain captures retain the reservation for recovery; only explicit terminal payment failure releases that exact reservation.
 - The admin Orders section displays unsettled checkout records and exposes an authenticated `Check Status` action that cannot release a non-terminal approved payment.
 - `docs/phase35-checkout-verification.md` records the deterministic emulator and browser test procedure and result.
-- This checkpoint still needs a real PayPal sandbox checkout, automatic webhook/scheduled recovery, refund/void reversal handling, dependency review under Node 20, rule/Function deployment approval, and explicit live enablement.
+- This checkpoint still needs a real PayPal sandbox checkout and signed webhook delivery, refund/void reversal handling, dependency review under Node 20, rule/Function deployment approval, and explicit live enablement.
 - The legacy browser capture fallback must not remain as the silent production fallback after Firebase orders become authoritative.
 
 ### Phase C: PayPal Webhook Reconciliation
@@ -137,6 +137,19 @@ Add PayPal webhooks as a safety net after server-side capture.
 - Do not let webhooks double-count inventory movements.
 - Reuse the same snapshot verification, reservation ownership, and deterministic order/movement finalization helpers as callable reconciliation.
 - Do not release reservations for `APPROVED`, `PENDING`, provider timeout, or unknown states. Release only after a verified terminal non-payment state.
+
+Implementation checkpoint on branch `codex/paypal-webhook-recovery`:
+
+- `paypalWebhook` is an HTTP Function with an independent disabled-by-default gate, server credentials, webhook ID, and expected merchant ID.
+- Signature verification returns the exact raw event bytes to PayPal's verification endpoint before any business write based on event content.
+- `paypalWebhookEvents/{eventId}` is a server-written, admin-readable inbox with attempt counts, short processing leases, terminal duplicate acknowledgement, and retryable failures.
+- Completed capture events re-fetch the full PayPal order and reuse the Phase 35 snapshot, amount, currency, reference, merchant, reservation, and deterministic finalization checks.
+- `paymentReferences/paypal_capture_{captureId}` maps captures to normalized orders for later refund/reversal lookup without an order scan.
+- A completed payment without a matching preexisting reservation enters review; the webhook does not invent a late stock decrement.
+- Refund, reversal, pending-refund, pending-capture, and declined-capture events enter the admin review queue and do not automatically restock products, release event seats, change the order's financial status, or write reversing movements.
+- Firestore client rules keep webhook records, capture references, and provider-looking movements server-owned while preserving the existing admin manual-adjustment flow.
+- `docs/phase36-webhook-verification.md` records the deterministic emulator matrix and browser acceptance test.
+- The checkpoint remains disabled and undeployed. Real PayPal sandbox webhook delivery and approved refund/disposition policy remain production gates.
 
 ## Square Reconciliation Path
 
@@ -177,7 +190,7 @@ Current decision: keep Firestore as the Calabash admin ledger and inventory sour
 - Admins can read orders and update fulfillment fields.
 - Server/backend writes payment facts, paid orders, and inventory movements.
 - Order IDs and source IDs must be idempotent.
-- Refunds and voids must create reversing movements instead of editing historical sale movement quantities.
+- Approved refunds and voids must create new reversing movements instead of editing historical sale movement quantities. A payment notification alone is not approval to restock a physical product or reopen an event seat.
 - Capture must be bound to the exact server-validated order snapshot created for the PayPal order ID; browser-supplied capture contents are never authoritative.
 - A payment/inventory failure must produce a recoverable recorded state rather than a captured payment with no saved order.
 - Public waitlist writes must move behind a server-owned endpoint with App Check/CAPTCHA and throttling; Firestore field and event-eligibility rules cannot prevent repeated anonymous submissions.
@@ -207,6 +220,7 @@ Expected admin features:
 - Full events cannot be oversold by simultaneous checkout.
 - Admin order list shows the saved PayPal order.
 - Uncertain capture states remain visible and recoverable after the browser leaves.
+- Verified completed-capture webhooks recover an interrupted finalization exactly once.
 - Refund/void handling is defined before inventory counts are considered final.
 - Square sales can be represented without changing PayPal or website order shape.
 

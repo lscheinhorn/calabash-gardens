@@ -1,4 +1,5 @@
 const http = require("http");
+const crypto = require("crypto");
 
 const host = "127.0.0.1";
 const port = Number(process.env.PAYPAL_MOCK_PORT || 8787);
@@ -10,6 +11,7 @@ let oauthRequests = 0;
 let createAttempts = 0;
 let captureAttempts = 0;
 let retrieveAttempts = 0;
+let verifyAttempts = 0;
 
 const json = (response, status, payload) => {
   const body = JSON.stringify(payload);
@@ -20,14 +22,18 @@ const json = (response, status, payload) => {
   response.end(body);
 };
 
-const readJson = async (request) => {
+const readText = async (request) => {
   const chunks = [];
 
   for await (const chunk of request) {
     chunks.push(chunk);
   }
 
-  const text = Buffer.concat(chunks).toString("utf8");
+  return Buffer.concat(chunks).toString("utf8");
+};
+
+const readJson = async (request) => {
+  const text = await readText(request);
   return text ? JSON.parse(text) : {};
 };
 
@@ -43,6 +49,10 @@ const completedOrder = (order, overrides = {}) => {
   if (overrides.wrongCustomId) {
     purchaseUnit.custom_id = "wrong-snapshot-hash";
   }
+
+  purchaseUnit.payee = {
+    merchant_id: "PHASE36MERCHANT",
+  };
 
   purchaseUnit.payments = {
     captures: [
@@ -93,6 +103,7 @@ const reset = () => {
   createAttempts = 0;
   captureAttempts = 0;
   retrieveAttempts = 0;
+  verifyAttempts = 0;
 };
 
 const state = () => ({
@@ -103,9 +114,11 @@ const state = () => ({
   orders: Array.from(orders.values()).map((order) => ({
     captureMode: order.captureMode,
     id: order.id,
+    retrieveFailuresRemaining: order.retrieveFailuresRemaining || 0,
     status: currentOrder(order).status,
   })),
   retrieveAttempts,
+  verifyAttempts,
 });
 
 const server = http.createServer(async (request, response) => {
@@ -124,8 +137,37 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "POST" && url.pathname === "/__control") {
       const payload = await readJson(request);
-      nextCaptureMode = String(payload.nextCaptureMode || "complete");
-      json(response, 200, { nextCaptureMode });
+
+      if (payload.nextCaptureMode) {
+        nextCaptureMode = String(payload.nextCaptureMode);
+      }
+
+      if (payload.completeOrderId) {
+        const order = orders.get(String(payload.completeOrderId));
+
+        if (!order) {
+          json(response, 404, { error: "order_not_found" });
+          return;
+        }
+
+        order.representation = completedOrder(order);
+      }
+
+      if (payload.retrieveFailureOrderId) {
+        const order = orders.get(String(payload.retrieveFailureOrderId));
+
+        if (!order) {
+          json(response, 404, { error: "order_not_found" });
+          return;
+        }
+
+        order.retrieveFailuresRemaining = Math.max(
+          0,
+          Number.parseInt(payload.retrieveFailuresRemaining, 10) || 0,
+        );
+      }
+
+      json(response, 200, state());
       return;
     }
 
@@ -137,6 +179,35 @@ const server = http.createServer(async (request, response) => {
 
     if (request.method === "GET" && url.pathname === "/__state") {
       json(response, 200, state());
+      return;
+    }
+
+    if (
+      request.method === "POST"
+      && url.pathname === "/v1/notifications/verify-webhook-signature"
+    ) {
+      verifyAttempts += 1;
+      const exactBody = await readText(request);
+      const payload = exactBody ? JSON.parse(exactBody) : {};
+      const eventMatch = exactBody.match(/,"webhook_event":([\s\S]*)}$/);
+      const exactEventBody = eventMatch ? eventMatch[1] : "";
+      const expectedSignature = `valid-signature-${crypto
+        .createHash("sha256")
+        .update(exactEventBody)
+        .digest("hex")}`;
+      const requiredFieldsPresent = [
+        payload.auth_algo,
+        payload.cert_url,
+        payload.transmission_id,
+        payload.transmission_time,
+        payload.webhook_event,
+      ].every(Boolean);
+      const verified = requiredFieldsPresent
+        && payload.webhook_id === "phase36-emulator-webhook"
+        && payload.transmission_sig === expectedSignature;
+      json(response, 200, {
+        verification_status: verified ? "SUCCESS" : "FAILURE",
+      });
       return;
     }
 
@@ -159,6 +230,7 @@ const server = http.createServer(async (request, response) => {
         id: orderId,
         request: payload,
         representation: null,
+        retrieveFailuresRemaining: 0,
       };
       nextCaptureMode = "complete";
       orders.set(orderId, order);
@@ -230,6 +302,12 @@ const server = http.createServer(async (request, response) => {
 
       if (!order) {
         json(response, 404, { name: "RESOURCE_NOT_FOUND" });
+        return;
+      }
+
+      if (order.retrieveFailuresRemaining > 0) {
+        order.retrieveFailuresRemaining -= 1;
+        json(response, 500, { name: "INTERNAL_SERVER_ERROR" });
         return;
       }
 

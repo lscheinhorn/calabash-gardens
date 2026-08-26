@@ -10,6 +10,7 @@ Calabash Gardens is a React storefront and event-booking site for a Vermont saff
 - Redux Toolkit
 - PayPal React SDK
 - EmailJS
+- Firebase Auth, Firestore, Storage, and guarded Functions foundations
 - Static JS resource files for products, events, content, and event inventory
 
 ## Local Setup
@@ -52,9 +53,11 @@ npm run build
 - `docs/data-model.md`: current static data model
 - `docs/maintenance.md`: common maintenance tasks
 - `docs/agent-workflow.md`: Git and phase workflow
+- `docs/phase35-checkout-verification.md`: isolated server-checkout verification
+- `docs/phase36-webhook-verification.md`: isolated webhook/recovery verification
 
 ## Notes
 
-The app currently uses static product and event data. Firebase config and an admin sign-in shell exist, but admin editing and public content backend data reads are not active.
+The public app still defaults to static product, event, and site content. The Firebase-backed admin portal supports draft editing, preview, media, inventory, and order-review foundations. Guarded server checkout and webhook recovery exist only as disabled, emulator-verified pre-live paths; they are not deployed or active on the public site.
 
 Before implementation work, confirm scope in `PROJECT_STATUS.md`, use a feature branch, and get Luke's approval.
