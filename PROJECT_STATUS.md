@@ -4,7 +4,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Admin inventory concurrency and event-bound waitlist rule hardening are at a verified, non-deployable checkpoint on branch `codex/waitlist-inventory-hardening`.
+Admin inventory concurrency and event-bound waitlist rule hardening are at an emulator-verified, non-deployable checkpoint on branch `codex/waitlist-inventory-hardening`.
 Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data. The guarded PayPal Functions path remains disabled. The local waitlist rules are stricter but do not provide rate limiting or per-occurrence capacity, so the public waitlist is not production-ready.
 
 ## Approved Tech Stack
@@ -133,6 +133,10 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - Made public product variant normalization conservative: unique explicit price indexes take priority, legacy array-order fallback is used only when unambiguous, and mixed/duplicate index collisions cannot silently overwrite another variant mapping.
 - Tightened local `eventWaitlist` create rules so submissions must use server time and match an existing active, published, future, full, waitlist-enabled event's ID, title, and listed date.
 - Added the first automated React/Jest coverage in the repository: 10 focused tests for legacy indexes, collision handling, concurrent product/event edits, variant preservation, ticket capacity, and movement direction.
+- Added a production-blocked Firebase Auth/Firestore emulator harness with deterministic fixtures and a development-only React emulator switch.
+- Verified inventory success and stale-edit conflict behavior through the real admin UI against emulators, including concurrent ticket-sale preservation, atomic no-partial-write rejection, and exact inventory movement records.
+- Verified the public waitlist rule matrix against the Firestore emulator: one eligible write succeeded and missing, inactive, not-full, disabled, unpublished, past, title-mismatched, and date-mismatched submissions were denied.
+- Scoped emulator cleanup to Phase 34 fixture IDs and verified it preserves unrelated local documents and Auth users; emulator mode now fails closed for non-demo projects and redirects Auth, Firestore, Functions, and Storage to loopback endpoints.
 
 ## In Progress Work
 
@@ -180,7 +184,7 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - Add event menu/document upload controls to the Event Editor before event media can be fully managed from preview edit mode.
 - Design real inventory/order/capacity decrement logic with server-side PayPal confirmation and Firestore transactions so successful checkout writes order records, decrements product variant stock, and updates computed event `ticketsSold`.
 - Finish the server-side PayPal validation/decrement phase before enabling server checkout publicly: reload Firestore products/events, recalculate prices/shipping from trusted data, enforce stock/capacity, write `inventoryMovements`, and update event `ticketsSold` in a transaction.
-- Finish live Inventory verification with an explicitly approved stock movement and event capacity/hold change. Transactional product metadata save/reload/restore is verified, but movement creation and event capacity persistence still need controlled data-changing tests.
+- Keep production Inventory mutation testing deferred. Emulator verification now covers product stock, event capacity/holds, movement creation, concurrent ticket-sale preservation, and stale bulk-save rejection without touching live business data.
 - Replace anonymous public waitlist writes with a protected server endpoint plus App Check/CAPTCHA and throttling before treating the waitlist as production-ready.
 - Decide a per-occurrence event date/capacity shape before supporting accurate waitlists for multi-date events; the current event model has one canonical timestamp and event-wide counts.
 - Review and approve any Firestore rules-only deploy separately; this phase does not merge, push, deploy, or enable public Firestore storefront reads.
@@ -233,6 +237,8 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - Draft collection rules for `productDrafts`, `eventDrafts`, and `siteContentDrafts` are deployed; admin draft reads and writes require an approved admin user.
 - Event waitlist, `ticketsSold`, and `inventoryMovements` rule changes were deployed to `calabash-54fb5` on 2026-06-22 after Luke approved a rules-only deploy.
 - Local `eventWaitlist` rules now bind creates to an existing active, published, future, full, waitlist-enabled event with matching ID/title/date, but those changes are not deployed. Rules alone cannot rate-limit anonymous submissions; a server endpoint with abuse protection is still required before production use.
+- Local emulator verification requires Java 11 or newer. Homebrew OpenJDK 21 was used successfully without changing the system Java configuration.
+- Installing the already-declared Functions dependencies for emulator verification reported 12 npm audit findings (1 low, 10 moderate, 1 high) and a local Node `23.7.0` versus Functions `node:20` engine warning; review dependency findings and use Node 20 before any Functions deployment.
 - Multi-date events still have one canonical timestamp and event-wide capacity counts. A listed past occurrence can pass the current canonical future-date check when another occurrence is future, so per-occurrence waitlisting needs a new approved data shape.
 - `.firebaserc` is currently commented out and triggers a Firebase CLI JSON warning. Firestore rules were deployed with the explicit `--project calabash-54fb5` flag, so the warning did not affect the deploy.
 - Product editor draft writes require Firebase env values, deployed/reviewed draft rules, and an approved admin record for real testing.
@@ -334,6 +340,7 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - Inventory bulk saves must use one Firestore transaction, read all affected records before writes, preserve concurrent fields Jette did not edit, and abort the entire save if an edited field changed since load.
 - Product inventory variants are identified by stable variant ID plus `priceOptionIndex`; array position alone is compatibility data and must not silently override an explicit or duplicate index.
 - Public waitlist rules may validate event eligibility, but anonymous abuse prevention and per-occurrence capacity require a later server-owned design.
+- Firebase emulator testing must use a `demo-*` project ID and fixed loopback Auth, Firestore, Functions, and Storage endpoints. The React emulator connector is development-only and requires the explicit `REACT_APP_FIREBASE_USE_EMULATORS=true` flag.
 
 ## Verification History
 
@@ -492,6 +499,16 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - 2026-08-26: Browser-controlled admin verification saved a harmless `Cilantro Salt 2 oz` low-stock threshold through the new transaction path, confirmed it survived a full reload, restored it to blank, and confirmed the restored value survived reload. Browser diagnostics contained no application errors.
 - 2026-08-26: Independent read-only QA found no transaction bug and confirmed protected resource and PayPal files were untouched. Its mixed-index overwrite finding was fixed and covered by a tenth test; anonymous waitlist spam and multi-date occurrence accuracy remain documented blockers.
 - Docs checked: `PROJECT_STATUS.md` and `docs/order-ledger-and-reconciliation-plan.md` were updated for the Phase 34 behavior, security boundary, verification, and remaining risks.
+- 2026-08-26: Firebase Auth and Firestore emulators started under the isolated `demo-calabash-gardens` project using OpenJDK 21; deterministic Phase 34 fixtures and an emulator-only approved admin were created successfully.
+- 2026-08-26: Browser-controlled Inventory verification changed QA Product A stock `10 -> 13` and QA Inventory Event capacity/holds `30/2 -> 32/4` while a concurrent `ticketsSold` change `5 -> 7` was injected. The UI saved successfully, preserved 7 sold tickets, and persisted exactly two movements with deltas `+3` and `-2`.
+- 2026-08-26: Browser-controlled stale-edit verification changed two product rows, injected a concurrent first-product stock update, and confirmed the bulk save was rejected atomically. The UI refreshed to stocks `9` and `20`, the second product was not partially written, and zero movement records were created.
+- 2026-08-26: Firestore emulator rules verification allowed the one eligible anonymous waitlist submission and denied eight invalid cases: missing, inactive, not-full, disabled, unpublished, past, title mismatch, and date mismatch. Exactly one waitlist document was stored.
+- 2026-08-26: Browser diagnostics contained only React development informational messages and no application errors. Emulator fixtures and the test admin were deleted; the temporary React server and Firebase emulators were stopped; the browser was returned to the normal `127.0.0.1:3001/#/admin` session.
+- 2026-08-26: Independent read-only QA identified over-broad emulator cleanup, incomplete Functions/Storage emulator redirection, an under-specified conflict postcondition, and movement metadata gaps. Cleanup was narrowed and chunked, all Firebase client services now fail closed onto loopback under emulator mode, conflict assertion requires explicit browser confirmation, and movement assertions require exactly two records with expected target/source/reason metadata.
+- 2026-08-26: `verify-cleanup-scope` confirmed Phase 34 cleanup preserved six unrelated emulator documents and one unrelated Auth user, then removed all sentinels. The corrected browser rerun passed both inventory scenarios and produced no new browser warnings or errors.
+- 2026-08-26: Final verification passed: 10 React/Jest tests, production build, Functions syntax check, emulator harness syntax check, `firebase.json` parse, Firestore rules dry-run compilation, `git diff --check`, protected-file diff check, and normal local admin `HTTP 200`. Build retained the same four existing unused-code warnings and Firebase CLI retained the known `.firebaserc` warning.
+- 2026-08-26: Independent read-only QA re-reviewed the fixes and returned PASS with no remaining actionable findings. It confirmed protected files unchanged, isolation guards passing, and temporary ports `3003`, `8080`, and `9099` stopped.
+- Docs checked: added `docs/phase34-emulator-verification.md` and updated `PROJECT_STATUS.md` for emulator setup, isolation, test steps, results, and remaining production blockers.
 
 ## Commits
 
@@ -536,6 +553,7 @@ Phase 34: Waitlist and inventory concurrency hardening.
 - `fix: keep preview edits in side drawer` (current branch)
 - `feat: clean admin editing sections` (current branch)
 - `feat: harden waitlists and inventory transactions` (current branch)
+- `test: verify waitlist and inventory emulators` (current branch)
 
 ## Deployments
 

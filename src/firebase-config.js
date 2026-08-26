@@ -1,8 +1,8 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-import { getFunctions } from "firebase/functions";
-import { getStorage } from "firebase/storage";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
+import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
+import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -28,3 +28,18 @@ export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;
 export const functions = app ? getFunctions(app) : null;
 export const storage = app ? getStorage(app) : null;
+const firebaseEmulatorsRequested = process.env.NODE_ENV !== "production"
+  && process.env.REACT_APP_FIREBASE_USE_EMULATORS === "true";
+
+if (firebaseEmulatorsRequested && !firebaseConfig.projectId?.startsWith("demo-")) {
+  throw new Error("Firebase emulator mode requires a demo-* project ID.");
+}
+
+export const isUsingFirebaseEmulators = firebaseEmulatorsRequested;
+
+if (isUsingFirebaseEmulators && auth && db && functions && storage) {
+  connectAuthEmulator(auth, "http://127.0.0.1:9099", { disableWarnings: true });
+  connectFirestoreEmulator(db, "127.0.0.1", 8080);
+  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  connectStorageEmulator(storage, "127.0.0.1", 9199);
+}
