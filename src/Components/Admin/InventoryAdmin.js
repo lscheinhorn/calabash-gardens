@@ -3,9 +3,16 @@ import {
   collection,
   doc,
   getDocs,
+  runTransaction,
   serverTimestamp,
-  writeBatch,
 } from "firebase/firestore";
+
+import {
+  InventoryConflictError,
+  mergeEventInventoryDraft,
+  mergeProductInventoryDrafts,
+  variantsForProduct,
+} from "./inventoryAdminModel";
 
 const defaultFilters = {
   search: "",
@@ -32,20 +39,7 @@ const statusLabel = (value) => String(value || "unknown")
 const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => {
   const product = docSnapshot.data();
   const productId = docSnapshot.id;
-  const variants = Array.isArray(product.variants) ? product.variants : [];
-  const priceOptions = Array.isArray(product.priceOptions) ? product.priceOptions : [];
-  const variantRows = variants.length
-    ? variants
-    : priceOptions.map((priceOption, index) => ({
-      active: product.inStock !== false,
-      id: text(priceOption.variantId || priceOption.option || `option-${index + 1}`),
-      inventoryTracked: priceOption.inventoryTracked !== false,
-      label: text(priceOption.option || `Option ${index + 1}`),
-      lowStockThreshold: numberOrNull(priceOption.lowStockThreshold),
-      price: text(priceOption.price),
-      sku: text(priceOption.sku),
-      stockOnHand: numberOrNull(priceOption.stockOnHand) || 0,
-    }));
+  const variantRows = variantsForProduct(product);
 
   return variantRows.map((variant, index) => {
     const stockOnHand = numberOrNull(variant.stockOnHand) || 0;
@@ -68,9 +62,10 @@ const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => 
 
     return {
       category: text(product.category),
-      id: `product-${productId}-${text(variant.id, index)}`,
+      id: `product-${productId}-${variant.priceOptionIndex}-${text(variant.id, index)}`,
       inventoryTracked,
       lowStockThreshold,
+      priceOptionIndex: variant.priceOptionIndex,
       primary: text(product.title, productId),
       productId,
       secondary: text(variant.label || variant.id || `Option ${index + 1}`),
@@ -80,8 +75,6 @@ const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => 
       type: "product",
       value: inventoryTracked ? `${stockOnHand} on hand` : "Not tracked",
       variantId: text(variant.id),
-      variantIndex: index,
-      variants: variantRows,
     };
   });
 });
@@ -279,88 +272,6 @@ export default function InventoryAdmin({ db }) {
     return "";
   };
 
-  const addProductUpdates = (batch, changedProductRows) => {
-    const productUpdates = new Map();
-
-    changedProductRows.forEach((row) => {
-      const currentUpdate = productUpdates.get(row.productId) || {
-        row,
-        variants: row.variants.map((variant) => ({ ...variant })),
-      };
-      const draft = draftRows[row.id] || {};
-      const nextStockOnHand = Number(draft.stockOnHand);
-      const nextLowStockThreshold = draft.lowStockThreshold === "" ? null : Number(draft.lowStockThreshold);
-
-      currentUpdate.variants[row.variantIndex] = {
-        ...currentUpdate.variants[row.variantIndex],
-        inventoryTracked: draft.inventoryTracked === true,
-        lowStockThreshold: nextLowStockThreshold,
-        stockOnHand: nextStockOnHand,
-      };
-      productUpdates.set(row.productId, currentUpdate);
-
-      const quantityDelta = nextStockOnHand - row.stockOnHand;
-      if (quantityDelta !== 0) {
-        batch.set(doc(collection(db, "inventoryMovements")), {
-          capacityGroupKey: "",
-          createdAt: serverTimestamp(),
-          createdBy: "admin_inventory",
-          lineItemId: "",
-          linkedId: row.productId,
-          linkedType: "product",
-          orderId: "",
-          quantityDelta,
-          reason: "manual_adjustment",
-          sku: row.sku,
-          source: "manual",
-          sourcePaymentId: "",
-          title: `${row.primary}${row.secondary ? ` ${row.secondary}` : ""}`,
-          variantId: row.variantId,
-        });
-      }
-    });
-
-    productUpdates.forEach(({ row, variants }) => {
-      batch.update(doc(db, "products", row.productId), {
-        updatedAt: serverTimestamp(),
-        variants,
-      });
-    });
-  };
-
-  const addEventUpdates = (batch, changedEventRows) => {
-    changedEventRows.forEach((row) => {
-      const draft = draftRows[row.id] || {};
-      const nextManualSeatsReserved = Number(draft.manualSeatsReserved);
-
-      batch.update(doc(db, "events", row.productId), {
-        capacity: Number(draft.capacity),
-        manualSeatsReserved: nextManualSeatsReserved,
-        updatedAt: serverTimestamp(),
-        waitlistEnabled: draft.waitlistEnabled === true,
-      });
-
-      if (nextManualSeatsReserved !== row.manualSeatsReserved) {
-        batch.set(doc(collection(db, "inventoryMovements")), {
-          capacityGroupKey: row.productId,
-          createdAt: serverTimestamp(),
-          createdBy: "admin_inventory",
-          lineItemId: "",
-          linkedId: row.productId,
-          linkedType: "event",
-          orderId: "",
-          quantityDelta: -(nextManualSeatsReserved - row.manualSeatsReserved),
-          reason: "manual_adjustment",
-          sku: "",
-          source: "manual",
-          sourcePaymentId: "",
-          title: row.primary,
-          variantId: "",
-        });
-      }
-    });
-  };
-
   const saveInventoryChanges = async () => {
     if (!dirtyRows.length) {
       setMessage("No inventory changes to save.");
@@ -377,15 +288,131 @@ export default function InventoryAdmin({ db }) {
     setMessage("");
 
     try {
-      const batch = writeBatch(db);
-      addProductUpdates(batch, dirtyRows.filter((row) => row.type === "product"));
-      addEventUpdates(batch, dirtyRows.filter((row) => row.type === "event"));
-      await batch.commit();
+      const changedProductRows = dirtyRows.filter((row) => row.type === "product");
+      const changedEventRows = dirtyRows.filter((row) => row.type === "event");
+      const productRowsById = changedProductRows.reduce((rowsById, row) => {
+        rowsById.set(row.productId, [...(rowsById.get(row.productId) || []), row]);
+        return rowsById;
+      }, new Map());
+      const productRefs = new Map(Array.from(productRowsById.keys()).map((productId) => [
+        productId,
+        doc(db, "products", productId),
+      ]));
+      const eventRefs = new Map(changedEventRows.map((row) => [
+        row.productId,
+        doc(db, "events", row.productId),
+      ]));
+      const movementRefs = new Map(dirtyRows.map((row) => [
+        row.id,
+        doc(collection(db, "inventoryMovements")),
+      ]));
 
-      setMessage("Inventory changes saved.");
+      await runTransaction(db, async (transaction) => {
+        const productSnapshots = await Promise.all(Array.from(productRefs.entries())
+          .map(async ([productId, productRef]) => [productId, await transaction.get(productRef)]));
+        const eventSnapshots = await Promise.all(Array.from(eventRefs.entries())
+          .map(async ([eventId, eventRef]) => [eventId, await transaction.get(eventRef)]));
+        const productSnapshotsById = new Map(productSnapshots);
+        const eventSnapshotsById = new Map(eventSnapshots);
+
+        productRowsById.forEach((productRows, productId) => {
+          const productSnapshot = productSnapshotsById.get(productId);
+          const firstRow = productRows[0];
+
+          if (!productSnapshot?.exists()) {
+            throw new InventoryConflictError(
+              `${firstRow.primary} no longer exists in Firestore. Inventory was refreshed; review it and save again.`,
+            );
+          }
+
+          const { movements, variants } = mergeProductInventoryDrafts({
+            changes: productRows.map((row) => ({
+              draft: draftRows[row.id] || {},
+              row,
+            })),
+            product: productSnapshot.data(),
+          });
+
+          transaction.update(productRefs.get(productId), {
+            updatedAt: serverTimestamp(),
+            variants,
+          });
+
+          movements.forEach(({ quantityDelta, row, variant }) => {
+            transaction.set(movementRefs.get(row.id), {
+              capacityGroupKey: "",
+              createdAt: serverTimestamp(),
+              createdBy: "admin_inventory",
+              lineItemId: "",
+              linkedId: row.productId,
+              linkedType: "product",
+              orderId: "",
+              quantityDelta,
+              reason: "manual_adjustment",
+              sku: text(variant.sku),
+              source: "manual",
+              sourcePaymentId: "",
+              title: `${row.primary}${row.secondary ? ` ${row.secondary}` : ""}`,
+              variantId: text(variant.id),
+            });
+          });
+        });
+
+        changedEventRows.forEach((row) => {
+          const eventSnapshot = eventSnapshotsById.get(row.productId);
+
+          if (!eventSnapshot?.exists()) {
+            throw new InventoryConflictError(
+              `${row.primary} no longer exists in Firestore. Inventory was refreshed; review it and save again.`,
+            );
+          }
+
+          const { movementDelta, update } = mergeEventInventoryDraft({
+            draft: draftRows[row.id] || {},
+            event: eventSnapshot.data(),
+            row,
+          });
+
+          transaction.update(eventRefs.get(row.productId), {
+            ...update,
+            updatedAt: serverTimestamp(),
+          });
+
+          if (movementDelta !== 0) {
+            transaction.set(movementRefs.get(row.id), {
+              capacityGroupKey: row.productId,
+              createdAt: serverTimestamp(),
+              createdBy: "admin_inventory",
+              lineItemId: "",
+              linkedId: row.productId,
+              linkedType: "event",
+              orderId: "",
+              quantityDelta: movementDelta,
+              reason: "manual_adjustment",
+              sku: "",
+              source: "manual",
+              sourcePaymentId: "",
+              title: row.primary,
+              variantId: "",
+            });
+          }
+        });
+      });
+
       await loadInventory();
+      setMessage("Inventory changes saved.");
     } catch (error) {
-      setMessage("Inventory could not be saved. If this is a permissions error, deploy the latest Firestore rules first.");
+      if (error instanceof InventoryConflictError) {
+        await loadInventory();
+        setMessage(error.message);
+      } else {
+        const changedNames = Array.from(new Set(dirtyRows.map((row) => row.primary)));
+        const affectedLabel = changedNames.length > 3
+          ? `${changedNames.slice(0, 3).join(", ")} and ${changedNames.length - 3} more`
+          : changedNames.join(", ");
+
+        setMessage(`Inventory could not be saved for ${affectedLabel}. Check the values and Firestore permissions, then try again.`);
+      }
     } finally {
       setIsSaving(false);
     }

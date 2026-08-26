@@ -13,9 +13,34 @@ const normalizePriceOptions = (priceOptions, variants = []) => {
     return [{ option: "", price: "" }];
   }
 
-  const variantsByIndex = Array.isArray(variants)
-    ? new Map(variants.map((variant) => [variant.priceOptionIndex, variant]))
-    : new Map();
+  const variantList = Array.isArray(variants) ? variants : [];
+  const explicitIndexCounts = variantList.reduce((counts, variant) => {
+    if (Number.isInteger(variant.priceOptionIndex)) {
+      counts.set(variant.priceOptionIndex, (counts.get(variant.priceOptionIndex) || 0) + 1);
+    }
+
+    return counts;
+  }, new Map());
+  const variantsByIndex = variantList.reduce((variantsByIndexMap, variant) => {
+    if (
+      Number.isInteger(variant.priceOptionIndex)
+      && explicitIndexCounts.get(variant.priceOptionIndex) === 1
+    ) {
+      variantsByIndexMap.set(variant.priceOptionIndex, variant);
+    }
+
+    return variantsByIndexMap;
+  }, new Map());
+
+  variantList.forEach((variant, index) => {
+    if (
+      !Number.isInteger(variant.priceOptionIndex)
+      && !explicitIndexCounts.has(index)
+      && !variantsByIndex.has(index)
+    ) {
+      variantsByIndex.set(index, variant);
+    }
+  });
 
   return priceOptions.map((priceOption, index) => {
     const variant = variantsByIndex.get(index) || {};

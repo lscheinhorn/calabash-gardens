@@ -408,21 +408,57 @@ service cloud.firestore {
 
     function validEventWaitlistEntry() {
       return hasOnlyAllowedKeys(['createdAt', 'email', 'eventDate', 'eventId', 'eventTitle', 'message', 'name', 'phone', 'status'])
-        && hasRequiredKeys(['createdAt', 'email', 'eventId', 'eventTitle', 'name', 'status'])
+        && hasRequiredKeys(['createdAt', 'email', 'eventDate', 'eventId', 'eventTitle', 'name', 'status'])
         && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdAt == request.time
         && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
         && request.resource.data.email.size() <= 180
         && request.resource.data.eventDate is string
+        && request.resource.data.eventDate.size() > 0
         && request.resource.data.eventDate.size() <= 160
         && request.resource.data.eventId is string
+        && request.resource.data.eventId.size() > 0
         && request.resource.data.eventId.size() <= 180
         && request.resource.data.eventTitle is string
+        && request.resource.data.eventTitle.size() > 0
         && request.resource.data.eventTitle.size() <= 240
         && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 160
         && request.resource.data.status == 'new'
         && (!('message' in request.resource.data) || (request.resource.data.message is string && request.resource.data.message.size() <= 1000))
         && (!('phone' in request.resource.data) || (request.resource.data.phone is string && request.resource.data.phone.size() <= 80));
+    }
+
+    function waitlistEventPath(eventId) {
+      return /databases/$(database)/documents/events/$(eventId);
+    }
+
+    function waitlistTicketsSold(event) {
+      return ('ticketsSold' in event) ? event.ticketsSold : 0;
+    }
+
+    function waitlistManualSeatsReserved(event) {
+      return ('manualSeatsReserved' in event) ? event.manualSeatsReserved : 0;
+    }
+
+    function validWaitlistTarget(event) {
+      return event.keys().hasAll(['capacity', 'date', 'eventDates', 'isActive', 'published', 'title', 'waitlistEnabled'])
+        && event.capacity is int
+        && event.capacity > 0
+        && event.date is timestamp
+        && event.date > request.time
+        && event.eventDates is list
+        && event.isActive == true
+        && event.published == true
+        && event.title is string
+        && event.waitlistEnabled == true
+        && (!('ticketsSold' in event) || (event.ticketsSold is int && event.ticketsSold >= 0))
+        && (!('manualSeatsReserved' in event) || (event.manualSeatsReserved is int && event.manualSeatsReserved >= 0))
+        && waitlistTicketsSold(event) + waitlistManualSeatsReserved(event) >= event.capacity
+        && request.resource.data.eventTitle == event.title
+        && request.resource.data.eventDate in event.eventDates;
     }
 
     function validSiteContentDraft(contentId) {
@@ -541,7 +577,9 @@ service cloud.firestore {
     }
 
     match /eventWaitlist/{entryId} {
-      allow create: if validEventWaitlistEntry();
+      allow create: if validEventWaitlistEntry()
+        && exists(waitlistEventPath(request.resource.data.eventId))
+        && validWaitlistTarget(get(waitlistEventPath(request.resource.data.eventId)).data);
       allow get, list, update, delete: if isAdmin();
     }
 

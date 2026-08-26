@@ -9,6 +9,8 @@ This plan defines the backend path for tracking all Calabash sales in one place 
 - Firestore `orders` rules currently deny client writes.
 - Event capacity can be represented in Firestore events, but `ticketsSold` is not authoritative until confirmed orders write it.
 - Product variants can carry Firebase inventory metadata (`sku`, `stockOnHand`, `lowStockThreshold`, and tracking flags) in the admin product draft flow.
+- Admin Inventory bulk saves now merge into freshly read product/event documents in one Firestore transaction, preserve concurrent fields that were not edited, and abort if an edited field changed since the screen loaded.
+- Local waitlist rules now bind entries to an eligible event, but the public waitlist still needs a protected server endpoint and a per-occurrence date/capacity model before production use.
 - Jette may also sell through Square in person, so the system needs a shared sales ledger rather than PayPal-only tracking.
 
 ## Guiding Decision
@@ -109,7 +111,7 @@ Recommended flow:
 
 This prevents a user from spoofing an order write or changing totals in the browser.
 
-Implementation checkpoint on branch `codex/preview-edit-drawer`:
+Implementation checkpoint carried forward through branch `codex/waitlist-inventory-hardening`:
 
 - Luke approved building this scaffold as a guarded next phase. Enabling it for public checkout, deploying Functions, or treating it as inventory-safe still requires explicit approval.
 - A Firebase Functions source folder exists at `functions/`.
@@ -125,7 +127,7 @@ Checkpoint blockers found during the 2026-08-26 review:
 
 - `createPayPalOrder` must persist the server-validated cart snapshot under the created PayPal order ID. `capturePayPalOrder` must load that trusted snapshot instead of accepting replacement cart contents from the browser.
 - The capture flow needs an approved reservation or compensation/recovery design. Capturing payment before a Firestore stock/order transaction can leave a customer charged if concurrent inventory changes make the transaction fail.
-- Product stock updates must read and update the current Firestore variant inside a transaction instead of writing a complete variants array from a stale browser snapshot.
+- Admin inventory stock/capacity writes now read and merge current Firestore records transactionally. The separate PayPal capture blockers above remain unresolved and keep the Functions path disabled.
 - The Functions path remains disabled and non-deployable until these blockers are implemented and sandbox-tested.
 
 ### Phase C: PayPal Webhook Reconciliation
@@ -178,6 +180,8 @@ Current decision: keep Firestore as the Calabash admin ledger and inventory sour
 - Refunds and voids must create reversing movements instead of editing historical sale movement quantities.
 - Capture must be bound to the exact server-validated order snapshot created for the PayPal order ID; browser-supplied capture contents are never authoritative.
 - A payment/inventory failure must produce a recoverable recorded state rather than a captured payment with no saved order.
+- Public waitlist writes must move behind a server-owned endpoint with App Check/CAPTCHA and throttling; Firestore field and event-eligibility rules cannot prevent repeated anonymous submissions.
+- Multi-date event waitlists require occurrence-specific timestamps and capacity keys. A display-date string plus one canonical event timestamp is not enough to determine whether each session is future or full.
 
 ## Admin Orders UI
 
