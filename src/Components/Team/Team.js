@@ -1,5 +1,6 @@
 import './Team.css'
 import { content } from '../../data/siteData'
+import SiteContentBlocks from '../SiteContentBlocks/SiteContentBlocks'
 
 const renderStaticContent = (fieldPath, label, children) => children;
 
@@ -28,6 +29,12 @@ export default function Team ({
                     </div>
                 </div>
             </div>
+            <SiteContentBlocks
+                blocks={teamContent.contentBlocks}
+                labelPrefix="Team"
+                renderEditableContent={renderEditableContent}
+                variant="team"
+            />
         </div>
         
     )

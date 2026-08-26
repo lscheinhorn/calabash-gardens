@@ -1,6 +1,7 @@
 import './About.css'
 import { content } from '../../data/siteData'
 import { Link } from 'react-router-dom'
+import SiteContentBlocks from '../SiteContentBlocks/SiteContentBlocks'
 
 const renderStaticContent = (fieldPath, label, children) => children;
 
@@ -13,6 +14,12 @@ export default function About ({
             <h1>{ renderEditableContent('title', 'About title', aboutContent.title) }</h1>
             <p>{ renderEditableContent('paragraph_1', 'About first paragraph', aboutContent.paragraph_1) }</p>
             <p>{ renderEditableContent('paragraph_2', 'About second paragraph', aboutContent.paragraph_2) }</p>
+            <SiteContentBlocks
+                blocks={aboutContent.contentBlocks}
+                labelPrefix="About"
+                renderEditableContent={renderEditableContent}
+                variant="about"
+            />
             <Link to="contact">
                 <button className="btn btn-primary" aria-label="Get In Touch" >{ aboutContent.button }</button>
             </Link>

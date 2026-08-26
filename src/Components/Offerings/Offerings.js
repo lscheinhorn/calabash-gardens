@@ -1,7 +1,13 @@
 import { content } from '../../data/siteData'
 import './Offerings.css'
+import SiteContentBlocks from '../SiteContentBlocks/SiteContentBlocks'
 
-export default function Offerings ({ offeringsContent = content.home.offerings }) {
+const renderStaticContent = (fieldPath, label, children) => children;
+
+export default function Offerings ({
+    offeringsContent = content.home.offerings,
+    renderEditableContent = renderStaticContent
+}) {
     return (
         <div id="offerings">
             <h1>{ offeringsContent.title || "Offerings" }</h1>
@@ -33,6 +39,12 @@ export default function Offerings ({ offeringsContent = content.home.offerings }
             <div>
                 <p>{ offeringsContent.more_info }</p>
             </div>
+            <SiteContentBlocks
+                blocks={offeringsContent.contentBlocks}
+                labelPrefix="Offerings"
+                renderEditableContent={renderEditableContent}
+                variant="offerings"
+            />
 
         </div>
     )

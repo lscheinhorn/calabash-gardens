@@ -8,11 +8,6 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faChevronDown,
-  faChevronRight,
-} from "@fortawesome/free-solid-svg-icons";
 
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
 import ContentAdmin from "./ContentAdmin";
@@ -20,49 +15,15 @@ import ContentMirrorAudit from "./ContentMirrorAudit";
 import EventAdmin from "./EventAdmin";
 import EventMirrorAudit from "./EventMirrorAudit";
 import AdminPreview from "./AdminPreview";
+import InventoryAdmin from "./InventoryAdmin";
 import MediaAdmin from "./MediaAdmin";
+import OrdersAdmin from "./OrdersAdmin";
 import ProductAdmin from "./ProductAdmin";
 import ProductMirrorAudit from "./ProductMirrorAudit";
 import ProductPublicParityAudit from "./ProductPublicParityAudit";
 
 const adminCollection = "adminUsers";
 const adminThemeStorageKey = "calabashAdminTheme";
-
-const CollapseIcon = ({ isExpanded }) => (
-  <FontAwesomeIcon
-    aria-hidden="true"
-    className="admin_collapse_icon"
-    icon={isExpanded ? faChevronDown : faChevronRight}
-  />
-);
-
-const AdminDashboardSection = ({
-  children,
-  description,
-  isOpen,
-  onToggle,
-  title,
-}) => (
-  <section className={isOpen ? "admin_dashboard_section admin_dashboard_section_open" : "admin_dashboard_section"}>
-    <button
-      aria-expanded={isOpen}
-      className="admin_dashboard_section_header"
-      onClick={onToggle}
-      type="button"
-    >
-      <span className="admin_dashboard_section_text">
-        <strong>{title}</strong>
-        {description ? <small>{description}</small> : null}
-      </span>
-      <CollapseIcon isExpanded={isOpen} />
-    </button>
-    {isOpen ? (
-      <div className="admin_dashboard_section_body">
-        {children}
-      </div>
-    ) : null}
-  </section>
-);
 
 const loadInitialTheme = () => {
   if (typeof window === "undefined") {
@@ -227,12 +188,6 @@ export default function Admin() {
     setTheme((currentTheme) => (currentTheme === "dark" ? "light" : "dark"));
   };
 
-  const toggleAdminSection = (sectionId) => {
-    setActiveAdminSection((currentSection) => (
-      currentSection === sectionId ? "" : sectionId
-    ));
-  };
-
   const renderDashboard = () => {
     if (isCheckingAdmin) {
       return <p className="admin_status">Checking admin access...</p>;
@@ -256,6 +211,7 @@ export default function Admin() {
           <AdminPreview
             db={db}
             defaultExpanded
+            storage={storage}
             userId={user?.uid || ""}
           />
         ),
@@ -277,7 +233,7 @@ export default function Admin() {
         title: "Products",
       },
       {
-        children: <EventAdmin db={db} defaultExpanded userId={user?.uid || ""} />,
+        children: <EventAdmin db={db} defaultExpanded storage={storage} userId={user?.uid || ""} />,
         description: "Create and edit event drafts before publishing live event content.",
         id: "events",
         title: "Events",
@@ -293,6 +249,17 @@ export default function Admin() {
         description: "Edit approved site text through draft-safe content records.",
         id: "content",
         title: "Site Content",
+      },
+      {
+        children: <InventoryAdmin db={db} />,
+        id: "inventory",
+        title: "Inventory",
+      },
+      {
+        children: <OrdersAdmin db={db} />,
+        description: "Review saved web, market, manual, and future imported orders in one ledger.",
+        id: "orders",
+        title: "Orders",
       },
       {
         children: <MediaAdmin db={db} defaultExpanded storage={storage} />,
@@ -314,23 +281,35 @@ export default function Admin() {
         title: "Developer / Audit Tools",
       },
     ];
+    const activeSection = dashboardSections.find((section) => section.id === activeAdminSection)
+      || dashboardSections[0];
 
     return (
       <div className="admin_dashboard">
-        <p className="admin_status">Admin access is confirmed.</p>
-        <div className="admin_dashboard_sections">
+        <aside className="admin_sidebar" aria-label="Admin sections">
           {dashboardSections.map((section) => (
-            <AdminDashboardSection
-              description={section.description}
-              isOpen={activeAdminSection === section.id}
+            <button
+              aria-current={activeSection.id === section.id ? "page" : undefined}
+              className={activeSection.id === section.id ? "admin_sidebar_button admin_sidebar_button_active" : "admin_sidebar_button"}
               key={section.id}
-              onToggle={() => toggleAdminSection(section.id)}
-              title={section.title}
+              onClick={() => setActiveAdminSection(section.id)}
+              type="button"
             >
-              {section.children}
-            </AdminDashboardSection>
+              {section.title}
+            </button>
           ))}
-        </div>
+        </aside>
+        <section className="admin_dashboard_main" aria-labelledby="admin-active-section-title">
+          <div className="admin_active_section_header">
+            <div>
+              <h2 id="admin-active-section-title">{activeSection.title}</h2>
+              {activeSection.description ? <p>{activeSection.description}</p> : null}
+            </div>
+          </div>
+          <div className="admin_active_section_body">
+            {activeSection.children}
+          </div>
+        </section>
       </div>
     );
   };

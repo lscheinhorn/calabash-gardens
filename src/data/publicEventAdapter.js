@@ -28,6 +28,25 @@ const normalizeStringList = (values) => (
     : []
 );
 
+const normalizeDescriptionBlocks = (eventDoc) => {
+  if (!Array.isArray(eventDoc.descriptionBlocks)) {
+    return [];
+  }
+
+  return eventDoc.descriptionBlocks
+    .map((block) => ({
+      body: String(block?.body || "").trim(),
+      subtitle: String(block?.subtitle || "").trim(),
+    }))
+    .filter((block) => block.body || block.subtitle);
+};
+
+const infoFromDescriptionBlocks = (descriptionBlocks) => (
+  descriptionBlocks
+    .flatMap((block) => [block.subtitle, block.body])
+    .filter(Boolean)
+);
+
 const normalizePhotoRefs = (photos) => {
   if (!Array.isArray(photos)) {
     return [];
@@ -79,25 +98,31 @@ export const normalizeFirestoreEventForPublic = (firestoreEvent, options = {}) =
   const storageUrlByPath = options.storageUrlByPath || {};
   const title = String(firestoreEvent.title || "");
   const photoRefs = normalizePhotoRefs(firestoreEvent.photos);
+  const descriptionBlocks = normalizeDescriptionBlocks(firestoreEvent);
+  const info = normalizeStringList(firestoreEvent.info);
   const storagePhotos = photoRefs
     .map((photo) => storageUrlByPath[photo.path] || "")
     .filter(Boolean);
 
   return {
+    capacity: Number.isFinite(firestoreEvent.capacity) ? firestoreEvent.capacity : null,
     category: String(firestoreEvent.category || "Experience"),
     date: normalizeDate(firestoreEvent.date),
+    descriptionBlocks,
     eventDates: normalizeStringList(firestoreEvent.eventDates),
     id: firestoreEvent.id || firestoreEvent.slug || "",
-    info: normalizeStringList(firestoreEvent.info),
+    info: info.length ? info : infoFromDescriptionBlocks(descriptionBlocks),
     inStock: firestoreEvent.inStock === true,
     isActive: firestoreEvent.published === true && firestoreEvent.isActive === true,
     key: createKey(title),
     link: String(firestoreEvent.link || ""),
+    manualSeatsReserved: Number.isFinite(firestoreEvent.manualSeatsReserved) ? firestoreEvent.manualSeatsReserved : 0,
     photos: storagePhotos.length ? storagePhotos : [defaultEventPhoto],
     priceOptions: normalizeStringList(firestoreEvent.priceOptions),
     shipping: String(firestoreEvent.shipping || "0.00"),
-    sortOrder: Number.isFinite(firestoreEvent.sortOrder) ? firestoreEvent.sortOrder : 999,
+    ticketsSold: Number.isFinite(firestoreEvent.ticketsSold) ? firestoreEvent.ticketsSold : 0,
     title,
+    waitlistEnabled: firestoreEvent.waitlistEnabled === true,
   };
 };
 

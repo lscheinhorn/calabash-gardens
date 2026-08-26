@@ -19,9 +19,10 @@ const normalizeDate = (date) => (
     : new Date(0)
 );
 
-const buildEventDoc = (event, index) => {
+const buildEventDoc = (event) => {
   const title = String(event.title || "");
   const id = event.slug || event.id || seedIdForTitle(title);
+  const isActive = event.isActive === true;
 
   return {
     id,
@@ -31,13 +32,12 @@ const buildEventDoc = (event, index) => {
       eventDates: cloneStringArray(event.eventDates),
       info: cloneStringArray(event.info),
       inStock: event.inStock === true,
-      isActive: event.isActive === true,
+      isActive,
       link: "",
       photos: [],
       priceOptions: cloneStringArray(event.priceOptions),
-      published: true,
+      published: isActive,
       shipping: String(event.shipping || "0.00"),
-      sortOrder: index,
       title,
     },
     title,

@@ -16,9 +16,29 @@ const sortedParagraphs = (paragraphs) => {
     .filter(Boolean);
 };
 
+const normalizeContentBlocks = (blocks) => {
+  if (!blocks || typeof blocks !== "object") {
+    return {};
+  }
+
+  const entries = Array.isArray(blocks)
+    ? blocks.map((block, index) => [block?.id || `block_${index + 1}`, block])
+    : Object.entries(blocks);
+
+  return Object.fromEntries(entries.map(([id, block], index) => [
+    id,
+    {
+      sortOrder: Number.isFinite(block?.sortOrder) ? block.sortOrder : index,
+      text: String(block?.text || ""),
+      type: ["paragraph", "subtitle", "title"].includes(block?.type) ? block.type : "paragraph",
+    },
+  ]));
+};
+
 export const normalizeSiteContentForPublic = (siteContentDocs, options = {}) => {
   const content = clone(options.staticContent || staticContent);
   let experienceBlurb = [...(options.staticExperienceBlurb || staticExperienceBlurb)];
+  let experienceBlurbBlocks = {};
   const publishedDocs = siteContentDocs.filter((contentDoc) => contentDoc.published === true);
 
   publishedDocs.forEach((contentDoc) => {
@@ -53,12 +73,14 @@ export const normalizeSiteContentForPublic = (siteContentDocs, options = {}) => 
       experienceBlurb = Array.isArray(sections)
         ? sections.map((paragraph) => String(paragraph || "")).filter(Boolean)
         : sortedParagraphs(sections.paragraphs || sections);
+      experienceBlurbBlocks = normalizeContentBlocks(sections.contentBlocks);
     }
   });
 
   return {
     content,
     experienceBlurb,
+    experienceBlurbBlocks,
   };
 };
 

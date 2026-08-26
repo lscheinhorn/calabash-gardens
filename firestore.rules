@@ -58,7 +58,8 @@ service cloud.firestore {
           'slug',
           'sortOrder',
           'title',
-          'updatedAt'
+          'updatedAt',
+          'variants'
         ])
         && hasRequiredKeys(['category', 'inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
         && request.resource.data.category is string
@@ -71,7 +72,8 @@ service cloud.firestore {
         && request.resource.data.photos is list
         && request.resource.data.priceOptions is list
         && request.resource.data.shipping is string
-        && request.resource.data.title is string;
+        && request.resource.data.title is string
+        && (!('variants' in request.resource.data) || validProductVariants(request.resource.data.variants));
     }
 
     function validProductCategory() {
@@ -82,6 +84,68 @@ service cloud.firestore {
         && (!('sortOrder' in request.resource.data) || request.resource.data.sortOrder is number || request.resource.data.sortOrder == null)
         && (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp)
         && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
+    }
+
+    function validProductVariant(variant) {
+      return variant is map
+        && variant.keys().hasOnly([
+          'active',
+          'id',
+          'inventoryTracked',
+          'label',
+          'lowStockThreshold',
+          'price',
+          'priceOptionIndex',
+          'sku',
+          'sortOrder',
+          'stockOnHand'
+        ])
+        && variant.keys().hasAll(['active', 'id', 'inventoryTracked', 'label', 'price', 'sku', 'stockOnHand'])
+        && variant.active is bool
+        && variant.id is string
+        && variant.id.size() > 0
+        && variant.id.size() <= 120
+        && variant.inventoryTracked is bool
+        && variant.label is string
+        && variant.label.size() <= 160
+        && variant.price is string
+        && variant.price.size() <= 40
+        && variant.sku is string
+        && variant.sku.size() <= 120
+        && variant.stockOnHand is int
+        && variant.stockOnHand >= 0
+        && (!('lowStockThreshold' in variant) || variant.lowStockThreshold == null || (variant.lowStockThreshold is int && variant.lowStockThreshold >= 0))
+        && (!('priceOptionIndex' in variant) || variant.priceOptionIndex is int)
+        && (!('sortOrder' in variant) || variant.sortOrder is int);
+    }
+
+    function validOptionalProductVariant(variants, index) {
+      return variants.size() <= index || validProductVariant(variants[index]);
+    }
+
+    function validProductVariants(variants) {
+      return variants is list
+        && variants.size() <= 20
+        && validOptionalProductVariant(variants, 0)
+        && validOptionalProductVariant(variants, 1)
+        && validOptionalProductVariant(variants, 2)
+        && validOptionalProductVariant(variants, 3)
+        && validOptionalProductVariant(variants, 4)
+        && validOptionalProductVariant(variants, 5)
+        && validOptionalProductVariant(variants, 6)
+        && validOptionalProductVariant(variants, 7)
+        && validOptionalProductVariant(variants, 8)
+        && validOptionalProductVariant(variants, 9)
+        && validOptionalProductVariant(variants, 10)
+        && validOptionalProductVariant(variants, 11)
+        && validOptionalProductVariant(variants, 12)
+        && validOptionalProductVariant(variants, 13)
+        && validOptionalProductVariant(variants, 14)
+        && validOptionalProductVariant(variants, 15)
+        && validOptionalProductVariant(variants, 16)
+        && validOptionalProductVariant(variants, 17)
+        && validOptionalProductVariant(variants, 18)
+        && validOptionalProductVariant(variants, 19);
     }
 
     function approvedProductCategory(categoryId) {
@@ -97,6 +161,53 @@ service cloud.firestore {
       ];
     }
 
+    function validDescriptionBlock(block) {
+      return block is map
+        && block.keys().hasOnly(['body', 'subtitle'])
+        && (!('body' in block) || block.body is string)
+        && (!('subtitle' in block) || block.subtitle is string);
+    }
+
+    function validOptionalDescriptionBlock(blocks, index) {
+      return blocks.size() <= index || validDescriptionBlock(blocks[index]);
+    }
+
+    function validDescriptionBlocks(blocks) {
+      return blocks is list
+        && blocks.size() <= 20
+        && validOptionalDescriptionBlock(blocks, 0)
+        && validOptionalDescriptionBlock(blocks, 1)
+        && validOptionalDescriptionBlock(blocks, 2)
+        && validOptionalDescriptionBlock(blocks, 3)
+        && validOptionalDescriptionBlock(blocks, 4)
+        && validOptionalDescriptionBlock(blocks, 5)
+        && validOptionalDescriptionBlock(blocks, 6)
+        && validOptionalDescriptionBlock(blocks, 7)
+        && validOptionalDescriptionBlock(blocks, 8)
+        && validOptionalDescriptionBlock(blocks, 9)
+        && validOptionalDescriptionBlock(blocks, 10)
+        && validOptionalDescriptionBlock(blocks, 11)
+        && validOptionalDescriptionBlock(blocks, 12)
+        && validOptionalDescriptionBlock(blocks, 13)
+        && validOptionalDescriptionBlock(blocks, 14)
+        && validOptionalDescriptionBlock(blocks, 15)
+        && validOptionalDescriptionBlock(blocks, 16)
+        && validOptionalDescriptionBlock(blocks, 17)
+        && validOptionalDescriptionBlock(blocks, 18)
+        && validOptionalDescriptionBlock(blocks, 19);
+    }
+
+    function validEventTicketCounts() {
+      return (!('capacity' in request.resource.data) || (request.resource.data.capacity is int && request.resource.data.capacity >= 0))
+        && (!('manualSeatsReserved' in request.resource.data) || (request.resource.data.manualSeatsReserved is int && request.resource.data.manualSeatsReserved >= 0))
+        && (!('ticketsSold' in request.resource.data) || (request.resource.data.ticketsSold is int && request.resource.data.ticketsSold >= 0))
+        && (!('manualSeatsReserved' in request.resource.data) || ('capacity' in request.resource.data))
+        && (!('ticketsSold' in request.resource.data) || ('capacity' in request.resource.data))
+        && (!('manualSeatsReserved' in request.resource.data) || request.resource.data.manualSeatsReserved <= request.resource.data.capacity)
+        && (!('ticketsSold' in request.resource.data) || request.resource.data.ticketsSold <= request.resource.data.capacity)
+        && (!('manualSeatsReserved' in request.resource.data && 'ticketsSold' in request.resource.data) || request.resource.data.manualSeatsReserved + request.resource.data.ticketsSold <= request.resource.data.capacity);
+    }
+
     function validEvent() {
       return hasOnlyAllowedKeys([
           'capacity',
@@ -104,26 +215,29 @@ service cloud.firestore {
           'childTicket',
           'createdAt',
           'date',
+          'descriptionBlocks',
           'dietaryOptions',
           'eventDates',
-          'eventType',
           'info',
           'inStock',
           'isActive',
           'link',
+          'manualSeatsReserved',
           'photos',
           'priceOptions',
           'published',
           'shipping',
           'slug',
-          'sortOrder',
+          'ticketsSold',
           'title',
-          'updatedAt'
+          'updatedAt',
+          'waitlistEnabled'
         ])
         && hasRequiredKeys(['category', 'date', 'eventDates', 'info', 'inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
         && request.resource.data.eventDates is list
         && request.resource.data.category is string
         && request.resource.data.date is timestamp
+        && (!('descriptionBlocks' in request.resource.data) || validDescriptionBlocks(request.resource.data.descriptionBlocks))
         && request.resource.data.info is list
         && request.resource.data.inStock is bool
         && request.resource.data.isActive is bool
@@ -131,7 +245,44 @@ service cloud.firestore {
         && request.resource.data.priceOptions is list
         && request.resource.data.published is bool
         && request.resource.data.shipping is string
-        && request.resource.data.title is string;
+        && request.resource.data.title is string
+        && validEventTicketCounts()
+        && (!('waitlistEnabled' in request.resource.data) || request.resource.data.waitlistEnabled is bool);
+    }
+
+    function validInventoryMovement() {
+      return hasOnlyAllowedKeys([
+          'capacityGroupKey',
+          'createdAt',
+          'createdBy',
+          'lineItemId',
+          'linkedId',
+          'linkedType',
+          'orderId',
+          'quantityDelta',
+          'reason',
+          'sku',
+          'source',
+          'sourcePaymentId',
+          'title',
+          'variantId'
+        ])
+        && hasRequiredKeys(['createdAt', 'createdBy', 'linkedId', 'linkedType', 'quantityDelta', 'reason', 'source', 'title'])
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.createdBy is string
+        && request.resource.data.linkedId is string
+        && request.resource.data.linkedId.size() > 0
+        && request.resource.data.linkedType in ['product', 'event']
+        && request.resource.data.quantityDelta is int
+        && request.resource.data.reason in ['sale', 'refund', 'manual_adjustment', 'square_import', 'comp', 'waste']
+        && request.resource.data.source in ['paypal_web', 'square_pos', 'square_import', 'manual', 'inventory_adjustment']
+        && request.resource.data.title is string
+        && (!('capacityGroupKey' in request.resource.data) || request.resource.data.capacityGroupKey is string)
+        && (!('lineItemId' in request.resource.data) || request.resource.data.lineItemId is string)
+        && (!('orderId' in request.resource.data) || request.resource.data.orderId is string)
+        && (!('sku' in request.resource.data) || request.resource.data.sku is string)
+        && (!('sourcePaymentId' in request.resource.data) || request.resource.data.sourcePaymentId is string)
+        && (!('variantId' in request.resource.data) || request.resource.data.variantId is string);
     }
 
     function validSiteContent() {
@@ -184,7 +335,8 @@ service cloud.firestore {
           'slug',
           'sortOrder',
           'title',
-          'updatedAt'
+          'updatedAt',
+          'variants'
         ])
         && hasRequiredKeys(['category', 'draftStatus', 'draftTargetCollection', 'draftTargetId', 'draftUpdatedAt', 'draftUpdatedBy', 'inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
         && validDraftMetadata('products', productId)
@@ -198,7 +350,8 @@ service cloud.firestore {
         && request.resource.data.photos is list
         && request.resource.data.priceOptions is list
         && request.resource.data.shipping is string
-        && request.resource.data.title is string;
+        && request.resource.data.title is string
+        && (!('variants' in request.resource.data) || validProductVariants(request.resource.data.variants));
     }
 
     function validEventDraft(eventId) {
@@ -208,6 +361,7 @@ service cloud.firestore {
           'childTicket',
           'createdAt',
           'date',
+          'descriptionBlocks',
           'dietaryOptions',
           'draftDiscardedAt',
           'draftDiscardedBy',
@@ -219,25 +373,27 @@ service cloud.firestore {
           'draftUpdatedAt',
           'draftUpdatedBy',
           'eventDates',
-          'eventType',
           'info',
           'inStock',
           'isActive',
           'link',
+          'manualSeatsReserved',
           'photos',
           'priceOptions',
           'published',
           'shipping',
           'slug',
-          'sortOrder',
+          'ticketsSold',
           'title',
-          'updatedAt'
+          'updatedAt',
+          'waitlistEnabled'
         ])
         && hasRequiredKeys(['category', 'date', 'draftStatus', 'draftTargetCollection', 'draftTargetId', 'draftUpdatedAt', 'draftUpdatedBy', 'eventDates', 'info', 'inStock', 'isActive', 'photos', 'priceOptions', 'published', 'shipping', 'title'])
         && validDraftMetadata('events', eventId)
         && request.resource.data.eventDates is list
         && request.resource.data.category is string
         && request.resource.data.date is timestamp
+        && (!('descriptionBlocks' in request.resource.data) || validDescriptionBlocks(request.resource.data.descriptionBlocks))
         && request.resource.data.info is list
         && request.resource.data.inStock is bool
         && request.resource.data.isActive is bool
@@ -245,7 +401,28 @@ service cloud.firestore {
         && request.resource.data.priceOptions is list
         && request.resource.data.published is bool
         && request.resource.data.shipping is string
-        && request.resource.data.title is string;
+        && request.resource.data.title is string
+        && validEventTicketCounts()
+        && (!('waitlistEnabled' in request.resource.data) || request.resource.data.waitlistEnabled is bool);
+    }
+
+    function validEventWaitlistEntry() {
+      return hasOnlyAllowedKeys(['createdAt', 'email', 'eventDate', 'eventId', 'eventTitle', 'message', 'name', 'phone', 'status'])
+        && hasRequiredKeys(['createdAt', 'email', 'eventId', 'eventTitle', 'name', 'status'])
+        && request.resource.data.createdAt is timestamp
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 180
+        && request.resource.data.eventDate is string
+        && request.resource.data.eventDate.size() <= 160
+        && request.resource.data.eventId is string
+        && request.resource.data.eventId.size() <= 180
+        && request.resource.data.eventTitle is string
+        && request.resource.data.eventTitle.size() <= 240
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 160
+        && request.resource.data.status == 'new'
+        && (!('message' in request.resource.data) || (request.resource.data.message is string && request.resource.data.message.size() <= 1000))
+        && (!('phone' in request.resource.data) || (request.resource.data.phone is string && request.resource.data.phone.size() <= 80));
     }
 
     function validSiteContentDraft(contentId) {
@@ -363,6 +540,11 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /eventWaitlist/{entryId} {
+      allow create: if validEventWaitlistEntry();
+      allow get, list, update, delete: if isAdmin();
+    }
+
     match /eventDrafts/{eventId} {
       allow get, list: if isAdmin();
       allow create, update: if isAdmin() && validEventDraft(eventId);
@@ -390,6 +572,12 @@ service cloud.firestore {
     match /orders/{orderId} {
       allow get, list: if isAdmin();
       allow create, update, delete: if false;
+    }
+
+    match /inventoryMovements/{movementId} {
+      allow get, list: if isAdmin();
+      allow create: if isAdmin() && validInventoryMovement();
+      allow update, delete: if false;
     }
 
     match /mediaAssets/{mediaAssetId} {

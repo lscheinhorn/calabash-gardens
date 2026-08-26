@@ -2,6 +2,7 @@ import './Footer.css'
 import { content } from '../../data/siteData'
 import { Link } from 'react-router-dom'
 import largeLogo from '../../resources/images/large_logo_no_purple_square.png';
+import SiteContentBlocks from '../SiteContentBlocks/SiteContentBlocks'
 
 const renderStaticContent = (fieldPath, label, children) => children;
 
@@ -25,6 +26,13 @@ export default function Footer ({
                         <p className='footer_color'>
                             { renderEditableContent('header.subtitle', 'Footer subtitle', footerContent.subtitle) }
                         </p>
+                        <SiteContentBlocks
+                            blocks={footerContent.contentBlocks}
+                            fieldPathPrefix="header.contentBlocks"
+                            labelPrefix="Footer"
+                            renderEditableContent={renderEditableContent}
+                            variant="footer"
+                        />
                     </div>
                     
                 </div>

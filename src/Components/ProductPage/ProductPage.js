@@ -6,7 +6,13 @@ import { useDispatch } from 'react-redux'
 import {  Link } from 'react-router-dom'
 import { useState, useEffect, useMemo } from 'react'
 
-export default function ProductPage ({ productOverride = null, continueShoppingTo = "../shop" }) {
+const renderStaticProductItem = (product, children) => children;
+
+export default function ProductPage ({
+    productOverride = null,
+    continueShoppingTo = "../shop",
+    renderProductPreviewItem = renderStaticProductItem
+}) {
     const dispatch = useDispatch()
     const params = useParams()
     const productKey = params.key || params.productKey
@@ -25,7 +31,6 @@ export default function ProductPage ({ productOverride = null, continueShoppingT
         return `${photo}`
     })
 
-    const featured = photos[0]
     const { title, info, link, priceOptions, inStock  } = safeProduct
 
     const [ priceOption, setPriceOption ] = useState( priceOptions[0] )
@@ -47,6 +52,9 @@ export default function ProductPage ({ productOverride = null, continueShoppingT
         setProductInfo({ 
             ...safeProduct,
             price: priceOption.price,
+            productId: safeProduct.id || safeProduct.slug || "",
+            variantId: priceOption.variantId || "",
+            sku: priceOption.sku || "",
             title: title + (priceOption.option ? " " + priceOption.option : ""),
             key: safeProduct.key.slice(0, -1) + priceOptions.findIndex(({ option }) => { return option === priceOption.option }).toString()
         })
@@ -76,8 +84,7 @@ export default function ProductPage ({ productOverride = null, continueShoppingT
         return <p>There was a problem loading this page!</p>
     }
 
-    return (
-
+    const productPage = (
         <div className="productPage_container">
             
             <h4>{ title }</h4>
@@ -130,4 +137,6 @@ export default function ProductPage ({ productOverride = null, continueShoppingT
         //     <button className="add_to_cart" onClick={ handleAddToCart } >Add To Cart</button>
         // </div>
     )
+
+    return renderProductPreviewItem(safeProduct, productPage)
 }

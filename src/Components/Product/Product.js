@@ -55,11 +55,14 @@ export default function Product (props) {
         setProductInfo({ 
             ...product, 
             price: priceOption.price,
+            productId: product.id || product.slug || "",
+            variantId: priceOption.variantId || "",
+            sku: priceOption.sku || "",
             title: title + (priceOption.option ? " " + priceOption.option : ""),
             key: product.key.slice(0, -1) + priceOptions.findIndex(({ option }) => { return option === priceOption.option }).toString()
         })
         // console.log("productInfo", productInfo )
-    }, [ priceOption, product, title ])
+    }, [ priceOption, priceOptions, product, title ])
   
     // console.log(priceOptions)
 

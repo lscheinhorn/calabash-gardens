@@ -77,11 +77,42 @@ const normalizePriceOptions = (priceOptions) => (
   price: String(priceOption?.price || "").trim(),
 }));
 
+const variantIdForPriceOption = (priceOption, index) => (
+  seedSlugify(priceOption.option) || (index === 0 ? "default" : `option-${index + 1}`)
+);
+
+const skuForVariant = (productId, variantId) => (
+  ["CG", productId, variantId]
+    .filter(Boolean)
+    .join("-")
+    .replace(/[^a-z0-9-]/gi, "-")
+    .replace(/-+/g, "-")
+    .toUpperCase()
+);
+
+const buildVariants = (productId, priceOptions) => priceOptions.map((priceOption, index) => {
+  const variantId = variantIdForPriceOption(priceOption, index);
+
+  return {
+    id: variantId,
+    label: priceOption.option || "Default",
+    price: priceOption.price,
+    sku: skuForVariant(productId, variantId),
+    stockOnHand: 0,
+    lowStockThreshold: null,
+    inventoryTracked: true,
+    active: true,
+    priceOptionIndex: index,
+    sortOrder: index,
+  };
+});
+
 const normalizeStaticProduct = (product, index) => {
   const title = String(product?.title || "").trim();
   const id = seedSlugify(title);
   const categoryName = resolveCategoryName(product);
   const category = seedSlugify(categoryName);
+  const priceOptions = normalizePriceOptions(product?.priceOptions);
 
   return {
     id,
@@ -92,7 +123,8 @@ const normalizeStaticProduct = (product, index) => {
       info1: String(product?.info1 || "").trim(),
       info2: String(product?.info2 || "").trim(),
       shipping: String(product?.shipping || "").trim(),
-      priceOptions: normalizePriceOptions(product?.priceOptions),
+      priceOptions,
+      variants: buildVariants(id, priceOptions),
       published: product?.isActive === true,
       isActive: product?.isActive === true,
       inStock: product?.inStock !== false,

@@ -2,13 +2,17 @@ import './Events.css'
 import '../Shop/Shop.css';  // Make sure your paths are correct
 import { getActiveEvents, experienceBlurb } from '../../data/siteData';
 import Event from '../Event/Event';
+import SiteContentBlocks from '../SiteContentBlocks/SiteContentBlocks';
 import { useState, useEffect, useMemo } from 'react';
 
 const renderStaticContent = (fieldPath, label, children) => children;
+const renderStaticEventItem = (event, children) => children;
 
 export default function Events({
     eventsOverride = null,
+    experienceBlurbBlocksOverride = null,
     experienceBlurbOverride = null,
+    renderEventPreviewItem = renderStaticEventItem,
     renderExperienceBlurbContent = renderStaticContent
 }) {
     const activeEvents = useMemo(() => (
@@ -57,12 +61,21 @@ export default function Events({
                         )}
                     </p>
                 ))}
+                <SiteContentBlocks
+                    blocks={experienceBlurbBlocksOverride}
+                    labelPrefix="Experience blurb"
+                    renderEditableContent={renderExperienceBlurbContent}
+                    variant="experience"
+                />
                 <div style={{ display: 'flex', justifyContent: 'space-around', width: '100%' }}>
                     <button className="btn btn-outline-primary" onClick={handlePrevious}>Previous Experience</button>
                     <button className="btn btn-outline-primary" onClick={handleNext}>Next Experience</button>
 
                 </div>
-                { activeEvents.length ? <Event event={activeEvents[eventIdx]} /> : null }
+                { activeEvents.length ? renderEventPreviewItem(
+                    activeEvents[eventIdx],
+                    <Event event={activeEvents[eventIdx]} />
+                ) : null }
             </div>
         </div>
     );

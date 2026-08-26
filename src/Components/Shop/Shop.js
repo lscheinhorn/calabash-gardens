@@ -3,7 +3,12 @@ import { usePublicProducts } from '../../data/usePublicProducts'
 import Product from '../Product/Product'
 import { useMemo, useState } from 'react'
 
-export default function Shop ({ productsOverride = null }) {
+const renderStaticProductItem = (product, children) => children;
+
+export default function Shop ({
+    productsOverride = null,
+    renderProductPreviewItem = renderStaticProductItem
+}) {
     const [ option, setOption ] = useState("All")
     const publicProducts = usePublicProducts()
     const products = productsOverride || publicProducts.products
@@ -33,7 +38,10 @@ export default function Shop ({ productsOverride = null }) {
                 {   
                     activeProducts.map( product => {
                         if(product.category === option || option === "All" ) {
-                            return <Product product={ product } key={ product.key } />
+                            return renderProductPreviewItem(
+                                product,
+                                <Product product={ product } key={ product.key } />
+                            )
                         }
                         return null
                     })

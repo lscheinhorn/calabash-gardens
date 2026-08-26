@@ -30,7 +30,8 @@ Protected static resource files remain read-only unless Luke explicitly approves
 The admin preview is the map Jette uses to find content the same way a customer would find it.
 
 - Normal preview navigation stays inside the preview iframe.
-- Content Edit Mode highlights approved editable text in the preview.
+- Content Edit Mode makes approved editable text clickable in the preview, but only the active field or paragraph should keep a persistent selected highlight.
+- Saved draft words that differ from the live Firestore text should be highlighted inline in the preview, with added draft words shown as an obvious green mark.
 - Clicking an approved content field opens the edit drawer beside the preview.
 - The preview route stays where Jette clicked.
 - The lower admin editor sections do not auto-scroll open for preview clicks.
@@ -40,6 +41,8 @@ The admin preview is the map Jette uses to find content the same way a customer 
 - The expand icon opens a full-preview admin overlay that keeps the side edit drawer available.
 - Preview side cards should edit the clicked field or paragraph only, in the same order Jette sees it on the site.
 - Preview side cards use `Save Draft`, `Publish`, and `Discard Draft`; the preview itself is the primary review surface.
+- Preview side cards keep instructional notes compact behind help controls so the edit field remains the focus.
+- Added content blocks use the same preview-click drawer flow. A block can be a title, subtitle, or paragraph, and it can be removed from the draft before publishing.
 - Manual refresh and audit/setup tools belong outside the Jette-facing preview editing flow.
 
 ## Admin Sections
@@ -59,17 +62,50 @@ Migration, mirror, parity, and setup/audit tooling belongs under `Developer / Au
 
 ## Product And Event Editing
 
-Products and events should follow the same preview-click pattern, but only after their drawer mode is implemented by reusing the existing Product Editor and Event Editor draft/publish logic.
+Products and events follow the same preview-click pattern by reusing the existing Product Editor and Event Editor draft/publish logic.
 
 Do not create a separate product or event save path for preview editing. The drawer must reuse the existing draft, review, publish, and discard helpers.
 
-Expected future flow:
+Expected flow:
 
 1. Jette navigates to a product card, product detail, or event in the preview.
 2. Edit Mode shows a small edit control for the product or event.
 3. Clicking the edit control opens a drawer with only that product or event card.
 4. Saving a draft refreshes the preview in place.
 5. Publishing remains explicit and review-gated.
+
+Product and event preview editing include photo upload, Photo Library attach, drag-handle reorder, selected-photo alt-text editing, and thumbnail `x` detach tools. These photo tools should stay hidden until Jette selects a photo or clicks `Add Photo`; in-app crop is intentionally deferred because photos can be cropped before upload. The Photo Library picker should show all active Storage-backed media assets as previewable thumbnail cards, not only the old `other` bin.
+
+Event description editing uses repeatable sections with optional subtitle and paragraph fields. Events are ordered chronologically by the canonical `date` field; do not add a separate event-level sort-order editor. The earlier admin-only `eventType` field should stay removed unless Luke approves a real customer-facing use for it. Event menu/document upload remains a separate event-media phase.
+
+Product and event editors show one customer-facing visibility control: `Visible on site`. The stored `published` compatibility field is kept in sync behind the scenes. Product shipping remains editable because products ship; event shipping remains an internal `0.00` compatibility field and should not be shown in the event editor.
+
+Event availability should be computed instead of manually toggled. Jette sets capacity; future order tracking should update `ticketsSold`; and the Event Editor may use manual holds only for seats reserved outside the website until checkout/order persistence is connected. Public event pages should show labels like `2 of 30 available`, hide ticket purchase for past events, and show a waitlist for full future events when waitlist is enabled. Waitlist entries save to `eventWaitlist` and are visible from the matching Event Editor card.
+
+The client cart also counts event seats across adult, child, dietary, and duplicate cart variants for the same event/date, but this is only a customer-side guard. The authoritative sold count still needs server-side PayPal confirmation and Firestore transaction work before public Firestore events become purchase-safe.
+
+## Admin Shell And Inventory
+
+The admin dashboard uses a left-sidebar navigation shell. Only one section renders in the main workspace at a time: Site Preview, Products, Events, Inventory, Orders, Photos, Site Content, or Developer / Audit Tools.
+
+The Inventory section is the operating view over live Firestore inventory records. It combines product variant stock and event capacity/tickets/manual holds without changing protected static resource files.
+
+Inventory edits are intentionally narrower than product/event content edits:
+
+- Product inventory rows can update stock on hand, low-stock threshold, and whether inventory is tracked for that variant.
+- Event inventory rows can update capacity, manual holds, and whether the waitlist opens when full.
+- Product/event descriptions, prices, photos, titles, and visibility still belong in the Product and Event editors.
+- Stock/manual-hold changes create `inventoryMovements` rows for audit. This is the beginning of the inventory ledger; paid orders and future Square/manual imports should use the same movement model.
+
+## Site Content Blocks
+
+Existing site content fields stay owned by their current content docs. When Jette needs to add new copy without a code change, the Site Content Editor can add optional blocks:
+
+- `title`
+- `subtitle`
+- `paragraph`
+
+These blocks save under `contentBlocks`, render after the existing approved fields for that content section, and stay draft-only until published. The `home` document stores header/footer blocks under `sections.header.contentBlocks`; the other content docs store them under `sections.contentBlocks`.
 
 ## Regression Checks
 

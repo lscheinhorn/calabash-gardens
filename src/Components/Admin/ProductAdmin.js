@@ -18,6 +18,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
   faChevronRight,
+  faGripVertical,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -36,6 +38,17 @@ import {
 } from "../../data/adminDrafts";
 import AdminPublishReview from "./AdminPublishReview";
 
+const emptyPriceOption = {
+  option: "",
+  price: "",
+  variantId: "",
+  sku: "",
+  stockOnHand: "0",
+  lowStockThreshold: "",
+  inventoryTracked: true,
+  active: true,
+};
+
 const emptyProduct = {
   slug: "",
   title: "",
@@ -44,7 +57,7 @@ const emptyProduct = {
   info1: "",
   info2: "",
   shipping: "17.00",
-  priceOptions: [{ option: "", price: "" }],
+  priceOptions: [{ ...emptyPriceOption }],
   published: false,
   isActive: false,
   inStock: true,
@@ -60,6 +73,7 @@ const emptyCategory = {
 };
 
 const decimalPattern = /^\d+\.\d{2}$/;
+const wholeNumberPattern = /^\d+$/;
 const recommendedImageSize = 10 * 1024 * 1024;
 const maxOriginalImageSize = 25 * 1024 * 1024;
 const optimizedImageMaxWidth = 1800;
@@ -81,15 +95,110 @@ const slugify = (value) =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-const normalizePriceOptions = (priceOptions) => {
+const variantIdForOption = (option, index) => (
+  slugify(option) || (index === 0 ? "default" : `option-${index + 1}`)
+);
+
+const skuForVariant = (productId, variantId) => {
+  const skuParts = ["CG", productId, variantId]
+    .map((part) => String(part || "").trim())
+    .filter(Boolean);
+
+  return skuParts.join("-").replace(/[^a-z0-9-]/gi, "-").replace(/-+/g, "-").toUpperCase();
+};
+
+const quantityText = (value, fallback = "0") => {
+  const text = String(value ?? "").trim();
+
+  return wholeNumberPattern.test(text) ? text : fallback;
+};
+
+const optionalQuantityText = (value) => {
+  const text = String(value ?? "").trim();
+
+  return wholeNumberPattern.test(text) ? text : "";
+};
+
+const normalizePriceOptions = (priceOptions, variants = [], productId = "") => {
   if (!Array.isArray(priceOptions) || priceOptions.length === 0) {
-    return [{ option: "", price: "" }];
+    return [{ ...emptyPriceOption, variantId: "default", sku: skuForVariant(productId, "default") }];
   }
 
-  return priceOptions.map((priceOption) => ({
-    option: priceOption.option || "",
-    price: priceOption.price || "",
-  }));
+  const variantsByIndex = Array.isArray(variants)
+    ? new Map(variants.map((variant) => [variant.priceOptionIndex, variant]))
+    : new Map();
+
+  return priceOptions.map((priceOption, index) => {
+    const storedVariant = variantsByIndex.get(index) || {};
+    const variantId = slugify(
+      storedVariant.id
+      || storedVariant.variantId
+      || priceOption.variantId
+      || variantIdForOption(priceOption.option, index)
+    );
+
+    return {
+      ...emptyPriceOption,
+      option: priceOption.option,
+      price: priceOption.price,
+      variantId,
+      sku: String(storedVariant.sku || priceOption.sku || skuForVariant(productId, variantId)),
+      stockOnHand: quantityText(storedVariant.stockOnHand ?? priceOption.stockOnHand),
+      lowStockThreshold: optionalQuantityText(storedVariant.lowStockThreshold ?? priceOption.lowStockThreshold),
+      inventoryTracked: storedVariant.inventoryTracked !== false && priceOption.inventoryTracked !== false,
+      active: storedVariant.active !== false && priceOption.active !== false,
+    };
+  });
+};
+
+const buildProductVariants = (productId, priceOptions) => normalizePriceOptions(priceOptions, [], productId)
+  .map((priceOption, index) => {
+    const variantId = slugify(priceOption.variantId) || variantIdForOption(priceOption.option, index);
+
+    return {
+      id: variantId,
+      label: priceOption.option.trim() || "Default",
+      price: priceOption.price.trim(),
+      sku: priceOption.sku.trim() || skuForVariant(productId, variantId),
+      stockOnHand: Number(quantityText(priceOption.stockOnHand)),
+      lowStockThreshold: priceOption.lowStockThreshold === "" ? null : Number(quantityText(priceOption.lowStockThreshold)),
+      inventoryTracked: priceOption.inventoryTracked !== false,
+      active: priceOption.active !== false,
+      priceOptionIndex: index,
+      sortOrder: index,
+    };
+  });
+
+const productInventorySummary = (product) => {
+  if (!Array.isArray(product.variants) || product.variants.length === 0) {
+    return {
+      available: product.inStock !== false,
+      label: product.inStock === false ? "Unavailable" : "Inventory not set up",
+      totalStock: 0,
+      trackedCount: 0,
+    };
+  }
+
+  const variants = normalizePriceOptions(product.priceOptions, product.variants, product.id);
+  const trackedVariants = variants.filter((variant) => variant.active !== false && variant.inventoryTracked !== false);
+
+  if (!trackedVariants.length) {
+    return {
+      available: product.inStock !== false,
+      label: product.inStock === false ? "Unavailable" : "Inventory not tracked",
+      totalStock: 0,
+      trackedCount: 0,
+    };
+  }
+
+  const totalStock = trackedVariants.reduce((total, variant) => total + Number(quantityText(variant.stockOnHand)), 0);
+
+  return {
+    available: product.inStock !== false && totalStock > 0,
+    label: `${totalStock} on hand across ${trackedVariants.length} ${trackedVariants.length === 1 ? "variant" : "variants"}`,
+    totalStock,
+    trackedCount: trackedVariants.length,
+  };
 };
 
 const normalizePhotos = (photos) => {
@@ -170,6 +279,8 @@ const buildImagePath = (productId, fileName, contentType) => {
   return `product-images/${productId}-${Date.now()}-${safeName}${extension}`;
 };
 
+const photoKeyFor = (productId, photoPath) => `${productId}:${photoPath}`;
+
 const loadImage = (file) => new Promise((resolve, reject) => {
   const image = new Image();
   const imageUrl = URL.createObjectURL(file);
@@ -227,7 +338,7 @@ const buildFormFromProduct = (product) => ({
   info1: product.info1 || "",
   info2: product.info2 || "",
   shipping: product.shipping || "17.00",
-  priceOptions: normalizePriceOptions(product.priceOptions),
+  priceOptions: normalizePriceOptions(product.priceOptions, product.variants, product.id),
   published: product.published === true,
   isActive: product.isActive === true,
   inStock: product.inStock !== false,
@@ -238,9 +349,13 @@ const buildFormFromProduct = (product) => ({
 export default function ProductAdmin({
   db,
   defaultExpandedSections = {},
+  focusRequest = null,
+  onDraftChange = () => {},
   storage,
   userId = "",
+  variant = "full",
 }) {
+  const isDrawerMode = variant === "drawer";
   const [form, setForm] = useState(emptyProduct);
   const [editingForm, setEditingForm] = useState(emptyProduct);
   const [categoryForm, setCategoryForm] = useState(emptyCategory);
@@ -268,6 +383,10 @@ export default function ProductAdmin({
   const [isAttachingPhoto, setIsAttachingPhoto] = useState(false);
   const [photoAltDrafts, setPhotoAltDrafts] = useState({});
   const [isUpdatingProductPhoto, setIsUpdatingProductPhoto] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState({ productId: "", path: "" });
+  const [addPhotoProductId, setAddPhotoProductId] = useState("");
+  const [photoAddMode, setPhotoAddMode] = useState("");
+  const [draggedPhoto, setDraggedPhoto] = useState({ productId: "", path: "" });
   const [isProductIdEdited, setIsProductIdEdited] = useState(false);
   const [seedResult, setSeedResult] = useState(null);
   const [isSeeding, setIsSeeding] = useState(false);
@@ -279,7 +398,6 @@ export default function ProductAdmin({
   const [productFilters, setProductFilters] = useState({
     search: "",
     category: "all",
-    published: "all",
     active: "all",
     stock: "all",
   });
@@ -347,6 +465,11 @@ export default function ProductAdmin({
     loadMediaAssets();
   }, [loadCategories, loadMediaAssets, loadProducts]);
 
+  const reloadProductsAfterMutation = useCallback(async () => {
+    await loadProducts();
+    onDraftChange();
+  }, [loadProducts, onDraftChange]);
+
   useEffect(() => {
     let isCurrentLoad = true;
 
@@ -356,10 +479,17 @@ export default function ProductAdmin({
         return;
       }
 
-      const photoPaths = Array.from(new Set(products
+      const productPhotoPaths = products
         .flatMap((product) => normalizePhotos(product.photos))
         .map((photo) => photo.path)
-        .filter(Boolean)));
+        .filter(Boolean);
+      const libraryPhotoPaths = mediaAssets
+        .map((asset) => asset.storagePath)
+        .filter(Boolean);
+      const photoPaths = Array.from(new Set([
+        ...productPhotoPaths,
+        ...libraryPhotoPaths,
+      ]));
 
       const photoUrlEntries = await Promise.all(photoPaths.map(async (photoPath) => {
         try {
@@ -379,20 +509,36 @@ export default function ProductAdmin({
     return () => {
       isCurrentLoad = false;
     };
-  }, [products, storage]);
+  }, [mediaAssets, products, storage]);
 
   const updateForm = (field, value) => {
-    setForm((currentForm) => ({
-      ...currentForm,
-      [field]: value,
-    }));
+    setForm((currentForm) => {
+      const nextForm = {
+        ...currentForm,
+        [field]: value,
+      };
+
+      if (field === "isActive") {
+        nextForm.published = value;
+      }
+
+      return nextForm;
+    });
   };
 
   const updateEditingForm = (field, value) => {
-    setEditingForm((currentForm) => ({
-      ...currentForm,
-      [field]: value,
-    }));
+    setEditingForm((currentForm) => {
+      const nextForm = {
+        ...currentForm,
+        [field]: value,
+      };
+
+      if (field === "isActive") {
+        nextForm.published = value;
+      }
+
+      return nextForm;
+    });
   };
 
   const updateCategoryForm = (field, value) => {
@@ -461,6 +607,10 @@ export default function ProductAdmin({
     setPhotoFile(null);
     setPhotoUploadChoice("optimize");
     setSelectedExistingMediaId("");
+    setSelectedPhoto({ productId: "", path: "" });
+    setAddPhotoProductId("");
+    setPhotoAddMode("");
+    setDraggedPhoto({ productId: "", path: "" });
     setPhotoInputKey((currentKey) => currentKey + 1);
   };
 
@@ -468,6 +618,36 @@ export default function ProductAdmin({
     setPhotoFile(file);
     setPhotoMessage("");
     setPhotoUploadChoice(file && file.size >= recommendedImageSize ? "optimize" : "original");
+  };
+
+  const selectProductPhoto = (productId, photoPath) => {
+    setSelectedProductId(productId);
+    setSelectedPhoto({ productId, path: photoPath });
+    setAddPhotoProductId("");
+    setPhotoAddMode("");
+    setPhotoMessage("");
+  };
+
+  const toggleAddPhotoTools = (productId) => {
+    const isAddingToProduct = addPhotoProductId === productId;
+
+    setSelectedProductId(productId);
+    setSelectedPhoto({ productId: "", path: "" });
+    setAddPhotoProductId(isAddingToProduct ? "" : productId);
+    setPhotoAddMode("");
+    setPhotoMessage("");
+  };
+
+  const choosePhotoAddMode = (productId, mode) => {
+    setSelectedProductId(productId);
+    setSelectedPhoto({ productId: "", path: "" });
+    setAddPhotoProductId(productId);
+    setPhotoAddMode(mode);
+    setSelectedExistingMediaId("");
+    setPhotoFile(null);
+    setPhotoAlt("");
+    setPhotoUploadChoice("optimize");
+    setPhotoMessage("");
   };
 
   const toggleProductCard = (product) => {
@@ -493,6 +673,28 @@ export default function ProductAdmin({
     resetPhotoForm();
   };
 
+  useEffect(() => {
+    if (!isDrawerMode || !focusRequest?.productId) {
+      return;
+    }
+
+    const focusedProduct = products.find((product) => product.id === focusRequest.productId);
+
+    if (!focusedProduct) {
+      return;
+    }
+
+    setExpandedProductId(focusedProduct.id);
+    setSelectedProductId(focusedProduct.id);
+
+    if (editingProductId !== focusedProduct.id) {
+      setEditingProductId(focusedProduct.id);
+      setEditingForm(buildFormFromProduct(focusedProduct));
+      setProductCardMessage("");
+      resetPhotoForm();
+    }
+  }, [editingProductId, focusRequest?.productId, isDrawerMode, products]);
+
   const cancelProductEdit = () => {
     setEditingProductId("");
     setEditingForm(emptyProduct);
@@ -515,7 +717,7 @@ export default function ProductAdmin({
       ...currentForm,
       priceOptions: currentForm.priceOptions.map((priceOption, priceOptionIndex) => (
         priceOptionIndex === index
-          ? { ...priceOption, [field]: value }
+          ? { ...priceOption, [field]: field === "variantId" ? slugify(value) : value }
           : priceOption
       )),
     }));
@@ -526,7 +728,7 @@ export default function ProductAdmin({
       ...currentForm,
       priceOptions: currentForm.priceOptions.map((priceOption, priceOptionIndex) => (
         priceOptionIndex === index
-          ? { ...priceOption, [field]: value }
+          ? { ...priceOption, [field]: field === "variantId" ? slugify(value) : value }
           : priceOption
       )),
     }));
@@ -535,14 +737,14 @@ export default function ProductAdmin({
   const addPriceOption = () => {
     setForm((currentForm) => ({
       ...currentForm,
-      priceOptions: [...currentForm.priceOptions, { option: "", price: "" }],
+      priceOptions: [...currentForm.priceOptions, { ...emptyPriceOption }],
     }));
   };
 
   const addEditingPriceOption = () => {
     setEditingForm((currentForm) => ({
       ...currentForm,
-      priceOptions: [...currentForm.priceOptions, { option: "", price: "" }],
+      priceOptions: [...currentForm.priceOptions, { ...emptyPriceOption }],
     }));
   };
 
@@ -607,6 +809,30 @@ export default function ProductAdmin({
       return "Every price must be a decimal like 15.00.";
     }
 
+    const variants = buildProductVariants(productId, productForm.priceOptions);
+    const variantIds = variants.map((variant) => variant.id);
+    const hasInvalidVariantId = variantIds.some((variantId) => !variantId);
+
+    if (hasInvalidVariantId) {
+      return "Every inventory variant needs an ID.";
+    }
+
+    if (new Set(variantIds).size !== variantIds.length) {
+      return "Every inventory variant ID must be unique for this product.";
+    }
+
+    const hasInvalidStock = productForm.priceOptions.some((priceOption) => {
+      const stockOnHand = String(priceOption.stockOnHand ?? "").trim();
+      const lowStockThreshold = String(priceOption.lowStockThreshold ?? "").trim();
+
+      return (stockOnHand !== "" && !wholeNumberPattern.test(stockOnHand))
+        || (lowStockThreshold !== "" && !wholeNumberPattern.test(lowStockThreshold));
+    });
+
+    if (hasInvalidStock) {
+      return "Inventory counts must be whole numbers.";
+    }
+
     return "";
   };
 
@@ -648,7 +874,8 @@ export default function ProductAdmin({
         option: priceOption.option.trim(),
         price: priceOption.price.trim(),
       })),
-      published: productForm.published,
+      variants: buildProductVariants(productId, productForm.priceOptions),
+      published: productForm.isActive === true,
       isActive: productForm.isActive,
       inStock: productForm.inStock,
       isHighlighted: productForm.isHighlighted,
@@ -711,7 +938,7 @@ export default function ProductAdmin({
       setSelectedProductId(productId);
       resetForm();
       setMessage("Product saved as a preview draft.");
-      await loadProducts();
+      await reloadProductsAfterMutation();
     } catch (error) {
       setMessage("Product draft could not be saved.");
     } finally {
@@ -746,7 +973,7 @@ export default function ProductAdmin({
       setProductCardMessage("Product saved as a preview draft.");
       setEditingProductId("");
       setEditingForm(emptyProduct);
-      await loadProducts();
+      await reloadProductsAfterMutation();
     } catch (error) {
       setProductCardMessage("Product draft could not be saved.");
     } finally {
@@ -791,7 +1018,7 @@ export default function ProductAdmin({
       setPublishReview(null);
       setEditingProductId("");
       setEditingForm(emptyProduct);
-      await loadProducts();
+      await reloadProductsAfterMutation();
     } catch (error) {
       setProductCardMessage("Product could not be published.");
     } finally {
@@ -814,7 +1041,7 @@ export default function ProductAdmin({
       setPublishReview(null);
       setEditingProductId("");
       setEditingForm(emptyProduct);
-      await loadProducts();
+      await reloadProductsAfterMutation();
     } catch (error) {
       setProductCardMessage("Product draft could not be discarded.");
     } finally {
@@ -904,9 +1131,12 @@ export default function ProductAdmin({
       setPhotoAlt("");
       setPhotoFile(null);
       setPhotoUploadChoice("optimize");
+      setSelectedPhoto({ productId: product.id, path: photoPath });
+      setAddPhotoProductId("");
+      setPhotoAddMode("");
       setPhotoInputKey((currentKey) => currentKey + 1);
       setPhotoMessage(shouldOptimize ? "Photo optimized, uploaded, and attached to the product draft." : "Photo uploaded and attached to the product draft.");
-      await loadProducts();
+      await reloadProductsAfterMutation();
     } catch (error) {
       setPhotoMessage("Photo could not be uploaded.");
     } finally {
@@ -964,8 +1194,11 @@ export default function ProductAdmin({
           : currentProduct
       )));
       setSelectedExistingMediaId("");
+      setSelectedPhoto({ productId: product.id, path: mediaAsset.storagePath });
+      setAddPhotoProductId("");
+      setPhotoAddMode("");
       setPhotoMessage("Existing photo attached to the product draft.");
-      await loadProducts();
+      await reloadProductsAfterMutation();
     } catch (error) {
       setPhotoMessage("Existing photo could not be attached.");
     } finally {
@@ -1011,7 +1244,7 @@ export default function ProductAdmin({
           : currentProduct
       )));
       setPhotoMessage(successMessage);
-      await loadProducts();
+      await reloadProductsAfterMutation();
       return updatedPhotos;
     } catch (error) {
       setPhotoMessage("Product photo changes could not be saved.");
@@ -1042,25 +1275,66 @@ export default function ProductAdmin({
     });
   };
 
-  const moveProductPhoto = async (product, photo, direction) => {
-    await updateProductPhotoList(product, (latestPhotos) => {
-      const photoIndex = latestPhotos.findIndex((latestPhoto) => latestPhoto.path === photo.path);
-      const swapIndex = photoIndex + direction;
+  const reorderProductPhoto = async (product, sourcePhotoPath, targetPhotoPath) => {
+    if (!sourcePhotoPath || !targetPhotoPath || sourcePhotoPath === targetPhotoPath) {
+      return;
+    }
 
-      if (photoIndex < 0 || swapIndex < 0 || swapIndex >= latestPhotos.length) {
+    await updateProductPhotoList(product, (latestPhotos) => {
+      const sourceIndex = latestPhotos.findIndex((latestPhoto) => latestPhoto.path === sourcePhotoPath);
+      const targetIndex = latestPhotos.findIndex((latestPhoto) => latestPhoto.path === targetPhotoPath);
+
+      if (sourceIndex < 0 || targetIndex < 0) {
         return latestPhotos;
       }
 
       const nextPhotos = [...latestPhotos];
-      [nextPhotos[photoIndex], nextPhotos[swapIndex]] = [nextPhotos[swapIndex], nextPhotos[photoIndex]];
+      const [movedPhoto] = nextPhotos.splice(sourceIndex, 1);
+      nextPhotos.splice(targetIndex, 0, movedPhoto);
       return nextPhotos;
     }, "Photo order saved.");
+  };
+
+  const startPhotoDrag = (event, product, photo) => {
+    setDraggedPhoto({ productId: product.id, path: photo.path });
+    setSelectedProductId(product.id);
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", photo.path);
+  };
+
+  const dropProductPhoto = async (event, product, targetPhoto) => {
+    event.preventDefault();
+
+    const draggedPath = draggedPhoto.productId === product.id
+      ? draggedPhoto.path
+      : event.dataTransfer.getData("text/plain");
+
+    setDraggedPhoto({ productId: "", path: "" });
+    await reorderProductPhoto(product, draggedPath, targetPhoto.path);
+  };
+
+  const reorderProductPhotoFromKeyboard = async (event, product, photo, direction) => {
+    const latestPhotos = normalizePhotos(product.photos)
+      .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
+    const photoIndex = latestPhotos.findIndex((latestPhoto) => latestPhoto.path === photo.path);
+    const targetPhoto = latestPhotos[photoIndex + direction];
+
+    if (!targetPhoto) {
+      return;
+    }
+
+    event.preventDefault();
+    await reorderProductPhoto(product, photo.path, targetPhoto.path);
   };
 
   const detachProductPhoto = async (product, photo) => {
     const updatedPhotos = await updateProductPhotoList(product, (latestPhotos) => (
       latestPhotos.filter((latestPhoto) => latestPhoto.path !== photo.path)
     ), "Photo detached from this product.");
+
+    if (updatedPhotos && selectedPhoto.productId === product.id && selectedPhoto.path === photo.path) {
+      setSelectedPhoto({ productId: "", path: "" });
+    }
 
     return updatedPhotos;
   };
@@ -1209,7 +1483,7 @@ export default function ProductAdmin({
         });
       }
       await loadCategories();
-      await loadProducts();
+      await reloadProductsAfterMutation();
 
       setSeedResult({
         ...seed,
@@ -1232,20 +1506,21 @@ export default function ProductAdmin({
   const filteredProducts = products.filter((product) => {
     const search = productFilters.search.trim().toLowerCase();
     const title = String(product.title || product.id).toLowerCase();
+    const inventorySummary = productInventorySummary(product);
     const matchesSearch = !search || title.includes(search) || product.id.includes(search);
     const matchesCategory = productFilters.category === "all" || product.category === productFilters.category;
-    const matchesPublished = productFilters.published === "all"
-      || (productFilters.published === "published" && product.published === true)
-      || (productFilters.published === "draft" && product.published !== true);
     const matchesActive = productFilters.active === "all"
       || (productFilters.active === "active" && product.isActive === true)
       || (productFilters.active === "inactive" && product.isActive !== true);
     const matchesStock = productFilters.stock === "all"
-      || (productFilters.stock === "inStock" && product.inStock !== false)
-      || (productFilters.stock === "outOfStock" && product.inStock === false);
+      || (productFilters.stock === "inStock" && inventorySummary.available)
+      || (productFilters.stock === "outOfStock" && !inventorySummary.available);
 
-    return matchesSearch && matchesCategory && matchesPublished && matchesActive && matchesStock;
+    return matchesSearch && matchesCategory && matchesActive && matchesStock;
   });
+  const visibleProducts = isDrawerMode && focusRequest?.productId
+    ? products.filter((product) => product.id === focusRequest.productId)
+    : filteredProducts;
 
   const approvedCategories = categories.filter((category) => isApprovedCategoryId(category.id));
   const productCategoryOptions = (productId) => approvedCategories.filter((category) => (
@@ -1259,37 +1534,38 @@ export default function ProductAdmin({
     ...categoryNames,
     [category.id]: category.name || category.id,
   }), {});
-  const attachableMediaAssets = mediaAssets.filter((asset) => (
-    asset.bin === "other"
-    && asset.status === "active"
-    && asset.storagePath
+  const photoLibraryAssets = mediaAssets.filter((asset) => (
+    asset.status === "active" && asset.storagePath
   ));
 
   return (
-    <div className="admin_editor_grid">
+    <div className={isDrawerMode ? "admin_drawer_editor_inner" : "admin_editor_grid"}>
       <section className="admin_panel admin_full_width">
-        <div className="admin_form_header">
-          <h3>Firestore Products</h3>
-          <div className="admin_button_row">
-            <button className="admin_secondary_button" disabled={isLoading} onClick={loadProducts} type="button">
-              Refresh
-            </button>
-            <button
-              aria-expanded={expandedSections.products}
-              aria-label={`${expandedSections.products ? "Collapse" : "Expand"} Firestore Products`}
-              className="admin_icon_button"
-              onClick={() => toggleSection("products")}
-              title={`${expandedSections.products ? "Collapse" : "Expand"} Firestore Products`}
-              type="button"
-            >
-              <CollapseIcon isExpanded={expandedSections.products} />
-            </button>
+        {!isDrawerMode ? (
+          <div className="admin_form_header">
+            <h3>Firestore Products</h3>
+            <div className="admin_button_row">
+              <button className="admin_secondary_button" disabled={isLoading} onClick={loadProducts} type="button">
+                Refresh
+              </button>
+              <button
+                aria-expanded={expandedSections.products}
+                aria-label={`${expandedSections.products ? "Collapse" : "Expand"} Firestore Products`}
+                className="admin_icon_button"
+                onClick={() => toggleSection("products")}
+                title={`${expandedSections.products ? "Collapse" : "Expand"} Firestore Products`}
+                type="button"
+              >
+                <CollapseIcon isExpanded={expandedSections.products} />
+              </button>
+            </div>
           </div>
-        </div>
+        ) : null}
 
-        {expandedSections.products ? (
+        {expandedSections.products || isDrawerMode ? (
           <>
-            <div className="admin_filter_grid">
+            {!isDrawerMode ? (
+              <div className="admin_filter_grid">
               <label>
                 Search
                 <input
@@ -1310,43 +1586,53 @@ export default function ProductAdmin({
                 </select>
               </label>
               <label>
-                Published
-                <select onChange={(event) => updateFilter("published", event.target.value)} value={productFilters.published}>
-                  <option value="all">All</option>
-                  <option value="published">Published</option>
-                  <option value="draft">Draft</option>
-                </select>
-              </label>
-              <label>
-                Active
+                Visibility
                 <select onChange={(event) => updateFilter("active", event.target.value)} value={productFilters.active}>
                   <option value="all">All</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
+                  <option value="active">Visible</option>
+                  <option value="inactive">Hidden</option>
                 </select>
               </label>
               <label>
                 Stock
                 <select onChange={(event) => updateFilter("stock", event.target.value)} value={productFilters.stock}>
                   <option value="all">All</option>
-                  <option value="inStock">In Stock</option>
+                  <option value="inStock">Available now</option>
                   <option value="outOfStock">Out of Stock</option>
                 </select>
               </label>
-            </div>
+              </div>
+            ) : null}
 
             {isLoading ? <p className="admin_status">Loading products...</p> : null}
-            <p className="admin_status">{filteredProducts.length} of {products.length} products shown.</p>
+            {!isDrawerMode ? (
+              <p className="admin_status">{filteredProducts.length} of {products.length} products shown.</p>
+            ) : null}
+            {isDrawerMode && !isLoading && !visibleProducts.length ? (
+              <p className="admin_status">The selected product was not found.</p>
+            ) : null}
 
             <div className="admin_product_list">
-              {filteredProducts.map((product) => {
+              {visibleProducts.map((product) => {
                 const isExpanded = expandedProductId === product.id;
                 const isEditing = editingProductId === product.id;
                 const productPhotos = normalizePhotos(product.photos)
                   .sort((firstPhoto, secondPhoto) => firstPhoto.sortOrder - secondPhoto.sortOrder);
+                const productAttachedPhotoPaths = new Set(productPhotos.map((photo) => photo.path));
+                const productAttachedMediaAssetIds = new Set(productPhotos
+                  .map((photo) => photo.mediaAssetId)
+                  .filter(Boolean));
                 const isPhotoTarget = selectedProductId === product.id;
+                const isAddingPhoto = addPhotoProductId === product.id;
+                const isUploadMode = isAddingPhoto && photoAddMode === "upload";
+                const isLibraryMode = isAddingPhoto && photoAddMode === "library";
+                const selectedProductPhotoPath = selectedPhoto.productId === product.id ? selectedPhoto.path : "";
                 const hasDraft = Boolean(draftsById[product.id]);
                 const isPublishReviewOpen = publishReview?.id === product.id;
+                const inventorySummary = productInventorySummary(product);
+                const productVariantRows = Array.isArray(product.variants) && product.variants.length
+                  ? normalizePriceOptions(product.priceOptions, product.variants, product.id)
+                  : [];
                 const productPublishReview = isPublishReviewOpen ? (
                   <AdminPublishReview
                     draftData={publishReview.data}
@@ -1375,37 +1661,51 @@ export default function ProductAdmin({
                       </small>
                     </button>
 
-                    <div className="admin_product_meta">
-                      <span>{hasDraft ? "Draft changes pending" : "Live product"}</span>
-                      {product._draftOnly ? <span>Draft-only new product</span> : null}
-                      <span>{product.published ? "Published" : "Draft"}</span>
-                      <span>{product.isActive ? "Active" : "Inactive"}</span>
-                      <span>{product.inStock === false ? "Out of Stock" : "In Stock"}</span>
-                      <span>{categoryNameById[product.category] || product.category || "No Category"}</span>
-                    </div>
+                    {!isEditing ? (
+                      <div className="admin_product_meta">
+                        <span>{hasDraft ? "Draft changes pending" : "Live product"}</span>
+                        {product._draftOnly ? <span>Draft-only new product</span> : null}
+                        <span>{product.isActive ? "Visible on site" : "Hidden from site"}</span>
+                        <span>{inventorySummary.available ? "Available now" : "Unavailable now"}</span>
+                        <span>{inventorySummary.label}</span>
+                        <span>{categoryNameById[product.category] || product.category || "No Category"}</span>
+                      </div>
+                    ) : null}
 
                     {isExpanded ? (
                       <div className="admin_product_card_body">
-                        <dl className="admin_product_details">
-                          <div>
-                            <dt>ID</dt>
-                            <dd>{product.id}</dd>
-                          </div>
-                          <div>
-                            <dt>Shipping</dt>
-                            <dd>{product.shipping || "None"}</dd>
-                          </div>
-                          <div>
-                            <dt>Prices</dt>
-                            <dd>
-                              {normalizePriceOptions(product.priceOptions).map((priceOption, index) => (
-                                <span key={`${product.id}-price-${index}`}>
-                                  {priceOption.option ? `${priceOption.option}: ` : ""}${priceOption.price}
-                                </span>
-                              ))}
-                            </dd>
-                          </div>
-                        </dl>
+                        {!isEditing ? (
+                          <dl className="admin_product_details">
+                            <div>
+                              <dt>ID</dt>
+                              <dd>{product.id}</dd>
+                            </div>
+                            <div>
+                              <dt>Shipping</dt>
+                              <dd>{product.shipping || "None"}</dd>
+                            </div>
+                            <div>
+                              <dt>Prices</dt>
+                              <dd>
+                                {normalizePriceOptions(product.priceOptions, product.variants, product.id).map((priceOption, index) => (
+                                  <span key={`${product.id}-price-${index}`}>
+                                    {priceOption.option ? `${priceOption.option}: ` : ""}{priceOption.price}
+                                  </span>
+                                ))}
+                              </dd>
+                            </div>
+                            <div>
+                              <dt>Inventory</dt>
+                              <dd>
+                                {productVariantRows.length ? productVariantRows.map((variant) => (
+                                  <span key={`${product.id}-variant-summary-${variant.variantId}`}>
+                                    {variant.option || "Default"}: {variant.inventoryTracked ? `${variant.stockOnHand} on hand` : "not tracked"}
+                                  </span>
+                                )) : <span>Inventory not set up</span>}
+                              </dd>
+                            </div>
+                          </dl>
+                        ) : null}
 
                         {!isEditing ? (
                           <>
@@ -1473,23 +1773,75 @@ export default function ProductAdmin({
                             </label>
                             <div className="admin_price_options">
                               {editingForm.priceOptions.map((priceOption, index) => (
-                                <div className="admin_split_fields" key={`edit-price-option-${product.id}-${index}`}>
-                                  <label>
-                                    Option Label
-                                    <input
-                                      onChange={(event) => updateEditingPriceOption(index, "option", event.target.value)}
-                                      value={priceOption.option}
-                                    />
-                                  </label>
-                                  <label>
-                                    Price
-                                    <input
-                                      inputMode="decimal"
-                                      onChange={(event) => updateEditingPriceOption(index, "price", event.target.value)}
-                                      required
-                                      value={priceOption.price}
-                                    />
-                                  </label>
+                                <div className="admin_variant_option_card" key={`edit-price-option-${product.id}-${index}`}>
+                                  <div className="admin_split_fields">
+                                    <label>
+                                      Option Label
+                                      <input
+                                        onChange={(event) => updateEditingPriceOption(index, "option", event.target.value)}
+                                        value={priceOption.option}
+                                      />
+                                    </label>
+                                    <label>
+                                      Price
+                                      <input
+                                        inputMode="decimal"
+                                        onChange={(event) => updateEditingPriceOption(index, "price", event.target.value)}
+                                        required
+                                        value={priceOption.price}
+                                      />
+                                    </label>
+                                    <label>
+                                      Variant ID
+                                      <input
+                                        onChange={(event) => updateEditingPriceOption(index, "variantId", event.target.value)}
+                                        value={priceOption.variantId || variantIdForOption(priceOption.option, index)}
+                                      />
+                                    </label>
+                                  </div>
+                                  <div className="admin_variant_fields">
+                                    <label>
+                                      SKU
+                                      <input
+                                        onChange={(event) => updateEditingPriceOption(index, "sku", event.target.value)}
+                                        value={priceOption.sku}
+                                      />
+                                    </label>
+                                    <label>
+                                      Stock on Hand
+                                      <input
+                                        inputMode="numeric"
+                                        onChange={(event) => updateEditingPriceOption(index, "stockOnHand", event.target.value)}
+                                        value={priceOption.stockOnHand}
+                                      />
+                                    </label>
+                                    <label>
+                                      Low Stock Alert
+                                      <input
+                                        inputMode="numeric"
+                                        onChange={(event) => updateEditingPriceOption(index, "lowStockThreshold", event.target.value)}
+                                        value={priceOption.lowStockThreshold}
+                                      />
+                                    </label>
+                                  </div>
+                                  <div className="admin_checkbox_grid">
+                                    <label>
+                                      <input
+                                        checked={priceOption.inventoryTracked !== false}
+                                        onChange={(event) => updateEditingPriceOption(index, "inventoryTracked", event.target.checked)}
+                                        type="checkbox"
+                                      />
+                                      Track inventory
+                                    </label>
+                                    <label>
+                                      <input
+                                        checked={priceOption.active !== false}
+                                        onChange={(event) => updateEditingPriceOption(index, "active", event.target.checked)}
+                                        type="checkbox"
+                                      />
+                                      Sell this option
+                                    </label>
+                                  </div>
                                   <button
                                     className="admin_secondary_button"
                                     disabled={editingForm.priceOptions.length === 1}
@@ -1515,16 +1867,12 @@ export default function ProductAdmin({
                             </label>
                             <div className="admin_checkbox_grid">
                               <label>
-                                <input checked={editingForm.published} onChange={(event) => updateEditingForm("published", event.target.checked)} type="checkbox" />
-                                Published
-                              </label>
-                              <label>
                                 <input checked={editingForm.isActive} onChange={(event) => updateEditingForm("isActive", event.target.checked)} type="checkbox" />
-                                Active
+                                Visible on site
                               </label>
                               <label>
                                 <input checked={editingForm.inStock} onChange={(event) => updateEditingForm("inStock", event.target.checked)} type="checkbox" />
-                                In Stock
+                                Available now
                               </label>
                               <label>
                                 <input checked={editingForm.isHighlighted} onChange={(event) => updateEditingForm("isHighlighted", event.target.checked)} type="checkbox" />
@@ -1560,7 +1908,7 @@ export default function ProductAdmin({
                           </form>
                         )}
 
-                        <form className="admin_embedded_form admin_card_photo_form" onSubmit={(event) => handlePhotoUpload(event, product)}>
+                        <div className="admin_embedded_form admin_card_photo_form">
                           <div className="admin_form_header">
                             <h4>Photos</h4>
                             <span className="admin_status">{productPhotos.length} attached</span>
@@ -1568,57 +1916,104 @@ export default function ProductAdmin({
 
                           <div className="admin_photo_list">
                             {productPhotos.length ? productPhotos.map((photo, photoIndex) => {
-                              const draftKey = `${product.id}:${photo.path}`;
+                              const draftKey = photoKeyFor(product.id, photo.path);
                               const draftAlt = photoAltDrafts[draftKey] ?? photo.alt;
+                              const isSelectedPhoto = selectedProductPhotoPath === photo.path;
+                              const isDraggedPhoto = draggedPhoto.productId === product.id && draggedPhoto.path === photo.path;
 
                               return (
-                              <div className="admin_photo_row" key={photo.path}>
-                                {photoUrlsByPath[photo.path] ? (
-                                  <img alt={photo.alt || product.title || photo.path} src={photoUrlsByPath[photo.path]} />
-                                ) : null}
-                                <label className="admin_photo_alt_field">
-                                  Alt Text
-                                  <input
+                              <div
+                                className={`admin_photo_row${isSelectedPhoto ? " admin_photo_row_selected" : ""}${isDraggedPhoto ? " admin_photo_row_dragging" : ""}`}
+                                key={photo.path}
+                                onClick={() => selectProductPhoto(product.id, photo.path)}
+                                onDragOver={(event) => {
+                                  event.preventDefault();
+                                  event.dataTransfer.dropEffect = "move";
+                                }}
+                                onDrop={(event) => dropProductPhoto(event, product, photo)}
+                              >
+                                <button
+                                  aria-label={`Drag ${photo.alt || product.title || `photo ${photoIndex + 1}`} to reorder`}
+                                  aria-describedby={`photo-reorder-help-${product.id}-${photoIndex}`}
+                                  className="admin_photo_drag_handle"
+                                  disabled={isUpdatingProductPhoto}
+                                  draggable={!isUpdatingProductPhoto}
+                                  onClick={(event) => event.stopPropagation()}
+                                  onDragEnd={() => setDraggedPhoto({ productId: "", path: "" })}
+                                  onDragStart={(event) => startPhotoDrag(event, product, photo)}
+                                  onKeyDown={(event) => {
+                                    event.stopPropagation();
+
+                                    if (event.key === "ArrowUp") {
+                                      reorderProductPhotoFromKeyboard(event, product, photo, -1);
+                                    }
+
+                                    if (event.key === "ArrowDown") {
+                                      reorderProductPhotoFromKeyboard(event, product, photo, 1);
+                                    }
+                                  }}
+                                  title="Drag to reorder"
+                                  type="button"
+                                >
+                                  <FontAwesomeIcon icon={faGripVertical} />
+                                </button>
+                                <span className="admin_sr_only" id={`photo-reorder-help-${product.id}-${photoIndex}`}>
+                                  Use arrow up or arrow down to reorder this photo.
+                                </span>
+                                <div className="admin_photo_thumbnail_wrap">
+                                  {photoUrlsByPath[photo.path] ? (
+                                    <img alt={photo.alt || product.title || photo.path} src={photoUrlsByPath[photo.path]} />
+                                  ) : (
+                                    <span>No preview</span>
+                                  )}
+                                  <button
+                                    aria-label={`Remove ${photo.alt || product.title || `photo ${photoIndex + 1}`} from product`}
+                                    className="admin_photo_remove_button"
                                     disabled={isUpdatingProductPhoto}
-                                    onChange={(event) => updatePhotoAltDraft(product.id, photo.path, event.target.value)}
-                                    value={draftAlt}
-                                  />
-                                </label>
-                                <small>{photo.path}</small>
-                                <div className="admin_photo_actions">
-                                  <button
-                                    className="admin_secondary_button"
-                                    disabled={isUpdatingProductPhoto || photoIndex === 0}
-                                    onClick={() => moveProductPhoto(product, photo, -1)}
+                                    onClick={(event) => {
+                                      event.stopPropagation();
+                                      detachProductPhoto(product, photo);
+                                    }}
+                                    title="Remove from product"
                                     type="button"
                                   >
-                                    Up
-                                  </button>
-                                  <button
-                                    className="admin_secondary_button"
-                                    disabled={isUpdatingProductPhoto || photoIndex === productPhotos.length - 1}
-                                    onClick={() => moveProductPhoto(product, photo, 1)}
-                                    type="button"
-                                  >
-                                    Down
-                                  </button>
-                                  <button
-                                    className="admin_secondary_button"
-                                    disabled={isUpdatingProductPhoto || draftAlt.trim() === photo.alt}
-                                    onClick={() => saveProductPhotoAlt(product, photo)}
-                                    type="button"
-                                  >
-                                    Save Alt
-                                  </button>
-                                  <button
-                                    className="admin_danger_button"
-                                    disabled={isUpdatingProductPhoto}
-                                    onClick={() => detachProductPhoto(product, photo)}
-                                    type="button"
-                                  >
-                                    Detach
+                                    <FontAwesomeIcon icon={faXmark} />
                                   </button>
                                 </div>
+                                <button
+                                  aria-pressed={isSelectedPhoto}
+                                  className="admin_photo_summary admin_photo_select_button"
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    selectProductPhoto(product.id, photo.path);
+                                  }}
+                                  type="button"
+                                >
+                                  <span>{photo.alt || `Photo ${photoIndex + 1}`}</span>
+                                  <small>{isSelectedPhoto ? photo.path : "Select to edit alt text"}</small>
+                                </button>
+                                {isSelectedPhoto ? (
+                                  <div className="admin_photo_selected_tools" onClick={(event) => event.stopPropagation()}>
+                                    <label className="admin_photo_alt_field">
+                                      Alt Text
+                                      <div className="admin_inline_save">
+                                        <input
+                                          disabled={isUpdatingProductPhoto}
+                                          onChange={(event) => updatePhotoAltDraft(product.id, photo.path, event.target.value)}
+                                          value={draftAlt}
+                                        />
+                                        <button
+                                          className="admin_secondary_button"
+                                          disabled={isUpdatingProductPhoto || draftAlt.trim() === photo.alt}
+                                          onClick={() => saveProductPhotoAlt(product, photo)}
+                                          type="button"
+                                        >
+                                          Save
+                                        </button>
+                                      </div>
+                                    </label>
+                                  </div>
+                                ) : null}
                               </div>
                               );
                             }) : (
@@ -1626,89 +2021,142 @@ export default function ProductAdmin({
                             )}
                           </div>
 
-                          <label>
-                            Image File
-                            <input
-                              accept="image/*"
-                              disabled={isUploadingPhoto}
-                              key={`${product.id}-${photoInputKey}`}
-                              onChange={(event) => updatePhotoFile(event.target.files?.[0] || null)}
-                              type="file"
-                            />
-                          </label>
-                          {photoFile && isPhotoTarget ? (
-                            <div className="admin_upload_notice">
-                              <span>{photoFile.name}</span>
-                              <small>{formatFileSize(photoFile.size)}</small>
-                              {photoFile.size >= recommendedImageSize ? (
-                                <div className="admin_upload_options">
+                          <button
+                            className="admin_secondary_button admin_add_photo_button"
+                            onClick={() => toggleAddPhotoTools(product.id)}
+                            type="button"
+                          >
+                            {isAddingPhoto ? "Close Add Photo" : "Add Photo"}
+                          </button>
+
+                          {isAddingPhoto ? (
+                            <div className="admin_add_photo_panel">
+                              <div className="admin_button_row">
+                                <button
+                                  className={isUploadMode ? "admin_secondary_button admin_toggle_button_active" : "admin_secondary_button"}
+                                  onClick={() => choosePhotoAddMode(product.id, "upload")}
+                                  type="button"
+                                >
+                                  Upload New Photo
+                                </button>
+                                <button
+                                  className={isLibraryMode ? "admin_secondary_button admin_toggle_button_active" : "admin_secondary_button"}
+                                  onClick={() => choosePhotoAddMode(product.id, "library")}
+                                  type="button"
+                                >
+                                  Choose from Photo Library
+                                </button>
+                              </div>
+
+                              {isUploadMode ? (
+                                <form className="admin_photo_upload_form" onSubmit={(event) => handlePhotoUpload(event, product)}>
                                   <label>
+                                    Image File
                                     <input
-                                      checked={photoUploadChoice === "optimize"}
+                                      accept="image/*"
                                       disabled={isUploadingPhoto}
-                                      name={`photo-upload-choice-${product.id}`}
-                                      onChange={() => setPhotoUploadChoice("optimize")}
-                                      type="radio"
+                                      key={`${product.id}-${photoInputKey}`}
+                                      onChange={(event) => updatePhotoFile(event.target.files?.[0] || null)}
+                                      type="file"
                                     />
-                                    Optimize for website
                                   </label>
+                                  {photoFile && isPhotoTarget ? (
+                                    <div className="admin_upload_notice">
+                                      <span>{photoFile.name}</span>
+                                      <small>{formatFileSize(photoFile.size)}</small>
+                                      {photoFile.size >= recommendedImageSize ? (
+                                        <div className="admin_upload_options">
+                                          <label>
+                                            <input
+                                              checked={photoUploadChoice === "optimize"}
+                                              disabled={isUploadingPhoto}
+                                              name={`photo-upload-choice-${product.id}`}
+                                              onChange={() => setPhotoUploadChoice("optimize")}
+                                              type="radio"
+                                            />
+                                            Optimize for website
+                                          </label>
+                                          <label>
+                                            <input
+                                              checked={photoUploadChoice === "original"}
+                                              disabled={isUploadingPhoto}
+                                              name={`photo-upload-choice-${product.id}`}
+                                              onChange={() => setPhotoUploadChoice("original")}
+                                              type="radio"
+                                            />
+                                            Upload original
+                                          </label>
+                                        </div>
+                                      ) : null}
+                                    </div>
+                                  ) : null}
                                   <label>
+                                    Alt Text
                                     <input
-                                      checked={photoUploadChoice === "original"}
                                       disabled={isUploadingPhoto}
-                                      name={`photo-upload-choice-${product.id}`}
-                                      onChange={() => setPhotoUploadChoice("original")}
-                                      type="radio"
+                                      onChange={(event) => setPhotoAlt(event.target.value)}
+                                      placeholder="Small jar of saffron salt"
+                                      value={photoAlt}
                                     />
-                                    Upload original
                                   </label>
+                                  <button className="admin_primary_button" disabled={isUploadingPhoto} type="submit">
+                                    {isUploadingPhoto && isPhotoTarget ? "Uploading..." : "Upload Photo"}
+                                  </button>
+                                </form>
+                              ) : null}
+
+                              {isLibraryMode ? (
+                                <div className="admin_photo_library_picker">
+                                  <div className="admin_form_header">
+                                    <h4>Photo Library</h4>
+                                    <span className="admin_status">{photoLibraryAssets.length} available</span>
+                                  </div>
+                                  {photoLibraryAssets.length ? (
+                                    <div className="admin_photo_library_grid">
+                                      {photoLibraryAssets.map((asset) => {
+                                        const isSelectedAsset = selectedExistingMediaId === asset.id;
+                                        const isAlreadyAttached = productAttachedPhotoPaths.has(asset.storagePath)
+                                          || productAttachedMediaAssetIds.has(asset.id);
+
+                                        return (
+                                          <button
+                                            aria-pressed={isSelectedAsset}
+                                            className={`admin_photo_library_card${isSelectedAsset ? " admin_photo_library_card_selected" : ""}`}
+                                            disabled={isAttachingPhoto || isAlreadyAttached}
+                                            key={asset.id}
+                                            onClick={() => setSelectedExistingMediaId(asset.id)}
+                                            type="button"
+                                          >
+                                            <span className="admin_photo_library_thumb">
+                                              {photoUrlsByPath[asset.storagePath] ? (
+                                                <img alt={asset.alt || asset.title} src={photoUrlsByPath[asset.storagePath]} />
+                                              ) : (
+                                                <span>No preview</span>
+                                              )}
+                                            </span>
+                                            <span className="admin_photo_library_title">{asset.title}</span>
+                                            <small>{isAlreadyAttached ? "Already attached" : asset.bin}</small>
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  ) : (
+                                    <p className="admin_status">No active photos are available in the Photo Library.</p>
+                                  )}
+                                  <button
+                                    className="admin_secondary_button"
+                                    disabled={isAttachingPhoto || !isPhotoTarget || !selectedExistingMediaId}
+                                    onClick={() => attachExistingPhoto(product)}
+                                    type="button"
+                                  >
+                                    {isAttachingPhoto && isPhotoTarget ? "Attaching..." : "Attach Photo"}
+                                  </button>
                                 </div>
                               ) : null}
                             </div>
                           ) : null}
-                          <label>
-                            Alt Text
-                            <input
-                              disabled={isUploadingPhoto}
-                              onChange={(event) => setPhotoAlt(event.target.value)}
-                              placeholder="Small jar of saffron salt"
-                              value={photoAlt}
-                            />
-                          </label>
-                          <button className="admin_primary_button" disabled={isUploadingPhoto} type="submit">
-                            {isUploadingPhoto && isPhotoTarget ? "Uploading..." : "Upload Photo"}
-                          </button>
-                          {isPhotoTarget && photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
-                        </form>
 
-                        <div className="admin_embedded_form admin_attach_photo_panel">
-                          <div className="admin_form_header">
-                            <h4>Attach Existing Photo</h4>
-                            <span className="admin_status">{attachableMediaAssets.length} in Other</span>
-                          </div>
-                          <label>
-                            Photo From Other Bin
-                            <select
-                              disabled={isAttachingPhoto || attachableMediaAssets.length === 0}
-                              onChange={(event) => setSelectedExistingMediaId(event.target.value)}
-                              value={isPhotoTarget ? selectedExistingMediaId : ""}
-                            >
-                              <option value="">Choose photo</option>
-                              {attachableMediaAssets.map((asset) => (
-                                <option key={asset.id} value={asset.id}>
-                                  {asset.title}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                          <button
-                            className="admin_secondary_button"
-                            disabled={isAttachingPhoto || !isPhotoTarget || !selectedExistingMediaId}
-                            onClick={() => attachExistingPhoto(product)}
-                            type="button"
-                          >
-                            {isAttachingPhoto && isPhotoTarget ? "Attaching..." : "Attach Photo"}
-                          </button>
+                          {isPhotoTarget && photoMessage ? <p className="admin_message">{photoMessage}</p> : null}
                         </div>
                       </div>
                     ) : null}
@@ -1720,6 +2168,7 @@ export default function ProductAdmin({
         ) : null}
       </section>
 
+      {!isDrawerMode ? (
       <section className="admin_panel">
         <div className="admin_form_header">
           <h3>New Product</h3>
@@ -1789,25 +2238,79 @@ export default function ProductAdmin({
 
             <div className="admin_price_options">
               {form.priceOptions.map((priceOption, index) => (
-                <div className="admin_split_fields" key={`price-option-${index}`}>
-                  <label>
-                    Option Label
-                    <input
-                      onChange={(event) => updatePriceOption(index, "option", event.target.value)}
-                      placeholder="4 oz"
-                      value={priceOption.option}
-                    />
-                  </label>
-                  <label>
-                    Price
-                    <input
-                      inputMode="decimal"
-                      onChange={(event) => updatePriceOption(index, "price", event.target.value)}
-                      placeholder="15.00"
-                      required
-                      value={priceOption.price}
-                    />
-                  </label>
+                <div className="admin_variant_option_card" key={`price-option-${index}`}>
+                  <div className="admin_split_fields">
+                    <label>
+                      Option Label
+                      <input
+                        onChange={(event) => updatePriceOption(index, "option", event.target.value)}
+                        placeholder="4 oz"
+                        value={priceOption.option}
+                      />
+                    </label>
+                    <label>
+                      Price
+                      <input
+                        inputMode="decimal"
+                        onChange={(event) => updatePriceOption(index, "price", event.target.value)}
+                        placeholder="15.00"
+                        required
+                        value={priceOption.price}
+                      />
+                    </label>
+                    <label>
+                      Variant ID
+                      <input
+                        onChange={(event) => updatePriceOption(index, "variantId", event.target.value)}
+                        placeholder={variantIdForOption(priceOption.option, index)}
+                        value={priceOption.variantId || variantIdForOption(priceOption.option, index)}
+                      />
+                    </label>
+                  </div>
+                  <div className="admin_variant_fields">
+                    <label>
+                      SKU
+                      <input
+                        onChange={(event) => updatePriceOption(index, "sku", event.target.value)}
+                        placeholder={skuForVariant(form.slug, priceOption.variantId || variantIdForOption(priceOption.option, index))}
+                        value={priceOption.sku}
+                      />
+                    </label>
+                    <label>
+                      Stock on Hand
+                      <input
+                        inputMode="numeric"
+                        onChange={(event) => updatePriceOption(index, "stockOnHand", event.target.value)}
+                        value={priceOption.stockOnHand}
+                      />
+                    </label>
+                    <label>
+                      Low Stock Alert
+                      <input
+                        inputMode="numeric"
+                        onChange={(event) => updatePriceOption(index, "lowStockThreshold", event.target.value)}
+                        value={priceOption.lowStockThreshold}
+                      />
+                    </label>
+                  </div>
+                  <div className="admin_checkbox_grid">
+                    <label>
+                      <input
+                        checked={priceOption.inventoryTracked !== false}
+                        onChange={(event) => updatePriceOption(index, "inventoryTracked", event.target.checked)}
+                        type="checkbox"
+                      />
+                      Track inventory
+                    </label>
+                    <label>
+                      <input
+                        checked={priceOption.active !== false}
+                        onChange={(event) => updatePriceOption(index, "active", event.target.checked)}
+                        type="checkbox"
+                      />
+                      Sell this option
+                    </label>
+                  </div>
                   <button
                     className="admin_secondary_button"
                     disabled={form.priceOptions.length === 1}
@@ -1835,16 +2338,12 @@ export default function ProductAdmin({
 
             <div className="admin_checkbox_grid">
               <label>
-                <input checked={form.published} onChange={(event) => updateForm("published", event.target.checked)} type="checkbox" />
-                Published
-              </label>
-              <label>
                 <input checked={form.isActive} onChange={(event) => updateForm("isActive", event.target.checked)} type="checkbox" />
-                Active
+                Visible on site
               </label>
               <label>
                 <input checked={form.inStock} onChange={(event) => updateForm("inStock", event.target.checked)} type="checkbox" />
-                In Stock
+                Available now
               </label>
               <label>
                 <input checked={form.isHighlighted} onChange={(event) => updateForm("isHighlighted", event.target.checked)} type="checkbox" />
@@ -1865,7 +2364,9 @@ export default function ProductAdmin({
           </form>
         ) : null}
       </section>
+      ) : null}
 
+      {!isDrawerMode ? (
       <form className="admin_form admin_category_panel" onSubmit={handleCategorySubmit}>
         <div className="admin_form_header">
           <h3>{selectedCategoryId ? "Edit Category" : "Product Categories"}</h3>
@@ -1975,7 +2476,9 @@ export default function ProductAdmin({
           </>
         ) : null}
       </form>
+      ) : null}
 
+      {!isDrawerMode ? (
       <div className="admin_panel admin_seed_panel">
         <div className="admin_form_header">
           <h3>Seed Static Products</h3>
@@ -2049,6 +2552,7 @@ export default function ProductAdmin({
           </>
         ) : null}
       </div>
+      ) : null}
     </div>
   );
 }

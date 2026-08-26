@@ -64,65 +64,90 @@
 
 .admin_dashboard {
   display: grid;
-  gap: 16px;
+  align-items: start;
+  gap: 18px;
+  grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
 }
 
-.admin_dashboard_sections {
-  display: grid;
-  gap: 12px;
-}
-
-.admin_dashboard_section {
+.admin_sidebar,
+.admin_dashboard_main {
   border: 1px solid #d8d1dd;
   border-radius: 8px;
+}
+
+.admin_sidebar {
+  background: #f9f8fa;
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  position: sticky;
+  top: 16px;
+}
+
+.admin_sidebar_button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #3d3343;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 800;
+  padding: 12px;
+  text-align: left;
+}
+
+.admin_sidebar_button:hover,
+.admin_sidebar_button:focus-visible,
+.admin_sidebar_button_active {
+  background: #efe8f4;
+  color: #735284;
+  outline: 0;
+}
+
+.admin_dashboard_main {
+  display: grid;
+  gap: 0;
+  min-width: 0;
   overflow: hidden;
 }
 
-.admin_dashboard_section_header {
+.admin_active_section_header {
   align-items: center;
   background: #f9f8fa;
-  border: 0;
+  border-bottom: 1px solid #d8d1dd;
   color: #3d3343;
-  cursor: pointer;
   display: flex;
   gap: 12px;
   justify-content: space-between;
   padding: 16px 18px;
-  text-align: left;
-  width: 100%;
 }
 
-.admin_dashboard_section_header:hover,
-.admin_dashboard_section_header:focus-visible {
-  background: #f1edf4;
-  outline: 0;
-}
-
-.admin_dashboard_section_text {
+.admin_active_section_header div {
   display: grid;
   gap: 4px;
 }
 
-.admin_dashboard_section_text strong {
+.admin_active_section_header h2 {
   color: #735284;
-  font-size: 18px;
+  margin: 0;
 }
 
-.admin_dashboard_section_text small {
+.admin_active_section_header p {
   color: #5f5366;
   font-weight: 700;
   line-height: 1.4;
+  margin: 0;
 }
 
-.admin_dashboard_section_body {
+.admin_active_section_body {
   display: grid;
   gap: 14px;
   padding: 14px;
 }
 
-.admin_dashboard_section_body > .admin_panel,
-.admin_dashboard_section_body > .admin_full_width,
-.admin_dashboard_section_body > .admin_seed_panel {
+.admin_active_section_body > .admin_panel,
+.admin_active_section_body > .admin_full_width,
+.admin_active_section_body > .admin_seed_panel {
   margin: 0;
 }
 
@@ -267,6 +292,18 @@
   gap: 10px;
 }
 
+.admin_sr_only {
+  clip: rect(0 0 0 0);
+  border: 0;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
 .admin_form_header > .admin_button_row {
   flex: 0 0 auto;
   flex-wrap: nowrap;
@@ -310,6 +347,11 @@
   color: #ffffff;
 }
 
+.admin_icon_button_small {
+  min-height: 34px;
+  padding: 8px 10px;
+}
+
 .admin_preview_workspace {
   display: grid;
   gap: 14px;
@@ -317,7 +359,7 @@
 }
 
 .admin_preview_workspace_with_drawer {
-  align-items: start;
+  align-items: flex-start;
   grid-template-columns: minmax(0, 1fr) minmax(320px, 420px);
 }
 
@@ -338,9 +380,57 @@
   align-items: flex-start;
 }
 
+.admin_preview_edit_drawer .admin_form_header > .admin_button_row {
+  overflow: visible;
+}
+
+.admin_preview_edit_drawer .admin_split_fields,
+.admin_preview_edit_drawer .admin_event_availability_fields,
+.admin_preview_edit_drawer .admin_event_price_row,
+.admin_preview_edit_drawer .admin_checkbox_grid {
+  grid-template-columns: 1fr;
+}
+
+.admin_preview_edit_drawer .admin_description_block_header {
+  align-items: flex-start;
+  flex-direction: column;
+}
+
+.admin_preview_edit_drawer .admin_description_block_header .admin_button_row {
+  width: 100%;
+}
+
+.admin_preview_edit_drawer .admin_description_block_header .admin_secondary_button {
+  flex: 1 1 96px;
+  padding: 8px 10px;
+}
+
 .admin_preview_edit_drawer h4 {
   color: #735284;
   margin: 0;
+}
+
+.admin_drawer_help {
+  position: relative;
+}
+
+.admin_drawer_help_popover {
+  background: #fffdf5;
+  border: 1px solid #f3cf50;
+  border-radius: 6px;
+  box-shadow: 0 12px 28px rgba(61, 51, 67, 0.16);
+  color: #3d3343;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0;
+  max-width: 240px;
+  padding: 10px;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: max-content;
+  z-index: 5;
 }
 
 .admin_drawer_editor_inner {
@@ -516,7 +606,6 @@
 
 .admin_preview_edit_marker {
   border-radius: 4px;
-  box-shadow: 0 0 0 2px rgba(243, 207, 80, 0.78);
   cursor: pointer;
   position: relative;
 }
@@ -524,8 +613,26 @@
 .admin_preview_edit_marker:hover,
 .admin_preview_edit_marker:focus-visible {
   background: rgba(243, 207, 80, 0.18);
-  box-shadow: 0 0 0 3px rgba(115, 82, 132, 0.82);
+  box-shadow: 0 0 0 2px rgba(115, 82, 132, 0.72);
   outline: 0;
+}
+
+.admin_preview_edit_marker_selected,
+.admin_preview_edit_marker_selected:hover,
+.admin_preview_edit_marker_selected:focus-visible {
+  background: rgba(243, 207, 80, 0.12);
+  box-shadow: 0 0 0 3px rgba(243, 207, 80, 0.92);
+}
+
+.admin_preview_diff_added {
+  -webkit-box-decoration-break: clone;
+  background: #5cf58a;
+  border: 1px solid #18843d;
+  border-radius: 3px;
+  box-decoration-break: clone;
+  color: #102f1a;
+  font-weight: 800;
+  padding: 0 2px;
 }
 
 .admin_preview_edit_badge {
@@ -548,7 +655,53 @@
 }
 
 .admin_preview_edit_marker:hover .admin_preview_edit_badge,
-.admin_preview_edit_marker:focus-visible .admin_preview_edit_badge {
+.admin_preview_edit_marker:focus-visible .admin_preview_edit_badge,
+.admin_preview_edit_marker_selected .admin_preview_edit_badge {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.admin_preview_record_edit_marker {
+  border-radius: 6px;
+  cursor: pointer;
+  display: block;
+  position: relative;
+}
+
+.admin_preview_record_edit_marker:hover,
+.admin_preview_record_edit_marker:focus-visible {
+  box-shadow: 0 0 0 3px rgba(115, 82, 132, 0.82);
+  outline: 0;
+}
+
+.admin_preview_record_edit_marker_selected,
+.admin_preview_record_edit_marker_selected:hover,
+.admin_preview_record_edit_marker_selected:focus-visible {
+  box-shadow: 0 0 0 4px rgba(243, 207, 80, 0.94);
+}
+
+.admin_preview_record_edit_badge {
+  background: #533a60;
+  border-radius: 999px;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 800;
+  left: 8px;
+  line-height: 1;
+  opacity: 0;
+  padding: 5px 8px;
+  pointer-events: none;
+  position: absolute;
+  top: 8px;
+  transform: translateY(-4px);
+  transition: opacity 140ms ease, transform 140ms ease;
+  white-space: nowrap;
+  z-index: 3;
+}
+
+.admin_preview_record_edit_marker:hover .admin_preview_record_edit_badge,
+.admin_preview_record_edit_marker:focus-visible .admin_preview_record_edit_badge,
+.admin_preview_record_edit_marker_selected .admin_preview_record_edit_badge {
   opacity: 1;
   transform: translateY(0);
 }
@@ -622,10 +775,6 @@
   opacity: 0.6;
 }
 
-.admin_collapse_icon {
-  font-size: 13px;
-}
-
 .admin_embedded_form,
 .admin_inline_form {
   display: grid;
@@ -655,6 +804,20 @@
 .admin_price_options {
   display: grid;
   gap: 10px;
+}
+
+.admin_variant_option_card {
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.admin_variant_fields {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .admin_checkbox_grid {
@@ -700,6 +863,274 @@
 
 .admin_product_row small {
   color: #735284;
+}
+
+.admin_orders_filters {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.admin_orders_layout {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(240px, 0.8fr) minmax(0, 1.2fr);
+}
+
+.admin_orders_list,
+.admin_order_detail,
+.admin_order_block,
+.admin_order_items {
+  display: grid;
+  gap: 10px;
+}
+
+.admin_order_row {
+  background: #ffffff;
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  color: #3d3343;
+  cursor: pointer;
+  display: flex;
+  font: inherit;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 12px;
+  text-align: left;
+}
+
+.admin_order_row:hover,
+.admin_order_row:focus-visible,
+.admin_order_row_selected {
+  border-color: #735284;
+  outline: 0;
+}
+
+.admin_order_row span,
+.admin_order_item span {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.admin_order_row strong,
+.admin_order_item strong {
+  overflow-wrap: anywhere;
+}
+
+.admin_order_row small,
+.admin_order_item small {
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin_order_detail {
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.admin_order_detail_header {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.admin_order_detail_header h4,
+.admin_order_detail_header p,
+.admin_order_block h5 {
+  margin: 0;
+}
+
+.admin_order_badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+.admin_order_badges span {
+  background: #f9f8fa;
+  border: 1px solid #e5deea;
+  border-radius: 999px;
+  color: #735284;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 8px;
+}
+
+.admin_order_meta,
+.admin_order_totals {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin: 0;
+}
+
+.admin_order_meta div,
+.admin_order_totals div {
+  display: grid;
+  gap: 4px;
+}
+
+.admin_inventory_filters {
+  grid-template-columns: minmax(0, 1.4fr) minmax(140px, 0.6fr) minmax(160px, 0.7fr);
+}
+
+.admin_inventory_panel {
+  min-height: min(76vh, 760px);
+}
+
+.admin_inventory_toolbar {
+  align-items: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e5deea;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  margin: -4px -4px 0;
+  padding: 4px 4px 12px;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+
+.admin_inventory_table {
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  max-height: min(58vh, 620px);
+  overflow: hidden;
+  overflow-y: auto;
+}
+
+.admin_inventory_header,
+.admin_inventory_row {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: minmax(190px, 1.1fr) minmax(72px, 0.35fr) minmax(100px, 0.45fr) minmax(155px, 0.65fr) minmax(260px, 1.15fr);
+  padding: 12px;
+}
+
+.admin_inventory_header {
+  background: #f9f8fa;
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 800;
+  position: sticky;
+  top: 0;
+  text-transform: uppercase;
+  z-index: 2;
+}
+
+.admin_inventory_row {
+  align-items: start;
+  border-top: 1px solid #e5deea;
+}
+
+.admin_inventory_row_dirty {
+  background: #fffbea;
+}
+
+.admin_inventory_row span {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.admin_inventory_row strong {
+  color: #3d3343;
+  overflow-wrap: anywhere;
+}
+
+.admin_inventory_row small {
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin_inventory_status {
+  border: 1px solid #d8d1dd;
+  border-radius: 999px;
+  color: #3d3343;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  justify-self: start;
+  line-height: 1;
+  padding: 6px 8px;
+}
+
+.admin_inventory_status_available {
+  background: #e9f7ef;
+  border-color: #7abf8f;
+}
+
+.admin_inventory_status_low {
+  background: #fff3cd;
+  border-color: #e0b84c;
+}
+
+.admin_inventory_status_out {
+  background: #ffe5e5;
+  border-color: #d88787;
+}
+
+.admin_inventory_status_untracked,
+.admin_inventory_status_inactive {
+  background: #f1edf4;
+}
+
+.admin_inventory_controls {
+  align-items: end;
+  display: grid !important;
+  gap: 8px;
+  grid-template-columns: minmax(58px, 0.7fr) minmax(58px, 0.7fr) minmax(82px, 0.8fr);
+}
+
+.admin_inventory_controls label {
+  display: grid;
+  gap: 6px;
+}
+
+.admin_inventory_controls input {
+  min-width: 0;
+}
+
+.admin_inline_checkbox {
+  align-items: center;
+  display: flex !important;
+  gap: 8px !important;
+}
+
+.admin_inline_checkbox input {
+  width: auto;
+}
+
+.admin_order_meta dt,
+.admin_order_totals dt {
+  color: #5f5366;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.admin_order_meta dd,
+.admin_order_totals dd {
+  color: #3d3343;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.admin_order_item {
+  align-items: flex-start;
+  border-top: 1px solid #e5deea;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+  padding-top: 10px;
 }
 
 .admin_content_card,
@@ -809,9 +1240,119 @@
   padding-top: 14px;
 }
 
-.admin_attach_photo_panel {
-  border-top: 1px solid #e5deea;
-  padding-top: 14px;
+.admin_description_blocks {
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.admin_content_blocks_editor {
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 12px;
+  padding: 12px;
+}
+
+.admin_content_block_list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin_content_block_card {
+  background: #f9f8fa;
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.admin_content_block_card_header,
+.admin_content_block_tools {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+}
+
+.admin_content_block_card_header strong {
+  color: #533a60;
+}
+
+.admin_content_block_tools {
+  align-items: end;
+}
+
+.admin_content_block_tools label {
+  flex: 1 1 180px;
+}
+
+.admin_description_blocks_header {
+  align-items: center;
+}
+
+.admin_description_block {
+  background: #f9f8fa;
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+}
+
+.admin_description_block_header {
+  align-items: center;
+  gap: 10px;
+}
+
+.admin_description_block_header h5 {
+  color: #533a60;
+  font-size: 14px;
+  margin: 0;
+}
+
+.admin_event_price_list {
+  display: grid;
+  gap: 10px;
+}
+
+.admin_event_price_row {
+  align-items: end;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.admin_event_availability_fields {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin_waitlist_entries {
+  display: grid;
+  gap: 8px;
+}
+
+.admin_waitlist_entry {
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+}
+
+.admin_waitlist_entry div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.admin_waitlist_entry p {
+  margin: 0;
 }
 
 .admin_photo_list {
@@ -825,28 +1366,136 @@
   border-radius: 6px;
   align-items: center;
   display: grid;
-  gap: 4px;
-  grid-template-columns: 72px minmax(0, 1fr);
+  gap: 8px;
+  grid-template-columns: 30px 72px minmax(0, 1fr);
   padding: 10px;
 }
 
-.admin_photo_row img {
+.admin_photo_row_selected {
+  border-color: #d8a72f;
+  box-shadow: 0 0 0 2px rgba(216, 167, 47, 0.18);
+}
+
+.admin_photo_row_dragging {
+  opacity: 0.55;
+}
+
+.admin_photo_drag_handle {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  color: #735284;
+  cursor: grab;
+  display: inline-flex;
+  height: 36px;
+  justify-content: center;
+  padding: 0;
+  width: 28px;
+}
+
+.admin_photo_drag_handle:active {
+  cursor: grabbing;
+}
+
+.admin_photo_drag_handle:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.admin_photo_drag_handle:hover,
+.admin_photo_drag_handle:focus-visible {
+  background: #efeaf2;
+  border-color: #d8cfe0;
+}
+
+.admin_photo_thumbnail_wrap {
   aspect-ratio: 1;
   border-radius: 4px;
   grid-row: span 2;
+  height: 72px;
+  overflow: hidden;
+  position: relative;
+  width: 72px;
+}
+
+.admin_photo_thumbnail_wrap img {
+  aspect-ratio: 1;
+  border-radius: 4px;
   height: 72px;
   object-fit: cover;
   width: 72px;
 }
 
-.admin_photo_row span {
-  color: #3d3343;
+.admin_photo_thumbnail_wrap > span {
+  align-items: center;
+  background: #efeaf2;
+  color: #735284;
+  display: flex;
+  font-size: 11px;
   font-weight: 700;
+  height: 100%;
+  justify-content: center;
+  padding: 6px;
+  text-align: center;
 }
 
-.admin_photo_row small {
+.admin_photo_remove_button {
+  align-items: center;
+  background: rgba(36, 29, 42, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  height: 22px;
+  justify-content: center;
+  padding: 0;
+  position: absolute;
+  right: 4px;
+  top: 4px;
+  width: 22px;
+}
+
+.admin_photo_remove_button:hover,
+.admin_photo_remove_button:focus-visible {
+  background: #9d331f;
+  border-color: #ffffff;
+}
+
+.admin_photo_summary {
+  background: transparent;
+  border: 0;
+  display: grid;
+  font: inherit;
+  gap: 3px;
+  min-width: 0;
+  padding: 0;
+  text-align: left;
+}
+
+.admin_photo_select_button {
+  cursor: pointer;
+}
+
+.admin_photo_select_button:focus-visible {
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px rgba(115, 82, 132, 0.72);
+  outline: 0;
+}
+
+.admin_photo_summary span {
+  color: #3d3343;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin_photo_summary small {
   color: #735284;
   overflow-wrap: anywhere;
+}
+
+.admin_photo_selected_tools {
+  grid-column: 3;
 }
 
 .admin_photo_alt_field {
@@ -857,14 +1506,103 @@
   padding: 8px;
 }
 
-.admin_photo_actions {
-  display: flex;
-  flex-wrap: wrap;
+.admin_inline_save {
+  display: grid;
   gap: 6px;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
-.admin_photo_actions button {
+.admin_inline_save button {
   padding: 8px 10px;
+}
+
+.admin_add_photo_button {
+  justify-self: start;
+}
+
+.admin_add_photo_panel,
+.admin_photo_library_picker,
+.admin_photo_upload_form {
+  border-top: 1px solid #e5deea;
+  display: grid;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.admin_toggle_button_active {
+  background: #f3cf50;
+  border-color: #d8a72f;
+  color: #3d3343;
+}
+
+.admin_photo_library_grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(118px, 1fr));
+}
+
+.admin_photo_library_card {
+  background: #f9f8fa;
+  border: 1px solid #e5deea;
+  border-radius: 6px;
+  color: #3d3343;
+  cursor: pointer;
+  display: grid;
+  gap: 6px;
+  padding: 8px;
+  text-align: left;
+}
+
+.admin_photo_library_card:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.admin_photo_library_card:hover:not(:disabled),
+.admin_photo_library_card:focus-visible,
+.admin_photo_library_card_selected {
+  border-color: #d8a72f;
+  box-shadow: 0 0 0 2px rgba(216, 167, 47, 0.18);
+  outline: 0;
+}
+
+.admin_photo_library_thumb {
+  aspect-ratio: 1;
+  background: #efeaf2;
+  border-radius: 4px;
+  display: block;
+  overflow: hidden;
+  width: 100%;
+}
+
+.admin_photo_library_thumb img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.admin_photo_library_thumb > span {
+  align-items: center;
+  color: #735284;
+  display: flex;
+  font-size: 11px;
+  font-weight: 700;
+  height: 100%;
+  justify-content: center;
+  padding: 8px;
+  text-align: center;
+}
+
+.admin_photo_library_title {
+  color: #3d3343;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.admin_photo_library_card small {
+  color: #735284;
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .admin_upload_notice {
@@ -1052,40 +1790,78 @@
 .admin_theme_dark .admin_form,
 .admin_theme_dark .admin_panel,
 .admin_theme_dark .admin_status_panel,
-.admin_theme_dark .admin_dashboard_section,
+.admin_theme_dark .admin_sidebar,
+.admin_theme_dark .admin_dashboard_main,
 .admin_theme_dark .admin_audit_summary div,
 .admin_theme_dark .admin_audit_section,
+.admin_theme_dark .admin_inventory_table,
+.admin_theme_dark .admin_inventory_row,
+.admin_theme_dark .admin_inventory_toolbar,
 .admin_theme_dark .admin_preview_edit_drawer,
 .admin_theme_dark .admin_placeholder_grid div,
 .admin_theme_dark .admin_content_card,
 .admin_theme_dark .admin_product_card,
+.admin_theme_dark .admin_order_detail,
+.admin_theme_dark .admin_order_row,
 .admin_theme_dark .admin_product_row,
 .admin_theme_dark .admin_media_card,
 .admin_theme_dark .admin_site_preview,
 .admin_theme_dark .admin_seed_summary,
 .admin_theme_dark .admin_upload_notice,
+.admin_theme_dark .admin_content_block_card,
 .admin_theme_dark .admin_photo_row,
+.admin_theme_dark .admin_waitlist_entry,
+.admin_theme_dark .admin_photo_library_card,
 .admin_theme_dark .admin_publish_review {
   background: #241d2a;
   border-color: #4e3d58;
 }
 
-.admin_theme_dark .admin_dashboard_section_header {
+.admin_theme_dark .admin_active_section_header {
   background: #241d2a;
+  border-bottom-color: #4e3d58;
   color: #f8f4fb;
 }
 
-.admin_theme_dark .admin_dashboard_section_header:hover,
-.admin_theme_dark .admin_dashboard_section_header:focus-visible {
+.admin_theme_dark .admin_sidebar_button {
+  color: #f8f4fb;
+}
+
+.admin_theme_dark .admin_sidebar_button:hover,
+.admin_theme_dark .admin_sidebar_button:focus-visible,
+.admin_theme_dark .admin_sidebar_button_active {
   background: #302537;
+  color: #f3cf50;
 }
 
-.admin_theme_dark .admin_dashboard_section_text strong {
+.admin_theme_dark .admin_active_section_header h2 {
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_active_section_header p {
+  color: #cbbbd4;
+}
+
+.admin_theme_dark .admin_inventory_header {
+  background: #18131d;
+  color: #cbbbd4;
+}
+
+.admin_theme_dark .admin_inventory_row small {
+  color: #cbbbd4;
+}
+
+.admin_theme_dark .admin_inventory_row_dirty {
+  background: #302537;
+  box-shadow: inset 3px 0 0 #f3cf50;
+}
+
+.admin_theme_dark .admin_inventory_row strong {
   color: #f8f4fb;
 }
 
-.admin_theme_dark .admin_dashboard_section_text small {
-  color: #cbbbd4;
+.admin_theme_dark .admin_inventory_status {
+  color: #18131d;
 }
 
 .admin_theme_dark .admin_preview_edit_drawer h4 {
@@ -1122,7 +1898,17 @@
 
 .admin_theme_dark .admin_product_card_body,
 .admin_theme_dark .admin_card_photo_form,
-.admin_theme_dark .admin_attach_photo_panel {
+.admin_theme_dark .admin_add_photo_panel,
+.admin_theme_dark .admin_content_blocks_editor,
+.admin_theme_dark .admin_content_block_card,
+.admin_theme_dark .admin_description_blocks,
+.admin_theme_dark .admin_description_block,
+.admin_theme_dark .admin_order_detail,
+.admin_theme_dark .admin_order_item,
+.admin_theme_dark .admin_photo_library_picker,
+.admin_theme_dark .admin_photo_upload_form,
+.admin_theme_dark .admin_variant_option_card,
+.admin_theme_dark .admin_waitlist_entry {
   border-color: #4e3d58;
 }
 
@@ -1137,8 +1923,17 @@
 .admin_theme_dark label,
 .admin_theme_dark .admin_filter_grid label,
 .admin_theme_dark .admin_product_card_header,
+.admin_theme_dark .admin_content_block_card_header strong,
+.admin_theme_dark .admin_order_detail_header h4,
+.admin_theme_dark .admin_order_item strong,
+.admin_theme_dark .admin_order_meta dd,
+.admin_theme_dark .admin_order_row strong,
+.admin_theme_dark .admin_order_totals dd,
 .admin_theme_dark .admin_product_row span,
-.admin_theme_dark .admin_photo_row span,
+.admin_theme_dark .admin_description_block_header h5,
+.admin_theme_dark .admin_photo_summary span,
+.admin_theme_dark .admin_photo_library_title,
+.admin_theme_dark .admin_waitlist_entry strong,
 .admin_theme_dark .admin_upload_notice span,
 .admin_theme_dark .admin_audit_section li,
 .admin_theme_dark .admin_product_details dd,
@@ -1146,6 +1941,18 @@
 .admin_theme_dark .admin_publish_diff_row pre,
 .admin_theme_dark .admin_publish_review_summary strong {
   color: #f4eef7;
+}
+
+.admin_theme_dark .admin_order_badges span {
+  background: #18131d;
+  border-color: #6a5574;
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_order_row_selected,
+.admin_theme_dark .admin_order_row:hover,
+.admin_theme_dark .admin_order_row:focus-visible {
+  border-color: #f3cf50;
 }
 
 .admin_theme_dark .admin_focused_field {
@@ -1170,6 +1977,11 @@
 .admin_theme_dark .admin_audit_summary span,
 .admin_theme_dark .admin_site_preview_toolbar span,
 .admin_theme_dark .admin_publish_review_summary span,
+.admin_theme_dark .admin_order_detail_header p,
+.admin_theme_dark .admin_order_item small,
+.admin_theme_dark .admin_order_meta dt,
+.admin_theme_dark .admin_order_row small,
+.admin_theme_dark .admin_order_totals dt,
 .admin_theme_dark .admin_product_details dt,
 .admin_theme_dark .admin_seed_summary small,
 .admin_theme_dark .admin_seed_summary li,
@@ -1184,10 +1996,44 @@
 .admin_theme_dark .admin_product_row small,
 .admin_theme_dark .admin_product_card_header small,
 .admin_theme_dark .admin_product_meta span,
-.admin_theme_dark .admin_photo_row small,
+.admin_theme_dark .admin_photo_summary small,
+.admin_theme_dark .admin_photo_library_card small,
+.admin_theme_dark .admin_waitlist_entry span,
 .admin_theme_dark .admin_audit_section small,
 .admin_theme_dark .admin_upload_notice small {
   color: #f3cf50;
+}
+
+.admin_theme_dark .admin_photo_row_selected {
+  border-color: #f3cf50;
+  box-shadow: 0 0 0 2px rgba(243, 207, 80, 0.18);
+}
+
+.admin_theme_dark .admin_photo_library_card:hover:not(:disabled),
+.admin_theme_dark .admin_photo_library_card:focus-visible,
+.admin_theme_dark .admin_photo_library_card_selected {
+  border-color: #f3cf50;
+  box-shadow: 0 0 0 2px rgba(243, 207, 80, 0.18);
+}
+
+.admin_theme_dark .admin_photo_drag_handle {
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_photo_drag_handle:hover,
+.admin_theme_dark .admin_photo_drag_handle:focus-visible,
+.admin_theme_dark .admin_photo_thumbnail_wrap > span,
+.admin_theme_dark .admin_photo_library_thumb,
+.admin_theme_dark .admin_photo_library_thumb > span {
+  background: #302537;
+  border-color: #6a5574;
+  color: #f3cf50;
+}
+
+.admin_theme_dark .admin_toggle_button_active {
+  background: #f3cf50;
+  border-color: #d8a72f;
+  color: #241d2a;
 }
 
 .admin_theme_dark .admin_icon_button {
@@ -1200,6 +2046,10 @@
   background: #735284;
   border-color: #735284;
   color: #ffffff;
+}
+
+.admin_theme_dark .admin_description_block {
+  background: #18131d;
 }
 
 .admin_theme_dark .admin_full_preview_overlay {
@@ -1223,6 +2073,22 @@
 }
 
 @media screen and (max-width: 700px) {
+  .admin_dashboard {
+    grid-template-columns: 1fr;
+  }
+
+  .admin_sidebar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    position: static;
+  }
+
+  .admin_sidebar_button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
   .admin_header {
     align-items: flex-start;
     flex-direction: column;
@@ -1301,21 +2167,47 @@
   }
 
   .admin_photo_row {
-    grid-template-columns: 56px minmax(0, 1fr);
+    grid-template-columns: 28px 56px minmax(0, 1fr);
   }
 
-  .admin_photo_row img {
+  .admin_photo_thumbnail_wrap,
+  .admin_photo_thumbnail_wrap img {
     height: 56px;
     width: 56px;
   }
 
+  .admin_photo_selected_tools {
+    grid-column: 1 / -1;
+  }
+
   .admin_editor_grid,
+  .admin_event_availability_fields,
+  .admin_event_price_row,
   .admin_filter_grid,
+  .admin_inventory_filters,
+  .admin_inventory_controls,
+  .admin_inventory_header,
+  .admin_inventory_row,
   .admin_media_filters,
   .admin_media_details,
+  .admin_order_meta,
+  .admin_order_totals,
+  .admin_orders_filters,
+  .admin_orders_layout,
   .admin_product_details,
   .admin_split_fields,
+  .admin_variant_fields,
   .admin_checkbox_grid {
     grid-template-columns: 1fr;
+  }
+
+  .admin_order_detail_header,
+  .admin_order_item,
+  .admin_order_row {
+    display: grid;
+  }
+
+  .admin_order_badges {
+    justify-content: flex-start;
   }
 }

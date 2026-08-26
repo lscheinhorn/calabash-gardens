@@ -7,6 +7,8 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronDown,
   faChevronRight,
+  faPlus,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 
 import {
@@ -35,11 +37,109 @@ const flattenSections = (value, prefix = "", output = {}) => {
   }
 
   Object.keys(value).sort().forEach((key) => {
+    if (key === "contentBlocks") {
+      return;
+    }
+
     const nextPrefix = prefix ? `${prefix}.${key}` : key;
     flattenSections(value[key], nextPrefix, output);
   });
 
   return output;
+};
+
+const contentBlockTypeLabels = {
+  paragraph: "Paragraph",
+  subtitle: "Subtitle",
+  title: "Title",
+};
+
+const contentBlockTypes = Object.keys(contentBlockTypeLabels);
+const emptyNewBlockForm = () => ({ text: "", type: "paragraph" });
+
+const createContentBlockId = () => (
+  `block_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
+);
+
+const contentBlockPathForDoc = (contentId) => (
+  contentId === "home" ? ["header", "contentBlocks"] : ["contentBlocks"]
+);
+
+const getNestedValue = (value, pathParts) => (
+  pathParts.reduce((currentValue, pathPart) => (
+    currentValue && typeof currentValue === "object" ? currentValue[pathPart] : undefined
+  ), value)
+);
+
+const setNestedValue = (value, pathParts, nestedValue) => {
+  const nextValue = { ...(value || {}) };
+  let target = nextValue;
+
+  pathParts.slice(0, -1).forEach((pathPart) => {
+    if (!target[pathPart] || typeof target[pathPart] !== "object" || Array.isArray(target[pathPart])) {
+      target[pathPart] = {};
+    }
+
+    target = target[pathPart];
+  });
+
+  const finalPart = pathParts[pathParts.length - 1];
+
+  if (nestedValue && Object.keys(nestedValue).length) {
+    target[finalPart] = nestedValue;
+  } else {
+    delete target[finalPart];
+  }
+
+  return nextValue;
+};
+
+const normalizeContentBlocks = (sections, contentId) => {
+  const rawBlocks = getNestedValue(sections, contentBlockPathForDoc(contentId));
+
+  if (!rawBlocks || typeof rawBlocks !== "object") {
+    return [];
+  }
+
+  const entries = Array.isArray(rawBlocks)
+    ? rawBlocks.map((block, index) => [block?.id || `block_${index + 1}`, block])
+    : Object.entries(rawBlocks);
+
+  return entries
+    .map(([id, block], index) => ({
+      id,
+      sortOrder: Number.isFinite(block?.sortOrder) ? block.sortOrder : index,
+      text: String(block?.text || ""),
+      type: contentBlockTypeLabels[block?.type] ? block.type : "paragraph",
+    }))
+    .sort((firstBlock, secondBlock) => (
+      firstBlock.sortOrder - secondBlock.sortOrder || firstBlock.id.localeCompare(secondBlock.id)
+    ));
+};
+
+const serializeContentBlocks = (blocks) => Object.fromEntries(
+  (Array.isArray(blocks) ? blocks : [])
+    .map((block, index) => [
+      block.id || `block_${index + 1}`,
+      {
+        sortOrder: index,
+        text: String(block.text || ""),
+        type: contentBlockTypeLabels[block.type] ? block.type : "paragraph",
+      },
+    ])
+);
+
+const parseContentBlockFieldPath = (fieldPath = "") => {
+  const pathParts = fieldPath.split(".");
+  const contentBlocksIndex = pathParts.indexOf("contentBlocks");
+
+  if (contentBlocksIndex === -1 || pathParts[contentBlocksIndex + 2] !== "text") {
+    return null;
+  }
+
+  return {
+    blockId: pathParts[contentBlocksIndex + 1],
+  };
 };
 
 const unflattenSections = (flatSections) => {
@@ -108,6 +208,7 @@ export default function ContentAdmin({
   const [draftsById, setDraftsById] = useState({});
   const [expandedDocId, setExpandedDocId] = useState("");
   const [formsById, setFormsById] = useState({});
+  const [newBlockFormsById, setNewBlockFormsById] = useState({});
   const [liveContentById, setLiveContentById] = useState({});
   const [publishReview, setPublishReview] = useState(null);
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
@@ -154,6 +255,7 @@ export default function ContentAdmin({
 
       setContentDocs(docs);
       setFormsById(Object.fromEntries(docs.map((contentDoc) => [contentDoc.id, {
+        contentBlocks: normalizeContentBlocks(contentDoc.sections, contentDoc.id),
         flatSections: flattenSections(contentDoc.sections),
         published: contentDoc.published === true,
         sortOrder: Number.isFinite(contentDoc.sortOrder) ? contentDoc.sortOrder : expectedMeta.get(contentDoc.id)?.sortOrder ?? null,
@@ -245,6 +347,121 @@ export default function ContentAdmin({
     }));
   };
 
+  const updateContentBlock = (contentId, blockId, field, value) => {
+    setFormsById((currentForms) => {
+      const currentForm = currentForms[contentId];
+
+      if (!currentForm) {
+        return currentForms;
+      }
+
+      return {
+        ...currentForms,
+        [contentId]: {
+          ...currentForm,
+          contentBlocks: (currentForm.contentBlocks || []).map((block) => (
+            block.id === blockId ? { ...block, [field]: value } : block
+          )),
+        },
+      };
+    });
+  };
+
+  const removeContentBlock = (contentId, blockId) => {
+    setFormsById((currentForms) => {
+      const currentForm = currentForms[contentId];
+
+      if (!currentForm) {
+        return currentForms;
+      }
+
+      return {
+        ...currentForms,
+        [contentId]: {
+          ...currentForm,
+          contentBlocks: (currentForm.contentBlocks || []).filter((block) => block.id !== blockId),
+        },
+      };
+    });
+  };
+
+  const toggleNewContentBlockForm = (contentId) => {
+    setNewBlockFormsById((currentForms) => {
+      if (currentForms[contentId]) {
+        const nextForms = { ...currentForms };
+        delete nextForms[contentId];
+        return nextForms;
+      }
+
+      return {
+        ...currentForms,
+        [contentId]: emptyNewBlockForm(),
+      };
+    });
+  };
+
+  const updateNewContentBlockForm = (contentId, field, value) => {
+    setNewBlockFormsById((currentForms) => ({
+      ...currentForms,
+      [contentId]: {
+        ...(currentForms[contentId] || emptyNewBlockForm()),
+        [field]: value,
+      },
+    }));
+  };
+
+  const addContentBlock = (contentId) => {
+    const newBlockForm = newBlockFormsById[contentId] || emptyNewBlockForm();
+    const text = String(newBlockForm.text || "").trim();
+
+    if (!text) {
+      setMessage("Add text before adding a content block.");
+      return;
+    }
+
+    setFormsById((currentForms) => {
+      const currentForm = currentForms[contentId];
+
+      if (!currentForm) {
+        return currentForms;
+      }
+
+      return {
+        ...currentForms,
+        [contentId]: {
+          ...currentForm,
+          contentBlocks: [
+            ...(currentForm.contentBlocks || []),
+            {
+              id: createContentBlockId(),
+              sortOrder: currentForm.contentBlocks?.length || 0,
+              text,
+              type: contentBlockTypeLabels[newBlockForm.type] ? newBlockForm.type : "paragraph",
+            },
+          ],
+        },
+      };
+    });
+
+    setNewBlockFormsById((currentForms) => {
+      const nextForms = { ...currentForms };
+      delete nextForms[contentId];
+      return nextForms;
+    });
+    setMessage("Content block added. Save Draft to preview it.");
+  };
+
+  const updateFocusedContentValue = (contentId, fieldPath, value) => {
+    const parsedBlockPath = parseContentBlockFieldPath(fieldPath);
+
+    if (parsedBlockPath) {
+      updateContentBlock(contentId, parsedBlockPath.blockId, "text", value);
+      return;
+    }
+
+    updateField(contentId, fieldPath, value);
+  };
+
   const buildContentPayload = (contentDoc) => {
     if (!expectedContentIds.has(contentDoc.id)) {
       return null;
@@ -256,9 +473,16 @@ export default function ContentAdmin({
       return null;
     }
 
+    const serializedBlocks = serializeContentBlocks(form.contentBlocks);
+    const sections = setNestedValue(
+      unflattenSections(form.flatSections),
+      contentBlockPathForDoc(contentDoc.id),
+      serializedBlocks
+    );
+
     return {
       published: form.published,
-      sections: unflattenSections(form.flatSections),
+      sections,
       sortOrder: Number.isFinite(Number(form.sortOrder)) ? Number(form.sortOrder) : null,
     };
   };
@@ -402,13 +626,18 @@ export default function ContentAdmin({
   if (isDrawerMode && focusRequest?.fieldPath) {
     const contentDoc = visibleContentDocs[0] || null;
     const form = contentDoc ? formsById[contentDoc.id] : null;
-    const selectedValue = String(form?.flatSections?.[focusRequest.fieldPath] ?? "");
+    const selectedBlockPath = parseContentBlockFieldPath(focusRequest.fieldPath);
+    const selectedBlock = selectedBlockPath
+      ? (form?.contentBlocks || []).find((block) => block.id === selectedBlockPath.blockId) || null
+      : null;
+    const selectedValue = selectedBlock
+      ? String(selectedBlock.text || "")
+      : String(form?.flatSections?.[focusRequest.fieldPath] ?? "");
     const selectedLabel = fieldLabelForRequest(focusRequest);
     const hasDraft = Boolean(contentDoc && draftsById[contentDoc.id]);
 
     return (
       <section className="admin_drawer_editor_inner" ref={sectionRef}>
-        {message ? <p className="admin_message">{message}</p> : null}
         {isLoading ? <p className="admin_status">Loading selected content...</p> : null}
         {!isLoading && !contentDoc ? (
           <p className="admin_status">The selected content field was not found.</p>
@@ -421,7 +650,7 @@ export default function ContentAdmin({
               {shouldUseTextarea(focusRequest.fieldPath, selectedValue) ? (
                 <textarea
                   disabled={isSaving}
-                  onChange={(event) => updateField(contentDoc.id, focusRequest.fieldPath, event.target.value)}
+                  onChange={(event) => updateFocusedContentValue(contentDoc.id, focusRequest.fieldPath, event.target.value)}
                   ref={(field) => {
                     if (field) {
                       fieldRefs.current[fieldRefKey(contentDoc.id, focusRequest.fieldPath)] = field;
@@ -436,7 +665,7 @@ export default function ContentAdmin({
               ) : (
                 <input
                   disabled={isSaving}
-                  onChange={(event) => updateField(contentDoc.id, focusRequest.fieldPath, event.target.value)}
+                  onChange={(event) => updateFocusedContentValue(contentDoc.id, focusRequest.fieldPath, event.target.value)}
                   ref={(field) => {
                     if (field) {
                       fieldRefs.current[fieldRefKey(contentDoc.id, focusRequest.fieldPath)] = field;
@@ -450,9 +679,31 @@ export default function ContentAdmin({
               )}
             </label>
 
-            <p className="admin_status">
-              Save Draft updates the preview. Publish makes the saved draft live.
-            </p>
+            {selectedBlock ? (
+              <div className="admin_content_block_tools">
+                <label>
+                  Block type
+                  <select
+                    disabled={isSaving}
+                    onChange={(event) => updateContentBlock(contentDoc.id, selectedBlock.id, "type", event.target.value)}
+                    value={selectedBlock.type}
+                  >
+                    {contentBlockTypes.map((blockType) => (
+                      <option key={blockType} value={blockType}>{contentBlockTypeLabels[blockType]}</option>
+                    ))}
+                  </select>
+                </label>
+                <button
+                  className="admin_danger_button"
+                  disabled={isSaving}
+                  onClick={() => removeContentBlock(contentDoc.id, selectedBlock.id)}
+                  type="button"
+                >
+                  <FontAwesomeIcon aria-hidden="true" icon={faTrash} />
+                  Remove section
+                </button>
+              </div>
+            ) : null}
 
             <div className="admin_button_row">
               <button
@@ -537,6 +788,8 @@ export default function ContentAdmin({
               const title = expectedMeta.get(contentDoc.id)?.title || contentDoc.id;
               const hasDraft = Boolean(draftsById[contentDoc.id]);
               const isPublishReviewOpen = publishReview?.id === contentDoc.id;
+              const contentBlocks = form?.contentBlocks || [];
+              const newBlockForm = newBlockFormsById[contentDoc.id] || null;
 
               return (
                 <article className="admin_content_card" key={contentDoc.id}>
@@ -613,6 +866,132 @@ export default function ContentAdmin({
                         </label>
                       );
                       })}
+
+                      <div className="admin_content_blocks_editor">
+                        <div className="admin_description_blocks_header admin_form_header">
+                          <div>
+                            <h4>Added content sections</h4>
+                            <p className="admin_status admin_inline_status">
+                              Optional title, subtitle, or paragraph sections that render after the current content.
+                            </p>
+                          </div>
+                          <button
+                            className="admin_icon_button"
+                            disabled={isSaving}
+                            onClick={() => toggleNewContentBlockForm(contentDoc.id)}
+                            title={newBlockForm ? "Cancel adding content" : "Add content section"}
+                            type="button"
+                          >
+                            <FontAwesomeIcon aria-hidden="true" icon={faPlus} />
+                          </button>
+                        </div>
+
+                        {newBlockForm ? (
+                          <div className="admin_content_block_card">
+                            <label>
+                              Section type
+                              <select
+                                disabled={isSaving}
+                                onChange={(event) => updateNewContentBlockForm(contentDoc.id, "type", event.target.value)}
+                                value={newBlockForm.type}
+                              >
+                                {contentBlockTypes.map((blockType) => (
+                                  <option key={blockType} value={blockType}>{contentBlockTypeLabels[blockType]}</option>
+                                ))}
+                              </select>
+                            </label>
+                            <label>
+                              Text
+                              <textarea
+                                disabled={isSaving}
+                                onChange={(event) => updateNewContentBlockForm(contentDoc.id, "text", event.target.value)}
+                                rows={4}
+                                value={newBlockForm.text}
+                              />
+                            </label>
+                            <div className="admin_button_row">
+                              <button
+                                className="admin_primary_button"
+                                disabled={isSaving}
+                                onClick={() => addContentBlock(contentDoc.id)}
+                                type="button"
+                              >
+                                Add Section
+                              </button>
+                              <button
+                                className="admin_secondary_button"
+                                disabled={isSaving}
+                                onClick={() => toggleNewContentBlockForm(contentDoc.id)}
+                                type="button"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        {contentBlocks.length ? (
+                          <div className="admin_content_block_list">
+                            {contentBlocks.map((block, index) => {
+                              const blockFieldPath = `${contentBlockPathForDoc(contentDoc.id).join(".")}.${block.id}.text`;
+                              const isFocusedBlock = focusRequest?.contentId === contentDoc.id
+                                && focusRequest?.fieldPath === blockFieldPath;
+
+                              return (
+                                <div
+                                  className={isFocusedBlock ? "admin_content_block_card admin_focused_field" : "admin_content_block_card"}
+                                  key={block.id}
+                                >
+                                  <div className="admin_content_block_card_header">
+                                    <strong>Section {index + 1}</strong>
+                                    <button
+                                      aria-label={`Remove section ${index + 1}`}
+                                      className="admin_icon_button"
+                                      disabled={isSaving}
+                                      onClick={() => removeContentBlock(contentDoc.id, block.id)}
+                                      title="Remove section"
+                                      type="button"
+                                    >
+                                      <FontAwesomeIcon aria-hidden="true" icon={faTrash} />
+                                    </button>
+                                  </div>
+                                  <label>
+                                    Section type
+                                    <select
+                                      disabled={isSaving}
+                                      onChange={(event) => updateContentBlock(contentDoc.id, block.id, "type", event.target.value)}
+                                      value={block.type}
+                                    >
+                                      {contentBlockTypes.map((blockType) => (
+                                        <option key={blockType} value={blockType}>{contentBlockTypeLabels[blockType]}</option>
+                                      ))}
+                                    </select>
+                                  </label>
+                                  <label>
+                                    Text
+                                    <textarea
+                                      disabled={isSaving}
+                                      onChange={(event) => updateContentBlock(contentDoc.id, block.id, "text", event.target.value)}
+                                      ref={(field) => {
+                                        if (field) {
+                                          fieldRefs.current[fieldRefKey(contentDoc.id, blockFieldPath)] = field;
+                                          return;
+                                        }
+
+                                        delete fieldRefs.current[fieldRefKey(contentDoc.id, blockFieldPath)];
+                                      }}
+                                      rows={4}
+                                      value={block.text}
+                                    />
+                                  </label>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <p className="admin_status admin_inline_status">No added content sections yet.</p>
+                        )}
+                      </div>
 
                       <div className="admin_button_row">
                         <button

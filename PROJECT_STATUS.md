@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Preview-driven admin editing is in progress on branch `codex/preview-edit-drawer`.
-Firestore rules for the draft collections are deployed to `calabash-54fb5`, draft save/preview/discard has been verified from the local admin UI, and the preview editor is being refined without changing protected static content files.
+Preview-driven admin editing is at a verified, non-deployable checkpoint on branch `codex/preview-edit-drawer`.
+Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data. The guarded PayPal Functions path remains disabled and must not be deployed or enabled until the payment, waitlist, and inventory-concurrency blockers below are resolved.
 
 ## Approved Tech Stack
 
@@ -100,6 +100,34 @@ Phase 33: Preview-driven admin editing workflow.
 - Updated preview side-drawer site-content editing so clicking a preview text field opens a focused single-field editor card with Save Draft, Publish, and Discard Draft instead of the full site-content document editor.
 - Added Contact page rendering to admin preview routes while preventing preview-mode contact submissions from sending EmailJS email.
 - Added `docs/admin-editing-workflow.md` to define admin-editable, code-owned, data-owned, and mixed ownership decisions for future site sections.
+- Refined preview side-drawer editing so only the active content field keeps a persistent preview highlight, drawer notes live behind a compact help icon, and the drawer close control uses an icon button.
+- Added word-level draft-vs-live highlighting in the admin preview so added draft words render with a clear green inline mark.
+- Added preview-drawer product and event editing: product cards/details and the active event can open focused ProductAdmin/EventAdmin drawers from preview edit mode, reusing existing draft, publish, discard, and product photo controls.
+- Refined product photo editing inside the product drawer so status tags hide while editing, selected photos reveal only their alt-text save control, attached photos detach from a thumbnail `x`, photo ordering uses a drag handle instead of Up/Down buttons, upload/Photo Library attach tools stay hidden behind `Add Photo`, and the Photo Library picker previews all active Storage-backed media assets instead of only the old `other` bin.
+- Refined event editing inside the event drawer with repeatable subtitle/paragraph description blocks, event photo upload, Photo Library attach, drag-handle reorder, selected-photo alt editing, and thumbnail `x` detach while keeping event menu/document upload for a later phase.
+- Simplified product and event editor visibility controls so Jette sees `Visible on site`; the stored `published` field is kept in sync with `isActive` for compatibility.
+- Hid event shipping from the Event Editor while preserving internal `shipping: "0.00"` for the legacy shared cart item shape.
+- Added flexible Site Content blocks so admins can draft new title, subtitle, or paragraph sections under approved content docs without editing protected static files.
+- Wired flexible content blocks into the Firestore preview/public rendering path for Home Header/Footer, Banner, Offerings, About, Team, and Experience Blurb.
+- Fixed event seed compatibility so seeded event `published` mirrors `isActive` instead of always writing published.
+- Adjusted narrow preview drawer form layout so event price/capacity and checkbox controls stack cleanly.
+- Updated event availability handling so Jette sets capacity, public/admin labels compute remaining tickets as `remaining of capacity available`, past events are not purchasable, and full future events can show a public waitlist form when waitlist is enabled.
+- Added local Firestore rule/data-shape support for computed event `ticketsSold`, manual offline holds, and public `eventWaitlist` entries, with waitlist requests visible from the matching Event Editor card.
+- Tightened client-side event cart capacity checks so cart additions count total event seats across adult, child, dietary, and duplicate cart variants for the same event/date.
+- Added `docs/order-ledger-and-reconciliation-plan.md` to define the shared PayPal/Square/manual order ledger, inventory movement audit trail, server-side PayPal capture path, Square reconciliation path, and admin Orders UI plan before payment backend implementation.
+- Added product variant/SKU/inventory metadata to Firestore product drafts and admin product cards so Firebase can become the product inventory source of truth without changing protected static product data or the public static shop default.
+- Added a read-only admin Orders section that can list, filter, and inspect future Firestore order records without changing checkout, browser PayPal behavior, public storefront reads, or protected static resource files.
+- Added a guarded Firebase Functions PayPal create/capture scaffold and React checkout feature flag so server-side PayPal order writing can be tested later without changing the current public browser PayPal checkout by default.
+- Reworked the admin dashboard into a left-sidebar navigation shell so only the selected admin section renders in the main workspace.
+- Added a read-only admin Inventory section that summarizes live Firestore product variant stock and event capacity/tickets/manual holds in one searchable view.
+- Added trusted Firestore validation to the guarded PayPal Functions path so server-side create/capture reloads products/events, recalculates totals, and rejects inactive, stale, out-of-stock, or over-capacity carts before PayPal work proceeds.
+- Added Inventory-section edit controls for product stock, low-stock thresholds, product inventory tracking, event capacity, manual event holds, and event waitlist availability, with stock/manual-hold changes written to `inventoryMovements`.
+- Reworked Inventory editing from row-by-row expanded editors into always-visible inline table fields with a bulk Save Changes flow for Jette's product/event inventory updates.
+- Updated the guarded PayPal capture path so a successful server-side capture writes the order, writes `inventoryMovements`, decrements tracked product variant stock, and increments event `ticketsSold` in an idempotent Firestore transaction.
+- Cleaned the Inventory admin view so it only shows the Inventory section title, the edit controls, filters, and a scrollable inventory table; removed the summary cards/counts and fixed blank low-stock thresholds so they stay blank after save/reload.
+- Verified all eight primary admin sidebar sections load for an approved local admin without loading or permission failures: Site Preview, Products, Events, Site Content, Inventory, Orders, Photos, and Developer / Audit Tools.
+- Verified a valid inactive product low-stock threshold can save to real Firestore, survive a full reload, and be restored to its original blank value. This did not create an inventory movement because stock quantity was not changed.
+- Fixed the admin preview's React iframe warning by using the supported `frameBorder` property.
 
 ## In Progress Work
 
@@ -110,6 +138,7 @@ Phase 33: Preview-driven admin editing workflow.
 - Verify attaching an existing `other` bin photo to a product saves a draft product photo ref without mutating live `products` or `mediaAssets`.
 - Verify product photo alt-text edits, reordering, and detach behavior save to `productDrafts` and preview correctly.
 - Verify Product Mirror Audit reports missing, extra, different, and photo-review product records without writing data.
+- Verify ProductAdmin variant/SKU/inventory controls save to product drafts, show in Publish Review, publish to live Firestore products, and keep `priceOptions` storefront-compatible.
 - Verify Content Mirror Audit reports missing, extra, and different site-content records without writing data.
 - Verify Seed Missing Content creates only missing `siteContent` documents and skips existing documents.
 - Verify Site Content Editor saves drafts to `siteContentDrafts`, previews those drafts, publishes only through Publish Changes, and does not edit protected static content files.
@@ -143,8 +172,13 @@ Phase 33: Preview-driven admin editing workflow.
 - Verify Confirm Publish Changes from the admin UI in a controlled live-write test only after Luke explicitly approves a live Firestore content mutation.
 - Verify the admin password-reset button with Jette's real email only when Luke explicitly approves sending the reset email.
 - Verify Jette can use preview content edit mode comfortably across Desktop, Tablet, and Mobile preview sizes before broader content-edit training.
-- Add product preview edit drawer mode by reusing the existing Product Editor draft/publish helpers.
-- Add event preview edit drawer mode by reusing the existing Event Editor draft/publish helpers.
+- Add event menu/document upload controls to the Event Editor before event media can be fully managed from preview edit mode.
+- Design real inventory/order/capacity decrement logic with server-side PayPal confirmation and Firestore transactions so successful checkout writes order records, decrements product variant stock, and updates computed event `ticketsSold`.
+- Finish the server-side PayPal validation/decrement phase before enabling server checkout publicly: reload Firestore products/events, recalculate prices/shipping from trusted data, enforce stock/capacity, write `inventoryMovements`, and update event `ticketsSold` in a transaction.
+- Finish live Inventory verification with an actual stock movement and event capacity change. Product metadata save/reload/restore is verified, but stock movement creation and event capacity persistence still need controlled tests after concurrency hardening.
+- Decide whether to delete or simply exclude the obsolete inactive `Test basket` Firestore document. Its legacy `All` category is intentionally excluded from current seed/category rules, so current inventory writes against that document are rejected.
+- Verify the guarded PayPal Functions path in PayPal sandbox only after server env values are configured and Luke approves a test checkout; include duplicate callback, out-of-stock, over-capacity, and stale-cart tests.
+- Browser click-through for the latest product photo UI refinement is still pending because the in-app browser connector timed out attaching to the local webview; localhost `3001` responded with `HTTP/1.1 200 OK`, and production build verification passed.
 
 ## Planned Work
 
@@ -164,16 +198,25 @@ Phase 33: Preview-driven admin editing workflow.
 
 ## Bugs
 
-- Event stock checks compare the full `quantity` object against stock, which cannot work as intended.
-- Some event inventory keys appear outdated or mismatched with current event dates.
+- Some legacy static event inventory keys appear outdated or mismatched with current event dates; Firestore event capacity now uses event document capacity plus computed/cart-held seats in preview/public Firestore mode.
 - The events build has missing-dependency React hook warnings.
 - Several unused variables/imports remain.
 - `README.md` was still the Create React App default before this phase.
+- Inventory currently shows the obsolete legacy `Test basket` Firestore record even though its `All` category is invalid under current product rules; save failure messaging is generic rather than identifying the incompatible record.
+- Switching admin sidebar sections unmounts the open editor without warning, so unsaved local form edits can be lost.
+- The React test command currently finds zero automated tests; checkpoint verification relies on build, syntax, rules, and browser smoke checks.
 
 ## Risks And Open Questions
 
 - Checkout is client-side PayPal integration only; order persistence and fulfillment workflow are unclear.
-- Inventory is static and may not prevent overselling.
+- PayPal returns capture details in the browser after purchase today, but those details are not persisted and should not become the authoritative inventory signal until a backend verifies and writes paid orders.
+- The new Firebase Functions PayPal scaffold is disabled by default and not public-checkout ready; it validates submitted cart items against Firestore and has decrement logic, but still needs sandbox payment testing, duplicate-callback testing, and failure/reconciliation review before public use.
+- The guarded PayPal capture scaffold currently accepts a new browser-supplied cart at capture time instead of loading the trusted cart snapshot used to create the PayPal order. It must bind capture to the server-validated create-order snapshot before enablement.
+- The guarded PayPal capture scaffold currently captures payment before its Firestore inventory/order transaction. A defined reservation or compensation/recovery design is required so a transaction conflict cannot charge a customer without a saved order.
+- Luke approved adding the guarded Firebase Functions scaffold in this phase, but deploying Functions or enabling server checkout for the public site still requires separate approval.
+- Generating `functions/package-lock.json` reported 9 moderate npm audit findings in Firebase Functions dependencies and a local Node `23.7.0` vs Functions `node:20` engine warning; review before deploying Functions.
+- Square POS/market sales should reconcile through the same future order/inventory movement ledger, either by manual entry/CSV first or Square API/webhooks later.
+- Product variant stock metadata exists in Firestore, and the guarded server checkout path now decrements stock/capacity when enabled and deployed, but public checkout still needs PayPal sandbox verification before relying on it live.
 - Admin product editor writes to Firestore, but public product pages still use static data.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - Real admin testing still needs Firebase project values and approved admin user records.
@@ -181,6 +224,8 @@ Phase 33: Preview-driven admin editing workflow.
 - Admin data-shape contract is a planning document and is not a migration.
 - Draft Firestore rules were deployed to `calabash-54fb5` on 2026-06-16.
 - Draft collection rules for `productDrafts`, `eventDrafts`, and `siteContentDrafts` are deployed; admin draft reads and writes require an approved admin user.
+- Event waitlist, `ticketsSold`, and `inventoryMovements` rule changes were deployed to `calabash-54fb5` on 2026-06-22 after Luke approved a rules-only deploy.
+- Public `eventWaitlist` creates currently validate field shape but do not prove the referenced event exists, is active, is full, or has waitlisting enabled. Harden and deploy those rules before relying on the public waitlist or exposing it broadly.
 - `.firebaserc` is currently commented out and triggers a Firebase CLI JSON warning. Firestore rules were deployed with the explicit `--project calabash-54fb5` flag, so the warning did not affect the deploy.
 - Product editor draft writes require Firebase env values, deployed/reviewed draft rules, and an approved admin record for real testing.
 - Product writes require approved `productCategories` records.
@@ -201,6 +246,8 @@ Phase 33: Preview-driven admin editing workflow.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
 - Existing unapproved Firestore categories may need manual cleanup if they were already seeded before this guardrail.
+- InventoryAdmin currently writes a complete product `variants` array from its loaded browser snapshot. Replace this with transaction-based current-document updates before concurrent checkout/admin stock changes are enabled.
+- Legacy `priceOptions` converted into Inventory rows need stable `priceOptionIndex` metadata before the server checkout path can rely on generated variant IDs.
 - CSV import/export should reuse the product seed validation contract instead of trusting spreadsheet validation.
 - Public product pages still do not read Firestore products; admin Firestore product labels reflect seeded/admin data only.
 - `src/generated/public-products-cache.json` is a generated fallback artifact only and may be stale unless refreshed from Firestore before deployment.
@@ -228,6 +275,7 @@ Phase 33: Preview-driven admin editing workflow.
 - Do not merge without Luke's approval.
 - Treat docs as required infrastructure before product implementation.
 - Do not change `src/resources/products.js`, `src/resources/events.js`, `src/resources/content.js`, `src/resources/inventory.js`, `src/resources/images/**`, or `src/resources/public_keys.js` without explicit approval.
+- Use Firebase as the Calabash product inventory source of truth; PayPal and any future Square integration should feed verified sales into Firebase rather than becoming the only inventory ledger.
 - Future backend prep should start with read-only content boundaries and data-shape documentation before adding backend dependencies.
 - Recommended backend path is Firebase Auth, Firestore, and Storage, pending Luke approval before implementation.
 - First implementation slice should be a read-only content adapter, not Firebase activation or admin editing.
@@ -386,6 +434,48 @@ Phase 33: Preview-driven admin editing workflow.
 - 2026-06-18: `git diff --check` passed after the admin dashboard cleanup and focused preview side-card update.
 - 2026-06-18: Protected content diff check returned no changes after the admin dashboard cleanup and focused preview side-card update.
 - 2026-06-18: `npm run build` completed successfully after the admin dashboard cleanup and focused preview side-card update, with the same existing warnings.
+- 2026-06-18: `git diff --check` passed after the product photo editor progressive-controls refinement.
+- 2026-06-18: Protected content diff check returned no changes after the product photo editor progressive-controls refinement.
+- 2026-06-18: `npm run build` completed successfully after the product photo editor progressive-controls refinement, with the same existing warnings.
+- 2026-06-18: Local admin route `http://127.0.0.1:3001/#/admin` returned `HTTP/1.1 200 OK`; in-app browser visual verification was not completed because the browser connector timed out attaching to the local webview.
+- 2026-06-18: `node --check src/Components/Admin/ProductAdmin.js`, `git diff --check`, and protected content diff check passed after expanding the product Photo Library picker to active Storage-backed media thumbnails.
+- 2026-06-18: `npm run build` completed successfully after expanding the product Photo Library picker, with the same existing warnings.
+- 2026-06-18: Event editor cleanup removed the admin-only event type and event-level sort-order controls from the UI/save path; events continue to order chronologically by canonical date.
+- 2026-06-18: Event editing now uses repeatable description sections with optional subtitles and paragraphs while preserving the legacy `info` array for current public rendering compatibility.
+- 2026-06-18: Event cards now include hidden-until-needed photo tools matching products: upload, choose from Photo Library, preview before attach, drag reorder, selected-photo alt edit, and thumbnail `x` detach.
+- 2026-06-18: Firestore rules were updated locally to allow event `descriptionBlocks` and to remove `eventType` and event-level `sortOrder` from the intended event document shape. These rules still need deployment approval before live Firebase testing.
+- 2026-06-18: Firestore rules now validate event `descriptionBlocks` as a list of up to 20 `{ body, subtitle }` maps, and event photo uploads now create reusable `mediaAssets` records in the `events` bin before attaching them to the event draft.
+- 2026-06-18: `node --check` passed for `EventAdmin.js`, `Event.js`, `adminEventSeed.js`, and `publicEventAdapter.js` after the event editor cleanup.
+- 2026-06-18: `git diff --check` passed and protected content diff check returned no changes after the event editor cleanup.
+- 2026-06-18: `npm run build` completed successfully after the event editor cleanup, with the same existing warnings.
+- 2026-06-18: Local admin route `http://127.0.0.1:3001/#/admin` returned `HTTP/1.1 200 OK`; in-app browser visual verification was not completed because browser automation timed out attaching to the local webview.
+- 2026-06-18: Static UI grep confirmed `Shipping` no longer appears in `src/Components/Admin/EventAdmin.js`; product shipping remains visible in `ProductAdmin.js`.
+- 2026-06-18: Static UI grep confirmed `Published` no longer appears in `ProductAdmin.js` or `EventAdmin.js`; both editors now expose `Visible on site`, while stored `published` remains synced behind the scenes.
+- 2026-06-18: Protected content diff check returned no changes after product/event visibility cleanup and flexible site-content block wiring.
+- 2026-06-18: `git diff --check` passed after product/event visibility cleanup and flexible site-content block wiring.
+- 2026-06-18: `npm run build` completed successfully after product/event visibility cleanup and flexible site-content block wiring, with the same existing warnings.
+- 2026-06-18: Local admin route `http://127.0.0.1:3001/#/admin` returned `HTTP/1.1 200 OK`; in-app browser visual verification was not completed because browser automation timed out attaching to the local webview.
+- 2026-06-18: Subagent read-only review found one P2 seed mismatch: `adminEventSeed.js` always wrote `published: true`; this was fixed so event seed `published` mirrors `isActive`.
+- 2026-06-18: `git diff --check`, protected content diff check, and `npm run build` passed after fixing event seed visibility and preview drawer price/capacity layout, with the same existing warnings.
+- 2026-06-18: Subagent read-only review recommended stable product variants/SKUs, Firebase-owned inventory, protected static-file guardrails, and server-side order decrementing as a later phase.
+- 2026-06-18: `git diff --check`, protected content diff check, `npm run build`, local admin route `HTTP/1.1 200 OK`, and Firestore rules dry-run compile passed after adding product variant/SKU/inventory metadata. Build retained only the existing warnings. In-app browser visual click-through is still pending because browser attach timed out twice.
+- 2026-06-18: Subagent read-only review recommended a normal Jette-facing read-only Orders dashboard section, no rules change, no checkout change, and no protected static-file edits for the admin Orders foundation.
+- 2026-06-18: `git diff --check`, protected content diff check, `npm run build`, local admin route `HTTP/1.1 200 OK`, and Firestore rules dry-run compile passed after adding the read-only admin Orders section. Build retained only the existing warnings. In-app browser visual click-through is still pending because browser attach timed out.
+- 2026-06-19: Subagent read-only review of the PayPal Functions scaffold found one P2 disabled-state issue where `capturePayPalOrder` could read an existing order before checking `PAYPAL_CHECKOUT_ENABLED`; this was fixed so both PayPal callable functions assert server checkout is enabled before order reads or PayPal calls.
+- 2026-06-19: Generated `functions/package-lock.json` with `npm --prefix functions install --package-lock-only`; npm reported 9 moderate audit findings and a local Node `23.7.0` vs Functions `node:20` engine warning.
+- 2026-06-19: `npm run functions:check`, `git diff --check`, protected content diff check, and `npm run build` passed after adding the guarded PayPal Functions scaffold. Build retained only the existing warnings. Local route curl was not completed because no dev server was running on `3001`.
+- 2026-06-22: Subagent read-only review confirmed inventory metadata, event capacity, and Orders view foundations exist, but true inventory management and paid-order decrementing were not implemented before this phase.
+- 2026-06-22: `node --check` passed for `Admin.js` and `InventoryAdmin.js`; `npm run functions:check`, `git diff --check`, protected content diff check, and `npm run build` passed after adding the admin sidebar shell, read-only Inventory section, and trusted Firestore checkout validation. Build retained only the existing warnings.
+- 2026-06-22: `node --check` passed for `Admin.js` and `InventoryAdmin.js`; `npm run functions:check`, `git diff --check`, protected content diff check, `npm run build`, and `firebase-tools deploy --only firestore:rules --dry-run` passed after adding editable Inventory controls, `inventoryMovements` rules, and guarded PayPal capture decrement/movement logic. Build retained only the existing warnings, and the Firebase CLI still reported the known `.firebaserc` JSON warning.
+- 2026-06-22: `node --check src/Components/Admin/InventoryAdmin.js`, `git diff --check`, protected content diff check, `npm run build`, local admin route `HTTP/1.1 200 OK`, and Firestore rules dry-run compile passed after changing Inventory to inline bulk editing. Build retained only the existing warnings.
+- 2026-06-22: Deployed Firestore rules only to `calabash-54fb5` after Luke approved the rules deploy for inline inventory saves and `inventoryMovements`; Firebase CLI reported the known `.firebaserc` JSON warning, but rules compiled and released successfully. No hosting or functions deploy was run.
+- 2026-06-22: Subagent read-only review confirmed the Inventory cleanup removed summary cards and protected static resources remained untouched; it also caught a blank low-stock threshold round-trip bug, which was fixed before handoff.
+- 2026-06-22: `node --check src/Components/Admin/InventoryAdmin.js`, `node --check src/Components/Admin/Admin.js`, `git diff --check`, protected content diff check, and `npm run build` passed after the Inventory UI cleanup. Build retained only the existing warnings. Local dev server was restarted successfully on `127.0.0.1:3001`; in-app browser automation was blocked by Browser Use URL policy, so final visual confirmation remains manual.
+- 2026-08-26: Browser-controlled live admin testing verified a valid inactive product low-stock threshold saved to Firestore, survived reload, and restored to blank. The obsolete `Test basket` write was rejected and discarded; its stock remained `0`.
+- 2026-08-26: Browser smoke testing verified all eight primary admin sections load for an approved admin. Orders correctly displayed the intentional zero-order state, and the iframe `frameBorder` warning was fixed and did not recur after reload.
+- 2026-08-26: Subagent read-only checkpoint review confirmed protected business files are unchanged and identified blockers in PayPal cart binding/payment recovery, public waitlist validation, inventory concurrency, legacy variant indexing, and unsaved-editor navigation. The checkpoint is explicitly not ready for merge, Functions deployment, or server checkout enablement.
+- 2026-08-26: `npm run build`, `npm run functions:check`, `node --check` for InventoryAdmin and OrdersAdmin, `git diff --check`, protected content diff check, and Firestore rules dry-run compilation passed. Build retained the same existing unused-code warnings; `npm test -- --watchAll=false` reported that the repository contains no automated React tests.
+- Docs checked: `PROJECT_STATUS.md` and the order-ledger plan were updated for checkpoint verification and newly identified backend risks.
 
 ## Commits
 

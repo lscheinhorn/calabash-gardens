@@ -1,14 +1,111 @@
 import './Event.css'
-import { addCartItem } from '../Cart/cartSlice'
-import { useDispatch } from 'react-redux'
-import { useState, useEffect } from 'react'
-import { eventsInventory, createKey } from '../../data/siteData'
+import { addCartItem, selectCart } from '../Cart/cartSlice'
+import {
+    addDoc,
+    collection,
+    serverTimestamp,
+} from 'firebase/firestore'
+import { useDispatch, useSelector } from 'react-redux'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'; 
+import { db, isFirebaseConfigured } from '../../firebase-config'
+
+const todayStart = () => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return today
+}
+
+const normalizeEventDate = (value) => {
+    if (value?.toDate) {
+        return value.toDate()
+    }
+
+    if (value instanceof Date) {
+        return value
+    }
+
+    const parsedDate = new Date(value)
+    return Number.isNaN(parsedDate.getTime()) ? null : parsedDate
+}
+
+const numericValue = (value) => {
+    const number = Number(value)
+    return Number.isFinite(number) ? number : null
+}
+
+const eventSeatCount = (cartItem) => {
+    const seatsPerCartUnit = Number(cartItem.seatsPerCartUnit)
+
+    if (Number.isFinite(seatsPerCartUnit) && seatsPerCartUnit > 0) {
+        return seatsPerCartUnit
+    }
+
+    const ticketCount = Number(cartItem.ticketCount)
+
+    if (Number.isFinite(ticketCount) && ticketCount > 0) {
+        return ticketCount
+    }
+
+    return 1
+}
+
+const eventAvailability = (event) => {
+    const eventDate = normalizeEventDate(event.date)
+    const isPast = eventDate ? eventDate < todayStart() : false
+    const capacity = numericValue(event.capacity)
+    const ticketsSold = numericValue(event.ticketsSold) || 0
+    const reservedSeats = numericValue(event.manualSeatsReserved) || 0
+    const remainingSeats = capacity === null ? null : Math.max(0, capacity - ticketsSold - reservedSeats)
+
+    if (isPast) {
+        return {
+            canBuyTickets: false,
+            canJoinWaitlist: false,
+            capacity,
+            label: 'This event has passed.',
+            remainingSeats,
+            status: 'past',
+        }
+    }
+
+    if (remainingSeats !== null && remainingSeats <= 0) {
+        return {
+            canBuyTickets: false,
+            canJoinWaitlist: event.waitlistEnabled === true,
+            capacity,
+            label: event.waitlistEnabled === true ? 'This event is sold out. Join the waitlist below.' : 'This event is sold out.',
+            remainingSeats,
+            status: event.waitlistEnabled === true ? 'waitlist' : 'sold-out',
+        }
+    }
+
+    if (event.inStock === false) {
+        return {
+            canBuyTickets: false,
+            canJoinWaitlist: false,
+            capacity,
+            label: 'Tickets are not available for this event.',
+            remainingSeats,
+            status: 'closed',
+        }
+    }
+
+    return {
+        canBuyTickets: true,
+        canJoinWaitlist: false,
+        capacity,
+        label: remainingSeats === null ? 'Tickets available.' : `${remainingSeats} of ${capacity} available.`,
+        remainingSeats,
+        status: 'available',
+    }
+}
 
 export default function Event (props) {
     const { event } = props
     const dispatch = useDispatch()
-    const { title, info, eventDates, link, priceOptions, key, inStock } = event
+    const cartItems = useSelector(selectCart)
+    const { title, info = [], eventDates = [], link, priceOptions = [] } = event
     const [ quantity, setQuantity ] = useState( {
         adult: 0,
         child: 0
@@ -20,30 +117,69 @@ export default function Event (props) {
 
     const [ gFree, setGFree ]  = useState( false )
     const [ gFreeOption, setGFreeOption ]  = useState( "I am gluten free (+$10)" )
-    
-    // console.log("price of event", priceOptions[0])
-    const [ eventInfo, setEventInfo ] = useState({
-        ...event, 
-        price: Number(priceOptions[0]), 
-        key: event.key, 
-        quantity: quantity.adult, 
-        option: eventDates[0],
-
-    } )
     const [ addedToCart, setAddToCart ]  = useState( false )
+    const [ waitlistForm, setWaitlistForm ] = useState({
+        email: '',
+        message: '',
+        name: '',
+        phone: ''
+    })
+    const [ waitlistStatus, setWaitlistStatus ] = useState('')
+    const [ isJoiningWaitlist, setIsJoiningWaitlist ] = useState(false)
 
-    useEffect(() => {
-        console.log("quantity.child", quantity.child)
-    }, [quantity.child])
-
-   
-
-    const photos = event.photos.map(photo => {
+    const photos = (Array.isArray(event.photos) ? event.photos : []).map(photo => {
         return `${photo}`
     })
-    // const featured = photos[0]
-    const eventKey = key
-    // console.log("productKey", productKey)
+    const availability = eventAvailability(event)
+    const selectedTickets = quantity.adult + quantity.child
+    const basePrice = Number(priceOptions[0] || 0)
+    const adultPrice = (veg || gFree) ? basePrice + 10 : basePrice
+    const childTotal = quantity.child * 10
+    const ticketTotal = adultPrice * quantity.adult + childTotal
+    const capacityGroupKey = `${event.id || event.key || title}${dateOption ? ` ${dateOption}` : ''}`
+    const cartSeatsForEvent = cartItems.reduce((totalSeats, cartItem) => {
+        if (cartItem.category !== 'Experience' || cartItem.capacityGroupKey !== capacityGroupKey) {
+            return totalSeats
+        }
+
+        return totalSeats + eventSeatCount(cartItem) * (Number(cartItem.quantity) || 1)
+    }, 0)
+    const remainingSeatsForSelection = availability.remainingSeats === null
+        ? null
+        : Math.max(0, availability.remainingSeats - cartSeatsForEvent)
+    const ticketSummary = [
+        quantity.adult ? `${quantity.adult} Adult${quantity.adult === 1 ? '' : 's'}` : '',
+        quantity.child ? `${quantity.child} Child${quantity.child === 1 ? '' : 'ren'}` : '',
+    ].filter(Boolean).join(', ')
+    const dietarySummary = `${veg ? ' Vegetarian' : ''}${gFree ? ' Gluten Free' : ''}`
+    const eventCartKey = `${capacityGroupKey}${dietarySummary}${quantity.adult ? ` ${quantity.adult} Adults` : ''}${quantity.child ? ` ${quantity.child} Children` : ''}`
+    const eventInfo = useMemo(() => ({
+        ...event,
+        adultTickets: quantity.adult,
+        capacityGroupKey,
+        childTickets: quantity.child,
+        maxQuantity: availability.remainingSeats,
+        eventId: event.id || event.slug || "",
+        glutenFree: gFree,
+        option: dateOption,
+        photos: event.photos,
+        price: ticketTotal,
+        quantity: 1,
+        seatsPerCartUnit: selectedTickets,
+        ticketCount: selectedTickets,
+        title: `${title}${dateOption ? ` ${dateOption}` : ''}${dietarySummary}${ticketSummary ? ` (${ticketSummary})` : ''}`,
+        vegetarian: veg,
+        key: eventCartKey,
+    }), [availability.remainingSeats, capacityGroupKey, dateOption, dietarySummary, event, eventCartKey, gFree, quantity.adult, quantity.child, selectedTickets, ticketSummary, ticketTotal, title, veg])
+    const descriptionBlocks = Array.isArray(event.descriptionBlocks)
+        ? event.descriptionBlocks
+            .map(block => ({
+                body: `${block?.body || ''}`.trim(),
+                subtitle: `${block?.subtitle || ''}`.trim()
+            }))
+            .filter(block => block.body || block.subtitle)
+        : []
+    const hasDescriptionBlocks = descriptionBlocks.length > 0
 
     useEffect(() => {
         setDateOption(eventDates[0])
@@ -57,40 +193,30 @@ export default function Event (props) {
         setAddToCart( false )
     }, [ title, dateOption ])
 
-    useEffect(() => {
-
-        setEventInfo({ 
-            ...eventInfo,
-            photos: event.photos,
-            price: ((veg || gFree) ? Number(priceOptions[0]) + 10 : Number(priceOptions[0])) + quantity.child * 10, 
-            quantity: quantity.adult,
-            title: ((veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : "")) + (quantity.child ? " with " + quantity.child + " Children" : "" ) ,
-            key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
-        })
-    }, [dateOption, event, title, quantity, priceOptions, eventDates, gFree, veg])
-
     const handleAddCartItem = () => {
+        if (!availability.canBuyTickets || quantity.adult <= 0) {
+            return
+        }
+
+        if (remainingSeatsForSelection !== null && selectedTickets > remainingSeatsForSelection) {
+            return
+        }
+
         setAddToCart( true )
-        // console.log("eventInfo", eventInfo)
-        // setEventInfo({ 
-        //     ...eventInfo, 
-        //     price: priceOptions[0],
-        //     quantity: quantity.adult,
-        //     title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : ""),
-        //     key: event.key.slice(0, -1) + (dateOption ? createKey(dateOption) : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")        
-        // })
-        console.log("eventInfo", eventInfo)
-        // console.log("eventInfo.title", eventInfo.title)
         dispatch(addCartItem(eventInfo))
     }
 
     const handleIncrement = ( event ) => {
         const type = event.target.getAttribute("tickettype")
-        console.log("eventsInventory[ eventInfo.title].stock", eventsInventory,  eventInfo.title )
-        
-        if( eventsInventory[ eventInfo.title ] && quantity >= eventsInventory[ eventInfo.title ].stock ) {
+
+        if (!availability.canBuyTickets) {
             return
         }
+
+        if( remainingSeatsForSelection !== null && selectedTickets >= remainingSeatsForSelection ) {
+            return
+        }
+
         setQuantity({...quantity, [ type ]: quantity[ type ] + 1 })
     }
     const handleDecrement = ( event ) => {
@@ -120,21 +246,12 @@ export default function Event (props) {
     }
 
     const handleChange = ({ target }) => {
-        setQuantity(1)
+        setQuantity({
+            adult: 0,
+            child: 0
+        })
         setDateOption( target.value )
     }
-
-    // useEffect(() => {
-    //     // console.log({priceOption})
-
-    //     setEventInfo({ 
-    //         ...event, 
-    //         price: price,
-    //         title: title,
-    //         key: event.key
-    //     })
-    //     // console.log("eventInfo", eventInfo )
-    // }, [ dateOption, event, title ])
 
     const handleVeg = () => {
         if(veg) {
@@ -155,33 +272,56 @@ export default function Event (props) {
             setGFree(true)
             setGFreeOption("I eat gluten")
         }
-        setEventInfo((eventInfo) => ({
-            ...eventInfo,
-            price: ((veg || gFree) ? Number(priceOptions[0]) + 20 : priceOptions[0]) + quantity.child * 10,
-            title: (veg || gFree) ? (title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")) : title + (dateOption ? " " + dateOption : "") + (quantity.child ? quantity.child + " Children" : "" ),
-            key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
-        }));
     }
 
-    // useEffect(() => {
-    //     if (veg || gFree) {
-    //         console.log("Updating price...");
-    //         setEventInfo(prevEventInfo => {
-    //             console.log("prevEventInfo.price", prevEventInfo.price);
+    const updateWaitlistForm = (field, value) => {
+        setWaitlistForm((currentForm) => ({
+            ...currentForm,
+            [field]: value
+        }))
+    }
 
-    //             const newPrice = Number(prevEventInfo.price) + 20;
-    //             console.log("Number(prevEventInfo.price)", Number(prevEventInfo.price));
-    //             console.log("newPrice", newPrice);
+    const submitWaitlist = async (eventSubmit) => {
+        eventSubmit.preventDefault()
 
-    //             return {
-    //                 ...prevEventInfo,
-    //                 price: `${newPrice}`,
-    //                 title: prevEventInfo.title + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : ""),
-    //                 key: event.key.slice(0, -1) + (dateOption ? " " + dateOption : "") + (veg ? " Vegetarian" : "") + (gFree ? " Gluten Free" : "")
-    //             };
-    //         });
-    //     }
-    // }, [veg, gFree]);
+        if (!waitlistForm.name.trim() || !waitlistForm.email.trim()) {
+            setWaitlistStatus('Name and email are required for the waitlist.')
+            return
+        }
+
+        if (!isFirebaseConfigured || !db) {
+            setWaitlistStatus('The waitlist is not connected yet. Please contact Calabash Gardens directly.')
+            return
+        }
+
+        setIsJoiningWaitlist(true)
+        setWaitlistStatus('')
+
+        try {
+            await addDoc(collection(db, 'eventWaitlist'), {
+                createdAt: serverTimestamp(),
+                email: waitlistForm.email.trim(),
+                eventDate: dateOption || '',
+                eventId: event.id || event.key || title,
+                eventTitle: title,
+                message: waitlistForm.message.trim(),
+                name: waitlistForm.name.trim(),
+                phone: waitlistForm.phone.trim(),
+                status: 'new',
+            })
+            setWaitlistStatus('You are on the waitlist. Thank you.')
+            setWaitlistForm({
+                email: '',
+                message: '',
+                name: '',
+                phone: ''
+            })
+        } catch (error) {
+            setWaitlistStatus('The waitlist could not be saved. Please contact Calabash Gardens directly.')
+        } finally {
+            setIsJoiningWaitlist(false)
+        }
+    }
 
     return (
         <div className="productPage_container">
@@ -224,15 +364,28 @@ export default function Event (props) {
 
             
             
-            {
-                info.map((p, index) => (
-                <p 
-                    key={index}
-                    style={{ textIndent: '2em' }}
-                >
-                    {p}
-                    <br />
-                </p>
+            {hasDescriptionBlocks
+                ? descriptionBlocks.map((block, index) => (
+                    <div className="event_description_block" key={`${block.subtitle}-${index}`}>
+                        {block.subtitle ? (
+                            <h4 className="event_description_subtitle">{block.subtitle}</h4>
+                        ) : null}
+                        {block.body ? (
+                            <p style={{ textIndent: '2em', whiteSpace: 'pre-line' }}>
+                                {block.body}
+                                <br />
+                            </p>
+                        ) : null}
+                    </div>
+                ))
+                : info.map((p, index) => (
+                    <p
+                        key={index}
+                        style={{ textIndent: '2em' }}
+                    >
+                        {p}
+                        <br />
+                    </p>
                 ))}
                 {link ? 
                 <div style={{ textAlign: 'center' }} >
@@ -247,49 +400,123 @@ export default function Event (props) {
             }
             
 
-            <button className="btn btn-warning btn-lg mt-2" onClick={ handleVeg }>
-                <i className="fas fa-leaf"></i> { vegOption }
-            </button>
-
-            <button className="btn btn-warning btn-lg mt-2" onClick={handleGFree}>
-                <i className="fas fa-bread-slice"></i> { gFreeOption }
-            </button>
-
-            <p>${ eventInfo.price * quantity.adult   }</p>
-            
-            <div style={{ textAlign: 'center' }} >
-               <p>Children 12 & under</p>
-            </div>
-            <div id="quantity-selector" className="d-flex justify-content-center align-items-center m-2">
-                <button tickettype="child" className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease quantity">-</button>
-                <span className="mx-3">{ quantity.child }</span>
-                <button tickettype="child" className="btn btn-secondary" onClick={ handleIncrement } aria-label="Increase quantity">+</button>
-
+            <div className={`event_availability event_availability_${availability.status}`}>
+                <p>{availability.label}</p>
             </div>
 
-            <div style={{ textAlign: 'center' }} >
-               <p>Adults</p>
-            </div>
-            <div id="quantity-selector" className="d-flex justify-content-center align-items-center m-2">
-                <button tickettype="adult" className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease quantity">-</button>
-                <span className="mx-3">{ quantity.adult }</span>
-                <button tickettype="adult" className="btn btn-secondary" onClick={ handleIncrement } aria-label="Increase quantity">+</button>
+            {availability.canBuyTickets ? (
+                <div className="event_ticket_panel">
+                    <button className="btn btn-warning btn-lg mt-2" onClick={ handleVeg }>
+                        <i className="fas fa-leaf"></i> { vegOption }
+                    </button>
 
-            </div>
+                    <button className="btn btn-warning btn-lg mt-2" onClick={handleGFree}>
+                        <i className="fas fa-bread-slice"></i> { gFreeOption }
+                    </button>
 
-            {
-                !inStock ? <p> Out of Stock </p> :
-                <button className="btn btn-success btn-lg" onClick={handleAddCartItem}>
-                    <i className="fa fa-ticket-alt"></i> Buy Tickets
-                </button>
-            
-            }
-            {   
-                addedToCart ?
-                <Link to="/cart" className="btn btn-warning btn-lg mt-2">
-                    <i className="fas fa-shopping-cart"></i> Go to Cart
-                </Link> : null
-            }
+                    <p>${ ticketTotal }</p>
+
+                    <div style={{ textAlign: 'center' }} >
+                       <p>Children 12 & under</p>
+                    </div>
+                    <div id="quantity-selector" className="d-flex justify-content-center align-items-center m-2">
+                        <button tickettype="child" className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease child quantity">-</button>
+                        <span className="mx-3">{ quantity.child }</span>
+                        <button
+                            disabled={remainingSeatsForSelection !== null && selectedTickets >= remainingSeatsForSelection}
+                            tickettype="child"
+                            className="btn btn-secondary"
+                            onClick={ handleIncrement }
+                            aria-label="Increase child quantity"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                    <div style={{ textAlign: 'center' }} >
+                       <p>Adults</p>
+                    </div>
+                    <div id="quantity-selector" className="d-flex justify-content-center align-items-center m-2">
+                        <button tickettype="adult" className="btn btn-secondary" onClick={ handleDecrement } aria-label="Decrease adult quantity">-</button>
+                        <span className="mx-3">{ quantity.adult }</span>
+                        <button
+                            disabled={remainingSeatsForSelection !== null && selectedTickets >= remainingSeatsForSelection}
+                            tickettype="adult"
+                            className="btn btn-secondary"
+                            onClick={ handleIncrement }
+                            aria-label="Increase adult quantity"
+                        >
+                            +
+                        </button>
+
+                    </div>
+
+                    <button
+                        className="btn btn-success btn-lg"
+                        disabled={quantity.adult <= 0}
+                        onClick={handleAddCartItem}
+                    >
+                        <i className="fa fa-ticket-alt"></i> Buy Tickets
+                    </button>
+
+                    {quantity.adult <= 0 ? (
+                        <p className="event_ticket_hint">Choose at least one adult ticket.</p>
+                    ) : null}
+
+                    {addedToCart ? (
+                        <Link to="/cart" className="btn btn-warning btn-lg mt-2">
+                            <i className="fas fa-shopping-cart"></i> Go to Cart
+                        </Link>
+                    ) : null}
+                </div>
+            ) : null}
+
+            {availability.canJoinWaitlist ? (
+                <form className="event_waitlist_form" onSubmit={submitWaitlist}>
+                    <h4>Join the waitlist</h4>
+                    <label>
+                        Name
+                        <input
+                            disabled={isJoiningWaitlist}
+                            onChange={(event) => updateWaitlistForm('name', event.target.value)}
+                            required
+                            value={waitlistForm.name}
+                        />
+                    </label>
+                    <label>
+                        Email
+                        <input
+                            disabled={isJoiningWaitlist}
+                            onChange={(event) => updateWaitlistForm('email', event.target.value)}
+                            required
+                            type="email"
+                            value={waitlistForm.email}
+                        />
+                    </label>
+                    <label>
+                        Phone
+                        <input
+                            disabled={isJoiningWaitlist}
+                            onChange={(event) => updateWaitlistForm('phone', event.target.value)}
+                            value={waitlistForm.phone}
+                        />
+                    </label>
+                    <label>
+                        Note
+                        <textarea
+                            disabled={isJoiningWaitlist}
+                            onChange={(event) => updateWaitlistForm('message', event.target.value)}
+                            rows={3}
+                            value={waitlistForm.message}
+                        />
+                    </label>
+                    <button className="btn btn-success btn-lg" disabled={isJoiningWaitlist} type="submit">
+                        {isJoiningWaitlist ? 'Joining...' : 'Join Waitlist'}
+                    </button>
+                    {waitlistStatus ? <p className="event_waitlist_status">{waitlistStatus}</p> : null}
+                </form>
+            ) : null}
             
         </div>
     )

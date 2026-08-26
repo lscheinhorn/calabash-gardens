@@ -3,6 +3,7 @@ import Navbar from '../Navbar/Navbar'
 import { content } from '../../data/siteData'
 import { Link } from 'react-router-dom'
 import largeLogo from '../../resources/images/large_logo_no_purple_square.png';
+import SiteContentBlocks from '../SiteContentBlocks/SiteContentBlocks'
 
 const renderStaticContent = (fieldPath, label, children) => children;
 
@@ -29,6 +30,13 @@ export default function Header ({
                         <p className='header_color'>
                             { renderEditableContent('header.subtitle', 'Header subtitle', headerContent.subtitle) }
                         </p>
+                        <SiteContentBlocks
+                            blocks={headerContent.contentBlocks}
+                            fieldPathPrefix="header.contentBlocks"
+                            labelPrefix="Header"
+                            renderEditableContent={renderEditableContent}
+                            variant="header"
+                        />
                     </div>
                     
                 </div>

@@ -1,0 +1,28 @@
+.site_content_blocks {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0;
+}
+
+.site_content_block_title,
+.site_content_block_subtitle,
+.site_content_block_paragraph {
+  margin-bottom: 0;
+}
+
+.site_content_block_title {
+  font-size: 1.9rem;
+}
+
+.site_content_block_subtitle {
+  font-size: 1.35rem;
+}
+
+.site_content_block_paragraph {
+  white-space: pre-line;
+}
+
+.site_content_blocks_header,
+.site_content_blocks_footer {
+  margin: 0;
+}

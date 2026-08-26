@@ -8,11 +8,14 @@ import {
   faEye,
   faMobileAlt,
   faPencilAlt,
+  faQuestionCircle,
   faTabletAlt,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
 
 import ContentAdmin from "./ContentAdmin";
+import EventAdmin from "./EventAdmin";
+import ProductAdmin from "./ProductAdmin";
 
 const previewViewports = {
   desktop: {
@@ -64,13 +67,19 @@ const previewTabForPath = (path) => {
   return "home";
 };
 
-export default function AdminPreview({ db, defaultExpanded = false, userId = "" }) {
+export default function AdminPreview({
+  db,
+  defaultExpanded = false,
+  storage = null,
+  userId = "",
+}) {
   const iframeRef = useRef(null);
   const fullPreviewIframeRef = useRef(null);
   const fullPreviewCloseButtonRef = useRef(null);
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const [isContentEditMode, setIsContentEditMode] = useState(false);
   const [isFullPreviewOpen, setIsFullPreviewOpen] = useState(false);
+  const [isDrawerHelpOpen, setIsDrawerHelpOpen] = useState(false);
   const [isViewportMenuOpen, setIsViewportMenuOpen] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [previewPath, setPreviewPath] = useState(previewPathForTab("home"));
@@ -78,21 +87,34 @@ export default function AdminPreview({ db, defaultExpanded = false, userId = "" 
   const [previewViewport, setPreviewViewport] = useState("desktop");
   const [previewRefreshKey, setPreviewRefreshKey] = useState(0);
 
-  const refreshPreview = useCallback(() => {
+  const postToPreviewFrames = useCallback((message) => {
     if (typeof window !== "undefined") {
       [iframeRef, fullPreviewIframeRef].forEach((previewRef) => {
         if (!previewRef.current?.contentWindow) {
           return;
         }
 
-        previewRef.current.contentWindow.postMessage({
-          type: "calabash-admin-refresh-preview-data",
-        }, window.location.origin);
+        previewRef.current.contentWindow.postMessage(message, window.location.origin);
       });
     }
-
-    setPreviewRefreshKey((currentValue) => currentValue + 1);
   }, []);
+
+  const refreshPreview = useCallback(() => {
+    postToPreviewFrames({
+      type: "calabash-admin-refresh-preview-data",
+    });
+    setPreviewRefreshKey((currentValue) => currentValue + 1);
+  }, [postToPreviewFrames]);
+
+  const sendActiveEditTarget = useCallback(() => {
+    postToPreviewFrames({
+      contentId: editTarget?.type === "content" ? editTarget.id : "",
+      fieldPath: editTarget?.type === "content" ? editTarget.fieldPath : "",
+      targetId: editTarget?.id || "",
+      targetType: editTarget?.type || "",
+      type: "calabash-admin-preview-active-edit-target",
+    });
+  }, [editTarget, postToPreviewFrames]);
 
   useEffect(() => {
     const handlePreviewMessage = (event) => {
@@ -108,6 +130,38 @@ export default function AdminPreview({ db, defaultExpanded = false, userId = "" 
           setPreviewTab(previewTabForPath(nextPath));
         }
 
+        return;
+      }
+
+      if (event.data?.type === "calabash-admin-edit-product") {
+        const productId = String(event.data.id || "");
+
+        if (!productId) {
+          return;
+        }
+
+        setEditTarget({
+          id: productId,
+          label: String(event.data.label || productId),
+          requestId: Date.now(),
+          type: "product",
+        });
+        return;
+      }
+
+      if (event.data?.type === "calabash-admin-edit-event") {
+        const eventId = String(event.data.id || "");
+
+        if (!eventId) {
+          return;
+        }
+
+        setEditTarget({
+          id: eventId,
+          label: String(event.data.label || eventId),
+          requestId: Date.now(),
+          type: "event",
+        });
         return;
       }
 
@@ -144,6 +198,14 @@ export default function AdminPreview({ db, defaultExpanded = false, userId = "" 
   }, [isContentEditMode]);
 
   useEffect(() => {
+    setIsDrawerHelpOpen(false);
+  }, [editTarget?.requestId]);
+
+  useEffect(() => {
+    sendActiveEditTarget();
+  }, [sendActiveEditTarget]);
+
+  useEffect(() => {
     if (!isFullPreviewOpen) {
       return undefined;
     }
@@ -175,18 +237,35 @@ export default function AdminPreview({ db, defaultExpanded = false, userId = "" 
         <div className="admin_form_header">
           <div>
             <h4>{title}</h4>
-            <p className="admin_status">
-              Save Draft updates the preview only. Publish still requires review and confirmation.
-            </p>
           </div>
-          <button
-            aria-label="Close preview editor"
-            className="admin_secondary_button"
-            onClick={() => setEditTarget(null)}
-            type="button"
-          >
-            Close
-          </button>
+          <div className="admin_button_row">
+            <div className="admin_drawer_help">
+              <button
+                aria-expanded={isDrawerHelpOpen}
+                aria-label="Show preview editing notes"
+                className="admin_icon_button admin_icon_button_small"
+                onClick={() => setIsDrawerHelpOpen((currentValue) => !currentValue)}
+                title="Preview editing notes"
+                type="button"
+              >
+                <FontAwesomeIcon aria-hidden="true" icon={faQuestionCircle} />
+              </button>
+              {isDrawerHelpOpen ? (
+                <p className="admin_drawer_help_popover">
+                  Save Draft updates the preview only. Publish makes the saved draft live.
+                </p>
+              ) : null}
+            </div>
+            <button
+              aria-label="Close preview editor"
+              className="admin_icon_button admin_icon_button_small"
+              onClick={() => setEditTarget(null)}
+              title="Close preview editor"
+              type="button"
+            >
+              <FontAwesomeIcon aria-hidden="true" icon={faTimes} />
+            </button>
+          </div>
         </div>
 
         {editTarget.type === "content" ? (
@@ -199,6 +278,32 @@ export default function AdminPreview({ db, defaultExpanded = false, userId = "" 
               requestId: editTarget.requestId,
             }}
             onDraftChange={refreshPreview}
+            userId={userId}
+            variant="drawer"
+          />
+        ) : null}
+        {editTarget.type === "product" ? (
+          <ProductAdmin
+            db={db}
+            focusRequest={{
+              productId: editTarget.id,
+              requestId: editTarget.requestId,
+            }}
+            onDraftChange={refreshPreview}
+            storage={storage}
+            userId={userId}
+            variant="drawer"
+          />
+        ) : null}
+        {editTarget.type === "event" ? (
+          <EventAdmin
+            db={db}
+            focusRequest={{
+              eventId: editTarget.id,
+              requestId: editTarget.requestId,
+            }}
+            onDraftChange={refreshPreview}
+            storage={storage}
             userId={userId}
             variant="drawer"
           />
@@ -233,6 +338,7 @@ export default function AdminPreview({ db, defaultExpanded = false, userId = "" 
       <iframe
         className={className}
         key={previewSrc}
+        onLoad={sendActiveEditTarget}
         ref={previewRef}
         src={previewSrc}
         title={title}

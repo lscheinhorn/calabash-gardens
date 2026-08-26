@@ -1,5 +1,6 @@
 import './Banner.css'
 import { content } from '../../data/siteData'
+import SiteContentBlocks from '../SiteContentBlocks/SiteContentBlocks'
 
 const renderStaticContent = (fieldPath, label, children) => children;
 
@@ -28,6 +29,12 @@ export default function Banner ({
             </h4>
             <div className='banner_p'>
                 <p>{ renderEditableContent('paragraph', 'Banner paragraph', bannerContent.paragraph) }</p>
+                <SiteContentBlocks
+                    blocks={bannerContent.contentBlocks}
+                    labelPrefix="Banner"
+                    renderEditableContent={renderEditableContent}
+                    variant="banner"
+                />
             </div>
             <div className='learn_more'>
                 <button>{ bannerContent.button }</button>

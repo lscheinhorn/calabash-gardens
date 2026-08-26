@@ -10,6 +10,89 @@
     box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Soft shadow for depth */
 }
 
+.event_description_block {
+    margin: 0 0 1rem;
+}
+
+.event_description_subtitle {
+    color: #735284;
+    font-size: 1.25rem;
+    margin: 1rem 0 0.35rem;
+    text-align: center;
+}
+
+.event_availability {
+    border: 1px solid #d8d1dd;
+    border-radius: 6px;
+    color: #533a60;
+    font-weight: 700;
+    margin: 1rem auto;
+    max-width: 420px;
+    padding: 0.75rem 1rem;
+    text-align: center;
+}
+
+.event_availability p {
+    margin: 0;
+}
+
+.event_availability_available {
+    background: #fff8d8;
+    border-color: #e4b73a;
+}
+
+.event_availability_waitlist,
+.event_availability_sold-out,
+.event_availability_past,
+.event_availability_closed {
+    background: #f8eff2;
+    border-color: #c89aa8;
+}
+
+.event_ticket_panel,
+.event_waitlist_form {
+    display: grid;
+    gap: 0.75rem;
+    justify-items: center;
+    margin: 1rem auto;
+    max-width: 460px;
+}
+
+.event_ticket_hint,
+.event_waitlist_status {
+    color: #735284;
+    font-weight: 700;
+    margin: 0;
+    text-align: center;
+}
+
+.event_waitlist_form {
+    border: 1px solid #d8d1dd;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.event_waitlist_form h4 {
+    color: #735284;
+    margin: 0;
+}
+
+.event_waitlist_form label {
+    display: grid;
+    gap: 0.35rem;
+    text-align: left;
+    width: 100%;
+}
+
+.event_waitlist_form input,
+.event_waitlist_form textarea {
+    border: 1px solid #b8a9c1;
+    border-radius: 4px;
+    font: inherit;
+    padding: 0.55rem;
+    width: 100%;
+}
+
 @media (max-width: 768px) {
     .container {
         grid-template-columns: 1fr;

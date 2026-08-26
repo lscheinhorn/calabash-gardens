@@ -136,6 +136,7 @@ Required fields:
 - `title`: string.
 - `category`: string. Must match a document ID in `productCategories`.
 - `priceOptions`: array of price option objects.
+- `variants`: array of sellable product option/inventory metadata objects.
 - `shipping`: string decimal value, matching current cart behavior.
 - `published`: boolean.
 - `isActive`: boolean.
@@ -159,6 +160,34 @@ Price option shape:
 }
 ```
 
+Variant shape:
+
+```json
+{
+  "id": "4-oz",
+  "label": "4 oz",
+  "price": "15.00",
+  "sku": "CG-SAFFRON-MAPLE-SYRUP-4-OZ",
+  "stockOnHand": 12,
+  "lowStockThreshold": 3,
+  "inventoryTracked": true,
+  "active": true,
+  "priceOptionIndex": 0,
+  "sortOrder": 0
+}
+```
+
+Variant notes:
+
+- Product IDs remain stable document IDs suggested from the product title.
+- Variant IDs identify the exact sellable option inside a product, such as a jar size.
+- SKUs are generated from the product ID and variant ID unless an admin enters a custom SKU.
+- `priceOptions` remains the storefront compatibility shape. `variants` carries the stable ID, SKU, and inventory metadata for the same option index.
+- `stockOnHand` and `lowStockThreshold` are whole numbers. Blank stock fields normalize to `0`; blank low-stock thresholds store as `null`.
+- `inventoryTracked: false` allows a product option to stay sellable without a stock count.
+- `active: false` preserves an option without offering it as an active inventory variant.
+- This phase stores current admin inventory metadata on product variants. Verified checkout decrementing and an inventory movement ledger still require the server-side order phase.
+
 Current compatibility notes:
 
 - Some current products omit category in static data. Firestore product docs created through admin must use an approved `productCategories` ID.
@@ -175,6 +204,7 @@ Current compatibility notes:
 - `src/generated/public-products-cache.json` is a generated deploy artifact for backend-read fallback, not source-of-truth product content. It is refreshed manually from Firestore with `npm run generate:public-products-cache`.
 - If Firestore loading fails while the Firestore source flag is enabled, public product hooks use the generated product cache when it has products. If the generated cache is empty or missing products, they fall back to the current static product data.
 - Public product hooks normalize any product without photos to the existing default Calabash logo image before Product and ProductPage render it.
+- Public Firestore product normalization carries hidden `variantId` and `sku` fields on price options for future order/inventory capture, while preserving current visible option labels and prices.
 
 Editor controls:
 
@@ -182,7 +212,10 @@ Editor controls:
 - Product ID input suggested from title for new products and disabled for saved products.
 - Category dropdown populated from admin-managed `productCategories`.
 - Decimal text input for prices until checkout math is refactored safely.
-- Toggles for published, active, highlighted, and in-stock flags.
+- Variant ID, SKU, stock on hand, low-stock threshold, track-inventory, and sell-option controls for each product price option.
+- `Visible on site` toggle. The editor keeps stored `published` and `isActive` in sync for compatibility.
+- `Available now` remains stored as `inStock` for compatibility; variant stock is now the inventory-specific detail.
+- Highlighted toggle.
 - Filterable Firestore product cards with inline edit mode for existing products.
 - Image uploader writes approved admin uploads to Firebase Storage and stores image references on Firestore product drafts.
 - The first product editor writes Firestore product drafts only; it does not update public static product data.
@@ -278,10 +311,13 @@ Required fields:
 
 Optional fields:
 
+- `descriptionBlocks`: array of `{ subtitle, body }` sections. Admin event editing writes this structured shape while still writing `info` for current public compatibility.
 - `link`: menu document/image reference.
 - `slug`: string.
 - `capacity`: number.
-- `eventType`: string, for example `dining` or `music`.
+- `manualSeatsReserved`: number for seats Jette holds outside the website until order tracking is connected.
+- `ticketsSold`: computed number from order/ticket records. This is read by the site but not edited by Jette in the Event Editor.
+- `waitlistEnabled`: boolean.
 - `dietaryOptions`: object describing vegetarian/gluten-free availability and fees.
 - `childTicket`: object describing child-ticket pricing.
 
@@ -290,6 +326,13 @@ Current compatibility notes:
 - Current event `date` values are JavaScript `Date` objects.
 - Current `eventDates` are display strings and are also used in cart key/title generation.
 - Current event `priceOptions` are string arrays such as `["60.00"]`, unlike product option objects.
+- Events are ordered chronologically by `date`; there is no separate event-level sort order in the editor.
+- The earlier admin-only `eventType` field was removed from the editor and Firestore rules because it did not come from the static event model or public behavior.
+- Event shipping is retained as an internal `0.00` compatibility value for the shared cart item shape, but it is not exposed in the event editor.
+- The editor shows one customer-facing `Visible on site` toggle and keeps stored `published` and `isActive` in sync.
+- Event ticket availability is computed from event date and capacity. Future backend order tracking should update `ticketsSold`; the current manual hold field only reserves seats Jette knows are unavailable outside the website.
+- The visible availability label should read like `2 of 30 available` when a future event has capacity remaining.
+- When a future visible event reaches capacity, public purchase controls should hide and the waitlist should show if `waitlistEnabled` is true.
 - Past events should remain stored for history, but should not be purchasable.
 - Static event photos and menu links are intentionally not copied by the current event seed. They should move only through an approved media/document migration that preserves stable Storage paths and `mediaAssets` metadata.
 
@@ -297,10 +340,43 @@ Editor controls:
 
 - Date picker for canonical date.
 - Repeatable text inputs for event display dates.
-- Repeatable textarea inputs for description paragraphs.
+- Repeatable description sections with optional subtitles and paragraph fields; structured paragraph bodies render intentional line breaks in preview/public Firestore mode.
 - Decimal text inputs for deposits/ticket prices.
-- Toggles for published, active, and in-stock flags.
-- Menu/image selectors only after file storage workflow is approved.
+- `Visible on site` toggle.
+- Capacity, manual holds, and waitlist controls. `ticketsSold` remains computed/read-only and must not become an editor field without an approved order-tracking plan.
+- Event photo upload, Photo Library attach, drag-handle reorder, selected-photo alt-text editing, and thumbnail `x` detach tools.
+- Menu/document upload remains a separate event-media phase.
+
+## Event Waitlist
+
+Collection: `eventWaitlist`
+
+Suggested document ID:
+
+```text
+eventWaitlist/{autoId}
+```
+
+Required fields:
+
+- `createdAt`: timestamp.
+- `email`: string.
+- `eventDate`: string.
+- `eventId`: string.
+- `eventTitle`: string.
+- `name`: string.
+- `status`: string, currently `new`.
+
+Optional fields:
+
+- `message`: string.
+- `phone`: string.
+
+Current compatibility notes:
+
+- Public users may create waitlist entries only through the Firestore rules shape above.
+- Admin users can list waitlist entries from the Event Editor.
+- Waitlist entries do not decrement event capacity and do not represent sold tickets.
 
 ## Site Content
 
@@ -325,6 +401,20 @@ Current compatibility notes:
 - `src/resources/content.js` is nested by page and section.
 - `experienceBlurb` currently lives in `src/resources/events.js`, not `content.js`.
 - The first backend version should preserve the existing nested shape as closely as possible.
+- Flexible admin-added content blocks are stored as `contentBlocks` maps. The `home` document stores them under `sections.header.contentBlocks`; `banner`, `offerings`, `about`, `team`, and `experienceBlurb` store them under `sections.contentBlocks`.
+- Each block has `{ type, text, sortOrder }`, where `type` is `title`, `subtitle`, or `paragraph`.
+
+Content block shape:
+
+```json
+{
+  "block_1710000000000_abcd": {
+    "type": "paragraph",
+    "text": "Additional editable copy.",
+    "sortOrder": 0
+  }
+}
+```
 - Firestore rules allow `sections` for site content documents.
 - The first content mirror audit is read-only and checks `home`, `banner`, `offerings`, `about`, and `team` against Firestore `siteContent`.
 - The content mirror audit now also checks `experienceBlurb`, which is sourced from `src/resources/events.js` during migration.
@@ -401,14 +491,28 @@ Current compatibility notes:
 - Future image references should be storage paths or public URLs.
 - Existing bundled images should remain untouched until a migration/upload phase is approved.
 - Current Storage rules allow image uploads under `product-images/`, `event-images/`, `site-content-images/`, `other-images/`, and `admin-private/`. Non-image event documents need a new reviewed path/rule before they can be uploaded.
+- Event photo uploads create `mediaAssets` records with `bin: events`, `linkedType: event`, and `linkedId` set to the event ID so uploaded event photos remain visible in the reusable Photo Library.
 
 ## Orders
 
 Collection: `orders`
 
-Order persistence is not part of the first admin editor.
+Order persistence is planned as a shared sales ledger for PayPal website sales, Square point-of-sale/imported sales, manual sales, refunds, and inventory adjustments.
 
-Rules currently deny client order writes. A future order phase should decide whether PayPal order records are written by a server/cloud function instead of the browser.
+Rules currently deny client order writes. Payment/order facts should be written by a server/cloud function or another approved backend after PayPal/Square verification, not directly by the browser.
+
+Admin Orders foundation:
+
+- The admin dashboard has a top-level `Orders` section.
+- The section is read-only in this phase.
+- It reads existing `orders` documents for approved admins only.
+- It filters client-side by source, payment status, fulfillment status, and search text.
+- It tolerates missing/partial order fields while the backend shape is still being built.
+- It shows an empty state until server-side PayPal capture, Square import, or manual order entry writes records.
+- It does not create, update, delete, fulfill, import, export, or reconcile orders yet.
+- It does not change checkout, cart, PayPal buttons, product inventory counts, event capacity, or public storefront reads.
+
+See `docs/order-ledger-and-reconciliation-plan.md` for the target order, inventory movement, PayPal capture, Square reconciliation, and broader admin Orders UI plan.
 
 ## Next Implementation Gate
 

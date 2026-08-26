@@ -8,16 +8,32 @@ export const publicProductsSource = process.env.REACT_APP_PUBLIC_PRODUCTS_SOURCE
   ? "firestore"
   : "static";
 
-const normalizePriceOptions = (priceOptions) => {
+const normalizePriceOptions = (priceOptions, variants = []) => {
   if (!Array.isArray(priceOptions) || priceOptions.length === 0) {
     return [{ option: "", price: "" }];
   }
 
-  return priceOptions.map((priceOption) => ({
-    option: String(priceOption?.option || ""),
-    price: String(priceOption?.price || ""),
-  }));
+  const variantsByIndex = Array.isArray(variants)
+    ? new Map(variants.map((variant) => [variant.priceOptionIndex, variant]))
+    : new Map();
+
+  return priceOptions.map((priceOption, index) => {
+    const variant = variantsByIndex.get(index) || {};
+
+    return {
+      option: String(priceOption?.option || ""),
+      price: String(priceOption?.price || ""),
+      variantId: String(variant.id || priceOption?.variantId || ""),
+      sku: String(variant.sku || priceOption?.sku || ""),
+    };
+  });
 };
+
+const comparablePriceOptions = (priceOptions) => normalizePriceOptions(priceOptions)
+  .map((priceOption) => ({
+    option: priceOption.option,
+    price: priceOption.price,
+  }));
 
 const normalizePhotoRefs = (photos) => {
   if (!Array.isArray(photos)) {
@@ -85,7 +101,7 @@ export const normalizeFirestoreProductForPublic = (firestoreProduct, options = {
     isHighlighted: firestoreProduct.isHighlighted === true,
     key: fallbackProduct?.key || createKey(title),
     photos,
-    priceOptions: normalizePriceOptions(firestoreProduct.priceOptions || fallbackProduct?.priceOptions),
+    priceOptions: normalizePriceOptions(firestoreProduct.priceOptions || fallbackProduct?.priceOptions, firestoreProduct.variants),
     shipping: String(firestoreProduct.shipping || fallbackProduct?.shipping || "0.00"),
     sortOrder: Number.isFinite(firestoreProduct.sortOrder) ? firestoreProduct.sortOrder : fallbackProduct?.sortOrder ?? 999,
     title,
@@ -168,7 +184,7 @@ const comparableProduct = (product) => ({
   isHighlighted: product.isHighlighted === true,
   key: product.key || createKey(product.title || ""),
   photoCount: Array.isArray(product.photos) ? product.photos.length : 0,
-  priceOptions: normalizePriceOptions(product.priceOptions),
+  priceOptions: comparablePriceOptions(product.priceOptions),
   shipping: String(product.shipping || ""),
   title: product.title || "",
 });

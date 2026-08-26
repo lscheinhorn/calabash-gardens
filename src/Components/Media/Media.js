@@ -11,7 +11,7 @@ export default function Media () {
                 
                     src="https://www.youtube.com/embed/6kM92Zkr2lk?si=TsQip8wOTTx7JA_s&amp;start=323&end=532&rel=0" 
                     title="YouTube video player" 
-                    frameborder="0" 
+                    frameBorder="0"
                     allow="fullscreen; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
                     >
                 </iframe>

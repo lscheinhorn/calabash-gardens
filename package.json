@@ -36,6 +36,7 @@
     "import:media-migration": "node scripts/import-media-migration.js",
     "audit:firebase-ownership": "node scripts/firebase-ownership-audit.js",
     "generate:public-products-cache": "node scripts/generate-public-products-cache.js",
+    "functions:check": "npm --prefix functions run check",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },

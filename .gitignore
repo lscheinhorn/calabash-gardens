@@ -21,6 +21,12 @@
 .env.test.local
 .env.production.local
 
+# Firebase Functions local credentials
+/functions/.env
+/functions/.env.*
+/functions/.secret.local
+!/functions/.env.example
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
