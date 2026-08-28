@@ -65,6 +65,8 @@ describe("adminDraftPublishModel", () => {
       .toBe(contentFingerprintForTarget("products", baseline));
     expect(contentFingerprintForTarget("products", contentChange))
       .not.toBe(contentFingerprintForTarget("products", baseline));
+    expect(contentFingerprintForTarget("products", product({ inStock: false })))
+      .toBe(contentFingerprintForTarget("products", baseline));
   });
 
   test("product publishing preserves newer stock when the draft did not edit it", () => {
@@ -84,6 +86,46 @@ describe("adminDraftPublishModel", () => {
       lowStockThreshold: 2,
       stockOnHand: 7,
     });
+    expect(result.payload.inStock).toBe(true);
+  });
+
+  test("content-only legacy publishing does not synthesize inventory variants", () => {
+    const baseline = product();
+    delete baseline.variants;
+    const draft = { ...baseline, title: "Updated legacy product" };
+    const result = mergeDraftWithLiveOperationalData({
+      baseOperational: operationalSnapshotForTarget("products", baseline),
+      draftData: draft,
+      liveData: baseline,
+      targetCollection: "products",
+      targetExists: true,
+    });
+
+    expect(result.payload.title).toBe("Updated legacy product");
+    expect(result.payload.inStock).toBe(true);
+    expect(result.payload).not.toHaveProperty("variants");
+  });
+
+  test("product publishing derives availability from current operational variants", () => {
+    const baseline = product({ variants: [variant({ stockOnHand: 1 })] });
+    const draft = product({
+      title: "Updated product",
+      variants: [variant({ stockOnHand: 1 })],
+    });
+    const live = product({
+      inStock: true,
+      variants: [variant({ stockOnHand: 0 })],
+    });
+    const result = mergeDraftWithLiveOperationalData({
+      baseOperational: operationalSnapshotForTarget("products", baseline),
+      draftData: draft,
+      liveData: live,
+      targetCollection: "products",
+      targetExists: true,
+    });
+
+    expect(result.payload.variants[0].stockOnHand).toBe(0);
+    expect(result.payload.inStock).toBe(false);
   });
 
   test("product publishing carries explicit optional field deletions", () => {
@@ -128,6 +170,22 @@ describe("adminDraftPublishModel", () => {
       targetCollection: "products",
       targetExists: true,
     })).toThrow(DraftPublishConflictError);
+  });
+
+  test("matching concurrent product sellable-status edits preserve newer stock", () => {
+    const baseline = product();
+    const draft = product({ variants: [variant({ active: false })] });
+    const live = product({ variants: [variant({ active: false, stockOnHand: 7 })] });
+    const result = mergeDraftWithLiveOperationalData({
+      baseOperational: operationalSnapshotForTarget("products", baseline),
+      draftData: draft,
+      liveData: live,
+      targetCollection: "products",
+      targetExists: true,
+    });
+
+    expect(result.payload.variants[0]).toMatchObject({ active: false, stockOnHand: 7 });
+    expect(result.payload.inStock).toBe(false);
   });
 
   test("removing a product option with newer inventory is rejected", () => {

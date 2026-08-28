@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Phase 39 is a read-only Firebase parity checkpoint on branch `codex/firebase-parity-readiness`, based on committed Phase 38 draft publishing at `fadb06b`. The new strict audit reads raw Firestore/Storage data without adapter fallbacks or Firebase mutation APIs and compares products, categories, events, site content, media, event menus, drafts, variants, and the generated product fallback with the current static source shape.
-The 2026-08-27 production read-only result is **NOT READY**: 174 evidence rows across 16 blocker types. Product copy, price labels, shipping, relative order, visibility, product photo attachment, all ten event records, all six site-content records, and the reviewed identity of all 20 existing Storage objects match. Remaining blockers are 72 incomplete product variant/SKU records, 37 missing media documents/objects, 18 mismatched event photo/menu fields covering 20 expected attachments, event document access and URL resolution, category cleanup, one legacy active draft, generated fallback drift/workflow, missing event/content fallbacks, denied anonymous public queries, and bundled site/default media runtime. Protected static content files remain unchanged; no Firebase data, rules, public reads, checkout flags, merge, push, or deployment changed.
+Phase 40 is inventory variant readiness on branch `codex/inventory-variant-readiness`, based on committed Phase 39 parity auditing at `e7272d8` and transactional draft publishing at `fadb06b`. InventoryAdmin can now complete missing legacy variant rows with deterministic IDs/SKUs, save only operational inventory fields in one Firestore transaction, preserve unrelated unsaved rows after a conflict, and derive product `inStock` from active/tracked variant availability. Product content/photo drafts preserve existing inventory when it was not edited. Product publish and InventoryAdmin claim normalized SKUs transactionally, while local rules and server checkout require each variant price to match its displayed price option. The verified contract supports the current catalog maximum of three options.
+The 2026-08-28 Phase 40 code, rules, model, emulator, checkout, browser, desktop, and mobile checks pass without production mutation. The 2026-08-27 strict production parity result remains **NOT READY** with 174 evidence rows across 16 blocker types. The Phase 40 tools make the 72 incomplete product variant/SKU records safely editable but do not migrate them. Remaining blockers still include missing media, event photo/menu attachments and customer-usable links, category cleanup, a legacy active draft, fallback/runtime work, anonymous public reads, and visual release gates. Protected static content files remain unchanged; no Firebase data, rules, public reads, checkout flags, merge, push, or deployment changed.
 
 ## Approved Tech Stack
 
@@ -20,7 +20,7 @@ The 2026-08-27 production read-only result is **NOT READY**: 174 evidence rows a
 
 ## Current Phase
 
-Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
+Phase 40: Transactional inventory variant readiness and derived product availability.
 
 ## Done Work
 
@@ -163,10 +163,16 @@ Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 - Added `npm run test:draft-publish-emulators` as the named, demo-project-only entry point for the Phase 38 Auth/Firestore matrix.
 - Added `npm run audit:firebase-parity`, `npm run check:firebase-parity`, and deterministic model tests for a raw Firestore/Storage parity gate that cannot hide missing data behind static adapter fallbacks.
 - Generated `docs/firebase-parity-audit.md` and `.json` from a production read-only run against `calabash-54fb5`; the report records project ID, a double-read snapshot fingerprint, and structural findings without credentials or Storage download-token URLs.
+- Added deterministic completion and strict validation for legacy product variant rows, including exact price-option mapping, stable IDs, nonblank/generated SKUs, case-insensitive SKU checks, and a three-option boundary matching the current catalog and local Firestore rule evaluator limit.
+- Made InventoryAdmin bulk saves transactional through a dedicated helper, added option-level Sell controls, derived product `inStock`, blocked mid-save input changes, preserved unrelated unsaved rows after a conflict, and kept product copy/category/photos/prices/shipping/visibility outside the inventory write set.
+- Made transactional draft publishing preserve live option active/tracking/stock values and derive product availability after the operational merge, so stale content drafts cannot reintroduce stale `inStock`.
+- Made guarded checkout reservation/decrement and release recompute product availability, including last-unit sale/reservation and release restoration cases.
+- Added a seven-scenario inventory transaction/rules emulator suite and named `npm run test:inventory-admin-emulators` command; expanded model and draft tests and reran the full Phase 35 checkout matrix.
+- Manually verified emulator-backed Inventory success, movement creation, concurrent ticket preservation, atomic stale-save rejection, unrelated-draft preservation, discard, ProductAdmin option limit, desktop/mobile layout, sticky narrow-screen actions, and a clean browser console.
 
 ## In Progress Work
 
-- Resolve the 16 parity blocker types in separately reviewed phases without changing public reads: product variant migration, event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime.
+- Resolve the 16 parity blocker types in separately reviewed phases without changing public reads. Phase 40 makes product variant initialization safe in the supported portal, but the exact production IDs, SKUs, active/tracking values, and starting stock still require a reviewed migration preview before any write. Event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
 - Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
 - Review the zero-blocker media migration dry-run report before any real upload/import.
@@ -175,7 +181,7 @@ Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 - Verify attaching an existing `other` bin photo to a product saves a draft product photo ref without mutating live `products` or `mediaAssets`.
 - Verify product photo alt-text edits, reordering, and detach behavior save to `productDrafts` and preview correctly.
 - Verify Product Mirror Audit reports missing, extra, different, and photo-review product records without writing data.
-- Verify ProductAdmin variant/SKU/inventory controls save to product drafts, show in Publish Review, publish to live Firestore products, and keep `priceOptions` storefront-compatible.
+- Emulator verification now covers ProductAdmin variant limits and transactional draft publish preservation. A controlled production save/publish test remains deferred until matching rules and a migration plan are explicitly approved.
 - Verify Content Mirror Audit reports missing, extra, and different site-content records without writing data.
 - Verify Seed Missing Content creates only missing `siteContent` documents and skips existing documents.
 - Verify Site Content Editor saves drafts to `siteContentDrafts`, previews those drafts, publishes only through Publish Changes, and does not edit protected static content files.
@@ -251,6 +257,8 @@ Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 - Public checkout still uses the legacy client-side PayPal flow by default. The server-owned path is isolated behind two flags and has not been deployed or tested against real PayPal sandbox accounts.
 - Phase 37 Firestore order-update rules are verified locally but not deployed. The live admin remains read-only for orders until Luke separately approves a rules deployment.
 - Phase 38 draft-publish rules are verified locally but not deployed. Existing live rules do not understand the new baseline/revision metadata, so this branch must not be used for real draft saves or publishing until a separately approved rules deployment.
+- Phase 40 product-variant rules are verified locally but not deployed. The client, rules, and guarded Functions inventory invariant must be reviewed and released together; do not use this branch for production variant initialization before that approval.
+- The `productSkus` ownership collection is empty or incomplete in production until a separately approved variant migration or supported portal save claims each persisted SKU. Do not treat local uniqueness enforcement as production migration approval.
 - Active drafts created before Phase 38 do not have a trustworthy live baseline. They must be discarded, reopened from current live data, and saved again after the Phase 38 rules/client are approved together.
 - Approved admin credentials remain a trusted-operator boundary. Phase 38 prevents accidental races through the supported portal; Firebase Console/server-admin access bypasses client rules, and a deliberately custom admin client is not treated as an adversary.
 - Server checkout now binds capture to a token-protected trusted snapshot, reserves inventory before capture, persists recoverable uncertain states, and has a disabled verified webhook recovery path; the path still requires real PayPal sandbox delivery verification before public use.
@@ -259,7 +267,7 @@ Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 - The legacy browser checkout fallback must be removed or explicitly retired when Firebase orders become authoritative; a stale browser fallback must not silently accept payments outside the order ledger.
 - Luke approved adding the guarded Firebase Functions scaffold in this phase, but deploying Functions or enabling server checkout for the public site still requires separate approval.
 - Square POS/market sales should reconcile through the same future order/inventory movement ledger, either by manual entry/CSV first or Square API/webhooks later.
-- The admin and checkout models support product variants, but 72 current production product documents still lack a complete persisted `variants` array. The guarded server checkout rejects those products until a reviewed migration creates stable IDs, SKUs, and stock records.
+- The admin and checkout models support product variants, but 72 current production product documents still lack a complete persisted `variants` array. InventoryAdmin can now synthesize deterministic complete rows and persist them transactionally, but no production migration has run. Guarded server checkout rejects those products until Luke reviews the exact stable IDs, SKUs, sell/tracking settings, and starting stock and approves the write.
 - Admin product editor writes to Firestore, but public product pages still use static data.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - Real admin testing still needs Firebase project values and approved admin user records.
@@ -292,8 +300,10 @@ Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 - Static product seed maps preserved gift-set products with missing categories to `Gifts`.
 - Static product seed excludes inactive test products and must not create an `All` category.
 - Existing unapproved Firestore categories may need manual cleanup if they were already seeded before this guardrail.
-- InventoryAdmin now merges requested field changes into freshly read product/event documents in one transaction. Same-field stale edits abort the whole bulk save; concurrent sales or unrelated metadata changes are preserved.
-- Legacy `priceOptions` receive stable `priceOptionIndex` and `sortOrder` metadata on their first successful inventory update. Ambiguous duplicate or reordered variants fail safely instead of being updated by stale array position.
+- InventoryAdmin now merges requested field changes into freshly read product/event documents in one transaction. Same-field stale edits abort the whole bulk save; the conflicted row refreshes while unrelated unsaved drafts remain in the form. Concurrent sales or unrelated metadata changes are preserved.
+- Legacy `priceOptions` receive stable IDs, deterministic SKUs, `priceOptionIndex`, and `sortOrder` metadata on their first successful inventory update. Each product must have exactly one variant per price option, and the currently verified rules support at most three options. Ambiguous, malformed, duplicate-ID/index/SKU, or over-limit mappings fail safely.
+- Product content/photo edits preserve the exact current inventory shape unless option/inventory controls changed. Product publish and InventoryAdmin reserve each normalized SKU under `productSkus` transactionally; another owner rejects the entire write. Variant prices must equal displayed price-option values, which are authoritative for checkout.
+- Product `inStock` is derived after InventoryAdmin saves, draft publishing, checkout decrement/reservation, and reservation release. It is true only when an active option is untracked or has positive tracked stock; ProductAdmin no longer exposes an independent availability toggle.
 - CSV import/export should reuse the product seed validation contract instead of trusting spreadsheet validation.
 - Public product pages still do not read Firestore products; admin Firestore product labels reflect seeded/admin data only.
 - `src/generated/public-products-cache.json` is a generated fallback artifact only and may be stale unless refreshed from Firestore before deployment.
@@ -372,6 +382,11 @@ Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 - Jette-facing preview edits should use focused field cards. Full document diff/review and refresh-style tools are developer/admin fallback surfaces unless promoted deliberately.
 - Inventory bulk saves must use one Firestore transaction, read all affected records before writes, preserve concurrent fields Jette did not edit, and abort the entire save if an edited field changed since load.
 - Product inventory variants are identified by stable variant ID plus `priceOptionIndex`; array position alone is compatibility data and must not silently override an explicit or duplicate index.
+- Product `inStock` is derived operational data, never an independent admin choice. Inventory saves, draft publishing, checkout reservation/decrement, and reservation release must compute it from active variants and tracked/untracked availability.
+- Every persisted product variant list must map exactly one complete variant to every price option. The current Firestore rule contract and ProductAdmin support at most three options, matching the existing catalog; raising that limit requires a separately tested rule/data-shape change.
+- The displayed product `priceOptions` value is authoritative for checkout, and every mapped variant must store the exact same price. Product publish and InventoryAdmin must claim normalized SKUs through `productSkus` in the same transaction as the product write.
+- Product copy, visibility, and photo-only drafts must preserve existing inventory fields and must not synthesize or normalize legacy variants unless Jetta deliberately edits product option/inventory controls.
+- Legacy variant synthesis is migration tooling, not migration approval. Production initialization requires a reviewed per-product preview of IDs, SKUs, active/tracking state, and starting stock before any write.
 - Public waitlist rules may validate event eligibility, but anonymous abuse prevention and per-occurrence capacity require a later server-owned design.
 - Firebase emulator testing must use a `demo-*` project ID and fixed loopback Auth, Firestore, Functions, and Storage endpoints. The React emulator connector is development-only and requires the explicit `REACT_APP_FIREBASE_USE_EMULATORS=true` flag.
 - Server PayPal capture must remain bound to the persisted token-protected checkout snapshot. Inventory may be released only for a verified terminal non-payment state; pending, approved, timeout, and unknown states stay reserved for recovery.
@@ -594,6 +609,13 @@ Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 - 2026-08-27: Final verification passed 27 regular React/Jest tests with 11 emulator-only tests skipped, all 16 parity tests, Functions syntax, changed-script syntax, `git diff --check`, report consistency/reproduction, credential/token scans, and the production build with only the same four existing unused-code warnings.
 - 2026-08-27: The final no-write parity check exited `2` and preserved identical report hashes while the 174 production blockers remained.
 - Docs checked: updated README, architecture, admin data shapes, current status, risks, decisions, verification history, and generated parity reports. Protected business content/resource files were not edited.
+- 2026-08-28: The Phase 40 inventory transaction/rules emulator suite passed nine scenarios: complete legacy initialization with transactional SKU claims and no content changes, partial-list completion with custom identity preservation, threshold-only concurrent-stock preservation, atomic stale-stock rejection, competing-SKU rejection, malformed-value/anonymous denial, invalid mapping/SKU/price denial, the supported three-variant boundary, and approved-admin-only SKU-registry shape enforcement.
+- 2026-08-28: The transactional draft-publish emulator suite passed all fourteen scenarios, including content-only legacy preservation, simultaneous duplicate-SKU publish rejection, same-product variant claim transfer, and old-SKU release. The regular suite passed 42 tests with 23 emulator-gated tests skipped, and the production build passed with only the same four existing unused-code warnings.
+- 2026-08-28: The complete Phase 35 checkout matrix passed all sixteen scenario groups with eight invalid carts rejected before PayPal, including incomplete mappings and variant/displayed-price mismatches. Last-unit sale/reservation stored zero stock plus `inStock: false`, and terminal release restored stock plus `inStock: true` exactly once.
+- 2026-08-28: Browser-controlled demo-emulator verification changed QA Product A stock `10 -> 13` and QA Inventory Event capacity/holds `30/2 -> 32/4` while preserving a concurrent `ticketsSold` change `5 -> 7`; exactly two movement records were persisted.
+- 2026-08-28: Browser-controlled stale-save verification kept QA Product B's unsaved `21` in the form while refreshing conflicting QA Product A to `9`; the server retained Product B at `20`, wrote neither requested row, and created zero movements. Discard restored the remaining draft to `20`.
+- 2026-08-28: ProductAdmin exposed no independent Available now checkbox, disabled Add Price Option at three options, desktop product/event inventory controls did not overlap, the 390 x 844 layout stacked without table overflow and kept actions sticky, and browser diagnostics were empty. Emulator fixtures, temporary browser tab, port `3002`, and emulator ports were cleaned up; normal port `3001` remained available.
+- Docs checked: added the Phase 40 verification procedure and updated README, architecture, admin data shapes, editing workflow, checkout verification, current status, risks, and verification history. No protected business content or resource file was edited.
 
 ## Commits
 

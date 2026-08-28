@@ -1,18 +1,15 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   collection,
-  doc,
   getDocs,
-  runTransaction,
-  serverTimestamp,
 } from "firebase/firestore";
 
 import {
   InventoryConflictError,
-  mergeEventInventoryDraft,
-  mergeProductInventoryDrafts,
+  mergePreservedInventoryDrafts,
   variantsForProduct,
 } from "./inventoryAdminModel";
+import { saveInventoryRowsTransaction } from "./inventoryAdminTransactions";
 
 const defaultFilters = {
   search: "",
@@ -39,7 +36,7 @@ const statusLabel = (value) => String(value || "unknown")
 const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => {
   const product = docSnapshot.data();
   const productId = docSnapshot.id;
-  const variantRows = variantsForProduct(product);
+  const variantRows = variantsForProduct(product, productId);
 
   return variantRows.map((variant, index) => {
     const stockOnHand = numberOrNull(variant.stockOnHand) || 0;
@@ -74,6 +71,7 @@ const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => 
       stockOnHand,
       type: "product",
       value: inventoryTracked ? `${stockOnHand} on hand` : "Not tracked",
+      active: variantActive,
       variantId: text(variant.id),
     };
   });
@@ -114,6 +112,7 @@ const eventRows = (snapshot) => snapshot.docs.map((docSnapshot) => {
 });
 
 const draftForRow = (row) => (row.type === "product" ? {
+  active: row.active === true,
   inventoryTracked: row.inventoryTracked === true,
   lowStockThreshold: row.lowStockThreshold === null ? "" : String(row.lowStockThreshold),
   stockOnHand: String(row.stockOnHand),
@@ -133,7 +132,8 @@ const wholeNumber = (value) => /^\d+$/.test(String(value).trim());
 const productDraftChanged = (row, draft) => (
   draft
   && (
-    String(row.stockOnHand) !== String(draft.stockOnHand)
+    row.active !== draft.active
+    || String(row.stockOnHand) !== String(draft.stockOnHand)
     || String(row.lowStockThreshold === null ? "" : row.lowStockThreshold) !== String(draft.lowStockThreshold)
     || row.inventoryTracked !== draft.inventoryTracked
   )
@@ -162,7 +162,11 @@ export default function InventoryAdmin({ db }) {
   const [message, setMessage] = useState("");
   const [rows, setRows] = useState([]);
 
-  const loadInventory = useCallback(async () => {
+  const loadInventory = useCallback(async ({
+    preserveDraftRows = null,
+    preserveRowIds = [],
+    resetRowIds = [],
+  } = {}) => {
     setIsLoading(true);
     setMessage("");
 
@@ -182,11 +186,16 @@ export default function InventoryAdmin({ db }) {
       ));
 
       setRows(nextRows);
-      setDraftRows(draftRowsFor(nextRows));
+      setDraftRows(mergePreservedInventoryDrafts({
+        freshDraftRows: draftRowsFor(nextRows),
+        preserveDraftRows,
+        preserveRowIds,
+        resetRowIds,
+      }));
+      return true;
     } catch (error) {
-      setRows([]);
-      setDraftRows({});
       setMessage("Inventory could not be loaded.");
+      return false;
     } finally {
       setIsLoading(false);
     }
@@ -243,6 +252,24 @@ export default function InventoryAdmin({ db }) {
   };
 
   const validateDirtyRows = () => {
+    if (dirtyRows.some((row) => row.type === "product")) {
+      const productSkuOwners = new Map();
+
+      for (const row of rows.filter((candidate) => candidate.type === "product")) {
+        const sku = text(row.sku).toUpperCase();
+
+        if (!sku) {
+          return `${row.primary} ${row.secondary || "option"} needs a SKU before inventory can be saved.`;
+        }
+
+        if (productSkuOwners.has(sku)) {
+          return `${row.primary} ${row.secondary || "option"} uses the same SKU as ${productSkuOwners.get(sku)}.`;
+        }
+
+        productSkuOwners.set(sku, `${row.primary} ${row.secondary || "option"}`);
+      }
+    }
+
     for (const row of dirtyRows) {
       const draft = draftRows[row.id] || {};
 
@@ -286,127 +313,30 @@ export default function InventoryAdmin({ db }) {
 
     setIsSaving(true);
     setMessage("");
+    const savingDirtyRows = dirtyRows;
+    const savingDraftRows = draftRows;
 
     try {
-      const changedProductRows = dirtyRows.filter((row) => row.type === "product");
-      const changedEventRows = dirtyRows.filter((row) => row.type === "event");
-      const productRowsById = changedProductRows.reduce((rowsById, row) => {
-        rowsById.set(row.productId, [...(rowsById.get(row.productId) || []), row]);
-        return rowsById;
-      }, new Map());
-      const productRefs = new Map(Array.from(productRowsById.keys()).map((productId) => [
-        productId,
-        doc(db, "products", productId),
-      ]));
-      const eventRefs = new Map(changedEventRows.map((row) => [
-        row.productId,
-        doc(db, "events", row.productId),
-      ]));
-      const movementRefs = new Map(dirtyRows.map((row) => [
-        row.id,
-        doc(collection(db, "inventoryMovements")),
-      ]));
-
-      await runTransaction(db, async (transaction) => {
-        const productSnapshots = await Promise.all(Array.from(productRefs.entries())
-          .map(async ([productId, productRef]) => [productId, await transaction.get(productRef)]));
-        const eventSnapshots = await Promise.all(Array.from(eventRefs.entries())
-          .map(async ([eventId, eventRef]) => [eventId, await transaction.get(eventRef)]));
-        const productSnapshotsById = new Map(productSnapshots);
-        const eventSnapshotsById = new Map(eventSnapshots);
-
-        productRowsById.forEach((productRows, productId) => {
-          const productSnapshot = productSnapshotsById.get(productId);
-          const firstRow = productRows[0];
-
-          if (!productSnapshot?.exists()) {
-            throw new InventoryConflictError(
-              `${firstRow.primary} no longer exists in Firestore. Inventory was refreshed; review it and save again.`,
-            );
-          }
-
-          const { movements, variants } = mergeProductInventoryDrafts({
-            changes: productRows.map((row) => ({
-              draft: draftRows[row.id] || {},
-              row,
-            })),
-            product: productSnapshot.data(),
-          });
-
-          transaction.update(productRefs.get(productId), {
-            updatedAt: serverTimestamp(),
-            variants,
-          });
-
-          movements.forEach(({ quantityDelta, row, variant }) => {
-            transaction.set(movementRefs.get(row.id), {
-              capacityGroupKey: "",
-              createdAt: serverTimestamp(),
-              createdBy: "admin_inventory",
-              lineItemId: "",
-              linkedId: row.productId,
-              linkedType: "product",
-              orderId: "",
-              quantityDelta,
-              reason: "manual_adjustment",
-              sku: text(variant.sku),
-              source: "manual",
-              sourcePaymentId: "",
-              title: `${row.primary}${row.secondary ? ` ${row.secondary}` : ""}`,
-              variantId: text(variant.id),
-            });
-          });
-        });
-
-        changedEventRows.forEach((row) => {
-          const eventSnapshot = eventSnapshotsById.get(row.productId);
-
-          if (!eventSnapshot?.exists()) {
-            throw new InventoryConflictError(
-              `${row.primary} no longer exists in Firestore. Inventory was refreshed; review it and save again.`,
-            );
-          }
-
-          const { movementDelta, update } = mergeEventInventoryDraft({
-            draft: draftRows[row.id] || {},
-            event: eventSnapshot.data(),
-            row,
-          });
-
-          transaction.update(eventRefs.get(row.productId), {
-            ...update,
-            updatedAt: serverTimestamp(),
-          });
-
-          if (movementDelta !== 0) {
-            transaction.set(movementRefs.get(row.id), {
-              capacityGroupKey: row.productId,
-              createdAt: serverTimestamp(),
-              createdBy: "admin_inventory",
-              lineItemId: "",
-              linkedId: row.productId,
-              linkedType: "event",
-              orderId: "",
-              quantityDelta: movementDelta,
-              reason: "manual_adjustment",
-              sku: "",
-              source: "manual",
-              sourcePaymentId: "",
-              title: row.primary,
-              variantId: "",
-            });
-          }
-        });
+      await saveInventoryRowsTransaction({
+        db,
+        dirtyRows: savingDirtyRows,
+        draftRows: savingDraftRows,
       });
 
       await loadInventory();
       setMessage("Inventory changes saved.");
     } catch (error) {
       if (error instanceof InventoryConflictError) {
-        await loadInventory();
-        setMessage(error.message);
+        const refreshed = await loadInventory({
+          preserveDraftRows: savingDraftRows,
+          preserveRowIds: savingDirtyRows.map((row) => row.id),
+          resetRowIds: error.rowIds,
+        });
+        setMessage(refreshed
+          ? error.message
+          : `${error.message.replace(" Inventory was refreshed; review it and save again.", "")} Inventory could not be refreshed. Your other unsaved changes were kept; refresh before saving again.`);
       } else {
-        const changedNames = Array.from(new Set(dirtyRows.map((row) => row.primary)));
+        const changedNames = Array.from(new Set(savingDirtyRows.map((row) => row.primary)));
         const affectedLabel = changedNames.length > 3
           ? `${changedNames.slice(0, 3).join(", ")} and ${changedNames.length - 3} more`
           : changedNames.join(", ");
@@ -427,7 +357,7 @@ export default function InventoryAdmin({ db }) {
         <button className="admin_secondary_button" disabled={isSaving || dirtyCount === 0} onClick={discardChanges} type="button">
           Discard Changes
         </button>
-        <button className="admin_secondary_button" disabled={isLoading || isSaving} onClick={loadInventory} type="button">
+        <button className="admin_secondary_button" disabled={isLoading || isSaving} onClick={() => loadInventory()} type="button">
           {isLoading ? "Refreshing..." : "Refresh"}
         </button>
       </div>
@@ -499,13 +429,14 @@ export default function InventoryAdmin({ db }) {
                   <small>{row.lowStockThreshold === null ? "No low-stock threshold" : `Low at ${row.lowStockThreshold}`}</small>
                 )}
               </span>
-              <span className="admin_inventory_controls">
+              <span className={`admin_inventory_controls admin_inventory_controls_${row.type}`}>
                 {row.type === "product" ? (
                   <>
                     <label>
                       Stock
                       <input
                         inputMode="numeric"
+                        disabled={isSaving}
                         onChange={(event) => updateDraft(row.id, "stockOnHand", event.target.value)}
                         value={draft.stockOnHand || ""}
                       />
@@ -514,6 +445,7 @@ export default function InventoryAdmin({ db }) {
                       Low
                       <input
                         inputMode="numeric"
+                        disabled={isSaving}
                         onChange={(event) => updateDraft(row.id, "lowStockThreshold", event.target.value)}
                         placeholder="Optional"
                         value={draft.lowStockThreshold || ""}
@@ -522,10 +454,20 @@ export default function InventoryAdmin({ db }) {
                     <label className="admin_inline_checkbox">
                       <input
                         checked={draft.inventoryTracked === true}
+                        disabled={isSaving}
                         onChange={(event) => updateDraft(row.id, "inventoryTracked", event.target.checked)}
                         type="checkbox"
                       />
                       Track
+                    </label>
+                    <label className="admin_inline_checkbox">
+                      <input
+                        checked={draft.active === true}
+                        disabled={isSaving}
+                        onChange={(event) => updateDraft(row.id, "active", event.target.checked)}
+                        type="checkbox"
+                      />
+                      Sell
                     </label>
                   </>
                 ) : (
@@ -534,6 +476,7 @@ export default function InventoryAdmin({ db }) {
                       Capacity
                       <input
                         inputMode="numeric"
+                        disabled={isSaving}
                         onChange={(event) => updateDraft(row.id, "capacity", event.target.value)}
                         placeholder="Set capacity"
                         value={draft.capacity || ""}
@@ -543,6 +486,7 @@ export default function InventoryAdmin({ db }) {
                       Holds
                       <input
                         inputMode="numeric"
+                        disabled={isSaving}
                         onChange={(event) => updateDraft(row.id, "manualSeatsReserved", event.target.value)}
                         value={draft.manualSeatsReserved || "0"}
                       />
@@ -550,6 +494,7 @@ export default function InventoryAdmin({ db }) {
                     <label className="admin_inline_checkbox">
                       <input
                         checked={draft.waitlistEnabled === true}
+                        disabled={isSaving}
                         onChange={(event) => updateDraft(row.id, "waitlistEnabled", event.target.checked)}
                         type="checkbox"
                       />

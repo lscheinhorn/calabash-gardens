@@ -23,9 +23,11 @@ const productIds = {
   errorApproved: "phase35-product-error-approved",
   errorCompleted: "phase35-product-error-completed",
   failed: "phase35-product-failed",
+  incomplete: "phase35-product-incomplete",
   inactive: "phase35-product-inactive",
   leaseRace: "phase35-product-lease-race",
   main: "phase35-product-main",
+  mismatchedPrice: "phase35-product-mismatched-price",
   pending: "phase35-product-pending",
   race: "phase35-product-race",
   recovery: "phase35-product-recovery",
@@ -194,14 +196,22 @@ const seedFixtures = async () => {
     isActive: false,
     published: false,
   }));
+  batch.set(adminDb.doc(`products/${productIds.incomplete}`), productFixture(productIds.incomplete, {
+    priceOptions: [
+      { option: "Jar", price: "15.00" },
+      { option: "Large Jar", price: "25.00" },
+    ],
+  }));
+  batch.set(adminDb.doc(`products/${productIds.mismatchedPrice}`), productFixture(
+    productIds.mismatchedPrice,
+    { variants: [productVariant(productIds.mismatchedPrice, { price: "16.00" })] },
+  ));
   batch.set(adminDb.doc(`products/${productIds.race}`), productFixture(productIds.race, {
     variants: [productVariant(productIds.race, { stockOnHand: 1 })],
   }));
   [
     productIds.errorApproved,
-    productIds.errorCompleted,
     productIds.failed,
-    productIds.leaseRace,
     productIds.pending,
     productIds.recovery,
     productIds.snapshotChanged,
@@ -211,6 +221,11 @@ const seedFixtures = async () => {
   ].forEach((productId) => batch.set(adminDb.doc(`products/${productId}`), productFixture(productId, {
     variants: [productVariant(productId, { stockOnHand: 2 })],
   })));
+  [productIds.errorCompleted, productIds.leaseRace].forEach((productId) => (
+    batch.set(adminDb.doc(`products/${productId}`), productFixture(productId, {
+      variants: [productVariant(productId, { stockOnHand: 1 })],
+    }))
+  ));
   batch.set(adminDb.doc(`events/${eventIds.main}`), eventFixture(eventIds.main));
   batch.set(adminDb.doc(`events/${eventIds.aggregate}`), eventFixture(eventIds.aggregate, {
     capacity: 3,
@@ -387,6 +402,11 @@ const stockFor = async (productId) => {
   return snapshot.data()?.variants?.[0]?.stockOnHand;
 };
 
+const productAvailabilityFor = async (productId) => {
+  const snapshot = await adminDb.doc(`products/${productId}`).get();
+  return snapshot.data()?.inStock;
+};
+
 const createCheckout = async (client, cartItems, label, captureMode = "complete", payloadOverrides = {}) => {
   await setMockCaptureMode(captureMode);
   const checkoutAttemptId = opaqueValue(`${label}-attempt`);
@@ -433,6 +453,24 @@ const verifyValidation = async (client) => {
       ...payloadFor([productItem(productIds.inactive)]),
       checkoutAttemptId: opaqueValue("inactive-attempt"),
       checkoutToken: opaqueValue("inactive-token"),
+    }),
+    "failed-precondition",
+  );
+  await expectCallableError(
+    "incomplete product variant mapping",
+    () => client.createPayPalOrder({
+      ...payloadFor([productItem(productIds.incomplete)]),
+      checkoutAttemptId: opaqueValue("incomplete-attempt"),
+      checkoutToken: opaqueValue("incomplete-token"),
+    }),
+    "failed-precondition",
+  );
+  await expectCallableError(
+    "mismatched product variant price",
+    () => client.createPayPalOrder({
+      ...payloadFor([productItem(productIds.mismatchedPrice)]),
+      checkoutAttemptId: opaqueValue("mismatched-price-attempt"),
+      checkoutToken: opaqueValue("mismatched-price-token"),
     }),
     "failed-precondition",
   );
@@ -503,7 +541,7 @@ const verifyValidation = async (client) => {
     "Rejected validation cases must not call PayPal create.",
   );
 
-  return { rejectedBeforePayPal: 6, childOnlyTotalCents: 2000 };
+  return { rejectedBeforePayPal: 8, childOnlyTotalCents: 2000 };
 };
 
 const verifyCreateIdempotency = async (client) => {
@@ -611,6 +649,7 @@ const verifyCaptureTimeRace = async (client) => {
   const productRef = adminDb.doc(`products/${productIds.race}`);
   const product = (await productRef.get()).data();
   await productRef.update({
+    inStock: false,
     variants: [{ ...product.variants[0], stockOnHand: 0 }],
   });
   await expectCallableError(
@@ -619,7 +658,7 @@ const verifyCaptureTimeRace = async (client) => {
       checkoutToken: checkout.checkoutToken,
       orderID: checkout.orderID,
     }),
-    "resource-exhausted",
+    "failed-precondition",
   );
   const after = await mockState();
   assert(after.captureAttempts === before.captureAttempts, "Stock race must fail before PayPal capture.");
@@ -738,12 +777,14 @@ const verifyReconciliationLeaseRace = async (client) => {
 
   const reconciliation = await reconciliationPromise;
   assert(reconciliation.data.status === "processing", "Stale reconciliation must not release a newer capture lease.");
-  assert(await stockFor(productIds.leaseRace) === 1, "The active capture reservation must remain held during reconciliation.");
+  assert(await stockFor(productIds.leaseRace) === 0, "The active capture reservation must hold the last unit during reconciliation.");
+  assert(await productAvailabilityFor(productIds.leaseRace) === false, "Holding the last unit must mark the product unavailable.");
 
   const capture = await capturePromise;
   assert(capture.data.status === "not_paid", "The lease-owning capture must report terminal non-payment.");
   assert(capture.data.retryAllowed === true, "The lease-owning capture may permit retry after releasing inventory.");
-  assert(await stockFor(productIds.leaseRace) === 2, "The lease owner must release stock exactly once.");
+  assert(await stockFor(productIds.leaseRace) === 1, "The lease owner must release stock exactly once.");
+  assert(await productAvailabilityFor(productIds.leaseRace) === true, "Releasing the last unit must restore product availability.");
   assert((await sessionRef.get()).data()?.inventoryState === "released", "The terminal capture must mark inventory released.");
   assert(!(await orderFor(checkout.orderID)).exists, "The lease race must not write a paid order.");
   assert(await movementCountFor(checkout.orderID) === 0, "The lease race must not write sale movements.");
@@ -812,7 +853,8 @@ const verifyCapturedAfterProviderError = async (client) => {
     orderID: checkout.orderID,
   });
   assert(result.data.finalized === true, "Completed payment must recover after a lost capture response.");
-  assert(await stockFor(productIds.errorCompleted) === 1, "Recovered capture must decrement stock once.");
+  assert(await stockFor(productIds.errorCompleted) === 0, "Recovered capture must decrement the last unit once.");
+  assert(await productAvailabilityFor(productIds.errorCompleted) === false, "Selling the last unit must mark the product unavailable.");
   assert(await movementCountFor(checkout.orderID) === 1, "Recovered capture must write one movement.");
 
   return { orderID: checkout.orderID, recovered: true };

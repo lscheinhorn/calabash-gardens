@@ -71,7 +71,8 @@ Current admin workflow:
 
 Operational ownership during publish:
 
-- Product variant `stockOnHand`, `lowStockThreshold`, and `inventoryTracked` values are preserved from live data when the draft did not edit them.
+- Product variant `active`, `stockOnHand`, `lowStockThreshold`, and `inventoryTracked` values are preserved from live data when the draft did not edit them.
+- Product `inStock` is not draft-owned. It is derived from the merged live variants after every publish.
 - Event `capacity`, `manualSeatsReserved`, and `waitlistEnabled` values follow the same three-way merge rule.
 - Event `ticketsSold` is server/inventory owned and is always taken from the current live event.
 - If both the draft and live record changed the same operational value differently, publishing stops with a conflict and writes neither document.
@@ -202,10 +203,18 @@ Variant notes:
 - Variant IDs identify the exact sellable option inside a product, such as a jar size.
 - SKUs are generated from the product ID and variant ID unless an admin enters a custom SKU.
 - `priceOptions` remains the storefront compatibility shape. `variants` carries the stable ID, SKU, and inventory metadata for the same option index.
+- Each variant `price` must exactly match its corresponding `priceOptions` value. The displayed `priceOptions` value is authoritative for server checkout; a mismatch is rejected before PayPal.
 - `stockOnHand` and `lowStockThreshold` are whole numbers. Blank stock fields normalize to `0`; blank low-stock thresholds store as `null`.
 - `inventoryTracked: false` allows a product option to stay sellable without a stock count.
 - `active: false` preserves an option without offering it as an active inventory variant.
-- This phase stores current admin inventory metadata on product variants. Verified checkout decrementing and an inventory movement ledger still require the server-side order phase.
+- Each product must have exactly one variant for each `priceOptions` entry, identified by the matching zero-based `priceOptionIndex`.
+- The locally verified Firestore rules support at most three price options/variants per product. The current catalog does not exceed that boundary, and ProductAdmin disables adding a fourth option.
+- Variant IDs and SKUs must be nonblank. SKUs are compared case-insensitively for uniqueness in the supported admin UI.
+- `productSkus/{encodedNormalizedSku}` transactionally reserves each persisted SKU for one product ID and variant ID. Product publish and InventoryAdmin claim or release these records in the same transaction as the product write, so concurrent supported-portal saves cannot both claim one SKU.
+- `inStock` is a compatibility field derived from variants: it is true only when at least one active variant is either untracked or has positive tracked stock. ProductAdmin does not expose a separate availability checkbox.
+- InventoryAdmin can present missing legacy variants using deterministic IDs and SKUs. The first successful inventory save persists the complete mapping without changing product copy, category, photos, prices, shipping, or visibility.
+- A product title, copy, visibility, or photo draft preserves the exact existing `priceOptions`, `variants`, and compatibility availability when inventory controls were not edited. A legacy product with no persisted variants remains without variants until an intentional inventory save.
+- The guarded server checkout decrements tracked variant stock, release restores reserved stock, and both paths recompute `inStock`. These paths are emulator-verified but remain disabled and undeployed for public use.
 
 Current compatibility notes:
 
@@ -235,7 +244,7 @@ Editor controls:
 - Decimal text input for prices until checkout math is refactored safely.
 - Variant ID, SKU, stock on hand, low-stock threshold, track-inventory, and sell-option controls for each product price option.
 - `Visible on site` toggle. The editor keeps stored `published` and `isActive` in sync for compatibility.
-- `Available now` remains stored as `inStock` for compatibility; variant stock is now the inventory-specific detail.
+- `inStock` remains stored for compatibility but is derived from variant `active`, `inventoryTracked`, and `stockOnHand`; it has no independent editor control.
 - Highlighted toggle.
 - Filterable Firestore product cards with inline edit mode for existing products.
 - Image uploader writes approved admin uploads to Firebase Storage and stores image references on Firestore product drafts.
@@ -456,36 +465,30 @@ Editor controls:
 
 ## Inventory
 
-Collection: `inventory`
+Inventory is owned by the existing product and event documents rather than a separate mutable `inventory` collection:
 
-Suggested document ID:
+- `products/{productId}.variants[]` owns product option stock, tracking, low-stock threshold, and sellable status.
+- `events/{eventId}` owns capacity, manual holds, waitlist preference, and the server-owned `ticketsSold` count.
+- `inventoryMovements/{movementId}` is the append-only audit record for manual adjustments, checkout decrements, releases, and future imports.
 
-```text
-inventory/{inventoryKeyOrStableId}
-```
+InventoryAdmin reads current products/events and offers inline bulk editing. A save runs as one Firestore transaction that rereads every affected document before writing:
 
-Required fields:
+- Same-field stock, threshold, tracking, sellable-status, capacity, hold, or waitlist races fail closed.
+- An affected bulk save writes every requested row or no requested rows.
+- A conflicted row refreshes to current Firestore data while unrelated unsaved rows stay in the form.
+- Concurrent product copy changes and event `ticketsSold` updates are preserved.
+- Product writes contain only `variants`, derived `inStock`, and `updatedAt`; event writes contain only the approved operational fields and `updatedAt`.
+- Product saves also claim each normalized SKU under `productSkus` in the same transaction. An existing claim owned by another product option rejects the entire save.
+- Product quantity changes and event manual-hold changes create matching movement records in the same transaction. Threshold, tracking, sellable-status, capacity, and waitlist-only edits do not invent quantity movements.
 
-- `stock`: number.
-- `linkedType`: string, for example `event` or `product`.
-- `linkedId`: stable product/event ID.
+Inventory editor controls:
 
-Optional fields:
+- Product: stock on hand, optional low-stock threshold, track inventory, and sell this option.
+- Event: capacity, manual holds, and waitlist when full.
+- Event sold tickets are displayed but never editable in InventoryAdmin.
+- Save Changes, Discard Changes, and Refresh remain available above the scrollable table; the action bar stays visible while editing on narrow screens.
 
-- `eventDate`: string or timestamp.
-- `dietaryVariant`: string.
-- `notes`: string.
-
-Current compatibility notes:
-
-- Current event inventory keys are fragile human-readable title/date strings.
-- Current event stock logic has known bugs and should be redesigned before selling limited backend-backed seats.
-- Product inventory can remain `inStock` true/false until a deeper inventory phase is approved.
-
-Editor controls:
-
-- Do not build an inventory editor until event capacity and checkout behavior are accepted.
-- Initial admin UI may show inventory status read-only.
+Production note: the Phase 40 tools and rules are verified against demo emulators. They do not authorize or perform a production variant migration, rules deployment, public-source switch, or checkout enablement.
 
 ## Images
 

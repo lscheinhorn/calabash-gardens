@@ -16,6 +16,11 @@ import {
   parseOperationalSnapshot,
   serializeOperationalSnapshot,
 } from "./adminDraftPublishModel";
+import {
+  productSkuClaimHasOwner,
+  productSkuClaimsForProduct,
+  ProductSkuRegistryError,
+} from "./productSkuRegistry";
 
 const draftCollectionsByTarget = {
   events: "eventDrafts",
@@ -118,6 +123,81 @@ const baselineFor = ({ targetCollection, targetSnapshot }) => {
 
 const draftConflict = (message) => {
   throw new DraftPublishConflictError(message);
+};
+
+const prepareProductSkuRegistryChanges = async ({
+  db,
+  liveData,
+  productId,
+  targetPayload,
+  transaction,
+}) => {
+  let currentClaims;
+  let nextClaims;
+
+  try {
+    currentClaims = productSkuClaimsForProduct({
+      productId,
+      strict: false,
+      variants: liveData.variants,
+    });
+    nextClaims = productSkuClaimsForProduct({
+      productId,
+      variants: targetPayload.variants,
+    });
+  } catch (error) {
+    if (error instanceof ProductSkuRegistryError) {
+      draftConflict(error.message);
+    }
+    throw error;
+  }
+
+  const currentClaimsById = new Map(currentClaims.map((claim) => [claim.registryId, claim]));
+  const nextClaimsById = new Map(nextClaims.map((claim) => [claim.registryId, claim]));
+  const registryIds = Array.from(new Set([
+    ...currentClaimsById.keys(),
+    ...nextClaimsById.keys(),
+  ])).sort();
+  const registryRefs = new Map(registryIds.map((registryId) => [
+    registryId,
+    doc(db, "productSkus", registryId),
+  ]));
+  const registrySnapshots = await Promise.all(registryIds.map(async (registryId) => [
+    registryId,
+    await transaction.get(registryRefs.get(registryId)),
+  ]));
+  const registrySnapshotsById = new Map(registrySnapshots);
+
+  nextClaims.forEach((claim) => {
+    const registrySnapshot = registrySnapshotsById.get(claim.registryId);
+
+    if (!registrySnapshot?.exists()) {
+      return;
+    }
+
+    const registryData = registrySnapshot.data();
+    const currentClaim = currentClaimsById.get(claim.registryId);
+    const ownedByCurrentVariant = currentClaim
+      && productSkuClaimHasOwner(currentClaim, registryData);
+
+    if (!productSkuClaimHasOwner(claim, registryData) && !ownedByCurrentVariant) {
+      draftConflict(
+        `SKU ${claim.sku} is already assigned to another product option. Choose a different SKU.`,
+      );
+    }
+  });
+
+  return {
+    claimsToDelete: currentClaims.filter((claim) => {
+      const registrySnapshot = registrySnapshotsById.get(claim.registryId);
+
+      return !nextClaimsById.has(claim.registryId)
+        && registrySnapshot?.exists()
+        && productSkuClaimHasOwner(claim, registrySnapshot.data());
+    }),
+    claimsToSet: nextClaims,
+    registryRefs,
+  };
 };
 
 export const loadAdminDrafts = async ({ db, targetCollection = "" }) => {
@@ -460,6 +540,16 @@ export const publishAdminDraft = async ({
       }
     });
 
+    const skuRegistryChanges = targetCollection === "products"
+      ? await prepareProductSkuRegistryChanges({
+        db,
+        liveData,
+        productId: targetId,
+        targetPayload,
+        transaction,
+      })
+      : null;
+
     transaction.set(targetRef, targetPayload, { merge: true });
     transaction.set(draftRef, {
       draftPublishedAt: serverTimestamp(),
@@ -472,6 +562,19 @@ export const publishAdminDraft = async ({
       draftUpdatedAt: serverTimestamp(),
       draftUpdatedBy: userId,
     }, { merge: true });
+
+    skuRegistryChanges?.claimsToDelete.forEach((claim) => {
+      transaction.delete(skuRegistryChanges.registryRefs.get(claim.registryId));
+    });
+    skuRegistryChanges?.claimsToSet.forEach((claim) => {
+      transaction.set(skuRegistryChanges.registryRefs.get(claim.registryId), {
+        productId: claim.productId,
+        sku: claim.sku,
+        updatedAt: serverTimestamp(),
+        updatedBy: userId,
+        variantId: claim.variantId,
+      });
+    });
 
     return {
       contentRevision: nextContentRevision,

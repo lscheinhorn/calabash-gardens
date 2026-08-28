@@ -1,4 +1,5 @@
 const productOperationalFields = [
+  "active",
   "inventoryTracked",
   "lowStockThreshold",
   "stockOnHand",
@@ -22,12 +23,6 @@ const documentMetadataFields = new Set([
 ]);
 
 const cleanText = (value) => String(value || "").trim();
-
-const slugify = (value) => cleanText(value)
-  .toLowerCase()
-  .replace(/['\u2018\u2019]/g, "")
-  .replace(/[^a-z0-9]+/g, "-")
-  .replace(/^-+|-+$/g, "");
 
 const canonicalValue = (value) => {
   if (value === undefined) {
@@ -77,25 +72,11 @@ const variantKey = (variant = {}, index = 0) => {
 };
 
 const productVariants = (product = {}) => {
-  if (Array.isArray(product.variants) && product.variants.length) {
-    return product.variants;
-  }
-
-  return (Array.isArray(product.priceOptions) ? product.priceOptions : []).map((option, index) => ({
-    active: product.inStock !== false && option.active !== false,
-    id: slugify(option.variantId || option.option) || (index === 0 ? "default" : `option-${index + 1}`),
-    inventoryTracked: option.inventoryTracked !== false,
-    label: cleanText(option.option) || `Option ${index + 1}`,
-    lowStockThreshold: Number.isInteger(option.lowStockThreshold) ? option.lowStockThreshold : null,
-    price: cleanText(option.price),
-    priceOptionIndex: index,
-    sku: cleanText(option.sku),
-    sortOrder: index,
-    stockOnHand: Number.isInteger(option.stockOnHand) ? option.stockOnHand : 0,
-  }));
+  return Array.isArray(product.variants) ? product.variants : [];
 };
 
 const normalizedProductOperationalVariant = (variant, index) => ({
+  active: variant.active !== false,
   id: cleanText(variant.id || variant.variantId || variant.option)
     || (index === 0 ? "default" : `option-${index + 1}`),
   inventoryTracked: variant.inventoryTracked !== false,
@@ -108,6 +89,14 @@ const normalizedProductOperationalVariant = (variant, index) => ({
     : index,
   stockOnHand: Number.isInteger(variant.stockOnHand) ? variant.stockOnHand : 0,
 });
+
+const productInStock = (variants) => variants.some((variant) => (
+  variant.active === true
+    && (
+      variant.inventoryTracked === false
+      || (Number.isInteger(variant.stockOnHand) && variant.stockOnHand > 0)
+    )
+));
 
 const fieldState = (data, field) => (
   Object.prototype.hasOwnProperty.call(data || {}, field)
@@ -182,6 +171,22 @@ const mergeProductOperationalData = ({
   draftData,
   liveData,
 }) => {
+  if (!Array.isArray(draftData.variants)) {
+    const payload = { ...draftData };
+
+    if (Array.isArray(liveData.variants)) {
+      payload.variants = liveData.variants;
+      payload.inStock = productInStock(liveData.variants);
+    } else {
+      delete payload.variants;
+      payload.inStock = typeof liveData.inStock === "boolean"
+        ? liveData.inStock
+        : draftData.inStock;
+    }
+
+    return { fieldsToDelete: deletedFields, payload };
+  }
+
   const draftVariants = productVariants(draftData);
   const draftOperational = draftVariants.map(normalizedProductOperationalVariant);
   const baseVariants = Array.isArray(baseOperational?.variants) ? baseOperational.variants : [];
@@ -244,6 +249,7 @@ const mergeProductOperationalData = ({
     fieldsToDelete: deletedFields,
     payload: {
       ...draftData,
+      inStock: productInStock(variants),
       variants,
     },
   };
@@ -335,6 +341,7 @@ export const contentFingerprintForTarget = (targetCollection, data = {}) => {
   const content = withoutDocumentMetadata(data);
 
   if (targetCollection === "products") {
+    delete content.inStock;
     content.variants = productVariants(data).map((variant) => (
       Object.fromEntries(Object.entries(variant).filter(([key]) => (
         !productOperationalFields.includes(key)

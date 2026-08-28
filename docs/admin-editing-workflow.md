@@ -56,11 +56,15 @@ Confirm Publish Changes must reread both the saved draft and live target inside 
 - reject a publish when live product, event, or site content changed after the draft began;
 - preserve newer live product stock and event ticket counts when the draft did not edit those values;
 - reject conflicting inventory edits instead of choosing one silently;
+- preserve the exact existing product inventory shape when a draft changes only copy, visibility, or photos;
+- claim every published product SKU transactionally and reject an SKU already owned by another product option;
 - reject event capacity below current sold tickets plus manual holds;
 - write the live target and mark the draft published together, or write neither;
 - publish the persisted draft record, never unsaved form state supplied by the browser.
 
-Product inventory fields and event capacity/holds/waitlist settings are operational data. Their live values may change while a content draft is open, so draft preview and publish merge them through the same ownership rules. Event `ticketsSold` is always preserved from the live record and is never owned by a content draft.
+Product variant active status, stock, threshold, and tracking plus event capacity/holds/waitlist settings are operational data. Their live values may change while a content draft is open, so draft preview and publish merge them through the same ownership rules. Product `inStock` is always derived from the merged variants. Event `ticketsSold` is always preserved from the live record and is never owned by a content draft.
+
+Product price and inventory structures change only when Jetta edits the product's option/inventory controls. Title, description, visibility, and photo-only drafts must not synthesize, normalize, re-key, or otherwise migrate a legacy product's variants.
 
 Drafts saved before this contract lack a trustworthy baseline. An active legacy draft against an existing live record must be discarded, reopened from live data, and saved again before it can publish.
 
@@ -105,7 +109,7 @@ Product and event editors show one customer-facing visibility control: `Visible 
 
 Event availability should be computed instead of manually toggled. Jette sets capacity; future order tracking should update `ticketsSold`; and the Event Editor may use manual holds only for seats reserved outside the website until checkout/order persistence is connected. Public event pages should show labels like `2 of 30 available`, hide ticket purchase for past events, and show a waitlist for full future events when waitlist is enabled. Waitlist entries save to `eventWaitlist` and are visible from the matching Event Editor card.
 
-The client cart also counts event seats across adult, child, dietary, and duplicate cart variants for the same event/date, but this is only a customer-side guard. The authoritative sold count still needs server-side PayPal confirmation and Firestore transaction work before public Firestore events become purchase-safe.
+The client cart also counts event seats across adult, child, dietary, and duplicate cart variants for the same event/date, but this is only a customer-side guard. The guarded server PayPal path now owns reservation, capture, `ticketsSold`, product stock, and movement updates transactionally in demo-emulator verification. It remains disabled and undeployed until the production payment and release gates are approved.
 
 ## Admin Shell And Inventory
 
@@ -115,10 +119,15 @@ The Inventory section is the operating view over live Firestore inventory record
 
 Inventory edits are intentionally narrower than product/event content edits:
 
-- Product inventory rows can update stock on hand, low-stock threshold, and whether inventory is tracked for that variant.
+- Product inventory rows can update stock on hand, low-stock threshold, whether inventory is tracked, and whether the variant is sellable.
 - Event inventory rows can update capacity, manual holds, and whether the waitlist opens when full.
 - Product/event descriptions, prices, photos, titles, and visibility still belong in the Product and Event editors.
 - Stock/manual-hold changes create `inventoryMovements` rows for audit. This is the beginning of the inventory ledger; paid orders and future Square/manual imports should use the same movement model.
+- Inventory Save Changes rereads all affected records in one transaction. Same-field stale edits reject the whole save, the conflicted row refreshes, and unrelated unsaved rows remain editable.
+- Product `inStock` is derived from active variants and stock tracking; there is no independent availability checkbox.
+- Legacy products can display synthesized option rows, but the first successful save must persist exactly one stable variant and SKU per price option. The current locally verified rules support at most three options.
+- The displayed price option is the checkout price. Its mapped variant must store the same value, and the save fails closed on a mismatch.
+- Product publish and Inventory Save Changes reserve normalized SKUs through `productSkus` in the same transaction as the product update; a concurrent duplicate claim rejects atomically.
 
 ## Site Content Blocks
 

@@ -230,6 +230,65 @@ const visibleRecord = (record) => (
   && record.published !== false
 );
 
+const productInStockForVariants = (variants) => (
+  (Array.isArray(variants) ? variants : []).some((variant) => (
+    variant.active === true
+      && (
+        variant.inventoryTracked === false
+        || (Number.isInteger(variant.stockOnHand) && variant.stockOnHand > 0)
+      )
+  ))
+);
+
+const productHasCompleteVariantMapping = (product) => {
+  const priceOptions = Array.isArray(product?.priceOptions) ? product.priceOptions : [];
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+
+  if (!priceOptions.length || variants.length !== priceOptions.length || variants.length > 3) {
+    return false;
+  }
+
+  const ids = new Set();
+  const skus = new Set();
+
+  return variants.every((variant, index) => {
+    if (!variant || typeof variant !== "object" || Array.isArray(variant)) {
+      return false;
+    }
+
+    const id = typeof variant.id === "string" ? variant.id.trim() : "";
+    const sku = typeof variant.sku === "string" ? variant.sku.trim().toUpperCase() : "";
+    const optionPrice = typeof priceOptions[index]?.price === "string"
+      ? priceOptions[index].price
+      : "";
+    const thresholdIsValid = variant.lowStockThreshold === null
+      || (Number.isInteger(variant.lowStockThreshold) && variant.lowStockThreshold >= 0);
+    const isValid = typeof variant.active === "boolean"
+      && id.length > 0
+      && id.length <= 120
+      && typeof variant.inventoryTracked === "boolean"
+      && typeof variant.label === "string"
+      && variant.label.trim().length <= 160
+      && thresholdIsValid
+      && typeof variant.price === "string"
+      && optionPrice.length > 0
+      && variant.price === optionPrice
+      && variant.price.length <= 40
+      && variant.priceOptionIndex === index
+      && sku.length > 0
+      && sku.length <= 120
+      && variant.sortOrder === index
+      && Number.isInteger(variant.stockOnHand)
+      && variant.stockOnHand >= 0
+      && !ids.has(id)
+      && !skus.has(sku);
+
+    ids.add(id);
+    skus.add(sku);
+    return isValid;
+  });
+};
+
 const priceOptionForVariant = (product, variant, index) => {
   const priceOptions = Array.isArray(product.priceOptions) ? product.priceOptions : [];
   const priceOptionIndex = Number.isInteger(variant.priceOptionIndex) ? variant.priceOptionIndex : index;
@@ -252,7 +311,12 @@ const validateProductItemFromSnapshot = (item, productSnapshot) => {
 
   const product = productSnapshot.data() || {};
 
-  if (!visibleRecord(product) || product.inStock === false) {
+  if (
+    !visibleRecord(product)
+    || !productHasCompleteVariantMapping(product)
+    || product.inStock === false
+    || !productInStockForVariants(product.variants)
+  ) {
     throw new HttpsError("failed-precondition", "A product in your cart is not available.");
   }
 
@@ -260,19 +324,19 @@ const validateProductItemFromSnapshot = (item, productSnapshot) => {
   const variantIndex = variants.findIndex((variant) => variant.id === item.variantId);
   const variant = variantIndex >= 0 ? variants[variantIndex] : null;
 
-  if (!variant || variant.active === false) {
+  if (!variant || variant.active !== true) {
     throw new HttpsError("failed-precondition", "A product option in your cart is not available.");
   }
 
-  const inventoryTracked = variant.inventoryTracked !== false;
-  const stockOnHand = Number(variant.stockOnHand || 0);
+  const inventoryTracked = variant.inventoryTracked;
+  const stockOnHand = variant.stockOnHand;
 
   if (inventoryTracked && stockOnHand < item.quantity) {
     throw new HttpsError("resource-exhausted", "A product option in your cart does not have enough stock.");
   }
 
   const priceOption = priceOptionForVariant(product, variant, variantIndex);
-  const unitPriceCents = centsFromAmount(variant.price || priceOption.price);
+  const unitPriceCents = centsFromAmount(priceOption.price);
   const shippingCents = product.shipping === undefined || product.shipping === null ? 0 : centsFromAmount(product.shipping);
   const label = cleanText(variant.label || priceOption.option);
 
@@ -573,6 +637,7 @@ const applyProductInventoryUpdates = ({ productSnapshots, transaction, trustedIt
     });
 
     transaction.update(productSnapshot.ref, {
+      inStock: productInStockForVariants(variants),
       updatedAt: FieldValue.serverTimestamp(),
       variants,
     });
@@ -689,7 +754,7 @@ const releaseReservedInventory = async ({ expectedLeaseId = "", reason, sessionR
       const product = productSnapshot?.data() || {};
       const variants = Array.isArray(product.variants) ? product.variants.map((variant) => ({ ...variant })) : [];
 
-      if (!productSnapshot?.exists) {
+      if (!productSnapshot?.exists || !productHasCompleteVariantMapping(product)) {
         throw new HttpsError("failed-precondition", "Reserved product inventory needs manual review.");
       }
 
@@ -700,9 +765,10 @@ const releaseReservedInventory = async ({ expectedLeaseId = "", reason, sessionR
           throw new HttpsError("failed-precondition", "Reserved product inventory needs manual review.");
         }
 
-        variants[variantIndex].stockOnHand = Number(variants[variantIndex].stockOnHand || 0) + reservedProduct.quantity;
+        variants[variantIndex].stockOnHand += reservedProduct.quantity;
       });
       transaction.update(productSnapshot.ref, {
+        inStock: productInStockForVariants(variants),
         updatedAt: FieldValue.serverTimestamp(),
         variants,
       });

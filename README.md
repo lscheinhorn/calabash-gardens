@@ -39,6 +39,8 @@ npm run build
 - `npm run build`: create production build
 - `npm test`: run Create React App test runner
 - `npm run test:firebase-parity-model`: run deterministic parity-model tests
+- `npm run test:inventory-admin-emulators`: run the isolated inventory transaction and Firestore rules matrix
+- `npm run test:draft-publish-emulators`: run the isolated transactional draft-publish matrix
 - `npm run audit:firebase-parity`: read Firestore/Storage, exercise anonymous public query shapes, and refresh the sanitized local parity report without Firebase writes
 - `npm run check:firebase-parity`: run the same read-only audit without rewriting reports and fail while blockers remain
 - `npm run deploy`: build and publish with `gh-pages`
@@ -58,10 +60,11 @@ npm run build
 - `docs/agent-workflow.md`: Git and phase workflow
 - `docs/phase35-checkout-verification.md`: isolated server-checkout verification
 - `docs/phase36-webhook-verification.md`: isolated webhook/recovery verification
+- `docs/phase40-inventory-variant-verification.md`: inventory variant, availability, conflict, and responsive-admin verification
 - `docs/firebase-parity-audit.md`: latest read-only Firestore/Storage parity result
 
 ## Notes
 
-The public app still defaults to static product, event, and site content. The Firebase-backed admin portal supports draft editing, preview, media, inventory, and order-review foundations. Guarded server checkout and webhook recovery exist only as disabled, emulator-verified pre-live paths; they are not deployed or active on the public site.
+The public app still defaults to static product, event, and site content. The Firebase-backed admin portal supports draft editing, preview, media, transactionally unique product SKUs, inventory, and order-review foundations. Guarded server checkout and webhook recovery exist only as disabled, emulator-verified pre-live paths; they are not deployed or active on the public site.
 
 Before implementation work, confirm scope in `PROJECT_STATUS.md`, use a feature branch, and get Luke's approval.

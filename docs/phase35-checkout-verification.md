@@ -63,13 +63,14 @@ node scripts/phase35-checkout-verification.js verify
 The matrix verifies:
 
 - trusted product, event, shipping, and total recalculation;
-- inactive, stale-price, aggregate-stock, aggregate-capacity, past-event, and multi-date-event rejection before PayPal;
+- inactive, incomplete-variant, variant/displayed-price mismatch, stale-cart-price, aggregate-stock, aggregate-capacity, past-event, and multi-date-event rejection before PayPal;
 - child-only event ticket totals;
 - idempotent PayPal order creation;
 - wrong-token rejection and expired-session rejection before capture or reservation;
 - PayPal approval, amount, currency, and checkout-reference checks before inventory reservation;
 - immutable checkout snapshots between create and capture;
 - exact product stock and event seat updates from the stored server snapshot;
+- derived product availability when the final tracked unit is reserved or sold, and restoration when a reservation is released;
 - simultaneous duplicate capture callbacks without duplicate stock, seats, orders, or movements;
 - stock changes between create and capture;
 - retained reservations for pending or uncertain captures;

@@ -1,5 +1,7 @@
 const cleanText = (value, fallback = "") => String(value || fallback).trim();
 
+const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value || {}, key);
+
 const numberOrNull = (value) => {
   if (value === null || value === undefined || String(value).trim() === "") {
     return null;
@@ -23,10 +25,17 @@ const rowLabel = (row) => (
 const conflict = (row, detail) => {
   throw new InventoryConflictError(
     `${rowLabel(row)} ${detail} Inventory was refreshed; review it and save again.`,
+    [row.id],
   );
 };
 
 const validWholeNumber = (value) => Number.isInteger(value) && value >= 0;
+
+const maxVariantCount = 3;
+const maxVariantIdLength = 120;
+const maxVariantLabelLength = 160;
+const maxVariantPriceLength = 40;
+const maxVariantSkuLength = 120;
 
 const currentWholeNumber = (value, row, fieldName) => {
   if (!validWholeNumber(value)) {
@@ -59,7 +68,35 @@ const variantIdForPriceOption = (priceOption, index) => (
   || (index === 0 ? "default" : `option-${index + 1}`)
 );
 
+export const skuForVariant = (productId, variantId) => (
+  ["CG", cleanText(productId), cleanText(variantId)]
+    .filter(Boolean)
+    .join("-")
+    .replace(/[^a-z0-9-]/gi, "-")
+    .replace(/-+/g, "-")
+    .toUpperCase()
+);
+
+const comparableInventoryOption = (priceOption = {}) => ({
+  active: priceOption.active !== false,
+  inventoryTracked: priceOption.inventoryTracked !== false,
+  lowStockThreshold: String(priceOption.lowStockThreshold ?? "").trim(),
+  option: cleanText(priceOption.option),
+  price: cleanText(priceOption.price),
+  sku: cleanText(priceOption.sku).toUpperCase(),
+  stockOnHand: String(priceOption.stockOnHand ?? "").trim(),
+  variantId: cleanText(priceOption.variantId),
+});
+
+export const productInventoryFormMatches = (candidateOptions, baselineOptions) => (
+  JSON.stringify((Array.isArray(candidateOptions) ? candidateOptions : [])
+    .map(comparableInventoryOption))
+    === JSON.stringify((Array.isArray(baselineOptions) ? baselineOptions : [])
+      .map(comparableInventoryOption))
+);
+
 const inventoryFieldChanges = (row, draft) => ({
+  active: row.active !== (draft.active === true),
   inventoryTracked: row.inventoryTracked !== (draft.inventoryTracked === true),
   lowStockThreshold: String(row.lowStockThreshold === null ? "" : row.lowStockThreshold)
     !== String(draft.lowStockThreshold),
@@ -75,6 +112,7 @@ const eventFieldChanges = (row, draft) => ({
 const assertUniqueVariants = (variants, row) => {
   const variantIds = variants.map((variant) => cleanText(variant.id));
   const priceOptionIndexes = variants.map((variant) => variant.priceOptionIndex);
+  const skus = variants.map((variant) => cleanText(variant.sku).toUpperCase());
 
   if (variantIds.some((variantId) => !variantId)) {
     conflict(row, "has a product option without a stable ID.");
@@ -91,51 +129,238 @@ const assertUniqueVariants = (variants, row) => {
   if (new Set(priceOptionIndexes).size !== priceOptionIndexes.length) {
     conflict(row, "has duplicate product option price indexes.");
   }
+
+  if (skus.some((sku) => !sku)) {
+    conflict(row, "has a product option without a SKU.");
+  }
+
+  if (new Set(skus).size !== skus.length) {
+    conflict(row, "has duplicate product option SKUs.");
+  }
+};
+
+const assertCompleteVariantMapping = (variants, priceOptions, row) => {
+  if (variants.length > maxVariantCount || priceOptions.length > maxVariantCount) {
+    conflict(row, `has more than ${maxVariantCount} product options.`);
+  }
+
+  if (variants.length !== priceOptions.length) {
+    conflict(row, "does not have exactly one inventory option for every price option.");
+  }
+
+  priceOptions.forEach((priceOption, index) => {
+    const matchingVariants = variants.filter((variant) => variant.priceOptionIndex === index);
+
+    if (matchingVariants.length !== 1) {
+      conflict(row, `does not have exactly one inventory option for price option ${index + 1}.`);
+    }
+
+    if (matchingVariants[0].price !== priceOption?.price) {
+      conflict(row, `has an inventory price that does not match price option ${index + 1}.`);
+    }
+  });
+
+  variants.forEach((variant) => {
+    if (variant.__invalidInventoryVariant === true) {
+      conflict(row, "has a malformed product option in Firestore.");
+    }
+
+    if (typeof variant.active !== "boolean") {
+      conflict(row, "has a product option with an invalid sellable status.");
+    }
+
+    if (typeof variant.inventoryTracked !== "boolean") {
+      conflict(row, "has a product option with an invalid tracking status.");
+    }
+
+    if (typeof variant.id !== "string" || !variant.id.trim()) {
+      conflict(row, "has a product option without a valid stable ID.");
+    }
+
+    if (variant.id.trim().length > maxVariantIdLength) {
+      conflict(row, `has a product option ID longer than ${maxVariantIdLength} characters.`);
+    }
+
+    if (typeof variant.sku !== "string" || !variant.sku.trim()) {
+      conflict(row, "has a product option without a valid SKU.");
+    }
+
+    if (variant.sku.trim().length > maxVariantSkuLength) {
+      conflict(row, `has a SKU longer than ${maxVariantSkuLength} characters.`);
+    }
+
+    if (typeof variant.label !== "string") {
+      conflict(row, "has a product option with an invalid label.");
+    }
+
+    if (variant.label.trim().length > maxVariantLabelLength) {
+      conflict(row, `has a product option label longer than ${maxVariantLabelLength} characters.`);
+    }
+
+    if (typeof variant.price !== "string") {
+      conflict(row, "has a product option with an invalid price.");
+    }
+
+    if (variant.price.trim().length > maxVariantPriceLength) {
+      conflict(row, `has a product option price longer than ${maxVariantPriceLength} characters.`);
+    }
+
+    if (!Number.isInteger(variant.priceOptionIndex)) {
+      conflict(row, "has a product option without a valid price index.");
+    }
+
+    if (!Number.isInteger(variant.sortOrder)) {
+      conflict(row, "has a product option without a valid sort order.");
+    }
+
+    currentWholeNumber(variant.stockOnHand, row, "stock");
+    currentOptionalWholeNumber(variant.lowStockThreshold, row, "low-stock threshold");
+  });
 };
 
 export class InventoryConflictError extends Error {
-  constructor(message) {
+  constructor(message, rowIds = []) {
     super(message);
     this.name = "InventoryConflictError";
+    this.rowIds = Array.from(new Set(rowIds.filter(Boolean)));
   }
 }
 
-export const variantsForProduct = (product) => {
-  const variants = Array.isArray(product?.variants) ? product.variants : [];
-
-  if (variants.length) {
-    return variants.map((variant, index) => ({
-      ...variant,
-      priceOptionIndex: Number.isInteger(variant.priceOptionIndex)
-        ? variant.priceOptionIndex
-        : index,
-      sortOrder: Number.isInteger(variant.sortOrder) ? variant.sortOrder : index,
-    }));
+export const mergePreservedInventoryDrafts = ({
+  freshDraftRows,
+  preserveDraftRows,
+  preserveRowIds = Object.keys(preserveDraftRows || {}),
+  resetRowIds = [],
+}) => {
+  if (!preserveDraftRows) {
+    return freshDraftRows;
   }
 
-  const priceOptions = Array.isArray(product?.priceOptions) ? product.priceOptions : [];
+  const resetRowIdSet = new Set(resetRowIds);
+  const preserveRowIdSet = new Set(preserveRowIds);
 
-  return priceOptions.map((priceOption, index) => ({
-    active: product.inStock !== false && priceOption.active !== false,
-    id: variantIdForPriceOption(priceOption, index),
-    inventoryTracked: priceOption.inventoryTracked !== false,
-    label: cleanText(priceOption.option, `Option ${index + 1}`),
-    lowStockThreshold: numberOrNull(priceOption.lowStockThreshold),
-    price: cleanText(priceOption.price),
-    priceOptionIndex: index,
-    sku: cleanText(priceOption.sku),
-    sortOrder: index,
-    stockOnHand: numberOrNull(priceOption.stockOnHand) || 0,
-  }));
+  return Object.keys(freshDraftRows).reduce((merged, rowId) => ({
+    ...merged,
+    [rowId]: preserveRowIdSet.has(rowId)
+      && !resetRowIdSet.has(rowId)
+      && hasOwn(preserveDraftRows, rowId)
+      ? preserveDraftRows[rowId]
+      : freshDraftRows[rowId],
+  }), {});
 };
 
+export const variantsForProduct = (product, productId = product?.id || product?.slug || "") => {
+  const variants = Array.isArray(product?.variants) ? product.variants : [];
+  const priceOptions = Array.isArray(product?.priceOptions) ? product.priceOptions : [];
+  const normalizedVariants = variants.map((storedVariant, index) => {
+    const variant = storedVariant && typeof storedVariant === "object" && !Array.isArray(storedVariant)
+      ? storedVariant
+      : { __invalidInventoryVariant: true };
+    const priceOptionIndex = hasOwn(variant, "priceOptionIndex")
+      ? variant.priceOptionIndex
+      : index;
+    const fallbackPriceOptionIndex = Number.isInteger(priceOptionIndex)
+      ? priceOptionIndex
+      : index;
+    const priceOption = priceOptions[fallbackPriceOptionIndex] || {};
+    const storedVariantId = hasOwn(variant, "id") ? variant.id : variant.variantId;
+    const variantId = typeof storedVariantId === "string" && storedVariantId.trim()
+      ? storedVariantId
+      : storedVariantId === undefined || storedVariantId === null || storedVariantId === ""
+        ? variantIdForPriceOption(priceOption, fallbackPriceOptionIndex)
+        : storedVariantId;
+    const storedSku = variant.sku;
+    const skuMissing = storedSku === undefined
+      || storedSku === null
+      || (typeof storedSku === "string" && !storedSku.trim());
+    const storedLabel = variant.label;
+    const labelMissing = storedLabel === undefined
+      || storedLabel === null
+      || (typeof storedLabel === "string" && !storedLabel.trim());
+    const storedPrice = variant.price;
+    const priceMissing = storedPrice === undefined
+      || storedPrice === null
+      || (typeof storedPrice === "string" && !storedPrice.trim());
+
+    return {
+      ...variant,
+      active: hasOwn(variant, "active")
+        ? variant.active
+        : product.inStock !== false && priceOption.active !== false,
+      id: variantId,
+      inventoryTracked: hasOwn(variant, "inventoryTracked")
+        ? variant.inventoryTracked
+        : priceOption.inventoryTracked !== false,
+      label: labelMissing
+        ? cleanText(priceOption.option, `Option ${fallbackPriceOptionIndex + 1}`)
+        : storedLabel,
+      lowStockThreshold: hasOwn(variant, "lowStockThreshold")
+        ? variant.lowStockThreshold
+        : numberOrNull(priceOption.lowStockThreshold),
+      price: priceMissing ? cleanText(priceOption.price) : storedPrice,
+      priceOptionIndex,
+      sku: skuMissing
+        ? cleanText(priceOption.sku, skuForVariant(productId, variantId))
+        : storedSku,
+      sortOrder: hasOwn(variant, "sortOrder") ? variant.sortOrder : fallbackPriceOptionIndex,
+      stockOnHand: hasOwn(variant, "stockOnHand")
+        ? variant.stockOnHand
+        : numberOrNull(priceOption.stockOnHand) || 0,
+    };
+  });
+  const representedIndexes = new Set(normalizedVariants.map((variant) => variant.priceOptionIndex));
+  const missingVariants = priceOptions.flatMap((priceOption, index) => {
+    if (representedIndexes.has(index)) {
+      return [];
+    }
+
+    const variantId = variantIdForPriceOption(priceOption, index);
+
+    return [{
+      active: product.inStock !== false && priceOption.active !== false,
+      id: variantId,
+      inventoryTracked: priceOption.inventoryTracked !== false,
+      label: cleanText(priceOption.option, `Option ${index + 1}`),
+      lowStockThreshold: numberOrNull(priceOption.lowStockThreshold),
+      price: cleanText(priceOption.price),
+      priceOptionIndex: index,
+      sku: cleanText(priceOption.sku, skuForVariant(productId, variantId)),
+      sortOrder: index,
+      stockOnHand: numberOrNull(priceOption.stockOnHand) || 0,
+    }];
+  });
+
+  return [...normalizedVariants, ...missingVariants].sort((first, second) => (
+    (Number.isInteger(first.priceOptionIndex) ? first.priceOptionIndex : Number.MAX_SAFE_INTEGER)
+      - (Number.isInteger(second.priceOptionIndex) ? second.priceOptionIndex : Number.MAX_SAFE_INTEGER)
+    || (Number.isInteger(first.sortOrder) ? first.sortOrder : Number.MAX_SAFE_INTEGER)
+      - (Number.isInteger(second.sortOrder) ? second.sortOrder : Number.MAX_SAFE_INTEGER)
+    || cleanText(first.id).localeCompare(cleanText(second.id))
+  ));
+};
+
+export const productInStockForVariants = (variants) => (
+  (Array.isArray(variants) ? variants : []).some((variant) => (
+    variant.active === true
+      && (
+        variant.inventoryTracked === false
+        || (Number.isInteger(variant.stockOnHand) && variant.stockOnHand > 0)
+      )
+  ))
+);
+
 export const mergeProductInventoryDrafts = ({ changes, product }) => {
-  const variants = variantsForProduct(product).map((variant) => ({ ...variant }));
+  const productId = changes[0]?.row?.productId || product?.id || product?.slug || "";
+  const variants = variantsForProduct(product, productId).map((variant) => ({ ...variant }));
+  const priceOptions = Array.isArray(product?.priceOptions) ? product.priceOptions : [];
   const movements = [];
 
-  changes.forEach(({ draft, row }) => {
-    assertUniqueVariants(variants, row);
+  if (changes.length) {
+    assertCompleteVariantMapping(variants, priceOptions, changes[0].row);
+    assertUniqueVariants(variants, changes[0].row);
+  }
 
+  changes.forEach(({ draft, row }) => {
     const matches = variants.reduce((indexes, variant, index) => (
       cleanText(variant.id) === row.variantId
       && variant.priceOptionIndex === row.priceOptionIndex
@@ -160,12 +385,18 @@ export const mergeProductInventoryDrafts = ({ changes, product }) => {
       "low-stock threshold",
     );
     const currentInventoryTracked = currentVariant.inventoryTracked !== false;
+    const currentActive = currentVariant.active === true;
     const changed = inventoryFieldChanges(row, draft);
     const nextStockOnHand = desiredWholeNumber(draft.stockOnHand, row, "stock");
     const nextLowStockThreshold = draft.lowStockThreshold === ""
       ? null
       : desiredWholeNumber(draft.lowStockThreshold, row, "low-stock threshold");
     const nextInventoryTracked = draft.inventoryTracked === true;
+    const nextActive = draft.active === true;
+
+    if (changed.active && currentActive !== row.active) {
+      conflict(row, "sellable status changed in Firestore while you were editing.");
+    }
 
     if (changed.stockOnHand && currentStockOnHand !== row.stockOnHand) {
       conflict(row, "stock changed in Firestore while you were editing.");
@@ -187,6 +418,7 @@ export const mergeProductInventoryDrafts = ({ changes, product }) => {
 
     variants[variantIndex] = {
       ...currentVariant,
+      active: changed.active ? nextActive : currentActive,
       inventoryTracked: changed.inventoryTracked
         ? nextInventoryTracked
         : currentInventoryTracked,
@@ -205,7 +437,11 @@ export const mergeProductInventoryDrafts = ({ changes, product }) => {
     }
   });
 
-  return { movements, variants };
+  return {
+    inStock: productInStockForVariants(variants),
+    movements,
+    variants,
+  };
 };
 
 export const mergeEventInventoryDraft = ({ draft, event, row }) => {

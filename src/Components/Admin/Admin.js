@@ -299,7 +299,10 @@ export default function Admin() {
             </button>
           ))}
         </aside>
-        <section className="admin_dashboard_main" aria-labelledby="admin-active-section-title">
+        <section
+          className={`admin_dashboard_main admin_dashboard_main_${activeSection.id}`}
+          aria-labelledby="admin-active-section-title"
+        >
           <div className="admin_active_section_header">
             <div>
               <h2 id="admin-active-section-title">{activeSection.title}</h2>

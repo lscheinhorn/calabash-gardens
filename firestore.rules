@@ -75,7 +75,10 @@ service cloud.firestore {
         && request.resource.data.shipping is string
         && request.resource.data.title is string
         && validContentRevision()
-        && (!('variants' in request.resource.data) || validProductVariants(request.resource.data.variants));
+        && (!('variants' in request.resource.data) || (
+          validProductVariants(request.resource.data.variants, request.resource.data.priceOptions)
+          && request.resource.data.variants.size() == request.resource.data.priceOptions.size()
+        ));
     }
 
     function validProductCategory() {
@@ -86,6 +89,21 @@ service cloud.firestore {
         && (!('sortOrder' in request.resource.data) || request.resource.data.sortOrder is number || request.resource.data.sortOrder == null)
         && (!('createdAt' in request.resource.data) || request.resource.data.createdAt is timestamp)
         && (!('updatedAt' in request.resource.data) || request.resource.data.updatedAt is timestamp);
+    }
+
+    function validProductSku() {
+      return hasOnlyAllowedKeys(['productId', 'sku', 'updatedAt', 'updatedBy', 'variantId'])
+        && hasRequiredKeys(['productId', 'sku', 'updatedAt', 'updatedBy', 'variantId'])
+        && request.resource.data.productId is string
+        && request.resource.data.productId.size() > 0
+        && request.resource.data.sku is string
+        && request.resource.data.sku.size() > 0
+        && request.resource.data.sku.size() <= 120
+        && request.resource.data.updatedAt is timestamp
+        && request.resource.data.updatedBy is string
+        && request.resource.data.variantId is string
+        && request.resource.data.variantId.size() > 0
+        && request.resource.data.variantId.size() <= 120;
     }
 
     function validProductVariant(variant) {
@@ -102,7 +120,7 @@ service cloud.firestore {
           'sortOrder',
           'stockOnHand'
         ])
-        && variant.keys().hasAll(['active', 'id', 'inventoryTracked', 'label', 'price', 'sku', 'stockOnHand'])
+        && variant.keys().hasAll(['active', 'id', 'inventoryTracked', 'label', 'lowStockThreshold', 'price', 'priceOptionIndex', 'sku', 'sortOrder', 'stockOnHand'])
         && variant.active is bool
         && variant.id is string
         && variant.id.size() > 0
@@ -113,41 +131,34 @@ service cloud.firestore {
         && variant.price is string
         && variant.price.size() <= 40
         && variant.sku is string
+        && variant.sku.size() > 0
         && variant.sku.size() <= 120
         && variant.stockOnHand is int
         && variant.stockOnHand >= 0
-        && (!('lowStockThreshold' in variant) || variant.lowStockThreshold == null || (variant.lowStockThreshold is int && variant.lowStockThreshold >= 0))
-        && (!('priceOptionIndex' in variant) || variant.priceOptionIndex is int)
-        && (!('sortOrder' in variant) || variant.sortOrder is int);
+        && (variant.lowStockThreshold == null || (variant.lowStockThreshold is int && variant.lowStockThreshold >= 0))
+        && variant.priceOptionIndex is int
+        && variant.sortOrder is int;
     }
 
-    function validOptionalProductVariant(variants, index) {
-      return variants.size() <= index || validProductVariant(variants[index]);
+    function validOptionalProductVariant(variants, priceOptions, index) {
+      return variants.size() <= index || (
+        validProductVariant(variants[index])
+        && priceOptions.size() > index
+        && priceOptions[index] is map
+        && priceOptions[index].keys().hasAll(['price'])
+        && priceOptions[index].price is string
+        && variants[index].price == priceOptions[index].price
+        && variants[index].priceOptionIndex == index
+        && variants[index].sortOrder == index
+      );
     }
 
-    function validProductVariants(variants) {
+    function validProductVariants(variants, priceOptions) {
       return variants is list
-        && variants.size() <= 20
-        && validOptionalProductVariant(variants, 0)
-        && validOptionalProductVariant(variants, 1)
-        && validOptionalProductVariant(variants, 2)
-        && validOptionalProductVariant(variants, 3)
-        && validOptionalProductVariant(variants, 4)
-        && validOptionalProductVariant(variants, 5)
-        && validOptionalProductVariant(variants, 6)
-        && validOptionalProductVariant(variants, 7)
-        && validOptionalProductVariant(variants, 8)
-        && validOptionalProductVariant(variants, 9)
-        && validOptionalProductVariant(variants, 10)
-        && validOptionalProductVariant(variants, 11)
-        && validOptionalProductVariant(variants, 12)
-        && validOptionalProductVariant(variants, 13)
-        && validOptionalProductVariant(variants, 14)
-        && validOptionalProductVariant(variants, 15)
-        && validOptionalProductVariant(variants, 16)
-        && validOptionalProductVariant(variants, 17)
-        && validOptionalProductVariant(variants, 18)
-        && validOptionalProductVariant(variants, 19);
+        && variants.size() <= 3
+        && validOptionalProductVariant(variants, priceOptions, 0)
+        && validOptionalProductVariant(variants, priceOptions, 1)
+        && validOptionalProductVariant(variants, priceOptions, 2);
     }
 
     function approvedProductCategory(categoryId) {
@@ -468,7 +479,10 @@ service cloud.firestore {
         && request.resource.data.priceOptions is list
         && request.resource.data.shipping is string
         && request.resource.data.title is string
-        && (!('variants' in request.resource.data) || validProductVariants(request.resource.data.variants));
+        && (!('variants' in request.resource.data) || (
+          validProductVariants(request.resource.data.variants, request.resource.data.priceOptions)
+          && request.resource.data.variants.size() == request.resource.data.priceOptions.size()
+        ));
     }
 
     function validEventDraft(eventId) {
@@ -698,6 +712,12 @@ service cloud.firestore {
     match /productCategories/{categoryId} {
       allow get, list: if isAdmin();
       allow create, update: if isAdmin() && approvedProductCategory(categoryId) && validProductCategory();
+      allow delete: if isAdmin();
+    }
+
+    match /productSkus/{skuId} {
+      allow get, list: if isAdmin();
+      allow create, update: if isAdmin() && validProductSku();
       allow delete: if isAdmin();
     }
 

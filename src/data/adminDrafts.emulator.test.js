@@ -26,6 +26,7 @@ const {
   publishAdminDraft,
   saveAdminDraft,
 } = require("./adminDrafts");
+const { productSkuRegistryId } = require("./productSkuRegistry");
 
 const runEmulatorTests = process.env.RUN_DRAFT_PUBLISH_EMULATOR_TESTS === "true";
 const describeWithEmulators = runEmulatorTests ? describe : describe.skip;
@@ -35,6 +36,7 @@ const adminEmail = "phase38-draft-admin@local.test";
 const adminPassword = "phase38-emulator-only-password";
 const productId = "phase38-product";
 const newProductId = "phase38-new-product";
+const secondNewProductId = "phase38-second-new-product";
 const eventId = "phase38-event";
 const contentId = "phase38-content";
 
@@ -116,8 +118,10 @@ describeWithEmulators("admin draft publish transactions", () => {
   };
 
   const clearFixtures = async () => {
+    const skuRegistry = await adminDb.collection("productSkus").get();
     const batch = adminDb.batch();
-    [productId, newProductId].forEach((id) => {
+    skuRegistry.docs.forEach((snapshot) => batch.delete(snapshot.ref));
+    [productId, newProductId, secondNewProductId].forEach((id) => {
       batch.delete(adminDb.doc(`products/${id}`));
       batch.delete(adminDb.doc(`productDrafts/${id}`));
     });
@@ -200,7 +204,7 @@ describeWithEmulators("admin draft publish transactions", () => {
     }
   }, 30000);
 
-  test("publishing product content preserves inventory changed after draft save", async () => {
+  test("publishing product content preserves inventory and derives availability", async () => {
     const saved = await saveAdminDraft({
       data: productData({ title: "Draft Product Title" }),
       db: clientDb,
@@ -213,7 +217,7 @@ describeWithEmulators("admin draft publish transactions", () => {
     expect(saved.draftRevision).toBe(1);
     await adminDb.doc(`products/${productId}`).update({
       updatedAt: admin.firestore.FieldValue.serverTimestamp(),
-      variants: [productVariant({ stockOnHand: 7 })],
+      variants: [productVariant({ stockOnHand: 0 })],
     });
 
     await publishAdminDraft({
@@ -229,11 +233,48 @@ describeWithEmulators("admin draft publish transactions", () => {
       adminDb.doc(`productDrafts/${productId}`).get(),
     ]);
     expect(liveSnapshot.data().title).toBe("Draft Product Title");
-    expect(liveSnapshot.data().variants[0].stockOnHand).toBe(7);
+    expect(liveSnapshot.data().variants[0].stockOnHand).toBe(0);
+    expect(liveSnapshot.data().inStock).toBe(false);
     expect(liveSnapshot.data().contentRevision).toBe(1);
     expect(draftSnapshot.data().draftStatus).toBe("published");
     expect(draftSnapshot.data().draftPublishedContentRevision).toBe(1);
     expect(draftSnapshot.data().draftRevision).toBe(2);
+    const skuClaim = (await adminDb.doc(
+      `productSkus/${productSkuRegistryId("PHASE38-JAR")}`,
+    ).get()).data();
+    expect(skuClaim).toMatchObject({
+      productId,
+      sku: "PHASE38-JAR",
+      variantId: "jar",
+    });
+  });
+
+  test("publishing legacy product content does not create inventory variants", async () => {
+    const legacyProduct = productData({ title: "Phase 38 Legacy Product" });
+    delete legacyProduct.variants;
+    await adminDb.doc(`products/${productId}`).set(legacyProduct);
+    const saved = await saveAdminDraft({
+      data: { ...legacyProduct, title: "Updated Legacy Product" },
+      db: clientDb,
+      expectedTargetExists: true,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+
+    await publishAdminDraft({
+      db: clientDb,
+      expectedDraftRevision: saved.draftRevision,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+
+    const live = (await adminDb.doc(`products/${productId}`).get()).data();
+    expect(live.title).toBe("Updated Legacy Product");
+    expect(live.inStock).toBe(true);
+    expect(live.variants).toBeUndefined();
+    expect((await adminDb.collection("productSkus").get()).empty).toBe(true);
   });
 
   test("publishing can remove an optional product sort order", async () => {
@@ -361,6 +402,7 @@ describeWithEmulators("admin draft publish transactions", () => {
       data: productData({
         slug: newProductId,
         title: "Phase 38 New Product",
+        variants: [productVariant({ sku: "PHASE38-NEW-JAR" })],
       }),
       db: clientDb,
       expectedTargetExists: false,
@@ -385,6 +427,137 @@ describeWithEmulators("admin draft publish transactions", () => {
     expect(liveSnapshot.data().title).toBe("Phase 38 New Product");
     expect(liveSnapshot.data().contentRevision).toBe(1);
     expect(draftSnapshot.data().draftStatus).toBe("published");
+  });
+
+  test("simultaneous product publishes cannot claim the same SKU", async () => {
+    const sharedSku = "PHASE38-SHARED-JAR";
+    const firstSave = await saveAdminDraft({
+      data: productData({
+        slug: newProductId,
+        title: "Phase 38 First SKU Owner",
+        variants: [productVariant({ sku: sharedSku })],
+      }),
+      db: clientDb,
+      expectedTargetExists: false,
+      targetCollection: "products",
+      targetId: newProductId,
+      userId: adminUid,
+    });
+    const secondSave = await saveAdminDraft({
+      data: productData({
+        slug: secondNewProductId,
+        title: "Phase 38 Second SKU Owner",
+        variants: [productVariant({ sku: sharedSku })],
+      }),
+      db: clientDb,
+      expectedTargetExists: false,
+      targetCollection: "products",
+      targetId: secondNewProductId,
+      userId: adminUid,
+    });
+    const results = await Promise.allSettled([
+      publishAdminDraft({
+        db: clientDb,
+        expectedDraftRevision: firstSave.draftRevision,
+        targetCollection: "products",
+        targetId: newProductId,
+        userId: adminUid,
+      }),
+      publishAdminDraft({
+        db: clientDb,
+        expectedDraftRevision: secondSave.draftRevision,
+        targetCollection: "products",
+        targetId: secondNewProductId,
+        userId: adminUid,
+      }),
+    ]);
+
+    expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1);
+    expect(results.filter((result) => result.status === "rejected")).toHaveLength(1);
+    expect(results.find((result) => result.status === "rejected").reason)
+      .toMatchObject({ name: "DraftPublishConflictError" });
+    const claim = (await adminDb.doc(
+      `productSkus/${productSkuRegistryId(sharedSku)}`,
+    ).get()).data();
+    expect([newProductId, secondNewProductId]).toContain(claim.productId);
+  });
+
+  test("product publish transfers and releases SKU claims with variant edits", async () => {
+    const firstSave = await saveAdminDraft({
+      data: productData({ title: "Initial SKU Claim" }),
+      db: clientDb,
+      expectedTargetExists: true,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+    await publishAdminDraft({
+      db: clientDb,
+      expectedDraftRevision: firstSave.draftRevision,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+
+    const transferredVariant = productVariant({
+      id: "bottle",
+      label: "Bottle",
+    });
+    const transferSave = await saveAdminDraft({
+      data: productData({
+        title: "Transferred SKU Claim",
+        variants: [transferredVariant],
+      }),
+      db: clientDb,
+      expectedTargetExists: true,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+    await publishAdminDraft({
+      db: clientDb,
+      expectedDraftRevision: transferSave.draftRevision,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+
+    const originalClaimRef = adminDb.doc(
+      `productSkus/${productSkuRegistryId("PHASE38-JAR")}`,
+    );
+    expect((await originalClaimRef.get()).data()).toMatchObject({
+      productId,
+      variantId: "bottle",
+    });
+
+    const replacementSku = "PHASE38-BOTTLE";
+    const replacementSave = await saveAdminDraft({
+      data: productData({
+        title: "Replacement SKU Claim",
+        variants: [{ ...transferredVariant, sku: replacementSku }],
+      }),
+      db: clientDb,
+      expectedTargetExists: true,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+    await publishAdminDraft({
+      db: clientDb,
+      expectedDraftRevision: replacementSave.draftRevision,
+      targetCollection: "products",
+      targetId: productId,
+      userId: adminUid,
+    });
+
+    expect((await originalClaimRef.get()).exists).toBe(false);
+    expect((await adminDb.doc(
+      `productSkus/${productSkuRegistryId(replacementSku)}`,
+    ).get()).data()).toMatchObject({
+      productId,
+      sku: replacementSku,
+      variantId: "bottle",
+    });
   });
 
   test("two simultaneous publish attempts commit exactly once", async () => {

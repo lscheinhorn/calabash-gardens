@@ -39,6 +39,10 @@ import {
   saveAdminDraft,
 } from "../../data/adminDrafts";
 import AdminPublishReview from "./AdminPublishReview";
+import {
+  productInStockForVariants,
+  productInventoryFormMatches,
+} from "./inventoryAdminModel";
 
 const emptyPriceOption = {
   option: "",
@@ -62,7 +66,6 @@ const emptyProduct = {
   priceOptions: [{ ...emptyPriceOption }],
   published: false,
   isActive: false,
-  inStock: true,
   isHighlighted: false,
   sortOrder: "",
 };
@@ -80,6 +83,10 @@ const recommendedImageSize = 10 * 1024 * 1024;
 const maxOriginalImageSize = 25 * 1024 * 1024;
 const optimizedImageMaxWidth = 1800;
 const optimizedImageQuality = 0.82;
+const maxProductVariants = 3;
+const maxVariantIdLength = 120;
+const maxVariantLabelLength = 160;
+const maxVariantSkuLength = 120;
 
 const CollapseIcon = ({ isExpanded }) => (
   <FontAwesomeIcon
@@ -186,8 +193,8 @@ const productInventorySummary = (product) => {
 
   if (!trackedVariants.length) {
     return {
-      available: product.inStock !== false,
-      label: product.inStock === false ? "Unavailable" : "Inventory not tracked",
+      available: productInStockForVariants(product.variants),
+      label: productInStockForVariants(product.variants) ? "Inventory not tracked" : "Unavailable",
       totalStock: 0,
       trackedCount: 0,
     };
@@ -196,7 +203,7 @@ const productInventorySummary = (product) => {
   const totalStock = trackedVariants.reduce((total, variant) => total + Number(quantityText(variant.stockOnHand)), 0);
 
   return {
-    available: product.inStock !== false && totalStock > 0,
+    available: productInStockForVariants(product.variants),
     label: `${totalStock} on hand across ${trackedVariants.length} ${trackedVariants.length === 1 ? "variant" : "variants"}`,
     totalStock,
     trackedCount: trackedVariants.length,
@@ -343,7 +350,6 @@ const buildFormFromProduct = (product) => ({
   priceOptions: normalizePriceOptions(product.priceOptions, product.variants, product.id),
   published: product.published === true,
   isActive: product.isActive === true,
-  inStock: product.inStock !== false,
   isHighlighted: product.isHighlighted === true,
   sortOrder: product.sortOrder ?? "",
 });
@@ -739,14 +745,18 @@ export default function ProductAdmin({
   const addPriceOption = () => {
     setForm((currentForm) => ({
       ...currentForm,
-      priceOptions: [...currentForm.priceOptions, { ...emptyPriceOption }],
+      priceOptions: currentForm.priceOptions.length >= maxProductVariants
+        ? currentForm.priceOptions
+        : [...currentForm.priceOptions, { ...emptyPriceOption }],
     }));
   };
 
   const addEditingPriceOption = () => {
     setEditingForm((currentForm) => ({
       ...currentForm,
-      priceOptions: [...currentForm.priceOptions, { ...emptyPriceOption }],
+      priceOptions: currentForm.priceOptions.length >= maxProductVariants
+        ? currentForm.priceOptions
+        : [...currentForm.priceOptions, { ...emptyPriceOption }],
     }));
   };
 
@@ -813,6 +823,7 @@ export default function ProductAdmin({
 
     const variants = buildProductVariants(productId, productForm.priceOptions);
     const variantIds = variants.map((variant) => variant.id);
+    const variantSkus = variants.map((variant) => variant.sku.trim().toUpperCase());
     const hasInvalidVariantId = variantIds.some((variantId) => !variantId);
 
     if (hasInvalidVariantId) {
@@ -821,6 +832,35 @@ export default function ProductAdmin({
 
     if (new Set(variantIds).size !== variantIds.length) {
       return "Every inventory variant ID must be unique for this product.";
+    }
+
+    if (variants.length > maxProductVariants) {
+      return `Products can have no more than ${maxProductVariants} price options.`;
+    }
+
+    if (variantIds.some((variantId) => variantId.length > maxVariantIdLength)) {
+      return `Inventory variant IDs cannot be longer than ${maxVariantIdLength} characters.`;
+    }
+
+    if (variants.some((variant) => variant.label.length > maxVariantLabelLength)) {
+      return `Option labels cannot be longer than ${maxVariantLabelLength} characters.`;
+    }
+
+    if (variantSkus.some((sku) => !sku || sku.length > maxVariantSkuLength)) {
+      return `Every inventory variant needs a SKU no longer than ${maxVariantSkuLength} characters.`;
+    }
+
+    if (new Set(variantSkus).size !== variantSkus.length) {
+      return "Every inventory SKU must be unique for this product.";
+    }
+
+    const duplicateProductSku = products
+      .filter((product) => product.id !== productId)
+      .flatMap((product) => Array.isArray(product.variants) ? product.variants : [])
+      .find((variant) => variantSkus.includes(String(variant.sku || "").trim().toUpperCase()));
+
+    if (duplicateProductSku) {
+      return `SKU ${duplicateProductSku.sku} is already used by another product.`;
     }
 
     const hasInvalidStock = productForm.priceOptions.some((priceOption) => {
@@ -865,6 +905,26 @@ export default function ProductAdmin({
     isNewProduct = true,
     includePhotos = true
   ) => {
+    const normalizedCurrentPriceOptions = currentProduct
+      ? normalizePriceOptions(
+        currentProduct.priceOptions,
+        currentProduct.variants,
+        currentProduct.id || productId,
+      )
+      : [];
+    const inventoryWasEdited = isNewProduct || !currentProduct || !productInventoryFormMatches(
+      productForm.priceOptions,
+      normalizedCurrentPriceOptions,
+    );
+    const variants = inventoryWasEdited
+      ? buildProductVariants(productId, productForm.priceOptions)
+      : currentProduct.variants;
+    const priceOptions = inventoryWasEdited
+      ? productForm.priceOptions.map((priceOption) => ({
+        option: priceOption.option.trim(),
+        price: priceOption.price.trim(),
+      }))
+      : currentProduct.priceOptions;
     const payload = {
       title: productForm.title.trim(),
       category: productForm.category.trim(),
@@ -872,18 +932,22 @@ export default function ProductAdmin({
       info1: productForm.info1.trim(),
       info2: productForm.info2.trim(),
       shipping: productForm.shipping.trim(),
-      priceOptions: productForm.priceOptions.map((priceOption) => ({
-        option: priceOption.option.trim(),
-        price: priceOption.price.trim(),
-      })),
-      variants: buildProductVariants(productId, productForm.priceOptions),
+      priceOptions,
       published: productForm.isActive === true,
       isActive: productForm.isActive,
-      inStock: productForm.inStock,
+      inStock: inventoryWasEdited
+        ? productInStockForVariants(variants)
+        : typeof currentProduct.inStock === "boolean"
+          ? currentProduct.inStock
+          : productInStockForVariants(variants),
       isHighlighted: productForm.isHighlighted,
       slug: productId,
       updatedAt: serverTimestamp(),
     };
+
+    if (inventoryWasEdited || Object.prototype.hasOwnProperty.call(currentProduct || {}, "variants")) {
+      payload.variants = variants;
+    }
 
     if (includePhotos) {
       payload.photos = normalizePhotos(currentProduct?.photos);
@@ -1891,7 +1955,12 @@ export default function ProductAdmin({
                                   </button>
                                 </div>
                               ))}
-                              <button className="admin_secondary_button" onClick={addEditingPriceOption} type="button">
+                              <button
+                                className="admin_secondary_button"
+                                disabled={editingForm.priceOptions.length >= maxProductVariants}
+                                onClick={addEditingPriceOption}
+                                type="button"
+                              >
                                 Add Price Option
                               </button>
                             </div>
@@ -1908,10 +1977,6 @@ export default function ProductAdmin({
                               <label>
                                 <input checked={editingForm.isActive} onChange={(event) => updateEditingForm("isActive", event.target.checked)} type="checkbox" />
                                 Visible on site
-                              </label>
-                              <label>
-                                <input checked={editingForm.inStock} onChange={(event) => updateEditingForm("inStock", event.target.checked)} type="checkbox" />
-                                Available now
                               </label>
                               <label>
                                 <input checked={editingForm.isHighlighted} onChange={(event) => updateEditingForm("isHighlighted", event.target.checked)} type="checkbox" />
@@ -2360,7 +2425,12 @@ export default function ProductAdmin({
                   </button>
                 </div>
               ))}
-              <button className="admin_secondary_button" onClick={addPriceOption} type="button">
+              <button
+                className="admin_secondary_button"
+                disabled={form.priceOptions.length >= maxProductVariants}
+                onClick={addPriceOption}
+                type="button"
+              >
                 Add Price Option
               </button>
             </div>
@@ -2379,10 +2449,6 @@ export default function ProductAdmin({
               <label>
                 <input checked={form.isActive} onChange={(event) => updateForm("isActive", event.target.checked)} type="checkbox" />
                 Visible on site
-              </label>
-              <label>
-                <input checked={form.inStock} onChange={(event) => updateForm("inStock", event.target.checked)} type="checkbox" />
-                Available now
               </label>
               <label>
                 <input checked={form.isHighlighted} onChange={(event) => updateForm("isHighlighted", event.target.checked)} type="checkbox" />

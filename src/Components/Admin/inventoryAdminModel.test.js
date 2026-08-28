@@ -1,8 +1,12 @@
 import { normalizeFirestoreProductForPublic } from "../../data/publicProductAdapter";
 import {
   InventoryConflictError,
+  mergePreservedInventoryDrafts,
   mergeEventInventoryDraft,
   mergeProductInventoryDrafts,
+  productInStockForVariants,
+  productInventoryFormMatches,
+  skuForVariant,
   variantsForProduct,
 } from "./inventoryAdminModel";
 
@@ -33,6 +37,8 @@ const productVariant = (overrides = {}) => ({
 });
 
 const productRow = (overrides = {}) => ({
+  active: true,
+  id: "product-test-product-0-default",
   inventoryTracked: true,
   lowStockThreshold: 2,
   priceOptionIndex: 0,
@@ -45,6 +51,7 @@ const productRow = (overrides = {}) => ({
 });
 
 const productDraft = (overrides = {}) => ({
+  active: true,
   inventoryTracked: true,
   lowStockThreshold: "2",
   stockOnHand: "10",
@@ -68,6 +75,14 @@ const eventDraft = (overrides = {}) => ({
   ...overrides,
 });
 
+const productWithVariants = (variants) => ({
+  priceOptions: variants.map((variant) => ({
+    option: variant.label,
+    price: variant.price,
+  })),
+  variants,
+});
+
 describe("inventoryAdminModel", () => {
   test("legacy price options receive stable variant indexes", () => {
     const variants = variantsForProduct({
@@ -76,11 +91,75 @@ describe("inventoryAdminModel", () => {
         { option: "4 oz", price: "15.00" },
         { option: "8 oz", price: "27.00" },
       ],
-    });
+    }, "test-product");
 
     expect(variants).toMatchObject([
-      { id: "4-oz", priceOptionIndex: 0, sortOrder: 0 },
-      { id: "8-oz", priceOptionIndex: 1, sortOrder: 1 },
+      { id: "4-oz", priceOptionIndex: 0, sku: "CG-TEST-PRODUCT-4-OZ", sortOrder: 0 },
+      { id: "8-oz", priceOptionIndex: 1, sku: "CG-TEST-PRODUCT-8-OZ", sortOrder: 1 },
+    ]);
+  });
+
+  test("content-only edits can recognize unchanged inventory form values", () => {
+    const baseline = [{
+      active: true,
+      inventoryTracked: true,
+      lowStockThreshold: "2",
+      option: "Jar",
+      price: "15.00",
+      sku: "custom-jar",
+      stockOnHand: "10",
+      variantId: "jar",
+    }];
+
+    expect(productInventoryFormMatches([{ ...baseline[0] }], baseline)).toBe(true);
+    expect(productInventoryFormMatches([{ ...baseline[0], stockOnHand: "9" }], baseline)).toBe(false);
+    expect(productInventoryFormMatches([{ ...baseline[0], price: "16.00" }], baseline)).toBe(false);
+  });
+
+  test("legacy and incomplete variants receive deterministic metadata without replacing custom values", () => {
+    expect(skuForVariant("Luke's Test Product", "4 oz")).toBe("CG-LUKE-S-TEST-PRODUCT-4-OZ");
+
+    const variants = variantsForProduct({
+      priceOptions: [
+        { option: "Small", price: "10.00" },
+        { option: "Large", price: "20.00" },
+      ],
+      variants: [
+        { active: true, id: "small", inventoryTracked: true, label: "Small", price: "10.00", sku: "CUSTOM-SMALL", stockOnHand: 2 },
+        { active: true, id: "large", inventoryTracked: true, label: "Large", price: "20.00", sku: "", stockOnHand: 3 },
+      ],
+    }, "test-product");
+
+    expect(variants).toMatchObject([
+      { id: "small", priceOptionIndex: 0, sku: "CUSTOM-SMALL", sortOrder: 0 },
+      { id: "large", priceOptionIndex: 1, sku: "CG-TEST-PRODUCT-LARGE", sortOrder: 1 },
+    ]);
+  });
+
+  test("a partial variant list receives the missing price-option mapping", () => {
+    const variants = variantsForProduct({
+      inStock: true,
+      priceOptions: [
+        { option: "Small", price: "10.00" },
+        { option: "Large", price: "20.00" },
+      ],
+      variants: [{
+        active: true,
+        id: "large",
+        inventoryTracked: true,
+        label: "Large",
+        lowStockThreshold: 2,
+        price: "20.00",
+        priceOptionIndex: 1,
+        sku: "CUSTOM-LARGE",
+        sortOrder: 1,
+        stockOnHand: 3,
+      }],
+    }, "test-product");
+
+    expect(variants).toMatchObject([
+      { id: "small", priceOptionIndex: 0, sku: "CG-TEST-PRODUCT-SMALL", stockOnHand: 0 },
+      { id: "large", priceOptionIndex: 1, sku: "CUSTOM-LARGE", stockOnHand: 3 },
     ]);
   });
 
@@ -155,15 +234,14 @@ describe("inventoryAdminModel", () => {
         draft: productDraft({ lowStockThreshold: "3" }),
         row: productRow(),
       }],
-      product: {
-        variants: [productVariant({ stockOnHand: 8 })],
-      },
+      product: productWithVariants([productVariant({ stockOnHand: 8 })]),
     });
 
     expect(result.variants[0]).toMatchObject({
       lowStockThreshold: 3,
       stockOnHand: 8,
     });
+    expect(result.inStock).toBe(true);
     expect(result.movements).toEqual([]);
   });
 
@@ -173,9 +251,7 @@ describe("inventoryAdminModel", () => {
         draft: productDraft({ stockOnHand: "7" }),
         row: productRow(),
       }],
-      product: {
-        variants: [productVariant({ stockOnHand: 9 })],
-      },
+      product: productWithVariants([productVariant({ stockOnHand: 9 })]),
     })).toThrow(InventoryConflictError);
   });
 
@@ -197,8 +273,7 @@ describe("inventoryAdminModel", () => {
           }),
         },
       ],
-      product: {
-        variants: [
+      product: productWithVariants([
           productVariant(),
           productVariant({
             id: "large",
@@ -214,11 +289,11 @@ describe("inventoryAdminModel", () => {
             label: "Untouched",
             price: "33.00",
             priceOptionIndex: 2,
+            sku: "CG-PRODUCT-UNTOUCHED",
             sortOrder: 2,
             stockOnHand: 6,
           }),
-        ],
-      },
+        ]),
     });
 
     expect(result.variants[0].stockOnHand).toBe(8);
@@ -232,18 +307,48 @@ describe("inventoryAdminModel", () => {
     expect(result.movements[0].quantityDelta).toBe(-2);
   });
 
+  test("sellable status and tracked stock determine compatibility availability", () => {
+    const soldOut = mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ stockOnHand: "0" }),
+        row: productRow({ stockOnHand: 1 }),
+      }],
+      product: productWithVariants([productVariant({ stockOnHand: 1 })]),
+    });
+    const untracked = mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ inventoryTracked: false, stockOnHand: "0" }),
+        row: productRow({ stockOnHand: 0 }),
+      }],
+      product: productWithVariants([productVariant({ stockOnHand: 0 })]),
+    });
+    const inactive = mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ active: false }),
+        row: productRow(),
+      }],
+      product: productWithVariants([productVariant()]),
+    });
+
+    expect(soldOut.inStock).toBe(false);
+    expect(untracked.inStock).toBe(true);
+    expect(inactive.inStock).toBe(false);
+    expect(productInStockForVariants([
+      productVariant({ stockOnHand: 0 }),
+      productVariant({ id: "available", priceOptionIndex: 1, sku: "AVAILABLE", stockOnHand: 2 }),
+    ])).toBe(true);
+  });
+
   test("duplicate or reordered variants fail safely", () => {
     expect(() => mergeProductInventoryDrafts({
       changes: [{
         draft: productDraft({ stockOnHand: "9" }),
         row: productRow(),
       }],
-      product: {
-        variants: [
+      product: productWithVariants([
           productVariant(),
           productVariant({ priceOptionIndex: 1, sortOrder: 1 }),
-        ],
-      },
+        ]),
     })).toThrow(/duplicate product option IDs/i);
 
     expect(() => mergeProductInventoryDrafts({
@@ -251,10 +356,109 @@ describe("inventoryAdminModel", () => {
         draft: productDraft({ stockOnHand: "9" }),
         row: productRow(),
       }],
+      product: productWithVariants([productVariant({ priceOptionIndex: 1 })]),
+    })).toThrow(/exactly one inventory option/i);
+  });
+
+  test("malformed stored inventory values fail closed", () => {
+    expect(() => mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ lowStockThreshold: "3" }),
+        row: productRow(),
+      }],
+      product: productWithVariants([productVariant({ stockOnHand: "10" })]),
+    })).toThrow(/invalid stock value/i);
+
+    expect(() => mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ active: false }),
+        row: productRow(),
+      }],
+      product: productWithVariants([productVariant({ active: "true" })]),
+    })).toThrow(/invalid sellable status/i);
+
+    expect(() => mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ lowStockThreshold: "3" }),
+        row: productRow(),
+      }],
       product: {
-        variants: [productVariant({ priceOptionIndex: 1 })],
+        priceOptions: [{ option: "Default", price: "15.00" }],
+        variants: [productVariant({ price: "16.00" })],
       },
-    })).toThrow(/changed or no longer exists/i);
+    })).toThrow(/inventory price that does not match/i);
+
+    expect(() => mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ lowStockThreshold: "3" }),
+        row: productRow(),
+      }],
+      product: {
+        priceOptions: [{ option: "Default", price: "15.00" }],
+        variants: [productVariant({ price: "15.00 " })],
+      },
+    })).toThrow(/inventory price that does not match/i);
+
+    expect(() => mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ lowStockThreshold: "3" }),
+        row: productRow(),
+      }],
+      product: {
+        priceOptions: [{ option: "Default", price: "15.00" }],
+        variants: [null],
+      },
+    })).toThrow(/malformed product option/i);
+  });
+
+  test("a sellable-status edit rejects a concurrent status change", () => {
+    expect(() => mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ active: false }),
+        row: productRow(),
+      }],
+      product: productWithVariants([productVariant({ active: false })]),
+    })).toThrow(InventoryConflictError);
+  });
+
+  test("refreshing a conflict resets only that row and preserves other unsaved drafts", () => {
+    const merged = mergePreservedInventoryDrafts({
+      freshDraftRows: {
+        first: { stockOnHand: "9" },
+        second: { stockOnHand: "20" },
+      },
+      preserveDraftRows: {
+        first: { stockOnHand: "8" },
+        second: { stockOnHand: "18" },
+      },
+      preserveRowIds: ["first", "second"],
+      resetRowIds: ["first"],
+    });
+
+    expect(merged).toEqual({
+      first: { stockOnHand: "9" },
+      second: { stockOnHand: "18" },
+    });
+  });
+
+  test("a conflict refresh does not turn untouched stale snapshots into drafts", () => {
+    const merged = mergePreservedInventoryDrafts({
+      freshDraftRows: {
+        edited: { stockOnHand: "9" },
+        untouched: { stockOnHand: "25" },
+      },
+      preserveDraftRows: {
+        edited: { stockOnHand: "11" },
+        untouched: { stockOnHand: "20" },
+      },
+      preserveRowIds: ["edited"],
+      resetRowIds: ["edited"],
+    });
+
+    expect(merged).toEqual({
+      edited: { stockOnHand: "9" },
+      untouched: { stockOnHand: "25" },
+    });
   });
 
   test("event edits preserve concurrent fields and use current ticket sales", () => {
