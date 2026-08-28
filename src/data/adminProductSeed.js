@@ -1,4 +1,9 @@
 import { products as staticProducts } from "../resources/products";
+import {
+  productIdentitySlug,
+  skuForVariant,
+  variantIdForOption,
+} from "./productVariantIdentity";
 
 const decimalPattern = /^\d+\.\d{2}$/;
 const giftCategoryName = "Gifts";
@@ -23,13 +28,7 @@ export const approvedProductCategories = [
   "Tinctures",
 ];
 
-export const seedSlugify = (value) =>
-  String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/['‘’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
+export const seedSlugify = productIdentitySlug;
 
 const approvedCategoryIds = new Set(approvedProductCategories.map((category) => (
   seedSlugify(category)
@@ -77,21 +76,8 @@ const normalizePriceOptions = (priceOptions) => (
   price: String(priceOption?.price || "").trim(),
 }));
 
-const variantIdForPriceOption = (priceOption, index) => (
-  seedSlugify(priceOption.option) || (index === 0 ? "default" : `option-${index + 1}`)
-);
-
-const skuForVariant = (productId, variantId) => (
-  ["CG", productId, variantId]
-    .filter(Boolean)
-    .join("-")
-    .replace(/[^a-z0-9-]/gi, "-")
-    .replace(/-+/g, "-")
-    .toUpperCase()
-);
-
-const buildVariants = (productId, priceOptions) => priceOptions.map((priceOption, index) => {
-  const variantId = variantIdForPriceOption(priceOption, index);
+const buildVariants = (productId, priceOptions, productAvailable) => priceOptions.map((priceOption, index) => {
+  const variantId = variantIdForOption(priceOption.option, index);
 
   return {
     id: variantId,
@@ -100,8 +86,8 @@ const buildVariants = (productId, priceOptions) => priceOptions.map((priceOption
     sku: skuForVariant(productId, variantId),
     stockOnHand: 0,
     lowStockThreshold: null,
-    inventoryTracked: true,
-    active: true,
+    inventoryTracked: false,
+    active: productAvailable,
     priceOptionIndex: index,
     sortOrder: index,
   };
@@ -124,7 +110,7 @@ const normalizeStaticProduct = (product, index) => {
       info2: String(product?.info2 || "").trim(),
       shipping: String(product?.shipping || "").trim(),
       priceOptions,
-      variants: buildVariants(id, priceOptions),
+      variants: buildVariants(id, priceOptions, product?.inStock !== false),
       published: product?.isActive === true,
       isActive: product?.isActive === true,
       inStock: product?.inStock !== false,

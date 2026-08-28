@@ -7,6 +7,7 @@ import {
 import {
   InventoryConflictError,
   mergePreservedInventoryDrafts,
+  updateInventoryDraftValue,
   variantsForProduct,
 } from "./inventoryAdminModel";
 import { saveInventoryRowsTransaction } from "./inventoryAdminTransactions";
@@ -41,7 +42,10 @@ const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => 
   return variantRows.map((variant, index) => {
     const stockOnHand = numberOrNull(variant.stockOnHand) || 0;
     const lowStockThreshold = numberOrNull(variant.lowStockThreshold);
-    const inventoryTracked = variant.inventoryTracked !== false;
+    const storedInventoryTracked = variant.inventoryTracked !== false;
+    const inventoryTracked = variant.inventorySetupRequired === true
+      ? false
+      : storedInventoryTracked;
     const variantActive = variant.active !== false;
     const visible = product.isActive !== false && product.published !== false;
     const lowStock = inventoryTracked
@@ -61,6 +65,7 @@ const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => 
       category: text(product.category),
       id: `product-${productId}-${variant.priceOptionIndex}-${text(variant.id, index)}`,
       inventoryTracked,
+      inventorySetupRequired: variant.inventorySetupRequired === true,
       lowStockThreshold,
       priceOptionIndex: variant.priceOptionIndex,
       primary: text(product.title, productId),
@@ -69,6 +74,7 @@ const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => 
       sku: text(variant.sku),
       status,
       stockOnHand,
+      storedInventoryTracked,
       type: "product",
       value: inventoryTracked ? `${stockOnHand} on hand` : "Not tracked",
       active: variantActive,
@@ -132,7 +138,8 @@ const wholeNumber = (value) => /^\d+$/.test(String(value).trim());
 const productDraftChanged = (row, draft) => (
   draft
   && (
-    row.active !== draft.active
+    (row.inventorySetupRequired === true && draft.stockConfirmed === true)
+    || row.active !== draft.active
     || String(row.stockOnHand) !== String(draft.stockOnHand)
     || String(row.lowStockThreshold === null ? "" : row.lowStockThreshold) !== String(draft.lowStockThreshold)
     || row.inventoryTracked !== draft.inventoryTracked
@@ -237,12 +244,16 @@ export default function InventoryAdmin({ db }) {
 
   const updateDraft = (rowId, field, value) => {
     setMessage("");
+    const row = rows.find((candidate) => candidate.id === rowId);
+
     setDraftRows((currentDraftRows) => ({
       ...currentDraftRows,
-      [rowId]: {
-        ...(currentDraftRows[rowId] || {}),
-        [field]: value,
-      },
+      [rowId]: updateInventoryDraftValue({
+        draft: currentDraftRows[rowId],
+        field,
+        row,
+        value,
+      }),
     }));
   };
 
@@ -267,6 +278,24 @@ export default function InventoryAdmin({ db }) {
         }
 
         productSkuOwners.set(sku, `${row.primary} ${row.secondary || "option"}`);
+      }
+
+      const setupProductIds = new Set(dirtyRows
+        .filter((row) => row.type === "product" && row.inventorySetupRequired === true)
+        .map((row) => row.productId));
+
+      for (const productId of setupProductIds) {
+        const productRows = rows.filter((row) => (
+          row.type === "product" && row.productId === productId
+        ));
+        const unconfirmedQuantity = productRows.some((row) => (
+          row.inventorySetupRequired === true
+          && draftRows[row.id]?.stockConfirmed !== true
+        ));
+
+        if (unconfirmedQuantity) {
+          return `${productRows[0]?.primary || productId} needs a confirmed stock quantity for every option before inventory setup can be saved.`;
+        }
       }
     }
 

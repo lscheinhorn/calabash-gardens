@@ -7,6 +7,7 @@ import {
   productInStockForVariants,
   productInventoryFormMatches,
   skuForVariant,
+  updateInventoryDraftValue,
   variantsForProduct,
 } from "./inventoryAdminModel";
 
@@ -94,9 +95,48 @@ describe("inventoryAdminModel", () => {
     }, "test-product");
 
     expect(variants).toMatchObject([
-      { id: "4-oz", priceOptionIndex: 0, sku: "CG-TEST-PRODUCT-4-OZ", sortOrder: 0 },
-      { id: "8-oz", priceOptionIndex: 1, sku: "CG-TEST-PRODUCT-8-OZ", sortOrder: 1 },
+      {
+        active: true,
+        id: "4-oz",
+        inventorySetupRequired: true,
+        inventoryTracked: false,
+        priceOptionIndex: 0,
+        sku: "CG-TEST-PRODUCT-4-OZ",
+        sortOrder: 0,
+      },
+      {
+        active: true,
+        id: "8-oz",
+        inventorySetupRequired: true,
+        inventoryTracked: false,
+        priceOptionIndex: 1,
+        sku: "CG-TEST-PRODUCT-8-OZ",
+        sortOrder: 1,
+      },
     ]);
+  });
+
+  test("entering the first real quantity enables tracking and sellability", () => {
+    const updated = updateInventoryDraftValue({
+      draft: {
+        active: false,
+        inventoryTracked: false,
+        stockOnHand: "0",
+      },
+      field: "stockOnHand",
+      row: {
+        inventorySetupRequired: true,
+        type: "product",
+      },
+      value: "0",
+    });
+
+    expect(updated).toEqual({
+      active: true,
+      inventoryTracked: true,
+      stockConfirmed: true,
+      stockOnHand: "0",
+    });
   });
 
   test("content-only edits can recognize unchanged inventory form values", () => {
@@ -158,9 +198,115 @@ describe("inventoryAdminModel", () => {
     }, "test-product");
 
     expect(variants).toMatchObject([
-      { id: "small", priceOptionIndex: 0, sku: "CG-TEST-PRODUCT-SMALL", stockOnHand: 0 },
-      { id: "large", priceOptionIndex: 1, sku: "CUSTOM-LARGE", stockOnHand: 3 },
+      {
+        id: "small",
+        inventorySetupRequired: true,
+        priceOptionIndex: 0,
+        sku: "CG-TEST-PRODUCT-SMALL",
+        stockOnHand: 0,
+      },
+      {
+        id: "large",
+        inventorySetupRequired: true,
+        priceOptionIndex: 1,
+        sku: "CUSTOM-LARGE",
+        stockOnHand: 3,
+      },
     ]);
+  });
+
+  test("partial persisted inventory requires an explicit quantity for every option", () => {
+    const product = {
+      inStock: true,
+      priceOptions: [
+        { option: "Small", price: "10.00" },
+        { option: "Large", price: "20.00" },
+      ],
+      variants: [{
+        active: true,
+        id: "small custom",
+        inventoryTracked: true,
+        label: "Small",
+        lowStockThreshold: null,
+        price: "10.00",
+        sku: "",
+        stockOnHand: 0,
+      }],
+    };
+    const variants = variantsForProduct(product, "test-product");
+    const smallRow = productRow({
+      id: "product-test-product-0-small-custom",
+      inventorySetupRequired: true,
+      inventoryTracked: false,
+      lowStockThreshold: null,
+      priceOptionIndex: 0,
+      secondary: "Small",
+      stockOnHand: 0,
+      storedInventoryTracked: true,
+      variantId: "small custom",
+    });
+    const largeRow = productRow({
+      id: "product-test-product-1-large",
+      inventorySetupRequired: true,
+      inventoryTracked: false,
+      lowStockThreshold: null,
+      priceOptionIndex: 1,
+      secondary: "Large",
+      stockOnHand: 0,
+      storedInventoryTracked: false,
+      variantId: "large",
+    });
+
+    expect(variants.every((variant) => variant.inventorySetupRequired)).toBe(true);
+    expect(() => mergeProductInventoryDrafts({
+      changes: [{
+        draft: productDraft({ lowStockThreshold: "2", stockOnHand: "0" }),
+        row: smallRow,
+      }],
+      product,
+    })).toThrow("needs a confirmed stock quantity for every option");
+
+    const initialized = mergeProductInventoryDrafts({
+      changes: [
+        {
+          draft: productDraft({
+            inventoryTracked: false,
+            lowStockThreshold: "",
+            stockConfirmed: true,
+            stockOnHand: "0",
+          }),
+          row: smallRow,
+        },
+        {
+          draft: productDraft({
+            inventoryTracked: true,
+            lowStockThreshold: "",
+            stockConfirmed: true,
+            stockOnHand: "0",
+          }),
+          row: largeRow,
+        },
+      ],
+      product,
+    });
+
+    expect(initialized.variants).toMatchObject([
+      {
+        id: "small custom",
+        inventoryTracked: false,
+        sku: "CG-TEST-PRODUCT-SMALL-CUSTOM",
+        stockOnHand: 0,
+      },
+      {
+        id: "large",
+        inventoryTracked: true,
+        sku: "CG-TEST-PRODUCT-LARGE",
+        stockOnHand: 0,
+      },
+    ]);
+    expect(initialized.variants.every((variant) => (
+      !Object.prototype.hasOwnProperty.call(variant, "inventorySetupRequired")
+    ))).toBe(true);
   });
 
   test("public price options respect explicit indexes and legacy array order", () => {
@@ -241,6 +387,8 @@ describe("inventoryAdminModel", () => {
       lowStockThreshold: 3,
       stockOnHand: 8,
     });
+    expect(result.variants[0]).not.toHaveProperty("inventorySetupRequired");
+    expect(result.variants[0]).not.toHaveProperty("__invalidInventoryVariant");
     expect(result.inStock).toBe(true);
     expect(result.movements).toEqual([]);
   });

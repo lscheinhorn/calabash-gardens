@@ -44,6 +44,10 @@ Product availability has one invariant across admin editing, draft publishing, a
 
 `productSkus` is the transactional SKU ownership registry for the supported admin portal. Product publish and InventoryAdmin read each normalized SKU claim before writing, reject another owner, and update the claim in the same transaction as the product. This closes simultaneous duplicate-SKU saves while retaining the approved-admin trusted-operator boundary for Console/server-admin access.
 
+Product and option identity generation is centralized in `src/data/productVariantIdentity.js`. A new product ID is suggested from its title, an option ID is suggested from its option label, and its SKU is generated as `CG-{PRODUCT-ID}-{VARIANT-ID}`. Generated identities continue following unsaved title/label edits, then become read-only after persistence. There is no separate product-level SKU: every sellable product has at least one variant, and a single-option product's variant SKU is its effective SKU.
+
+`npm run plan:product-variant-migration` is the production read-only identity gate. It double-reads the exact `products` and `productSkus` state, rejects a changing snapshot, validates the reviewed 72-product/101-variant static contract, preserves valid persisted custom identities, generates only missing identities, detects mapping/collision/registry problems, and never invents stock. The source imports no Firestore mutation API. Its Markdown/JSON reports remain a plan until matching rules and client code are separately approved for release and Jetta intentionally saves real quantities through Inventory.
+
 The admin preview shows current live data plus a conflict warning when a draft no longer has a safe overlay. Firestore rules validate admin identity, document shape, and required draft metadata, but approved admin credentials remain a trusted-operator boundary. Firebase Console and server-admin access bypass client rules, so this transaction model protects the supported portal workflow from accidental races rather than treating an approved admin as an adversary.
 
 ## Checkout

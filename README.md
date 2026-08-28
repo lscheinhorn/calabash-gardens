@@ -39,10 +39,13 @@ npm run build
 - `npm run build`: create production build
 - `npm test`: run Create React App test runner
 - `npm run test:firebase-parity-model`: run deterministic parity-model tests
+- `npm run test:product-variant-migration-model`: run deterministic product identity and migration-preview tests
 - `npm run test:inventory-admin-emulators`: run the isolated inventory transaction and Firestore rules matrix
 - `npm run test:draft-publish-emulators`: run the isolated transactional draft-publish matrix
 - `npm run audit:firebase-parity`: read Firestore/Storage, exercise anonymous public query shapes, and refresh the sanitized local parity report without Firebase writes
 - `npm run check:firebase-parity`: run the same read-only audit without rewriting reports and fail while blockers remain
+- `npm run plan:product-variant-migration`: refresh the production read-only product/variant/SKU plan after verifying the exact project and catalog contract
+- `npm run check:product-variant-migration`: rerun the same preview without changing its checked-in reports and fail while migration blockers remain
 - `npm run deploy`: build and publish with `gh-pages`
 
 ## Project Docs
@@ -61,7 +64,9 @@ npm run build
 - `docs/phase35-checkout-verification.md`: isolated server-checkout verification
 - `docs/phase36-webhook-verification.md`: isolated webhook/recovery verification
 - `docs/phase40-inventory-variant-verification.md`: inventory variant, availability, conflict, and responsive-admin verification
+- `docs/phase41-product-variant-migration-verification.md`: automatic product/variant identity contract and no-write migration-preview verification
 - `docs/firebase-parity-audit.md`: latest read-only Firestore/Storage parity result
+- `docs/product-variant-migration-preview.md`: exact proposed identities for the current Firestore product catalog
 
 ## Notes
 

@@ -126,6 +126,8 @@ Inventory edits are intentionally narrower than product/event content edits:
 - Inventory Save Changes rereads all affected records in one transaction. Same-field stale edits reject the whole save, the conflicted row refreshes, and unrelated unsaved rows remain editable.
 - Product `inStock` is derived from active variants and stock tracking; there is no independent availability checkbox.
 - Legacy products can display synthesized option rows, but the first successful save must persist exactly one stable variant and SKU per price option. The current locally verified rules support at most three options.
+- Jetta does not need to make up identifiers. Product IDs are suggested from new product titles; option IDs and SKUs are generated from option labels and stay read-only after persistence. A single-option variant SKU is the product's effective SKU.
+- Existing legacy rows stay untracked until Jetta enters real quantities. Each stock edit automatically enables Track and Sell, and an incomplete product cannot initialize until every option quantity is explicitly confirmed. Save Changes then persists the full reviewed identity mapping plus those quantities transactionally.
 - The displayed price option is the checkout price. Its mapped variant must store the same value, and the save fails closed on a mismatch.
 - Product publish and Inventory Save Changes reserve normalized SKUs through `productSkus` in the same transaction as the product update; a concurrent duplicate claim rejects atomically.
 

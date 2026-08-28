@@ -29,6 +29,12 @@ import {
   seedSlugify,
 } from "../../data/adminProductSeed";
 import {
+  productIdentitySlug as slugify,
+  refreshGeneratedVariantIdentities,
+  skuForVariant,
+  variantIdForOption,
+} from "../../data/productVariantIdentity";
+import {
   activeAdminDrafts,
   adminDraftErrorMessage,
   applyAdminDrafts,
@@ -53,6 +59,8 @@ const emptyPriceOption = {
   lowStockThreshold: "",
   inventoryTracked: true,
   active: true,
+  skuLocked: false,
+  variantIdLocked: false,
 };
 
 const emptyProduct = {
@@ -96,26 +104,6 @@ const CollapseIcon = ({ isExpanded }) => (
   />
 );
 
-const slugify = (value) =>
-  value
-    .trim()
-    .toLowerCase()
-    .replace(/['‘’]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-const variantIdForOption = (option, index) => (
-  slugify(option) || (index === 0 ? "default" : `option-${index + 1}`)
-);
-
-const skuForVariant = (productId, variantId) => {
-  const skuParts = ["CG", productId, variantId]
-    .map((part) => String(part || "").trim())
-    .filter(Boolean);
-
-  return skuParts.join("-").replace(/[^a-z0-9-]/gi, "-").replace(/-+/g, "-").toUpperCase();
-};
-
 const quantityText = (value, fallback = "0") => {
   const text = String(value ?? "").trim();
 
@@ -128,41 +116,64 @@ const optionalQuantityText = (value) => {
   return wholeNumberPattern.test(text) ? text : "";
 };
 
-const normalizePriceOptions = (priceOptions, variants = [], productId = "") => {
+const normalizePriceOptions = (
+  priceOptions,
+  variants = [],
+  productId = "",
+  productAvailable = true,
+) => {
   if (!Array.isArray(priceOptions) || priceOptions.length === 0) {
     return [{ ...emptyPriceOption, variantId: "default", sku: skuForVariant(productId, "default") }];
   }
 
   const variantsByIndex = Array.isArray(variants)
-    ? new Map(variants.map((variant) => [variant.priceOptionIndex, variant]))
+    ? new Map(variants.map((variant, index) => [
+      Number.isInteger(variant?.priceOptionIndex) ? variant.priceOptionIndex : index,
+      variant,
+    ]))
     : new Map();
 
   return priceOptions.map((priceOption, index) => {
     const storedVariant = variantsByIndex.get(index) || {};
-    const variantId = slugify(
-      storedVariant.id
-      || storedVariant.variantId
-      || priceOption.variantId
-      || variantIdForOption(priceOption.option, index)
-    );
+    const storedVariantId = String(storedVariant.id || storedVariant.variantId || "").trim();
+    const storedSku = String(storedVariant.sku || "").trim();
+    const variantIdLocked = Boolean(storedVariantId) || priceOption.variantIdLocked === true;
+    const skuLocked = Boolean(storedSku) || priceOption.skuLocked === true;
+    const variantId = storedVariantId || (variantIdLocked
+      ? String(priceOption.variantId || "").trim()
+      : slugify(priceOption.variantId || variantIdForOption(priceOption.option, index)));
 
     return {
       ...emptyPriceOption,
       option: priceOption.option,
       price: priceOption.price,
       variantId,
-      sku: String(storedVariant.sku || priceOption.sku || skuForVariant(productId, variantId)),
+      sku: String(storedSku || priceOption.sku || skuForVariant(productId, variantId)),
+      skuLocked,
       stockOnHand: quantityText(storedVariant.stockOnHand ?? priceOption.stockOnHand),
       lowStockThreshold: optionalQuantityText(storedVariant.lowStockThreshold ?? priceOption.lowStockThreshold),
-      inventoryTracked: storedVariant.inventoryTracked !== false && priceOption.inventoryTracked !== false,
-      active: storedVariant.active !== false && priceOption.active !== false,
+      inventoryTracked: Object.prototype.hasOwnProperty.call(storedVariant, "inventoryTracked")
+        ? storedVariant.inventoryTracked === true
+        : priceOption.inventoryTracked === true,
+      active: Object.prototype.hasOwnProperty.call(storedVariant, "active")
+        ? storedVariant.active === true
+        : productAvailable && priceOption.active !== false,
+      variantIdLocked,
     };
   });
 };
 
+const updatePriceOptionValue = (priceOptions, index, field, value, productId) => (
+  refreshGeneratedVariantIdentities(priceOptions.map((priceOption, priceOptionIndex) => (
+    priceOptionIndex === index ? { ...priceOption, [field]: value } : priceOption
+  )), productId)
+);
+
 const buildProductVariants = (productId, priceOptions) => normalizePriceOptions(priceOptions, [], productId)
   .map((priceOption, index) => {
-    const variantId = slugify(priceOption.variantId) || variantIdForOption(priceOption.option, index);
+    const variantId = priceOption.variantIdLocked
+      ? priceOption.variantId.trim()
+      : slugify(priceOption.variantId) || variantIdForOption(priceOption.option, index);
 
     return {
       id: variantId,
@@ -188,7 +199,12 @@ const productInventorySummary = (product) => {
     };
   }
 
-  const variants = normalizePriceOptions(product.priceOptions, product.variants, product.id);
+  const variants = normalizePriceOptions(
+    product.priceOptions,
+    product.variants,
+    product.id,
+    product.inStock !== false,
+  );
   const trackedVariants = variants.filter((variant) => variant.active !== false && variant.inventoryTracked !== false);
 
   if (!trackedVariants.length) {
@@ -347,7 +363,7 @@ const buildFormFromProduct = (product) => ({
   info1: product.info1 || "",
   info2: product.info2 || "",
   shipping: product.shipping || "17.00",
-  priceOptions: normalizePriceOptions(product.priceOptions, product.variants, product.id),
+  priceOptions: normalizePriceOptions(product.priceOptions, product.variants, product.id, product.inStock !== false),
   published: product.published === true,
   isActive: product.isActive === true,
   isHighlighted: product.isHighlighted === true,
@@ -572,6 +588,10 @@ export default function ProductAdmin({
 
       if (!isProductIdEdited) {
         nextForm.slug = slugify(value);
+        nextForm.priceOptions = refreshGeneratedVariantIdentities(
+          currentForm.priceOptions,
+          nextForm.slug,
+        );
       }
 
       return nextForm;
@@ -580,7 +600,14 @@ export default function ProductAdmin({
 
   const updateProductId = (value) => {
     setIsProductIdEdited(true);
-    updateForm("slug", slugify(value));
+    setForm((currentForm) => {
+      const slug = slugify(value);
+      return {
+        ...currentForm,
+        slug,
+        priceOptions: refreshGeneratedVariantIdentities(currentForm.priceOptions, slug),
+      };
+    });
   };
 
   const toggleSection = (section) => {
@@ -723,22 +750,26 @@ export default function ProductAdmin({
   const updatePriceOption = (index, field, value) => {
     setForm((currentForm) => ({
       ...currentForm,
-      priceOptions: currentForm.priceOptions.map((priceOption, priceOptionIndex) => (
-        priceOptionIndex === index
-          ? { ...priceOption, [field]: field === "variantId" ? slugify(value) : value }
-          : priceOption
-      )),
+      priceOptions: updatePriceOptionValue(
+        currentForm.priceOptions,
+        index,
+        field,
+        value,
+        currentForm.slug,
+      ),
     }));
   };
 
   const updateEditingPriceOption = (index, field, value) => {
     setEditingForm((currentForm) => ({
       ...currentForm,
-      priceOptions: currentForm.priceOptions.map((priceOption, priceOptionIndex) => (
-        priceOptionIndex === index
-          ? { ...priceOption, [field]: field === "variantId" ? slugify(value) : value }
-          : priceOption
-      )),
+      priceOptions: updatePriceOptionValue(
+        currentForm.priceOptions,
+        index,
+        field,
+        value,
+        currentForm.slug,
+      ),
     }));
   };
 
@@ -747,7 +778,10 @@ export default function ProductAdmin({
       ...currentForm,
       priceOptions: currentForm.priceOptions.length >= maxProductVariants
         ? currentForm.priceOptions
-        : [...currentForm.priceOptions, { ...emptyPriceOption }],
+        : refreshGeneratedVariantIdentities(
+          [...currentForm.priceOptions, { ...emptyPriceOption }],
+          currentForm.slug,
+        ),
     }));
   };
 
@@ -756,25 +790,34 @@ export default function ProductAdmin({
       ...currentForm,
       priceOptions: currentForm.priceOptions.length >= maxProductVariants
         ? currentForm.priceOptions
-        : [...currentForm.priceOptions, { ...emptyPriceOption }],
+        : refreshGeneratedVariantIdentities(
+          [...currentForm.priceOptions, { ...emptyPriceOption }],
+          currentForm.slug,
+        ),
     }));
   };
 
   const removePriceOption = (index) => {
     setForm((currentForm) => ({
       ...currentForm,
-      priceOptions: currentForm.priceOptions.filter((priceOption, priceOptionIndex) => (
-        priceOptionIndex !== index || currentForm.priceOptions.length === 1
-      )),
+      priceOptions: refreshGeneratedVariantIdentities(
+        currentForm.priceOptions.filter((priceOption, priceOptionIndex) => (
+          priceOptionIndex !== index || currentForm.priceOptions.length === 1
+        )),
+        currentForm.slug,
+      ),
     }));
   };
 
   const removeEditingPriceOption = (index) => {
     setEditingForm((currentForm) => ({
       ...currentForm,
-      priceOptions: currentForm.priceOptions.filter((priceOption, priceOptionIndex) => (
-        priceOptionIndex !== index || currentForm.priceOptions.length === 1
-      )),
+      priceOptions: refreshGeneratedVariantIdentities(
+        currentForm.priceOptions.filter((priceOption, priceOptionIndex) => (
+          priceOptionIndex !== index || currentForm.priceOptions.length === 1
+        )),
+        currentForm.slug,
+      ),
     }));
   };
 
@@ -910,6 +953,7 @@ export default function ProductAdmin({
         currentProduct.priceOptions,
         currentProduct.variants,
         currentProduct.id || productId,
+        currentProduct.inStock !== false,
       )
       : [];
     const inventoryWasEdited = isNewProduct || !currentProduct || !productInventoryFormMatches(
@@ -1729,7 +1773,12 @@ export default function ProductAdmin({
                 const isPublishReviewOpen = publishReview?.id === product.id;
                 const inventorySummary = productInventorySummary(product);
                 const productVariantRows = Array.isArray(product.variants) && product.variants.length
-                  ? normalizePriceOptions(product.priceOptions, product.variants, product.id)
+                  ? normalizePriceOptions(
+                    product.priceOptions,
+                    product.variants,
+                    product.id,
+                    product.inStock !== false,
+                  )
                   : [];
                 const productPublishReview = isPublishReviewOpen ? (
                   <AdminPublishReview
@@ -1790,7 +1839,12 @@ export default function ProductAdmin({
                             <div>
                               <dt>Prices</dt>
                               <dd>
-                                {normalizePriceOptions(product.priceOptions, product.variants, product.id).map((priceOption, index) => (
+                                {normalizePriceOptions(
+                                  product.priceOptions,
+                                  product.variants,
+                                  product.id,
+                                  product.inStock !== false,
+                                ).map((priceOption, index) => (
                                   <span key={`${product.id}-price-${index}`}>
                                     {priceOption.option ? `${priceOption.option}: ` : ""}{priceOption.price}
                                   </span>
@@ -1897,7 +1951,7 @@ export default function ProductAdmin({
                                     <label>
                                       Variant ID
                                       <input
-                                        onChange={(event) => updateEditingPriceOption(index, "variantId", event.target.value)}
+                                        readOnly
                                         value={priceOption.variantId || variantIdForOption(priceOption.option, index)}
                                       />
                                     </label>
@@ -1906,7 +1960,7 @@ export default function ProductAdmin({
                                     <label>
                                       SKU
                                       <input
-                                        onChange={(event) => updateEditingPriceOption(index, "sku", event.target.value)}
+                                        readOnly
                                         value={priceOption.sku}
                                       />
                                     </label>
@@ -2365,8 +2419,8 @@ export default function ProductAdmin({
                     <label>
                       Variant ID
                       <input
-                        onChange={(event) => updatePriceOption(index, "variantId", event.target.value)}
                         placeholder={variantIdForOption(priceOption.option, index)}
+                        readOnly
                         value={priceOption.variantId || variantIdForOption(priceOption.option, index)}
                       />
                     </label>
@@ -2375,8 +2429,8 @@ export default function ProductAdmin({
                     <label>
                       SKU
                       <input
-                        onChange={(event) => updatePriceOption(index, "sku", event.target.value)}
                         placeholder={skuForVariant(form.slug, priceOption.variantId || variantIdForOption(priceOption.option, index))}
+                        readOnly
                         value={priceOption.sku}
                       />
                     </label>

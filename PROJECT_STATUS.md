@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Phase 40 is inventory variant readiness on branch `codex/inventory-variant-readiness`, based on committed Phase 39 parity auditing at `e7272d8` and transactional draft publishing at `fadb06b`. InventoryAdmin can now complete missing legacy variant rows with deterministic IDs/SKUs, save only operational inventory fields in one Firestore transaction, preserve unrelated unsaved rows after a conflict, and derive product `inStock` from active/tracked variant availability. Product content/photo drafts preserve existing inventory when it was not edited. Product publish and InventoryAdmin claim normalized SKUs transactionally, while local rules and server checkout require each variant price to match its displayed price option. The verified contract supports the current catalog maximum of three options.
-The 2026-08-28 Phase 40 code, rules, model, emulator, checkout, browser, desktop, and mobile checks pass without production mutation. The 2026-08-27 strict production parity result remains **NOT READY** with 174 evidence rows across 16 blocker types. The Phase 40 tools make the 72 incomplete product variant/SKU records safely editable but do not migrate them. Remaining blockers still include missing media, event photo/menu attachments and customer-usable links, category cleanup, a legacy active draft, fallback/runtime work, anonymous public reads, and visual release gates. Protected static content files remain unchanged; no Firebase data, rules, public reads, checkout flags, merge, push, or deployment changed.
+Phase 41 is automatic product/variant identity and the production no-write migration preview on branch `codex/product-variant-migration-preview`, based on committed Phase 40 inventory readiness at `5c15900`. Product IDs are suggested from titles, variant IDs are suggested from option labels, and SKUs are generated as `CG-{PRODUCT-ID}-{VARIANT-ID}` through one shared module. Generated identities follow unsaved title/label edits and persisted IDs/SKUs are read-only. There is no separate product SKU; each sellable product uses at least one variant SKU.
+The 2026-08-28 preview accounts for all 72 reviewed Firestore/static products and proposes 101 variant/SKU rows without inventing inventory. Existing custom variant IDs are preserved, known non-public `Title` and `test-basket` records are excluded, and every real quantity remains Jetta-owned. Legacy rows stay untracked until quantities are explicitly entered; each stock edit enables Track and Sell, and an incomplete product cannot initialize until every option quantity is confirmed. Automated model, transaction/rules, draft-publish, parity, Functions, build, and local browser checks pass without a production write. The preview remains **BLOCKED** only because currently deployed rules deny the signed-in client read of `productSkus`; matching rules/client release and a zero-blocker rerun require separate approval. The broader 2026-08-27 Firebase parity gate also remains **NOT READY**. No Firebase data, deployed rules, public reads, checkout flags, merge, push, or deployment changed.
 
 ## Approved Tech Stack
 
@@ -20,7 +20,7 @@ The 2026-08-28 Phase 40 code, rules, model, emulator, checkout, browser, desktop
 
 ## Current Phase
 
-Phase 40: Transactional inventory variant readiness and derived product availability.
+Phase 41: Automatic product/variant identity and no-write production migration preview.
 
 ## Done Work
 
@@ -169,10 +169,15 @@ Phase 40: Transactional inventory variant readiness and derived product availabi
 - Made guarded checkout reservation/decrement and release recompute product availability, including last-unit sale/reservation and release restoration cases.
 - Added a seven-scenario inventory transaction/rules emulator suite and named `npm run test:inventory-admin-emulators` command; expanded model and draft tests and reran the full Phase 35 checkout matrix.
 - Manually verified emulator-backed Inventory success, movement creation, concurrent ticket preservation, atomic stale-save rejection, unrelated-draft preservation, discard, ProductAdmin option limit, desktop/mobile layout, sticky narrow-screen actions, and a clean browser console.
+- Centralized product ID, variant ID, and SKU generation so future new products/options receive deterministic suggestions and persisted variant identities cannot drift.
+- Added a guarded production read-only migration preview with exact-project/catalog checks, double-read snapshot stability, allowlisted test-record exclusion, global collision checks, SKU-registry ownership review, reproducible Markdown/JSON output, and no Firestore mutation API.
+- Generated the Phase 41 preview for 72 reviewed products and 101 variants. It preserved three existing custom variant IDs, generated 98 missing variant IDs and all 101 missing SKUs, and left all 101 starting quantities for Jetta.
+- Changed incomplete legacy inventory rows to remain untracked until stock is explicitly confirmed. Each quantity entry automatically turns on Track and Sell, and the product cannot initialize until every option has a confirmed quantity; Inventory Save Changes then persists identities, claims SKUs, records quantity movements, and derives availability in one transaction.
 
 ## In Progress Work
 
-- Resolve the 16 parity blocker types in separately reviewed phases without changing public reads. Phase 40 makes product variant initialization safe in the supported portal, but the exact production IDs, SKUs, active/tracking values, and starting stock still require a reviewed migration preview before any write. Event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
+- Deploy the already-reviewed matching Firestore rules and Phase 41 client only after Luke explicitly approves merge/deploy, then rerun the no-write SKU-registry preview. Jetta should enter the 101 real quantities only after that report has zero blockers.
+- Resolve the broader Firebase parity blocker types in separately reviewed phases without changing public reads. Product identity generation is now deterministic, but event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
 - Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
 - Review the zero-blocker media migration dry-run report before any real upload/import.
@@ -616,6 +621,12 @@ Phase 40: Transactional inventory variant readiness and derived product availabi
 - 2026-08-28: Browser-controlled stale-save verification kept QA Product B's unsaved `21` in the form while refreshing conflicting QA Product A to `9`; the server retained Product B at `20`, wrote neither requested row, and created zero movements. Discard restored the remaining draft to `20`.
 - 2026-08-28: ProductAdmin exposed no independent Available now checkbox, disabled Add Price Option at three options, desktop product/event inventory controls did not overlap, the 390 x 844 layout stacked without table overflow and kept actions sticky, and browser diagnostics were empty. Emulator fixtures, temporary browser tab, port `3002`, and emulator ports were cleaned up; normal port `3001` remained available.
 - Docs checked: added the Phase 40 verification procedure and updated README, architecture, admin data shapes, editing workflow, checkout verification, current status, risks, and verification history. No protected business content or resource file was edited.
+- 2026-08-28: Phase 41 verification passed 24 focused identity/inventory tests, 14 migration-model/report tests, 48 regular React/Jest tests with 23 emulator-gated skips, 9 inventory transaction/rules emulator scenarios, 14 draft-publish emulator scenarios, 16 Firebase parity-model tests, the Functions syntax check, `git diff --check`, and the production build with only the existing warnings.
+- 2026-08-28: Browser-controlled New Product verification generated product ID `lukes-qa-product`, variant ID `large-jar`, and SKU `CG-LUKES-QA-PRODUCT-LARGE-JAR` from the test title/option. Product ID stayed adjustable before first save, variant identity fields were read-only, and the unsaved form was cleared.
+- 2026-08-28: Browser-controlled local verification showed both `A Touch of Sunshine` options and `Cilantro Salt` as `Not tracked` with Track off despite legacy stored flags. Entering a quantity automatically enabled Track/Sell only in the unsaved draft, and Discard Changes restored the original row without a Firestore save.
+- 2026-08-28: The final no-write production SKU preview check returned the expected single `productSkus` rules-permission blocker with 72 products, 101 variants/SKUs, and 2 warnings. It exited `2` by design and preserved identical Markdown/JSON report hashes.
+- 2026-08-28: Independent read-only review found and prompted fixes for setup-required rows displaying stored tracking and for an explicit Track-off choice being ignored after quantity confirmation. Model and emulator regressions now cover stored-true/draft-false persistence plus concurrent-baseline rejection; the final targeted rereview returned PASS.
+- Docs checked: added the Phase 41 verification procedure and generated migration preview, and updated README, architecture, admin data shapes, editing workflow, and current status. No protected business content or resource file was edited.
 
 ## Commits
 
@@ -665,6 +676,7 @@ Phase 40: Transactional inventory variant readiness and derived product availabi
 - `test: verify waitlist and inventory emulators` (current branch)
 - `feat: harden server paypal checkout` (current branch)
 - `feat: add paypal webhook recovery` (current branch)
+- `feat: prepare automatic product variant identities` (current branch)
 
 ## Deployments
 

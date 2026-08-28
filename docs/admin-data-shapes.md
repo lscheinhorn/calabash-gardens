@@ -199,9 +199,11 @@ Variant shape:
 
 Variant notes:
 
-- Product IDs remain stable document IDs suggested from the product title.
+- Product IDs are suggested automatically from the new product title. They may be adjusted before the first save and remain locked afterward.
 - Variant IDs identify the exact sellable option inside a product, such as a jar size.
-- SKUs are generated from the product ID and variant ID unless an admin enters a custom SKU.
+- Before first save, variant IDs follow option labels automatically and SKUs follow the product ID plus variant ID as `CG-{PRODUCT-ID}-{VARIANT-ID}`.
+- Persisted variant IDs and SKUs are read-only identities. Existing valid custom IDs/SKUs are preserved exactly.
+- There is no separate product-level SKU. A product always sells through at least one variant; for a single-option product, that variant SKU is the product's effective SKU.
 - `priceOptions` remains the storefront compatibility shape. `variants` carries the stable ID, SKU, and inventory metadata for the same option index.
 - Each variant `price` must exactly match its corresponding `priceOptions` value. The displayed `priceOptions` value is authoritative for server checkout; a mismatch is rejected before PayPal.
 - `stockOnHand` and `lowStockThreshold` are whole numbers. Blank stock fields normalize to `0`; blank low-stock thresholds store as `null`.
@@ -213,6 +215,7 @@ Variant notes:
 - `productSkus/{encodedNormalizedSku}` transactionally reserves each persisted SKU for one product ID and variant ID. Product publish and InventoryAdmin claim or release these records in the same transaction as the product write, so concurrent supported-portal saves cannot both claim one SKU.
 - `inStock` is a compatibility field derived from variants: it is true only when at least one active variant is either untracked or has positive tracked stock. ProductAdmin does not expose a separate availability checkbox.
 - InventoryAdmin can present missing legacy variants using deterministic IDs and SKUs. The first successful inventory save persists the complete mapping without changing product copy, category, photos, prices, shipping, or visibility.
+- Legacy rows remain untracked until Jetta enters the real quantity. Editing a stock value automatically enables tracking and sellability for that option; entering `0` intentionally records it as tracked and out of stock. An incomplete product mapping cannot save until every option has an explicitly confirmed quantity.
 - A product title, copy, visibility, or photo draft preserves the exact existing `priceOptions`, `variants`, and compatibility availability when inventory controls were not edited. A legacy product with no persisted variants remains without variants until an intentional inventory save.
 - The guarded server checkout decrements tracked variant stock, release restores reserved stock, and both paths recompute `inStock`. These paths are emulator-verified but remain disabled and undeployed for public use.
 
@@ -234,6 +237,7 @@ Current compatibility notes:
 - Public product hooks normalize any product without photos to the existing default Calabash logo image before Product and ProductPage render it.
 - Public Firestore product normalization carries hidden `variantId` and `sku` fields on price options for future order/inventory capture, while preserving current visible option labels and prices.
 - The production read-only parity audit found that 72 current product documents do not yet have a complete persisted `variants` array. InventoryAdmin can synthesize legacy rows for editing, but guarded server checkout requires persisted stable variant IDs, SKUs, and stock. This is a migration blocker, not permission to bulk-write production products.
+- The Phase 41 read-only identity preview proposes 101 variant IDs/SKUs across those 72 reviewed products and explicitly leaves all 101 starting quantities for Jetta. It excludes only the known non-public `Title` and `test-basket` records and fails closed if either becomes public or any other extra product appears.
 - `npm run audit:firebase-parity` compares raw Firestore fields before adapter fallbacks; validates one stable variant per price option, globally unique SKUs, and available tracked stock; checks exact ordered media attachments and reviewed Storage checksums; and reports content/media/cache differences in `docs/firebase-parity-audit.md` and `.json`.
 
 Editor controls:
@@ -488,7 +492,7 @@ Inventory editor controls:
 - Event sold tickets are displayed but never editable in InventoryAdmin.
 - Save Changes, Discard Changes, and Refresh remain available above the scrollable table; the action bar stays visible while editing on narrow screens.
 
-Production note: the Phase 40 tools and rules are verified against demo emulators. They do not authorize or perform a production variant migration, rules deployment, public-source switch, or checkout enablement.
+Production note: the Phase 41 UI/model and Phase 40 transaction/rule contract are verified against demo emulators. The migration preview does not write Firestore. The current deployed rules do not yet allow its signed-in client to verify `productSkus`, so Jetta's production quantity-entry handoff remains gated on a separately approved rules/client release and a zero-blocker preview rerun. This does not authorize a public-source switch or checkout enablement.
 
 ## Images
 

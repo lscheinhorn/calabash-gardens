@@ -1,3 +1,8 @@
+import {
+  skuForVariant,
+  variantIdForOption,
+} from "../../data/productVariantIdentity";
+
 const cleanText = (value, fallback = "") => String(value || fallback).trim();
 
 const hasOwn = (value, key) => Object.prototype.hasOwnProperty.call(value || {}, key);
@@ -11,12 +16,6 @@ const numberOrNull = (value) => {
 
   return Number.isFinite(number) ? number : null;
 };
-
-const slugify = (value) => cleanText(value)
-  .toLowerCase()
-  .replace(/['‘’]/g, "")
-  .replace(/[^a-z0-9]+/g, "-")
-  .replace(/^-+|-+$/g, "");
 
 const rowLabel = (row) => (
   row.secondary ? `${row.primary} (${row.secondary})` : row.primary
@@ -36,6 +35,28 @@ const maxVariantIdLength = 120;
 const maxVariantLabelLength = 160;
 const maxVariantPriceLength = 40;
 const maxVariantSkuLength = 120;
+
+const hasCompletePersistedVariantMapping = (variants, priceOptions) => (
+  variants.length === priceOptions.length
+  && variants.every((variant, index) => (
+    variant
+    && typeof variant === "object"
+    && !Array.isArray(variant)
+    && typeof variant.active === "boolean"
+    && typeof variant.id === "string"
+    && Boolean(variant.id.trim())
+    && typeof variant.inventoryTracked === "boolean"
+    && typeof variant.label === "string"
+    && (variant.lowStockThreshold === null || validWholeNumber(variant.lowStockThreshold))
+    && typeof variant.price === "string"
+    && variant.price === priceOptions[index]?.price
+    && variant.priceOptionIndex === index
+    && typeof variant.sku === "string"
+    && Boolean(variant.sku.trim())
+    && variant.sortOrder === index
+    && validWholeNumber(variant.stockOnHand)
+  ))
+);
 
 const currentWholeNumber = (value, row, fieldName) => {
   if (!validWholeNumber(value)) {
@@ -64,18 +85,10 @@ const desiredWholeNumber = (value, row, fieldName) => {
 };
 
 const variantIdForPriceOption = (priceOption, index) => (
-  slugify(priceOption?.variantId || priceOption?.option)
-  || (index === 0 ? "default" : `option-${index + 1}`)
+  variantIdForOption(priceOption?.variantId || priceOption?.option, index)
 );
 
-export const skuForVariant = (productId, variantId) => (
-  ["CG", cleanText(productId), cleanText(variantId)]
-    .filter(Boolean)
-    .join("-")
-    .replace(/[^a-z0-9-]/gi, "-")
-    .replace(/-+/g, "-")
-    .toUpperCase()
-);
+export { skuForVariant };
 
 const comparableInventoryOption = (priceOption = {}) => ({
   active: priceOption.active !== false,
@@ -97,7 +110,10 @@ export const productInventoryFormMatches = (candidateOptions, baselineOptions) =
 
 const inventoryFieldChanges = (row, draft) => ({
   active: row.active !== (draft.active === true),
-  inventoryTracked: row.inventoryTracked !== (draft.inventoryTracked === true),
+  inventoryTracked: (
+    row.inventorySetupRequired === true
+    && draft.stockConfirmed === true
+  ) || row.inventoryTracked !== (draft.inventoryTracked === true),
   lowStockThreshold: String(row.lowStockThreshold === null ? "" : row.lowStockThreshold)
     !== String(draft.lowStockThreshold),
   stockOnHand: String(row.stockOnHand) !== String(draft.stockOnHand),
@@ -218,6 +234,19 @@ const assertCompleteVariantMapping = (variants, priceOptions, row) => {
   });
 };
 
+const persistedProductVariant = (variant) => ({
+  active: variant.active,
+  id: variant.id,
+  inventoryTracked: variant.inventoryTracked,
+  label: variant.label,
+  lowStockThreshold: variant.lowStockThreshold,
+  price: variant.price,
+  priceOptionIndex: variant.priceOptionIndex,
+  sku: variant.sku,
+  sortOrder: variant.sortOrder,
+  stockOnHand: variant.stockOnHand,
+});
+
 export class InventoryConflictError extends Error {
   constructor(message, rowIds = []) {
     super(message);
@@ -249,9 +278,26 @@ export const mergePreservedInventoryDrafts = ({
   }), {});
 };
 
+export const updateInventoryDraftValue = ({ draft = {}, field, row, value }) => ({
+  ...draft,
+  ...(field === "stockOnHand"
+    && row?.type === "product"
+    && row.inventorySetupRequired === true
+    ? {
+      active: true,
+      inventoryTracked: true,
+    }
+    : {}),
+  ...(field === "stockOnHand" && row?.type === "product"
+    ? { stockConfirmed: true }
+    : {}),
+  [field]: value,
+});
+
 export const variantsForProduct = (product, productId = product?.id || product?.slug || "") => {
   const variants = Array.isArray(product?.variants) ? product.variants : [];
   const priceOptions = Array.isArray(product?.priceOptions) ? product.priceOptions : [];
+  const inventorySetupRequired = !hasCompletePersistedVariantMapping(variants, priceOptions);
   const normalizedVariants = variants.map((storedVariant, index) => {
     const variant = storedVariant && typeof storedVariant === "object" && !Array.isArray(storedVariant)
       ? storedVariant
@@ -290,7 +336,8 @@ export const variantsForProduct = (product, productId = product?.id || product?.
       id: variantId,
       inventoryTracked: hasOwn(variant, "inventoryTracked")
         ? variant.inventoryTracked
-        : priceOption.inventoryTracked !== false,
+        : priceOption.inventoryTracked === true,
+      inventorySetupRequired,
       label: labelMissing
         ? cleanText(priceOption.option, `Option ${fallbackPriceOptionIndex + 1}`)
         : storedLabel,
@@ -319,7 +366,8 @@ export const variantsForProduct = (product, productId = product?.id || product?.
     return [{
       active: product.inStock !== false && priceOption.active !== false,
       id: variantId,
-      inventoryTracked: priceOption.inventoryTracked !== false,
+      inventoryTracked: false,
+      inventorySetupRequired,
       label: cleanText(priceOption.option, `Option ${index + 1}`),
       lowStockThreshold: numberOrNull(priceOption.lowStockThreshold),
       price: cleanText(priceOption.price),
@@ -358,6 +406,22 @@ export const mergeProductInventoryDrafts = ({ changes, product }) => {
   if (changes.length) {
     assertCompleteVariantMapping(variants, priceOptions, changes[0].row);
     assertUniqueVariants(variants, changes[0].row);
+  }
+
+  if (variants.some((variant) => variant.inventorySetupRequired === true)) {
+    const everyQuantityConfirmed = variants.every((variant) => changes.some(({ draft, row }) => (
+      draft.stockConfirmed === true
+      && cleanText(variant.id) === row.variantId
+      && variant.priceOptionIndex === row.priceOptionIndex
+    )));
+
+    if (!everyQuantityConfirmed) {
+      const row = changes[0]?.row || { id: "", primary: "This product" };
+      throw new InventoryConflictError(
+        `${row.primary} needs a confirmed stock quantity for every option before inventory setup can be saved. Inventory was refreshed; review it and save again.`,
+        changes.map((change) => change.row?.id),
+      );
+    }
   }
 
   changes.forEach(({ draft, row }) => {
@@ -411,7 +475,11 @@ export const mergeProductInventoryDrafts = ({ changes, product }) => {
 
     if (
       changed.inventoryTracked
-      && currentInventoryTracked !== row.inventoryTracked
+      && currentInventoryTracked !== (
+        typeof row.storedInventoryTracked === "boolean"
+          ? row.storedInventoryTracked
+          : row.inventoryTracked
+      )
     ) {
       conflict(row, "tracking status changed in Firestore while you were editing.");
     }
@@ -440,7 +508,7 @@ export const mergeProductInventoryDrafts = ({ changes, product }) => {
   return {
     inStock: productInStockForVariants(variants),
     movements,
-    variants,
+    variants: variants.map(persistedProductVariant),
   };
 };
 

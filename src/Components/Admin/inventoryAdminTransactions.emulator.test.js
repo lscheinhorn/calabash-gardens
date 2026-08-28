@@ -73,17 +73,22 @@ const completeVariant = (overrides = {}) => ({
 
 const rowForVariant = (product, index) => {
   const variant = variantsForProduct(product, productId)[index];
+  const storedInventoryTracked = variant.inventoryTracked === true;
 
   return {
     active: variant.active === true,
     id: `product-${productId}-${variant.priceOptionIndex}-${variant.id}`,
-    inventoryTracked: variant.inventoryTracked === true,
+    inventoryTracked: variant.inventorySetupRequired === true
+      ? false
+      : storedInventoryTracked,
+    inventorySetupRequired: variant.inventorySetupRequired === true,
     lowStockThreshold: variant.lowStockThreshold,
     priceOptionIndex: variant.priceOptionIndex,
     primary: product.title,
     productId,
     secondary: variant.label,
     stockOnHand: Number.isInteger(variant.stockOnHand) ? variant.stockOnHand : 0,
+    storedInventoryTracked,
     type: "product",
     variantId: String(variant.id || ""),
   };
@@ -209,13 +214,14 @@ describeWithEmulators("admin inventory transactions", () => {
   test("an admin save initializes every legacy option and changes no product content", async () => {
     const original = productData();
     await seedProduct(original);
-    const row = rowForVariant(original, 0);
+    const rows = [rowForVariant(original, 0), rowForVariant(original, 1)];
 
     await saveInventoryRowsTransaction({
       db: clientDb,
-      dirtyRows: [row],
+      dirtyRows: rows,
       draftRows: {
-        [row.id]: draftForRow(row, { stockOnHand: "5" }),
+        [rows[0].id]: draftForRow(rows[0], { inventoryTracked: true, stockConfirmed: true, stockOnHand: "5" }),
+        [rows[1].id]: draftForRow(rows[1], { inventoryTracked: true, stockConfirmed: true, stockOnHand: "0" }),
       },
     });
 
@@ -282,20 +288,27 @@ describeWithEmulators("admin inventory transactions", () => {
       })],
     });
     await seedProduct(partial);
-    const row = rowForVariant(partial, 0);
+    const rows = [rowForVariant(partial, 0), rowForVariant(partial, 1)];
 
     await saveInventoryRowsTransaction({
       db: clientDb,
-      dirtyRows: [row],
+      dirtyRows: rows,
       draftRows: {
-        [row.id]: draftForRow(row, { stockOnHand: "4" }),
+        [rows[0].id]: draftForRow(rows[0], { inventoryTracked: true, stockConfirmed: true, stockOnHand: "4" }),
+        [rows[1].id]: draftForRow(rows[1], { inventoryTracked: false, stockConfirmed: true, stockOnHand: "3" }),
       },
     });
 
     const saved = (await adminDb.doc(`products/${productId}`).get()).data();
     expect(saved.variants).toMatchObject([
       { id: "small", priceOptionIndex: 0, stockOnHand: 4 },
-      { id: "large-custom", priceOptionIndex: 1, sku: "JETTE-CUSTOM-LARGE", stockOnHand: 3 },
+      {
+        id: "large-custom",
+        inventoryTracked: false,
+        priceOptionIndex: 1,
+        sku: "JETTE-CUSTOM-LARGE",
+        stockOnHand: 3,
+      },
     ]);
   });
 
@@ -351,7 +364,7 @@ describeWithEmulators("admin inventory transactions", () => {
   test("an inventory save cannot claim a SKU owned by another product", async () => {
     const original = productData();
     await seedProduct(original);
-    const row = rowForVariant(original, 0);
+    const rows = [rowForVariant(original, 0), rowForVariant(original, 1)];
     const sku = "CG-PHASE40-PRODUCT-SMALL";
     await adminDb.doc(`productSkus/${productSkuRegistryId(sku)}`).set({
       productId: "another-product",
@@ -363,13 +376,14 @@ describeWithEmulators("admin inventory transactions", () => {
 
     await expect(saveInventoryRowsTransaction({
       db: clientDb,
-      dirtyRows: [row],
+      dirtyRows: rows,
       draftRows: {
-        [row.id]: draftForRow(row, { stockOnHand: "5" }),
+        [rows[0].id]: draftForRow(rows[0], { inventoryTracked: true, stockConfirmed: true, stockOnHand: "5" }),
+        [rows[1].id]: draftForRow(rows[1], { inventoryTracked: true, stockConfirmed: true, stockOnHand: "0" }),
       },
     })).rejects.toMatchObject({
       name: "InventoryConflictError",
-      rowIds: [row.id],
+      rowIds: expect.arrayContaining(rows.map((row) => row.id)),
     });
 
     const saved = (await adminDb.doc(`products/${productId}`).get()).data();
@@ -387,7 +401,7 @@ describeWithEmulators("admin inventory transactions", () => {
     const request = {
       dirtyRows: [row],
       draftRows: {
-        [row.id]: draftForRow(row, { lowStockThreshold: "4" }),
+        [row.id]: draftForRow(row, { lowStockThreshold: "4", stockConfirmed: true }),
       },
     };
 
