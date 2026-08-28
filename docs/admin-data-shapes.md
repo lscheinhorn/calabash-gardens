@@ -224,6 +224,8 @@ Current compatibility notes:
 - If Firestore loading fails while the Firestore source flag is enabled, public product hooks use the generated product cache when it has products. If the generated cache is empty or missing products, they fall back to the current static product data.
 - Public product hooks normalize any product without photos to the existing default Calabash logo image before Product and ProductPage render it.
 - Public Firestore product normalization carries hidden `variantId` and `sku` fields on price options for future order/inventory capture, while preserving current visible option labels and prices.
+- The production read-only parity audit found that 72 current product documents do not yet have a complete persisted `variants` array. InventoryAdmin can synthesize legacy rows for editing, but guarded server checkout requires persisted stable variant IDs, SKUs, and stock. This is a migration blocker, not permission to bulk-write production products.
+- `npm run audit:firebase-parity` compares raw Firestore fields before adapter fallbacks; validates one stable variant per price option, globally unique SKUs, and available tracked stock; checks exact ordered media attachments and reviewed Storage checksums; and reports content/media/cache differences in `docs/firebase-parity-audit.md` and `.json`.
 
 Editor controls:
 

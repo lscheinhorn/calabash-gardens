@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-Transactional admin draft publishing is at an emulator- and build-verified, non-deployed checkpoint on branch `codex/transactional-draft-publish`. Product, event, and site-content publishing now rereads the reviewed saved draft and live target in one Firestore transaction, rejects stale content/reviews, preserves concurrent inventory and ticket facts, and writes the live target plus published draft status atomically.
-Protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. Phase 38 Firestore rules are local only; no production data was mutated. Server-owned PayPal checkout and verified webhook recovery remain disabled and undeployed. Content/media/menu parity, real PayPal sandbox checkout/webhook validation, refund and inventory-disposition policy, rule/Functions deployment review, and explicit live-switch approval remain required.
+Phase 39 is a read-only Firebase parity checkpoint on branch `codex/firebase-parity-readiness`, based on committed Phase 38 draft publishing at `fadb06b`. The new strict audit reads raw Firestore/Storage data without adapter fallbacks or Firebase mutation APIs and compares products, categories, events, site content, media, event menus, drafts, variants, and the generated product fallback with the current static source shape.
+The 2026-08-27 production read-only result is **NOT READY**: 174 evidence rows across 16 blocker types. Product copy, price labels, shipping, relative order, visibility, product photo attachment, all ten event records, all six site-content records, and the reviewed identity of all 20 existing Storage objects match. Remaining blockers are 72 incomplete product variant/SKU records, 37 missing media documents/objects, 18 mismatched event photo/menu fields covering 20 expected attachments, event document access and URL resolution, category cleanup, one legacy active draft, generated fallback drift/workflow, missing event/content fallbacks, denied anonymous public queries, and bundled site/default media runtime. Protected static content files remain unchanged; no Firebase data, rules, public reads, checkout flags, merge, push, or deployment changed.
 
 ## Approved Tech Stack
 
@@ -20,7 +20,7 @@ Protected static content files remain unchanged, and the public storefront still
 
 ## Current Phase
 
-Phase 38: Transactional draft publishing and inventory-conflict protection.
+Phase 39: Strict read-only Firebase parity and pre-live blocker inventory.
 
 ## Done Work
 
@@ -161,9 +161,13 @@ Phase 38: Transactional draft publishing and inventory-conflict protection.
 - Added deterministic publish-merge and preview-conflict unit coverage plus an isolated eleven-scenario Auth/Firestore emulator matrix for rules, atomicity, simultaneous publish, inventory preservation, content conflicts, stale review, draft-only/live collision, new records, optional deletion, and legacy-draft handling.
 - Changed unsafe draft previews to show current live data plus a clear conflict warning when live content or the same inventory field changed after the draft began.
 - Added `npm run test:draft-publish-emulators` as the named, demo-project-only entry point for the Phase 38 Auth/Firestore matrix.
+- Added `npm run audit:firebase-parity`, `npm run check:firebase-parity`, and deterministic model tests for a raw Firestore/Storage parity gate that cannot hide missing data behind static adapter fallbacks.
+- Generated `docs/firebase-parity-audit.md` and `.json` from a production read-only run against `calabash-54fb5`; the report records project ID, a double-read snapshot fingerprint, and structural findings without credentials or Storage download-token URLs.
 
 ## In Progress Work
 
+- Resolve the 16 parity blocker types in separately reviewed phases without changing public reads: product variant migration, event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime.
+- Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
 - Review the zero-blocker media migration dry-run report before any real upload/import.
 - Review `docs/media-optimization-review.html` before uploading optimized migration images.
@@ -255,7 +259,7 @@ Phase 38: Transactional draft publishing and inventory-conflict protection.
 - The legacy browser checkout fallback must be removed or explicitly retired when Firebase orders become authoritative; a stale browser fallback must not silently accept payments outside the order ledger.
 - Luke approved adding the guarded Firebase Functions scaffold in this phase, but deploying Functions or enabling server checkout for the public site still requires separate approval.
 - Square POS/market sales should reconcile through the same future order/inventory movement ledger, either by manual entry/CSV first or Square API/webhooks later.
-- Product variant stock metadata exists in Firestore, and the guarded server checkout path now decrements stock/capacity when enabled and deployed, but public checkout still needs PayPal sandbox verification before relying on it live.
+- The admin and checkout models support product variants, but 72 current production product documents still lack a complete persisted `variants` array. The guarded server checkout rejects those products until a reviewed migration creates stable IDs, SKUs, and stock records.
 - Admin product editor writes to Firestore, but public product pages still use static data.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` environment variables are configured.
 - Real admin testing still needs Firebase project values and approved admin user records.
@@ -297,8 +301,8 @@ Phase 38: Transactional draft publishing and inventory-conflict protection.
 - 2026-05-10 generated product cache refresh produced 74 products from Firestore, including 65 active products and 11 products with Storage-backed photo URLs.
 - Runtime product hooks now fill empty product photo arrays with the existing default image, but Firestore photo coverage still needs review before a public source switch because real product photos are preferred.
 - Event seed intentionally leaves event photos and menu links empty because static event media uses bundled `require(...)` values that should not be stored directly in Firestore.
-- Event inventory remains static and separate from event documents in this phase.
-- Event Editor saves event field edits to `eventDrafts` first and preserves existing Firestore event photos; it does not upload, attach, remove, or migrate event media yet.
+- Event capacity, sold tickets, manual holds, and waitlist settings now belong to Firestore event documents, but current live values still need Jette's reviewed setup before checkout activation.
+- Event Editor saves event field/photo edits to `eventDrafts` and supports image upload/library attachment; menu/document upload and the static event media migration remain incomplete.
 - Full Firebase ownership audit is read-only and local. It does not query Firebase, upload files, write Firestore documents, edit protected resource files, deploy rules, or switch public reads.
 - The ownership audit found 20 event media references: 10 photo refs and 10 menu/link refs. Eight menu/link refs are non-image documents that need a new reviewed Storage rule before upload.
 - The ownership audit found 8 site media assets currently referenced by components/CSS and 9 additional unowned local images that should be reviewed before being uploaded to the Other bin.
@@ -310,6 +314,7 @@ Phase 38: Transactional draft publishing and inventory-conflict protection.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
 - Product, event, content, inventory, image, and public key files are protected and must not be edited without explicit approval.
+- The strict production parity audit is read-only, but a passing data report alone does not authorize public Firestore rules, Firebase writes, a public source switch, checkout activation, merge, or deployment.
 
 ## Decisions
 
@@ -373,6 +378,7 @@ Phase 38: Transactional draft publishing and inventory-conflict protection.
 - Public server checkout requires both the Functions and React flags, reviewed secrets/rules, real PayPal sandbox verification, automatic recovery, and explicit deployment/live-switch approval.
 - Admin order updates are limited to the five fulfillment workflow fields. `cancelled` is a fulfillment label only and must never imply a refund, void, inventory reversal, or event-seat release.
 - Product, event, and site-content publish must use the persisted reviewed draft and live target in one transaction. Stale draft revisions or changed live content fail closed; current live inventory/ticket facts are preserved unless the draft intentionally changed the same operational value.
+- Public-source approval requires a strict raw-data parity report. Audit code must not import Firebase mutation APIs, use static fallback values to conceal missing documents, serialize credentials/download tokens, or treat operational stock/ticket quantities as protected static content.
 
 ## Verification History
 
@@ -576,6 +582,18 @@ Phase 38: Transactional draft publishing and inventory-conflict protection.
 - 2026-08-27: A second emulator-only browser fixture confirmed a safe draft title change over concurrently updated stock shows current `7 on hand`, opens Review Publish without a false conflict, and lists only the title difference. Confirm Publish was not clicked.
 - 2026-08-27: Independent final rereview returned PASS with no remaining P1/P2 issue after the Java 21 emulator proof, added concurrency cases, conflict-preview warnings, UI-ID-safe fingerprints, effective Publish Review inventory merging, trusted-admin boundary documentation, and named emulator test command.
 - Docs checked: added the Phase 38 verification procedure and updated architecture, admin data shapes, editing workflow, current status, decisions, risks, and verification history. No protected business content was edited.
+- 2026-08-27: Added a separate production read-only parity runner with an exact-project guard, no Firebase mutation imports, raw Firestore comparison before static fallbacks, Storage metadata/download checks that discard URLs, and local-only Markdown/JSON output.
+- 2026-08-27: Sixteen deterministic parity tests passed, including the source-level no-write-API assertion, complete parity, operational quantity exclusion, custom stable IDs/SKUs, all-product duplicate SKU and advertised-zero-stock rejection, URL-token sanitization, exact event/product media order and extras, reviewed Storage checksum identity/fail-closed absence, exact fallback key/photo/bucket/order, report reproducibility, hidden test records, unsafe legacy drafts, and fail-closed release gates.
+- 2026-08-27: The live read-only audit of `calabash-54fb5` found matching static product content/order/visibility/photo attachment, all 10 event records/effective visibility, all 6 site-content records, and matching size/MD5 identity for all 20 existing Storage objects. It reported 174 evidence rows across 16 blocker types, led by 72 incomplete product variant/SKU structures and 37 missing media records/objects; release gates also cover behavioral anonymous reads, full-domain fallbacks, and site/default media runtime.
+- 2026-08-27: The same audit confirmed 18 mismatched event media fields covering 20 expected photo/menu attachments, eight event document paths cannot be read under current Storage rules, event links lack customer-usable Storage URL resolution, one active product draft predates transactional baselines, the Gifts category state plus extra `all` category need review, and the generated product fallback/deploy refresh path is stale.
+- 2026-08-27: All four exact anonymous public query probes returned `permission-denied`, as expected under current admin-only rules. Release checks now exercise behavior or fail closed instead of trusting marker text, file existence, or script-name substrings.
+- 2026-08-27: `npm run check:firebase-parity` exited `2` as designed while blockers remained and did not rewrite reports; credential/download-token scans of both generated artifacts were empty. The final report refresh records 174 evidence rows across 16 blocker types.
+- 2026-08-27: Independent planning review confirmed static adapter fallbacks can conceal incomplete Firestore data, event media/menu parity and customer-usable links are mandatory, cache/runtime normalization has drifted, and existing admin mirror panels are not a release gate because some include seed actions.
+- 2026-08-27: Independent implementation review found and prompted fixes for hidden-extra SKU collisions and missing reviewed-file identities that could otherwise pass. Follow-up coverage now checks those paths, multi-photo cache order, Markdown/JSON reproducibility, and the `react-scripts`-owned Babel resolution contract without adding dependencies.
+- 2026-08-27: Final independent re-review returned READY TO COMMIT with no remaining P1/P2 finding. It reconfirmed no Firebase mutation APIs and an empty protected-file diff; the production data report remains NOT READY by design.
+- 2026-08-27: Final verification passed 27 regular React/Jest tests with 11 emulator-only tests skipped, all 16 parity tests, Functions syntax, changed-script syntax, `git diff --check`, report consistency/reproduction, credential/token scans, and the production build with only the same four existing unused-code warnings.
+- 2026-08-27: The final no-write parity check exited `2` and preserved identical report hashes while the 174 production blockers remained.
+- Docs checked: updated README, architecture, admin data shapes, current status, risks, decisions, verification history, and generated parity reports. Protected business content/resource files were not edited.
 
 ## Commits
 

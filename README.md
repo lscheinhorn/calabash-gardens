@@ -38,6 +38,9 @@ npm run build
 - `npm start`: run local development server
 - `npm run build`: create production build
 - `npm test`: run Create React App test runner
+- `npm run test:firebase-parity-model`: run deterministic parity-model tests
+- `npm run audit:firebase-parity`: read Firestore/Storage, exercise anonymous public query shapes, and refresh the sanitized local parity report without Firebase writes
+- `npm run check:firebase-parity`: run the same read-only audit without rewriting reports and fail while blockers remain
 - `npm run deploy`: build and publish with `gh-pages`
 
 ## Project Docs
@@ -55,6 +58,7 @@ npm run build
 - `docs/agent-workflow.md`: Git and phase workflow
 - `docs/phase35-checkout-verification.md`: isolated server-checkout verification
 - `docs/phase36-webhook-verification.md`: isolated webhook/recovery verification
+- `docs/firebase-parity-audit.md`: latest read-only Firestore/Storage parity result
 
 ## Notes
 

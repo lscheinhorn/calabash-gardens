@@ -1,0 +1,2260 @@
+{
+  "blockers": [
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "calabash-gifts-set"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "calabash-gift-set"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "spa-day-gift-set"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "erotic-gift-set"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "saffron-maple-syrup"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "saffron-honey-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "saffron-simple-syrup"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "saffron-salt-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 3 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants; price option 3 maps to 0 variants",
+      "target": "vermont-grown-saffron"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "saffron-tincture"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "oregano-1-2-0z"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "tarragon-1-2-0z"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "ramp-pesto-walnut"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "ramp-pesto-pecan"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "habanero-salt-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "thai-chili-salt-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "variant 1 needs a SKU",
+      "target": "cilantro-salt-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "rose-sugar-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "ginger-sugar-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "cranberry-honey"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "elderflower-saffron-elixir"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "trinidad-saffron-trifecta-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "saffron-ghost-in-trinidad-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "ghost-of-saffron-carolina-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "saffron-red-dragon-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "saffron-dreams-in-peach-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "jalapeno-popper-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "the-heart-and-head-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "easy-does-it-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "goddess-moon-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "brainiac-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "wild-fire-frenzy-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "cold-flu-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "milk-machine-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "sweet-relief-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "saffron-macha-1-2-oz-loose-leaf-tea"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "tea-ball"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 3 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants; price option 3 maps to 0 variants",
+      "target": "sizzle"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "slippery-daze-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "rara-magic"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "honey-dont-you-glow-clay-mask-4-0z"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "soaking-salts-5-0z"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "ageless-beauty-butter"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "ageless-beauty-oil-4-0z"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "bath-bombs"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "great-green-heal"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "heal-all"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "itch-dont-bug-me-now-10-ml"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "fungus-among-us-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "lip-balm-1-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 3 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants; price option 3 maps to 0 variants",
+      "target": "hydration-station"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "meadow-magic-gardeners-balm"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "pain-b-gone"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "sale-30-off-silky-smooth-flower-balm"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "sunny-days-massage-oil-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "bo-not-today-deoderant-spray-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "bug-spray-4-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "facial-toner"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "headache-and-fever"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "joint-health"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "reishi-turkey-tail"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "allergy-relief"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "moon-beams-and-day-dreams"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "a-touch-of-sunshine"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "bitters"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "the-root-cause-bitters"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "cold-and-flu"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "lions-share"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "free-the-pee"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 2 variants, found 0; price option 1 maps to 0 variants; price option 2 maps to 0 variants",
+      "target": "goddess-moon"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "dream-weaver-1-2-oz"
+    },
+    {
+      "code": "product-variants-invalid",
+      "group": "products",
+      "message": "expected 1 variants, found 0; price option 1 maps to 0 variants",
+      "target": "original-blend-1-2-oz"
+    },
+    {
+      "code": "categories-different",
+      "group": "categories",
+      "message": "Product categories fields differ: active.",
+      "target": "gifts"
+    },
+    {
+      "code": "categories-extra",
+      "group": "categories",
+      "message": "Unexpected product categories record exists.",
+      "target": "all"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "calabash-experience-chef-mike-clancy"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "calabash-experience-chef-mike-clancy"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "fleur-de-mar-by-chef-cole-conrad-cohen"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "fleur-de-mar-by-chef-cole-conrad-cohen"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "chuseok-by-mountain-song-kitchen"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "chuseok-by-mountain-song-kitchen"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "calabash-experience-solstice-dance-party-saffron-bites"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "calabash-experience-solstice-dance-party-saffron-bites"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "deep-summer-dance-party-saffron-bites"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "deep-summer-dance-party-saffron-bites"
+    },
+    {
+      "code": "event-photos-different",
+      "group": "events",
+      "message": "Ordered event photo attachments differ from the static event.",
+      "target": "calabash-experience-chad-lumbra"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "calabash-experience-chad-lumbra"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash"
+    },
+    {
+      "code": "event-menu-different",
+      "group": "events",
+      "message": "Event menu/link attachment differs from the static event.",
+      "target": "calabash-experience-home-grown"
+    },
+    {
+      "code": "event-link-resolution-not-configured",
+      "group": "events",
+      "message": "Event menu Storage paths are not resolved to customer-usable URLs.",
+      "target": "publicEventAdapter"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/calabash-experience-chef-mike-clancy-menu-menu.docx.pdf.",
+      "target": "event-calabash-experience-chef-mike-clancy-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/calabash-experience-chef-mike-clancy-01-event-night.jpg.",
+      "target": "event-calabash-experience-chef-mike-clancy-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu-ma-der-ma-der-menu.pdf.",
+      "target": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-01-moo-and-mom-fall-joy-.jpg.",
+      "target": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-02-mary-and-boys.jpg.",
+      "target": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-02"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/fleur-de-mar-by-chef-cole-conrad-cohen-menu-fluer-de-mar.pdf.",
+      "target": "event-fleur-de-mar-by-chef-cole-conrad-cohen-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/fleur-de-mar-by-chef-cole-conrad-cohen-01-cole-photo.jpg.",
+      "target": "event-fleur-de-mar-by-chef-cole-conrad-cohen-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/chuseok-by-mountain-song-kitchen-menu-mountain-song-menu.png.",
+      "target": "event-chuseok-by-mountain-song-kitchen-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/chuseok-by-mountain-song-kitchen-01-driscoll-and-jesa.jpg.",
+      "target": "event-chuseok-by-mountain-song-kitchen-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu-mountain-song-menu.png.",
+      "target": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-01-driscoll-and-jesa.jpg.",
+      "target": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/calabash-experience-solstice-dance-party-saffron-bites-menu-young-brothers-band-bio.pdf.",
+      "target": "event-calabash-experience-solstice-dance-party-saffron-bites-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/calabash-experience-solstice-dance-party-saffron-bites-01-young-brothers-band-photo.jpeg.",
+      "target": "event-calabash-experience-solstice-dance-party-saffron-bites-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/deep-summer-dance-party-saffron-bites-menu-august-23rd-buffet-menu-.pdf.",
+      "target": "event-deep-summer-dance-party-saffron-bites-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/deep-summer-dance-party-saffron-bites-01-flail.jpg.",
+      "target": "event-deep-summer-dance-party-saffron-bites-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/deep-summer-dance-party-saffron-bites-02-faux-in-love-poster-.png.",
+      "target": "event-deep-summer-dance-party-saffron-bites-photo-02"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/calabash-experience-chad-lumbra-menu-chad-lumbra-menu-.pdf.",
+      "target": "event-calabash-experience-chad-lumbra-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-images/calabash-experience-chad-lumbra-01-chad-photo.jpg.",
+      "target": "event-calabash-experience-chad-lumbra-photo-01"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu-menu.docx.pdf.",
+      "target": "event-we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for event-documents/calabash-experience-home-grown-menu-menu.docx.pdf.",
+      "target": "event-calabash-experience-home-grown-menu"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/background-farm.webp.",
+      "target": "site-background-farm"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/calabash-gardens-farm-mobile.png.",
+      "target": "site-calabash-gardens-farm-mobile"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/large-logo-no-purple-square.png.",
+      "target": "site-large-logo-no-purple-square"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/parallax.webp.",
+      "target": "site-parallax"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/parchment-background.jpeg.",
+      "target": "site-parchment-background"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/president.webp.",
+      "target": "site-president"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/the-calabash-experience.jpg.",
+      "target": "site-the-calabash-experience"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for site-content-images/vice-president.webp.",
+      "target": "site-vice-president"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/calabash-gardens-farm-mobile-2.png.",
+      "target": "other-calabash-gardens-farm-mobile-2"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/cat-sample.jpeg.",
+      "target": "other-cat-sample"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/hands-1.jpg.",
+      "target": "other-hands-1"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/hands-2.jpg.",
+      "target": "other-hands-2"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/large-logo-no-purple.png.",
+      "target": "other-large-logo-no-purple"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/large-logo-no-purple-wide.png.",
+      "target": "other-large-logo-no-purple-wide"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/products.jpg.",
+      "target": "other-products"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/purple-logo-.webp.",
+      "target": "other-purple-logo"
+    },
+    {
+      "code": "media-document-missing",
+      "group": "media",
+      "message": "mediaAssets document is missing for other-images/samantha-and-jeannie.jpg.",
+      "target": "other-samantha-and-jeannie"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/calabash-experience-chef-mike-clancy-menu-menu.docx.pdf.",
+      "target": "event-calabash-experience-chef-mike-clancy-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/calabash-experience-chef-mike-clancy-01-event-night.jpg.",
+      "target": "event-calabash-experience-chef-mike-clancy-photo-01"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu-ma-der-ma-der-menu.pdf.",
+      "target": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-01-moo-and-mom-fall-joy-.jpg.",
+      "target": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-01"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-02-mary-and-boys.jpg.",
+      "target": "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-02"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/fleur-de-mar-by-chef-cole-conrad-cohen-menu-fluer-de-mar.pdf.",
+      "target": "event-fleur-de-mar-by-chef-cole-conrad-cohen-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/fleur-de-mar-by-chef-cole-conrad-cohen-01-cole-photo.jpg.",
+      "target": "event-fleur-de-mar-by-chef-cole-conrad-cohen-photo-01"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/chuseok-by-mountain-song-kitchen-menu-mountain-song-menu.png.",
+      "target": "event-chuseok-by-mountain-song-kitchen-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/chuseok-by-mountain-song-kitchen-01-driscoll-and-jesa.jpg.",
+      "target": "event-chuseok-by-mountain-song-kitchen-photo-01"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu-mountain-song-menu.png.",
+      "target": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-01-driscoll-and-jesa.jpg.",
+      "target": "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-photo-01"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/calabash-experience-solstice-dance-party-saffron-bites-menu-young-brothers-band-bio.pdf.",
+      "target": "event-calabash-experience-solstice-dance-party-saffron-bites-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/calabash-experience-solstice-dance-party-saffron-bites-01-young-brothers-band-photo.jpeg.",
+      "target": "event-calabash-experience-solstice-dance-party-saffron-bites-photo-01"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/deep-summer-dance-party-saffron-bites-menu-august-23rd-buffet-menu-.pdf.",
+      "target": "event-deep-summer-dance-party-saffron-bites-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/deep-summer-dance-party-saffron-bites-01-flail.jpg.",
+      "target": "event-deep-summer-dance-party-saffron-bites-photo-01"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/deep-summer-dance-party-saffron-bites-02-faux-in-love-poster-.png.",
+      "target": "event-deep-summer-dance-party-saffron-bites-photo-02"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/calabash-experience-chad-lumbra-menu-chad-lumbra-menu-.pdf.",
+      "target": "event-calabash-experience-chad-lumbra-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: event-images/calabash-experience-chad-lumbra-01-chad-photo.jpg.",
+      "target": "event-calabash-experience-chad-lumbra-photo-01"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu-menu.docx.pdf.",
+      "target": "event-we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu"
+    },
+    {
+      "code": "storage-object-inaccessible",
+      "group": "media",
+      "message": "Storage object could not be verified (storage/unauthorized): event-documents/calabash-experience-home-grown-menu-menu.docx.pdf.",
+      "target": "event-calabash-experience-home-grown-menu"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/background-farm.webp.",
+      "target": "site-background-farm"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/calabash-gardens-farm-mobile.png.",
+      "target": "site-calabash-gardens-farm-mobile"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/large-logo-no-purple-square.png.",
+      "target": "site-large-logo-no-purple-square"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/parallax.webp.",
+      "target": "site-parallax"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/parchment-background.jpeg.",
+      "target": "site-parchment-background"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/president.webp.",
+      "target": "site-president"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/the-calabash-experience.jpg.",
+      "target": "site-the-calabash-experience"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: site-content-images/vice-president.webp.",
+      "target": "site-vice-president"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/calabash-gardens-farm-mobile-2.png.",
+      "target": "other-calabash-gardens-farm-mobile-2"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/cat-sample.jpeg.",
+      "target": "other-cat-sample"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/hands-1.jpg.",
+      "target": "other-hands-1"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/hands-2.jpg.",
+      "target": "other-hands-2"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/large-logo-no-purple.png.",
+      "target": "other-large-logo-no-purple"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/large-logo-no-purple-wide.png.",
+      "target": "other-large-logo-no-purple-wide"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/products.jpg.",
+      "target": "other-products"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/purple-logo-.webp.",
+      "target": "other-purple-logo"
+    },
+    {
+      "code": "storage-object-missing",
+      "group": "media",
+      "message": "Storage object is missing: other-images/samantha-and-jeannie.jpg.",
+      "target": "other-samantha-and-jeannie"
+    },
+    {
+      "code": "unsafe-active-draft",
+      "group": "drafts",
+      "message": "Active draft predates transactional publishing and must be discarded and saved again before it can publish safely.",
+      "target": "products/saffron-maple-syrup"
+    },
+    {
+      "code": "fallback-stale",
+      "group": "fallback",
+      "message": "Generated fallback differs from Firestore (0 missing, 0 extra, 1 changed).",
+      "target": "public-products-cache"
+    },
+    {
+      "code": "fallback-refresh-not-configured",
+      "group": "fallback",
+      "message": "The deploy workflow does not regenerate the Firestore product fallback before building.",
+      "target": "predeploy"
+    },
+    {
+      "code": "event-fallback-not-configured",
+      "group": "fallback",
+      "message": "Events do not have a generated Firestore fallback artifact for an outage or failed read.",
+      "target": "events"
+    },
+    {
+      "code": "content-fallback-not-configured",
+      "group": "fallback",
+      "message": "Site content does not have a generated Firestore fallback artifact for an outage or failed read.",
+      "target": "siteContent"
+    },
+    {
+      "code": "public-read-rules-not-configured",
+      "group": "release",
+      "message": "The anonymous product, category, event, and site-content query shapes did not all succeed; inspect the recorded probe codes before changing rules.",
+      "target": "firestore.rules"
+    },
+    {
+      "code": "site-media-runtime-not-configured",
+      "group": "media",
+      "message": "Site/default media still render from bundled files instead of a Firebase Storage adapter.",
+      "target": "public-site-media"
+    }
+  ],
+  "details": {
+    "categories": {
+      "changed": [
+        {
+          "differences": [
+            {
+              "actual": "true",
+              "expected": "false",
+              "field": "active"
+            }
+          ],
+          "id": "gifts"
+        }
+      ],
+      "extraHidden": [],
+      "extraVisible": [
+        "all"
+      ],
+      "matching": [
+        "body-care",
+        "culinary",
+        "loose-leaf-tea",
+        "mambo-gede",
+        "ritual-smoking-blends",
+        "saffron",
+        "tinctures"
+      ],
+      "missing": [],
+      "totalActual": 9,
+      "totalExpected": 8
+    },
+    "content": {
+      "changed": [],
+      "extraHidden": [],
+      "extraVisible": [],
+      "matching": [
+        "home",
+        "banner",
+        "offerings",
+        "about",
+        "team",
+        "experienceBlurb"
+      ],
+      "missing": [],
+      "order": {
+        "actual": [
+          "home",
+          "banner",
+          "offerings",
+          "about",
+          "team",
+          "experienceBlurb"
+        ],
+        "expected": [
+          "home",
+          "banner",
+          "offerings",
+          "about",
+          "team",
+          "experienceBlurb"
+        ],
+        "matches": true
+      },
+      "totalActual": 6,
+      "totalExpected": 6
+    },
+    "drafts": {
+      "active": [
+        "products/saffron-maple-syrup"
+      ],
+      "safeActive": [],
+      "total": 6,
+      "unsafeActive": [
+        "products/saffron-maple-syrup"
+      ]
+    },
+    "events": {
+      "changed": [],
+      "extraHidden": [],
+      "extraVisible": [],
+      "matching": [
+        "calabash-experience-chef-mike-clancy",
+        "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+        "fleur-de-mar-by-chef-cole-conrad-cohen",
+        "chuseok-by-mountain-song-kitchen",
+        "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+        "calabash-experience-solstice-dance-party-saffron-bites",
+        "deep-summer-dance-party-saffron-bites",
+        "calabash-experience-chad-lumbra",
+        "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash",
+        "calabash-experience-home-grown"
+      ],
+      "mediaDifferences": [
+        {
+          "actual": [],
+          "eventId": "calabash-experience-chef-mike-clancy",
+          "expected": [
+            "event-images/calabash-experience-chef-mike-clancy-01-event-night.jpg"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "calabash-experience-chef-mike-clancy",
+          "expected": "event-documents/calabash-experience-chef-mike-clancy-menu-menu.docx.pdf",
+          "field": "link"
+        },
+        {
+          "actual": [],
+          "eventId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+          "expected": [
+            "event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-01-moo-and-mom-fall-joy-.jpg",
+            "event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-02-mary-and-boys.jpg"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet",
+          "expected": "event-documents/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu-ma-der-ma-der-menu.pdf",
+          "field": "link"
+        },
+        {
+          "actual": [],
+          "eventId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+          "expected": [
+            "event-images/fleur-de-mar-by-chef-cole-conrad-cohen-01-cole-photo.jpg"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "fleur-de-mar-by-chef-cole-conrad-cohen",
+          "expected": "event-documents/fleur-de-mar-by-chef-cole-conrad-cohen-menu-fluer-de-mar.pdf",
+          "field": "link"
+        },
+        {
+          "actual": [],
+          "eventId": "chuseok-by-mountain-song-kitchen",
+          "expected": [
+            "event-images/chuseok-by-mountain-song-kitchen-01-driscoll-and-jesa.jpg"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "chuseok-by-mountain-song-kitchen",
+          "expected": "event-images/chuseok-by-mountain-song-kitchen-menu-mountain-song-menu.png",
+          "field": "link"
+        },
+        {
+          "actual": [],
+          "eventId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+          "expected": [
+            "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-01-driscoll-and-jesa.jpg"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs",
+          "expected": "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu-mountain-song-menu.png",
+          "field": "link"
+        },
+        {
+          "actual": [],
+          "eventId": "calabash-experience-solstice-dance-party-saffron-bites",
+          "expected": [
+            "event-images/calabash-experience-solstice-dance-party-saffron-bites-01-young-brothers-band-photo.jpeg"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "calabash-experience-solstice-dance-party-saffron-bites",
+          "expected": "event-documents/calabash-experience-solstice-dance-party-saffron-bites-menu-young-brothers-band-bio.pdf",
+          "field": "link"
+        },
+        {
+          "actual": [],
+          "eventId": "deep-summer-dance-party-saffron-bites",
+          "expected": [
+            "event-images/deep-summer-dance-party-saffron-bites-01-flail.jpg",
+            "event-images/deep-summer-dance-party-saffron-bites-02-faux-in-love-poster-.png"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "deep-summer-dance-party-saffron-bites",
+          "expected": "event-documents/deep-summer-dance-party-saffron-bites-menu-august-23rd-buffet-menu-.pdf",
+          "field": "link"
+        },
+        {
+          "actual": [],
+          "eventId": "calabash-experience-chad-lumbra",
+          "expected": [
+            "event-images/calabash-experience-chad-lumbra-01-chad-photo.jpg"
+          ],
+          "field": "photos"
+        },
+        {
+          "actual": "",
+          "eventId": "calabash-experience-chad-lumbra",
+          "expected": "event-documents/calabash-experience-chad-lumbra-menu-chad-lumbra-menu-.pdf",
+          "field": "link"
+        },
+        {
+          "actual": "",
+          "eventId": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash",
+          "expected": "event-documents/we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu-menu.docx.pdf",
+          "field": "link"
+        },
+        {
+          "actual": "",
+          "eventId": "calabash-experience-home-grown",
+          "expected": "event-documents/calabash-experience-home-grown-menu-menu.docx.pdf",
+          "field": "link"
+        }
+      ],
+      "missing": [],
+      "totalActual": 10,
+      "totalExpected": 10,
+      "visibilityDifferences": []
+    },
+    "fallback": {
+      "changed": [
+        "cilantro-salt-2-oz"
+      ],
+      "contentFallbackConfigured": false,
+      "eventFallbackConfigured": false,
+      "extra": [],
+      "generatedAt": "2026-05-10T04:17:40.753Z",
+      "missing": [],
+      "orderMatches": true,
+      "productCount": 74,
+      "refreshConfigured": false,
+      "source": "firestore:calabash-54fb5"
+    },
+    "media": {
+      "changed": [],
+      "extraDocuments": [],
+      "inaccessibleStorage": [
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/calabash-experience-chef-mike-clancy-menu-menu.docx.pdf"
+        },
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu-ma-der-ma-der-menu.pdf"
+        },
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/fleur-de-mar-by-chef-cole-conrad-cohen-menu-fluer-de-mar.pdf"
+        },
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/calabash-experience-solstice-dance-party-saffron-bites-menu-young-brothers-band-bio.pdf"
+        },
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/deep-summer-dance-party-saffron-bites-menu-august-23rd-buffet-menu-.pdf"
+        },
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/calabash-experience-chad-lumbra-menu-chad-lumbra-menu-.pdf"
+        },
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu-menu.docx.pdf"
+        },
+        {
+          "code": "storage/unauthorized",
+          "path": "event-documents/calabash-experience-home-grown-menu-menu.docx.pdf"
+        }
+      ],
+      "missingDocuments": [
+        "event-calabash-experience-chef-mike-clancy-menu",
+        "event-calabash-experience-chef-mike-clancy-photo-01",
+        "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-menu",
+        "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-01",
+        "event-ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-photo-02",
+        "event-fleur-de-mar-by-chef-cole-conrad-cohen-menu",
+        "event-fleur-de-mar-by-chef-cole-conrad-cohen-photo-01",
+        "event-chuseok-by-mountain-song-kitchen-menu",
+        "event-chuseok-by-mountain-song-kitchen-photo-01",
+        "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu",
+        "event-a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-photo-01",
+        "event-calabash-experience-solstice-dance-party-saffron-bites-menu",
+        "event-calabash-experience-solstice-dance-party-saffron-bites-photo-01",
+        "event-deep-summer-dance-party-saffron-bites-menu",
+        "event-deep-summer-dance-party-saffron-bites-photo-01",
+        "event-deep-summer-dance-party-saffron-bites-photo-02",
+        "event-calabash-experience-chad-lumbra-menu",
+        "event-calabash-experience-chad-lumbra-photo-01",
+        "event-we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash-menu",
+        "event-calabash-experience-home-grown-menu",
+        "site-background-farm",
+        "site-calabash-gardens-farm-mobile",
+        "site-large-logo-no-purple-square",
+        "site-parallax",
+        "site-parchment-background",
+        "site-president",
+        "site-the-calabash-experience",
+        "site-vice-president",
+        "other-calabash-gardens-farm-mobile-2",
+        "other-cat-sample",
+        "other-hands-1",
+        "other-hands-2",
+        "other-large-logo-no-purple",
+        "other-large-logo-no-purple-wide",
+        "other-products",
+        "other-purple-logo",
+        "other-samantha-and-jeannie"
+      ],
+      "missingStorage": [
+        "event-images/calabash-experience-chef-mike-clancy-01-event-night.jpg",
+        "event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-01-moo-and-mom-fall-joy-.jpg",
+        "event-images/ma-der-ma-der-lao-cuisine-by-chef-mary-and-phet-02-mary-and-boys.jpg",
+        "event-images/fleur-de-mar-by-chef-cole-conrad-cohen-01-cole-photo.jpg",
+        "event-images/chuseok-by-mountain-song-kitchen-menu-mountain-song-menu.png",
+        "event-images/chuseok-by-mountain-song-kitchen-01-driscoll-and-jesa.jpg",
+        "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-menu-mountain-song-menu.png",
+        "event-images/a-taste-of-season-in-vermont-by-chefs-samantha-langevin-and-jeannie-kovacs-01-driscoll-and-jesa.jpg",
+        "event-images/calabash-experience-solstice-dance-party-saffron-bites-01-young-brothers-band-photo.jpeg",
+        "event-images/deep-summer-dance-party-saffron-bites-01-flail.jpg",
+        "event-images/deep-summer-dance-party-saffron-bites-02-faux-in-love-poster-.png",
+        "event-images/calabash-experience-chad-lumbra-01-chad-photo.jpg",
+        "site-content-images/background-farm.webp",
+        "site-content-images/calabash-gardens-farm-mobile.png",
+        "site-content-images/large-logo-no-purple-square.png",
+        "site-content-images/parallax.webp",
+        "site-content-images/parchment-background.jpeg",
+        "site-content-images/president.webp",
+        "site-content-images/the-calabash-experience.jpg",
+        "site-content-images/vice-president.webp",
+        "other-images/calabash-gardens-farm-mobile-2.png",
+        "other-images/cat-sample.jpeg",
+        "other-images/hands-1.jpg",
+        "other-images/hands-2.jpg",
+        "other-images/large-logo-no-purple.png",
+        "other-images/large-logo-no-purple-wide.png",
+        "other-images/products.jpg",
+        "other-images/purple-logo-.webp",
+        "other-images/samantha-and-jeannie.jpg"
+      ],
+      "references": {
+        "invalid": [],
+        "unbacked": []
+      },
+      "storageMetadataDifferences": [],
+      "totalActual": 20,
+      "totalExpected": 57
+    },
+    "products": {
+      "changed": [],
+      "extraHidden": [
+        "Title",
+        "test-basket"
+      ],
+      "extraVisible": [],
+      "matching": [
+        "calabash-gifts-set",
+        "calabash-gift-set",
+        "spa-day-gift-set",
+        "erotic-gift-set",
+        "saffron-maple-syrup",
+        "saffron-honey-4-oz",
+        "saffron-simple-syrup",
+        "saffron-salt-2-oz",
+        "vermont-grown-saffron",
+        "saffron-tincture",
+        "oregano-1-2-0z",
+        "tarragon-1-2-0z",
+        "ramp-pesto-walnut",
+        "ramp-pesto-pecan",
+        "habanero-salt-2-oz",
+        "thai-chili-salt-2-oz",
+        "cilantro-salt-2-oz",
+        "rose-sugar-2-oz",
+        "ginger-sugar-2-oz",
+        "cranberry-honey",
+        "elderflower-saffron-elixir",
+        "trinidad-saffron-trifecta-4-oz",
+        "saffron-ghost-in-trinidad-4-oz",
+        "ghost-of-saffron-carolina-4-oz",
+        "saffron-red-dragon-4-oz",
+        "saffron-dreams-in-peach-4-oz",
+        "jalapeno-popper-4-oz",
+        "the-heart-and-head-1-2-oz-loose-leaf-tea",
+        "easy-does-it-1-2-oz-loose-leaf-tea",
+        "goddess-moon-1-2-oz-loose-leaf-tea",
+        "brainiac-1-2-oz-loose-leaf-tea",
+        "wild-fire-frenzy-1-2-oz-loose-leaf-tea",
+        "cold-flu-1-2-oz-loose-leaf-tea",
+        "milk-machine-1-2-oz-loose-leaf-tea",
+        "sweet-relief-1-2-oz-loose-leaf-tea",
+        "saffron-macha-1-2-oz-loose-leaf-tea",
+        "tea-ball",
+        "sizzle",
+        "slippery-daze-4-oz",
+        "rara-magic",
+        "honey-dont-you-glow-clay-mask-4-0z",
+        "soaking-salts-5-0z",
+        "ageless-beauty-butter",
+        "ageless-beauty-oil-4-0z",
+        "bath-bombs",
+        "great-green-heal",
+        "heal-all",
+        "itch-dont-bug-me-now-10-ml",
+        "fungus-among-us-2-oz",
+        "lip-balm-1-2-oz",
+        "hydration-station",
+        "meadow-magic-gardeners-balm",
+        "pain-b-gone",
+        "sale-30-off-silky-smooth-flower-balm",
+        "sunny-days-massage-oil-4-oz",
+        "bo-not-today-deoderant-spray-4-oz",
+        "bug-spray-4-oz",
+        "facial-toner",
+        "headache-and-fever",
+        "joint-health",
+        "reishi-turkey-tail",
+        "allergy-relief",
+        "moon-beams-and-day-dreams",
+        "a-touch-of-sunshine",
+        "bitters",
+        "the-root-cause-bitters",
+        "cold-and-flu",
+        "lions-share",
+        "free-the-pee",
+        "goddess-moon",
+        "dream-weaver-1-2-oz",
+        "original-blend-1-2-oz"
+      ],
+      "missing": [],
+      "order": {
+        "actual": [
+          "calabash-gifts-set",
+          "calabash-gift-set",
+          "spa-day-gift-set",
+          "erotic-gift-set",
+          "saffron-maple-syrup",
+          "saffron-honey-4-oz",
+          "saffron-simple-syrup",
+          "saffron-salt-2-oz",
+          "vermont-grown-saffron",
+          "saffron-tincture",
+          "oregano-1-2-0z",
+          "tarragon-1-2-0z",
+          "ramp-pesto-walnut",
+          "ramp-pesto-pecan",
+          "habanero-salt-2-oz",
+          "thai-chili-salt-2-oz",
+          "cilantro-salt-2-oz",
+          "rose-sugar-2-oz",
+          "ginger-sugar-2-oz",
+          "cranberry-honey",
+          "elderflower-saffron-elixir",
+          "trinidad-saffron-trifecta-4-oz",
+          "saffron-ghost-in-trinidad-4-oz",
+          "ghost-of-saffron-carolina-4-oz",
+          "saffron-red-dragon-4-oz",
+          "saffron-dreams-in-peach-4-oz",
+          "jalapeno-popper-4-oz",
+          "the-heart-and-head-1-2-oz-loose-leaf-tea",
+          "easy-does-it-1-2-oz-loose-leaf-tea",
+          "goddess-moon-1-2-oz-loose-leaf-tea",
+          "brainiac-1-2-oz-loose-leaf-tea",
+          "wild-fire-frenzy-1-2-oz-loose-leaf-tea",
+          "cold-flu-1-2-oz-loose-leaf-tea",
+          "milk-machine-1-2-oz-loose-leaf-tea",
+          "sweet-relief-1-2-oz-loose-leaf-tea",
+          "saffron-macha-1-2-oz-loose-leaf-tea",
+          "tea-ball",
+          "sizzle",
+          "slippery-daze-4-oz",
+          "rara-magic",
+          "honey-dont-you-glow-clay-mask-4-0z",
+          "soaking-salts-5-0z",
+          "ageless-beauty-butter",
+          "ageless-beauty-oil-4-0z",
+          "bath-bombs",
+          "great-green-heal",
+          "heal-all",
+          "itch-dont-bug-me-now-10-ml",
+          "fungus-among-us-2-oz",
+          "lip-balm-1-2-oz",
+          "hydration-station",
+          "meadow-magic-gardeners-balm",
+          "pain-b-gone",
+          "sale-30-off-silky-smooth-flower-balm",
+          "sunny-days-massage-oil-4-oz",
+          "bo-not-today-deoderant-spray-4-oz",
+          "bug-spray-4-oz",
+          "facial-toner",
+          "headache-and-fever",
+          "joint-health",
+          "reishi-turkey-tail",
+          "allergy-relief",
+          "moon-beams-and-day-dreams",
+          "a-touch-of-sunshine",
+          "bitters",
+          "the-root-cause-bitters",
+          "cold-and-flu",
+          "lions-share",
+          "free-the-pee",
+          "goddess-moon",
+          "dream-weaver-1-2-oz",
+          "original-blend-1-2-oz"
+        ],
+        "expected": [
+          "calabash-gifts-set",
+          "calabash-gift-set",
+          "spa-day-gift-set",
+          "erotic-gift-set",
+          "saffron-maple-syrup",
+          "saffron-honey-4-oz",
+          "saffron-simple-syrup",
+          "saffron-salt-2-oz",
+          "vermont-grown-saffron",
+          "saffron-tincture",
+          "oregano-1-2-0z",
+          "tarragon-1-2-0z",
+          "ramp-pesto-walnut",
+          "ramp-pesto-pecan",
+          "habanero-salt-2-oz",
+          "thai-chili-salt-2-oz",
+          "cilantro-salt-2-oz",
+          "rose-sugar-2-oz",
+          "ginger-sugar-2-oz",
+          "cranberry-honey",
+          "elderflower-saffron-elixir",
+          "trinidad-saffron-trifecta-4-oz",
+          "saffron-ghost-in-trinidad-4-oz",
+          "ghost-of-saffron-carolina-4-oz",
+          "saffron-red-dragon-4-oz",
+          "saffron-dreams-in-peach-4-oz",
+          "jalapeno-popper-4-oz",
+          "the-heart-and-head-1-2-oz-loose-leaf-tea",
+          "easy-does-it-1-2-oz-loose-leaf-tea",
+          "goddess-moon-1-2-oz-loose-leaf-tea",
+          "brainiac-1-2-oz-loose-leaf-tea",
+          "wild-fire-frenzy-1-2-oz-loose-leaf-tea",
+          "cold-flu-1-2-oz-loose-leaf-tea",
+          "milk-machine-1-2-oz-loose-leaf-tea",
+          "sweet-relief-1-2-oz-loose-leaf-tea",
+          "saffron-macha-1-2-oz-loose-leaf-tea",
+          "tea-ball",
+          "sizzle",
+          "slippery-daze-4-oz",
+          "rara-magic",
+          "honey-dont-you-glow-clay-mask-4-0z",
+          "soaking-salts-5-0z",
+          "ageless-beauty-butter",
+          "ageless-beauty-oil-4-0z",
+          "bath-bombs",
+          "great-green-heal",
+          "heal-all",
+          "itch-dont-bug-me-now-10-ml",
+          "fungus-among-us-2-oz",
+          "lip-balm-1-2-oz",
+          "hydration-station",
+          "meadow-magic-gardeners-balm",
+          "pain-b-gone",
+          "sale-30-off-silky-smooth-flower-balm",
+          "sunny-days-massage-oil-4-oz",
+          "bo-not-today-deoderant-spray-4-oz",
+          "bug-spray-4-oz",
+          "facial-toner",
+          "headache-and-fever",
+          "joint-health",
+          "reishi-turkey-tail",
+          "allergy-relief",
+          "moon-beams-and-day-dreams",
+          "a-touch-of-sunshine",
+          "bitters",
+          "the-root-cause-bitters",
+          "cold-and-flu",
+          "lions-share",
+          "free-the-pee",
+          "goddess-moon",
+          "dream-weaver-1-2-oz",
+          "original-blend-1-2-oz"
+        ],
+        "matches": true
+      },
+      "photoDifferences": [],
+      "totalActual": 74,
+      "totalExpected": 72,
+      "variantIssues": [
+        {
+          "id": "calabash-gifts-set",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "calabash-gift-set",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "spa-day-gift-set",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "erotic-gift-set",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-maple-syrup",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-honey-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-simple-syrup",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-salt-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "vermont-grown-saffron",
+          "issues": [
+            "expected 3 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants",
+            "price option 3 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-tincture",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "oregano-1-2-0z",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "tarragon-1-2-0z",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "ramp-pesto-walnut",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "ramp-pesto-pecan",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "habanero-salt-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "thai-chili-salt-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "cilantro-salt-2-oz",
+          "issues": [
+            "variant 1 needs a SKU"
+          ]
+        },
+        {
+          "id": "rose-sugar-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "ginger-sugar-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "cranberry-honey",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "elderflower-saffron-elixir",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "trinidad-saffron-trifecta-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-ghost-in-trinidad-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "ghost-of-saffron-carolina-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-red-dragon-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-dreams-in-peach-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "jalapeno-popper-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "the-heart-and-head-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "easy-does-it-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "goddess-moon-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "brainiac-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "wild-fire-frenzy-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "cold-flu-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "milk-machine-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "sweet-relief-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "saffron-macha-1-2-oz-loose-leaf-tea",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "tea-ball",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "sizzle",
+          "issues": [
+            "expected 3 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants",
+            "price option 3 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "slippery-daze-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "rara-magic",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "honey-dont-you-glow-clay-mask-4-0z",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "soaking-salts-5-0z",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "ageless-beauty-butter",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "ageless-beauty-oil-4-0z",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "bath-bombs",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "great-green-heal",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "heal-all",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "itch-dont-bug-me-now-10-ml",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "fungus-among-us-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "lip-balm-1-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "hydration-station",
+          "issues": [
+            "expected 3 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants",
+            "price option 3 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "meadow-magic-gardeners-balm",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "pain-b-gone",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "sale-30-off-silky-smooth-flower-balm",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "sunny-days-massage-oil-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "bo-not-today-deoderant-spray-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "bug-spray-4-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "facial-toner",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "headache-and-fever",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "joint-health",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "reishi-turkey-tail",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "allergy-relief",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "moon-beams-and-day-dreams",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "a-touch-of-sunshine",
+          "issues": [
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "bitters",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "the-root-cause-bitters",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "cold-and-flu",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "lions-share",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "free-the-pee",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "goddess-moon",
+          "issues": [
+            "expected 2 variants, found 0",
+            "price option 1 maps to 0 variants",
+            "price option 2 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "dream-weaver-1-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        },
+        {
+          "id": "original-blend-1-2-oz",
+          "issues": [
+            "expected 1 variants, found 0",
+            "price option 1 maps to 0 variants"
+          ]
+        }
+      ],
+      "visibilityDifferences": []
+    },
+    "release": {
+      "publicReadChecks": [
+        {
+          "allowed": false,
+          "code": "permission-denied",
+          "name": "products-order-by-title"
+        },
+        {
+          "allowed": false,
+          "code": "permission-denied",
+          "name": "product-categories"
+        },
+        {
+          "allowed": false,
+          "code": "permission-denied",
+          "name": "events-order-by-date"
+        },
+        {
+          "allowed": false,
+          "code": "permission-denied",
+          "name": "site-content"
+        }
+      ]
+    }
+  },
+  "generatedAt": "2026-08-28T03:22:56.775Z",
+  "projectId": "calabash-54fb5",
+  "ready": false,
+  "snapshotFingerprint": "5d8a3cff21e579a019b2c7b0053a2ec6fcc60c5b93932829cb0d00f2fd29db18",
+  "summary": {
+    "blockerCount": 174,
+    "blockerTypeCount": 16,
+    "categories": {
+      "actual": 9,
+      "expected": 8
+    },
+    "content": {
+      "actual": 6,
+      "expected": 6
+    },
+    "events": {
+      "actual": 10,
+      "expected": 10
+    },
+    "media": {
+      "actual": 20,
+      "expected": 57
+    },
+    "products": {
+      "actual": 74,
+      "expected": 72
+    },
+    "warningCount": 5,
+    "warningTypeCount": 3
+  },
+  "warnings": [
+    {
+      "code": "products-extra-hidden",
+      "group": "products",
+      "message": "Extra products record is hidden from the public site.",
+      "target": "Title"
+    },
+    {
+      "code": "products-extra-hidden",
+      "group": "products",
+      "message": "Extra products record is hidden from the public site.",
+      "target": "test-basket"
+    },
+    {
+      "code": "events-legacy-visibility-flags",
+      "group": "events",
+      "message": "Legacy published/isActive fields differ, although effective public visibility is unchanged.",
+      "target": "we-are-more-alike-than-different-a-juneteenth-calabash-solstice-bash"
+    },
+    {
+      "code": "events-legacy-visibility-flags",
+      "group": "events",
+      "message": "Legacy published/isActive fields differ, although effective public visibility is unchanged.",
+      "target": "calabash-experience-home-grown"
+    },
+    {
+      "code": "fallback-older-than-firestore",
+      "group": "fallback",
+      "message": "Generated fallback predates the latest Firestore product update.",
+      "target": "public-products-cache"
+    }
+  ]
+}
