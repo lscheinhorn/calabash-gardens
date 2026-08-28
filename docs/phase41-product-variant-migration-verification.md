@@ -44,9 +44,21 @@ For each product option, Jetta enters the actual Stock value. Each stock edit au
 - 101 quantities explicitly left for Jetta;
 - known non-public `Title` and `test-basket` records excluded;
 - 2 warnings for legacy `A Touch of Sunshine` rows whose array positions provide their missing indexes;
-- 1 blocker because currently deployed rules return `permission-denied` for `productSkus`.
+- the initial pre-release run had 1 blocker because the then-deployed rules returned `permission-denied` for `productSkus`.
 
-The preview is therefore intentionally **BLOCKED**, not failed or partially applied. No product, variant, SKU registry claim, inventory quantity, rule, or deployment was changed. After an explicitly approved matching rules/client release, rerun the preview; Jetta's quantity entry begins only when SKU ownership is verifiable and the report has zero blockers.
+That initial preview was intentionally **BLOCKED**, not failed or partially applied. It changed no product, variant, SKU registry claim, inventory quantity, rule, or deployment.
+
+## Post-Release Rerun
+
+After Luke approved the matching Phase 42 client and Firestore-rules release, `npm run check:product-variant-migration` was rerun against `calabash-54fb5` in `--no-write --check` mode. It reported:
+
+- `READY FOR INVENTORY ENTRY`;
+- 72 products;
+- 101 variants/SKUs;
+- 0 blockers;
+- 2 reviewed legacy-index warnings.
+
+The rerun did not write a local report, Firestore document, SKU claim, or inventory quantity. Jetta may now enter the actual quantity for every product option through the supported live Inventory editor.
 
 ## Verification
 
@@ -60,10 +72,11 @@ The preview is therefore intentionally **BLOCKED**, not failed or partially appl
 - Production build: passed with the same existing four unused-code warnings.
 - Manual New Product check: `Luke's QA Product` suggested product ID `lukes-qa-product`; option label `Large Jar` generated variant ID `large-jar` and SKU `CG-LUKES-QA-PRODUCT-LARGE-JAR`. The product ID remained adjustable before first save, while variant ID/SKU were read-only; the unsaved form was then cleared.
 - Manual local admin check: both `A Touch of Sunshine` options and `Cilantro Salt` displayed `Not tracked` with Track off even where legacy stored flags existed; generated identity fields were read-only; entering stock turned on Track/Sell only in the local draft; Discard Changes restored the untouched Firestore state.
-- Final no-write production check: returned the expected single `productSkus` rules-permission blocker with 72 products, 101 variants/SKUs, and 2 warnings; both checked-in report hashes remained unchanged.
+- Initial no-write production check: returned the expected single `productSkus` rules-permission blocker with 72 products, 101 variants/SKUs, and 2 warnings; both checked-in report hashes remained unchanged.
+- Post-release no-write production check: returned `READY FOR INVENTORY ENTRY` with 72 products, 101 variants/SKUs, 0 blockers, and the same 2 reviewed warnings.
 - Independent read-only review: caught and verified fixes for setup-required rows appearing tracked and for an explicit Track-off choice being ignored when a legacy stored flag was true; the final targeted rereview returned PASS and reconfirmed the stored-value concurrency guard.
 - Protected static content/resource diff: passed; no protected file changed.
 
 ## Release Gate
 
-This phase may be committed on its feature branch. It must not be merged, pushed, deployed, or used for production inventory entry until Luke explicitly approves those actions. It does not enable Firestore as the public storefront source or enable server PayPal checkout.
+Luke approved and completed the matching client and Firestore-rules release on 2026-08-28. The zero-blocker rerun authorizes Jetta's supported Inventory entry. It does not authorize an automatic inventory import, a public Firestore storefront source, Firebase Functions deployment, or server PayPal checkout.

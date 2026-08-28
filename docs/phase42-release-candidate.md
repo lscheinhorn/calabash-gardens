@@ -8,11 +8,23 @@ Candidate parent: `38d3740` (`feat: prepare automatic product variant identities
 
 ## Purpose
 
-This gate prepares the accumulated admin portal, transactional inventory foundation, and automatic product/variant identities for an explicitly approved release. It does not merge, push, deploy, write Firestore data, switch the public storefront to Firestore, or enable server PayPal checkout.
+This gate prepared the accumulated admin portal, transactional inventory foundation, and automatic product/variant identities for an explicitly approved release. The release was completed on 2026-08-28 without writing inventory, switching the public storefront to Firestore, deploying Functions or Storage rules, or enabling server PayPal checkout.
+
+## Release Result
+
+- Pre-release `main` rollback point: `ba6ffa0`.
+- Reviewed accumulated candidate: `ab72889`.
+- Released `main` after the custom-domain safeguard: `2cd3e8f`.
+- Pre-release `gh-pages` rollback point: `f59831e`.
+- Released `gh-pages`: `e7a744f`.
+- Firestore deployment scope: `firestore:rules` only to `calabash-54fb5`.
+- Live build switches: static products; server PayPal, webhook review, and Firebase emulators disabled.
+- Final no-write SKU gate: 72 products, 101 variants/SKUs, 0 blockers, and 2 warnings.
+- Production inventory writes: none.
 
 ## Git Scope
 
-`main` and `origin/main` currently point to `ba6ffa0`. Once this release-gate change is committed, the candidate is a linear descendant containing 50 commits beyond that point: 49 accumulated implementation commits plus this workflow/documentation gate.
+Before release, `main` and `origin/main` pointed to `ba6ffa0`. The reviewed candidate was a linear descendant containing 50 commits beyond that point: 49 accumulated implementation commits plus the workflow/documentation gate.
 
 - 124 files changed;
 - 45,454 insertions and 872 deletions;
@@ -25,11 +37,11 @@ Because this is the accumulated local admin/backend program rather than a one-co
 
 The reviewed build keeps customer-facing data and payment behavior unchanged:
 
-- `REACT_APP_PUBLIC_PRODUCTS_SOURCE` is absent, so products continue to load from the protected static catalog.
+- The release build explicitly set `REACT_APP_PUBLIC_PRODUCTS_SOURCE=static`, so products continue to load from the protected static catalog.
 - Public events and site content continue to use the static data. Firestore event/content adapters are used only by the admin preview.
-- `REACT_APP_PAYPAL_SERVER_CHECKOUT` and `REACT_APP_PAYPAL_WEBHOOK_REVIEW` are absent, so server checkout and webhook-review UI remain disabled.
+- The release build explicitly disabled `REACT_APP_PAYPAL_SERVER_CHECKOUT` and `REACT_APP_PAYPAL_WEBHOOK_REVIEW`, so server checkout and webhook-review UI remain disabled.
 - Firestore rules keep products, events, site content, orders, inventory movements, drafts, and `productSkus` restricted to approved admins.
-- Firebase Functions and Storage rules are not part of the proposed deployment.
+- Firebase Functions and Storage rules were not deployed.
 - `firebase.json` does not configure Firebase Hosting. The customer site remains on GitHub Pages through `npm run deploy`.
 - The stale Firebase-generated GitHub Actions workflows have been removed from this candidate. They attempted Firebase Hosting deployments on every pull request and `main` push despite Hosting being deferred and unconfigured. Git history retains them if Firebase Hosting is intentionally designed later.
 
@@ -43,19 +55,19 @@ The reviewed build keeps customer-facing data and payment behavior unchanged:
 - The production build loaded the static Shop and the Firebase-configured admin sign-in screen from a temporary local server.
 - Live-versus-candidate browser comparison matched Home, Shop, a product detail, Contact, and a populated Cart in text, headings, image counts, and layout dimensions.
 - The populated Cart matched `$15` subtotal, `$17` shipping, and `$32` total.
-- Events has one intentional difference: the live page still shows dead purchase controls for the September 20, 2025 event, while the candidate displays `This event has passed.` This is the previously approved past-event purchase safeguard.
+- The pre-release comparison had one intentional difference: the then-live page still showed dead purchase controls for the September 20, 2025 event, while the candidate displayed `This event has passed.` The released live page now displays that safeguard and exposes no event purchase controls.
 - Release audit found and removed the two stale automatic Firebase Hosting workflows. No replacement deployment automation was added; site publication remains the explicit `npm run deploy` GitHub Pages command.
 - The worktree remained clean after both dry-runs.
 
-## Approved Release Sequence
+## Executed Release Sequence
 
-Run only after Luke explicitly approves merge, push, Firestore-rules deployment, and GitHub Pages deployment:
+Luke explicitly approved this sequence before remote changes:
 
 1. Confirm this branch is clean and rerun the final test/build checks.
 2. Fast-forward `main` to this reviewed branch and push `main`. The candidate removes the stale Firebase Hosting workflows, so this push must not initiate a Firebase Hosting deployment.
 3. Deploy Firestore rules only to `calabash-54fb5`.
 4. Deploy the current production build to GitHub Pages with `npm run deploy`.
-5. Verify the live public routes remain on static data and verify Jetta can sign in to the live admin portal.
+5. Verify the live public routes remain on static data and verify the configured admin sign-in shell.
 6. Rerun `npm run check:product-variant-migration`. Stop if any blocker remains.
 7. Hand off Inventory to Jetta only after the preview reports zero blockers. Jetta must enter a real quantity for every product option before saving each incomplete product.
 
@@ -65,8 +77,8 @@ Firebase Hosting remains a separate future architecture and DNS phase. Do not re
 
 ## Rollback Boundary
 
-Record the pre-release `main`, `gh-pages`, and deployed Firestore-rules revisions before deployment. If verification fails, redeploy the previously reviewed GitHub Pages artifact and previous Firestore rules from their recorded commits. Do not use a destructive Git reset.
+The recorded pre-release refs are `main` at `ba6ffa0` and `gh-pages` at `f59831e`. The last documented pre-Phase-42 rules-only state is the waitlist/inventory rules captured at `0452d43`; Firebase CLI did not print a prior ruleset ID. If verification fails, redeploy reviewed artifacts from recorded commits. Do not use a destructive Git reset.
 
 ## Gate
 
-Phase 42 may be committed on its feature branch. Merge, push, rules deployment, GitHub Pages deployment, and production inventory entry still require explicit approval.
+Phase 42 merge, push, Firestore-rules-only deployment, and GitHub Pages deployment are complete. The final no-write gate authorizes Jetta's supported Inventory entry. Public Firestore reads, Functions, Storage-rule changes, server PayPal, and automatic production data migration remain outside this approval.

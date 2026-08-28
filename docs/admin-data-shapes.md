@@ -492,7 +492,7 @@ Inventory editor controls:
 - Event sold tickets are displayed but never editable in InventoryAdmin.
 - Save Changes, Discard Changes, and Refresh remain available above the scrollable table; the action bar stays visible while editing on narrow screens.
 
-Production note: the Phase 41 UI/model and Phase 40 transaction/rule contract are verified against demo emulators. The migration preview does not write Firestore. The current deployed rules do not yet allow its signed-in client to verify `productSkus`, so Jetta's production quantity-entry handoff remains gated on a separately approved rules/client release and a zero-blocker preview rerun. This does not authorize a public-source switch or checkout enablement.
+Production note: the Phase 41 UI/model and Phase 40 transaction/rule contract are verified against demo emulators. The matching client and Firestore rules were released on 2026-08-28, and the production no-write preview then reported 72 products, 101 variants/SKUs, and 0 blockers. Jetta may enter the real quantity for every option through the supported Inventory editor; each successful save claims the SKU and writes only the approved inventory fields and movements. This does not authorize an automatic migration, public-source switch, Functions deployment, or server checkout enablement.
 
 ## Images
 
