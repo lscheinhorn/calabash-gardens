@@ -30,7 +30,9 @@ import {
 } from "../../data/adminProductSeed";
 import {
   activeAdminDrafts,
+  adminDraftErrorMessage,
   applyAdminDrafts,
+  buildAdminDraftPublishPreview,
   discardAdminDraft,
   loadAdminDrafts,
   publishAdminDraft,
@@ -905,6 +907,10 @@ export default function ProductAdmin({
     }, product._draftOnly === true, true)
   );
 
+  const productDeletedFieldsForForm = (productForm) => (
+    productForm.sortOrder === "" ? ["sortOrder"] : []
+  );
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -930,6 +936,8 @@ export default function ProductAdmin({
       await saveAdminDraft({
         data: payload,
         db,
+        deletedFields: productDeletedFieldsForForm(form),
+        expectedTargetExists: false,
         targetCollection: "products",
         targetId: productId,
         userId,
@@ -940,7 +948,7 @@ export default function ProductAdmin({
       setMessage("Product saved as a preview draft.");
       await reloadProductsAfterMutation();
     } catch (error) {
-      setMessage("Product draft could not be saved.");
+      setMessage(adminDraftErrorMessage(error, "Product draft could not be saved."));
     } finally {
       setIsSaving(false);
     }
@@ -965,6 +973,8 @@ export default function ProductAdmin({
       await saveAdminDraft({
         data: payload,
         db,
+        deletedFields: productDeletedFieldsForForm(editingForm),
+        expectedTargetExists: product._draftOnly !== true,
         targetCollection: "products",
         targetId: product.id,
         userId,
@@ -975,7 +985,7 @@ export default function ProductAdmin({
       setEditingForm(emptyProduct);
       await reloadProductsAfterMutation();
     } catch (error) {
-      setProductCardMessage("Product draft could not be saved.");
+      setProductCardMessage(adminDraftErrorMessage(error, "Product draft could not be saved."));
     } finally {
       setIsSaving(false);
     }
@@ -989,11 +999,27 @@ export default function ProductAdmin({
       return;
     }
 
+    const liveData = liveProducts.find((liveProduct) => liveProduct.id === product.id) || null;
+    let reviewData;
+
+    try {
+      reviewData = buildAdminDraftPublishPreview({
+        draft,
+        liveData,
+        targetCollection: "products",
+      });
+    } catch (error) {
+      setProductCardMessage(adminDraftErrorMessage(error, "Product draft could not be reviewed."));
+      setPublishReview(null);
+      return;
+    }
+
     setProductCardMessage("");
     setPublishReview({
-      data: draft.data,
+      data: reviewData,
+      draftRevision: draft.draftRevision,
       id: product.id,
-      liveData: liveProducts.find((liveProduct) => liveProduct.id === product.id) || null,
+      liveData,
       title: product.title || product.id,
     });
   };
@@ -1008,8 +1034,8 @@ export default function ProductAdmin({
 
     try {
       await publishAdminDraft({
-        data: publishReview.data,
         db,
+        expectedDraftRevision: publishReview.draftRevision,
         targetCollection: "products",
         targetId: publishReview.id,
         userId,
@@ -1020,7 +1046,9 @@ export default function ProductAdmin({
       setEditingForm(emptyProduct);
       await reloadProductsAfterMutation();
     } catch (error) {
-      setProductCardMessage("Product could not be published.");
+      setProductCardMessage(adminDraftErrorMessage(error, "Product could not be published."));
+      setPublishReview(null);
+      await reloadProductsAfterMutation();
     } finally {
       setIsSaving(false);
     }
@@ -1117,6 +1145,8 @@ export default function ProductAdmin({
       await saveAdminDraft({
         data: buildProductDraftPayload(product, updatedPhotos),
         db,
+        deletedFields: productDeletedFieldsForForm(buildFormFromProduct(product)),
+        expectedTargetExists: product._draftOnly !== true,
         targetCollection: "products",
         targetId: product.id,
         userId,
@@ -1138,7 +1168,7 @@ export default function ProductAdmin({
       setPhotoMessage(shouldOptimize ? "Photo optimized, uploaded, and attached to the product draft." : "Photo uploaded and attached to the product draft.");
       await reloadProductsAfterMutation();
     } catch (error) {
-      setPhotoMessage("Photo could not be uploaded.");
+      setPhotoMessage(adminDraftErrorMessage(error, "Photo could not be uploaded."));
     } finally {
       setIsUploadingPhoto(false);
     }
@@ -1182,6 +1212,8 @@ export default function ProductAdmin({
       await saveAdminDraft({
         data: buildProductDraftPayload(product, updatedPhotos),
         db,
+        deletedFields: productDeletedFieldsForForm(buildFormFromProduct(product)),
+        expectedTargetExists: product._draftOnly !== true,
         targetCollection: "products",
         targetId: product.id,
         userId,
@@ -1200,7 +1232,7 @@ export default function ProductAdmin({
       setPhotoMessage("Existing photo attached to the product draft.");
       await reloadProductsAfterMutation();
     } catch (error) {
-      setPhotoMessage("Existing photo could not be attached.");
+      setPhotoMessage(adminDraftErrorMessage(error, "Existing photo could not be attached."));
     } finally {
       setIsAttachingPhoto(false);
     }
@@ -1232,6 +1264,8 @@ export default function ProductAdmin({
       await saveAdminDraft({
         data: buildProductDraftPayload(product, updatedPhotos),
         db,
+        deletedFields: productDeletedFieldsForForm(buildFormFromProduct(product)),
+        expectedTargetExists: product._draftOnly !== true,
         targetCollection: "products",
         targetId: product.id,
         userId,
@@ -1247,7 +1281,7 @@ export default function ProductAdmin({
       await reloadProductsAfterMutation();
       return updatedPhotos;
     } catch (error) {
-      setPhotoMessage("Product photo changes could not be saved.");
+      setPhotoMessage(adminDraftErrorMessage(error, "Product photo changes could not be saved."));
       return null;
     } finally {
       setIsUpdatingProductPhoto(false);
@@ -1670,6 +1704,11 @@ export default function ProductAdmin({
                         <span>{inventorySummary.label}</span>
                         <span>{categoryNameById[product.category] || product.category || "No Category"}</span>
                       </div>
+                    ) : null}
+                    {product._draftConflict ? (
+                      <p className="admin_conflict_message" role="alert">
+                        Draft conflict: {product._draftConflict} Discard and resave this draft before publishing.
+                      </p>
                     ) : null}
 
                     {isExpanded ? (

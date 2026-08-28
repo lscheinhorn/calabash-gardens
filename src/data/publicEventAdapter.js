@@ -109,6 +109,7 @@ export const normalizeFirestoreEventForPublic = (firestoreEvent, options = {}) =
     category: String(firestoreEvent.category || "Experience"),
     date: normalizeDate(firestoreEvent.date),
     descriptionBlocks,
+    draftConflict: String(firestoreEvent._draftConflict || ""),
     eventDates: normalizeStringList(firestoreEvent.eventDates),
     id: firestoreEvent.id || firestoreEvent.slug || "",
     info: info.length ? info : infoFromDescriptionBlocks(descriptionBlocks),

@@ -44,6 +44,7 @@ service cloud.firestore {
     function validProduct(productId) {
       return hasOnlyAllowedKeys([
           'category',
+          'contentRevision',
           'createdAt',
           'info',
           'info1',
@@ -73,6 +74,7 @@ service cloud.firestore {
         && request.resource.data.priceOptions is list
         && request.resource.data.shipping is string
         && request.resource.data.title is string
+        && validContentRevision()
         && (!('variants' in request.resource.data) || validProductVariants(request.resource.data.variants));
     }
 
@@ -213,6 +215,7 @@ service cloud.firestore {
           'capacity',
           'category',
           'childTicket',
+          'contentRevision',
           'createdAt',
           'date',
           'descriptionBlocks',
@@ -246,6 +249,7 @@ service cloud.firestore {
         && request.resource.data.published is bool
         && request.resource.data.shipping is string
         && request.resource.data.title is string
+        && validContentRevision()
         && validEventTicketCounts()
         && (!('waitlistEnabled' in request.resource.data) || request.resource.data.waitlistEnabled is bool);
     }
@@ -340,18 +344,69 @@ service cloud.firestore {
     }
 
     function validSiteContent() {
-      return hasOnlyAllowedKeys(['createdAt', 'published', 'sections', 'sortOrder', 'updatedAt'])
+      return hasOnlyAllowedKeys(['contentRevision', 'createdAt', 'published', 'sections', 'sortOrder', 'updatedAt'])
         && hasRequiredKeys(['published', 'sections'])
         && request.resource.data.published is bool
+        && validContentRevision()
         && (request.resource.data.sections is map || request.resource.data.sections is list);
+    }
+
+    function validContentRevision() {
+      return !('contentRevision' in request.resource.data)
+        || (request.resource.data.contentRevision is int && request.resource.data.contentRevision >= 0);
     }
 
     function validDraftStatus(status) {
       return status in ['draft', 'published', 'discarded'];
     }
 
+    function validDraftDeletedField(targetCollection, field) {
+      return (targetCollection == 'events'
+          && field in ['capacity', 'eventType', 'link', 'manualSeatsReserved', 'sortOrder'])
+        || (targetCollection == 'products' && field == 'sortOrder');
+    }
+
+    function validOptionalDraftDeletedField(targetCollection, fields, index) {
+      return fields.size() <= index || validDraftDeletedField(targetCollection, fields[index]);
+    }
+
+    function validDraftDeletedFields(targetCollection) {
+      let fields = request.resource.data.draftDeletedFields;
+      return fields is list
+        && fields.size() <= 5
+        && (targetCollection in ['events', 'products'] || fields.size() == 0)
+        && validOptionalDraftDeletedField(targetCollection, fields, 0)
+        && validOptionalDraftDeletedField(targetCollection, fields, 1)
+        && validOptionalDraftDeletedField(targetCollection, fields, 2)
+        && validOptionalDraftDeletedField(targetCollection, fields, 3)
+        && validOptionalDraftDeletedField(targetCollection, fields, 4);
+    }
+
     function validDraftMetadata(targetCollection, targetId) {
-      return request.resource.data.draftStatus is string
+      return request.resource.data.keys().hasAll([
+          'draftBaseContentFingerprint',
+          'draftBaseContentRevision',
+          'draftBaseOperationalJson',
+          'draftBaseTargetExists',
+          'draftDeletedFields',
+          'draftRevision',
+          'draftStatus',
+          'draftTargetCollection',
+          'draftTargetId',
+          'draftUpdatedAt',
+          'draftUpdatedBy'
+        ])
+        && request.resource.data.draftBaseContentFingerprint is string
+        && request.resource.data.draftBaseContentFingerprint.size() <= 500000
+        && request.resource.data.draftBaseContentRevision is int
+        && request.resource.data.draftBaseContentRevision >= 0
+        && request.resource.data.draftBaseOperationalJson is string
+        && request.resource.data.draftBaseOperationalJson.size() <= 100000
+        && request.resource.data.draftBaseTargetExists is bool
+        && validDraftDeletedFields(targetCollection)
+        && request.resource.data.draftRevision is int
+        && request.resource.data.draftRevision >= 1
+        && request.resource.data.draftStatus is string
         && validDraftStatus(request.resource.data.draftStatus)
         && request.resource.data.draftTargetCollection == targetCollection
         && request.resource.data.draftTargetId == targetId
@@ -359,6 +414,7 @@ service cloud.firestore {
         && request.resource.data.draftUpdatedBy is string
         && (!('draftPublishedAt' in request.resource.data) || request.resource.data.draftPublishedAt is timestamp)
         && (!('draftPublishedBy' in request.resource.data) || request.resource.data.draftPublishedBy is string)
+        && (!('draftPublishedContentRevision' in request.resource.data) || (request.resource.data.draftPublishedContentRevision is int && request.resource.data.draftPublishedContentRevision >= 1))
         && (!('draftDiscardedAt' in request.resource.data) || request.resource.data.draftDiscardedAt is timestamp)
         && (!('draftDiscardedBy' in request.resource.data) || request.resource.data.draftDiscardedBy is string);
     }
@@ -367,10 +423,17 @@ service cloud.firestore {
       return hasOnlyAllowedKeys([
           'category',
           'createdAt',
+          'draftBaseContentFingerprint',
+          'draftBaseContentRevision',
+          'draftBaseOperationalJson',
+          'draftBaseTargetExists',
+          'draftDeletedFields',
           'draftDiscardedAt',
           'draftDiscardedBy',
           'draftPublishedAt',
           'draftPublishedBy',
+          'draftPublishedContentRevision',
+          'draftRevision',
           'draftStatus',
           'draftTargetCollection',
           'draftTargetId',
@@ -417,10 +480,17 @@ service cloud.firestore {
           'date',
           'descriptionBlocks',
           'dietaryOptions',
+          'draftBaseContentFingerprint',
+          'draftBaseContentRevision',
+          'draftBaseOperationalJson',
+          'draftBaseTargetExists',
+          'draftDeletedFields',
           'draftDiscardedAt',
           'draftDiscardedBy',
           'draftPublishedAt',
           'draftPublishedBy',
+          'draftPublishedContentRevision',
+          'draftRevision',
           'draftStatus',
           'draftTargetCollection',
           'draftTargetId',
@@ -518,10 +588,17 @@ service cloud.firestore {
     function validSiteContentDraft(contentId) {
       return hasOnlyAllowedKeys([
           'createdAt',
+          'draftBaseContentFingerprint',
+          'draftBaseContentRevision',
+          'draftBaseOperationalJson',
+          'draftBaseTargetExists',
+          'draftDeletedFields',
           'draftDiscardedAt',
           'draftDiscardedBy',
           'draftPublishedAt',
           'draftPublishedBy',
+          'draftPublishedContentRevision',
+          'draftRevision',
           'draftStatus',
           'draftTargetCollection',
           'draftTargetId',

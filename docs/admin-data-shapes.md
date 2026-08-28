@@ -44,21 +44,40 @@ Admin edits should use draft collections before any public Firestore read switch
 
 Draft documents use the same public-facing fields as their live target collection plus draft metadata:
 
+- `draftBaseContentFingerprint`: canonical fingerprint of the live content when the draft began.
+- `draftBaseContentRevision`: live `contentRevision` when the draft began.
+- `draftBaseOperationalJson`: serialized baseline for product inventory or event capacity/holds/waitlist fields.
+- `draftBaseTargetExists`: whether the live target existed when the draft began.
+- `draftDeletedFields`: approved optional live fields intentionally removed by the draft.
+- `draftRevision`: integer incremented on every saved, published, or discarded draft state change.
 - `draftStatus`: `draft`, `published`, or `discarded`.
 - `draftTargetCollection`: `products`, `events`, or `siteContent`.
 - `draftTargetId`: matching target document ID.
 - `draftUpdatedAt`: server timestamp.
 - `draftUpdatedBy`: admin user ID string.
 - `draftPublishedAt` and `draftPublishedBy`: set when a draft is published.
+- `draftPublishedContentRevision`: live content revision produced by a successful publish.
 - `draftDiscardedAt` and `draftDiscardedBy`: set when a draft is discarded.
+
+Live product, event, and site-content documents may include `contentRevision`, a nonnegative integer incremented by transactional draft publishing.
 
 Current admin workflow:
 
 - Save Draft writes to the matching draft collection only.
 - Firestore Site Preview loads live records with active draft records overlaid.
-- Publish Changes copies the current draft-shaped data to the live collection and marks the draft `published`.
+- Publish Changes rereads the persisted draft and live target in one transaction, validates the reviewed draft revision and saved live-content baseline, writes the live collection, and marks the draft `published` atomically.
 - Discard Draft marks the draft `discarded`; it does not delete live data.
 - Public routes and generated cache reads still use live collections only.
+
+Operational ownership during publish:
+
+- Product variant `stockOnHand`, `lowStockThreshold`, and `inventoryTracked` values are preserved from live data when the draft did not edit them.
+- Event `capacity`, `manualSeatsReserved`, and `waitlistEnabled` values follow the same three-way merge rule.
+- Event `ticketsSold` is server/inventory owned and is always taken from the current live event.
+- If both the draft and live record changed the same operational value differently, publishing stops with a conflict and writes neither document.
+- A new event begins with `ticketsSold: 0` when it has a capacity.
+- A draft cannot publish event capacity below current sold tickets plus manual holds.
+- Active legacy drafts without baseline metadata must be discarded and saved again before publishing an existing live record.
 
 Product photo uploads still upload the Storage object immediately, but the product document reference to that photo is draft-only until published. Attaching, reordering, alt editing, and detaching product photos update `productDrafts`, not live `products`.
 

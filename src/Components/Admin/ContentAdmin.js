@@ -13,7 +13,9 @@ import {
 
 import {
   activeAdminDrafts,
+  adminDraftErrorMessage,
   applyAdminDrafts,
+  buildAdminDraftPublishPreview,
   discardAdminDraft,
   loadAdminDrafts,
   publishAdminDraft,
@@ -502,6 +504,7 @@ export default function ContentAdmin({
       await saveAdminDraft({
         data: payload,
         db,
+        expectedTargetExists: contentDoc._draftOnly !== true,
         targetCollection: "siteContent",
         targetId: contentDoc.id,
         userId,
@@ -512,7 +515,7 @@ export default function ContentAdmin({
       await loadContentDocs();
       onDraftChange();
     } catch (error) {
-      setMessage("Site content draft could not be saved.");
+      setMessage(adminDraftErrorMessage(error, "Site content draft could not be saved."));
     } finally {
       setIsSaving(false);
     }
@@ -526,11 +529,27 @@ export default function ContentAdmin({
       return;
     }
 
+    const liveData = liveContentById[contentDoc.id] || null;
+    let reviewData;
+
+    try {
+      reviewData = buildAdminDraftPublishPreview({
+        draft,
+        liveData,
+        targetCollection: "siteContent",
+      });
+    } catch (error) {
+      setMessage(adminDraftErrorMessage(error, "Site content draft could not be reviewed."));
+      setPublishReview(null);
+      return;
+    }
+
     setMessage("");
     setPublishReview({
-      data: draft.data,
+      data: reviewData,
+      draftRevision: draft.draftRevision,
       id: contentDoc.id,
-      liveData: liveContentById[contentDoc.id] || null,
+      liveData,
       title: expectedMeta.get(contentDoc.id)?.title || contentDoc.id,
     });
   };
@@ -545,8 +564,8 @@ export default function ContentAdmin({
 
     try {
       await publishAdminDraft({
-        data: publishReview.data,
         db,
+        expectedDraftRevision: publishReview.draftRevision,
         targetCollection: "siteContent",
         targetId: publishReview.id,
         userId,
@@ -557,7 +576,10 @@ export default function ContentAdmin({
       await loadContentDocs();
       onDraftChange();
     } catch (error) {
-      setMessage("Site content could not be published.");
+      setMessage(adminDraftErrorMessage(error, "Site content could not be published."));
+      setPublishReview(null);
+      await loadContentDocs();
+      onDraftChange();
     } finally {
       setIsSaving(false);
     }
@@ -600,8 +622,8 @@ export default function ContentAdmin({
 
     try {
       await publishAdminDraft({
-        data: draft.data,
         db,
+        expectedDraftRevision: draft.draftRevision,
         targetCollection: "siteContent",
         targetId: contentDoc.id,
         userId,
@@ -612,7 +634,10 @@ export default function ContentAdmin({
       await loadContentDocs();
       onDraftChange();
     } catch (error) {
-      setMessage("Site content could not be published.");
+      setMessage(adminDraftErrorMessage(error, "Site content could not be published."));
+      setPublishReview(null);
+      await loadContentDocs();
+      onDraftChange();
     } finally {
       setIsSaving(false);
     }
@@ -810,6 +835,11 @@ export default function ContentAdmin({
                     <span>{hasDraft ? "Draft changes pending" : "Live content"}</span>
                     <span>{form?.published ? "Published when live" : "Hidden when live"}</span>
                   </div>
+                  {contentDoc._draftConflict ? (
+                    <p className="admin_conflict_message" role="alert">
+                      Draft conflict: {contentDoc._draftConflict} Discard and resave this draft before publishing.
+                    </p>
+                  ) : null}
 
                   {isDocExpanded ? (
                     <div className="admin_embedded_form">

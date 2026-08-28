@@ -4,8 +4,8 @@ This file is the live source of truth for Calabash Gardens project work.
 
 ## Current Status
 
-The admin Orders fulfillment workflow is at an emulator- and browser-verified, non-deployed checkpoint on branch `codex/order-fulfillment-admin`. Approved admins can transactionally update only fulfillment status and internal notes, stale revisions are rejected, and filtered orders export as spreadsheet-safe CSV.
-Firestore draft/admin editing works locally with an approved user, protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. Server-owned PayPal checkout and verified webhook recovery remain disabled and undeployed. Real PayPal sandbox checkout/webhook validation, refund and inventory-disposition policy, rule/Functions deployment review, and explicit live-switch approval remain required.
+Transactional admin draft publishing is at an emulator- and build-verified, non-deployed checkpoint on branch `codex/transactional-draft-publish`. Product, event, and site-content publishing now rereads the reviewed saved draft and live target in one Firestore transaction, rejects stale content/reviews, preserves concurrent inventory and ticket facts, and writes the live target plus published draft status atomically.
+Protected static content files remain unchanged, and the public storefront still defaults to static data and the legacy browser PayPal flow. Phase 38 Firestore rules are local only; no production data was mutated. Server-owned PayPal checkout and verified webhook recovery remain disabled and undeployed. Content/media/menu parity, real PayPal sandbox checkout/webhook validation, refund and inventory-disposition policy, rule/Functions deployment review, and explicit live-switch approval remain required.
 
 ## Approved Tech Stack
 
@@ -20,7 +20,7 @@ Firestore draft/admin editing works locally with an approved user, protected sta
 
 ## Current Phase
 
-Phase 37: Restricted admin order fulfillment and filtered CSV export.
+Phase 38: Transactional draft publishing and inventory-conflict protection.
 
 ## Done Work
 
@@ -154,6 +154,13 @@ Phase 37: Restricted admin order fulfillment and filtered CSV export.
 - Added a restricted admin fulfillment editor for existing orders with fixed statuses, 2,000-character internal notes, transactional revision checks, stale-edit rejection, session-preserved unsaved drafts, and filtered spreadsheet-safe CSV export.
 - Tightened Firestore order rules so approved admins may update only fulfillment status, notes, revision, server timestamp, and authenticated updater UID; order create/delete and all payment/source/customer/shipping/item/total changes remain denied.
 - Added deterministic Phase 37 model/rules/browser verification covering two allowed updates, twenty denied cases, persisted UI saves, concurrent-admin conflict handling, CSV filtering/formula neutralization, dark/light styling, and mobile layout without touching production data.
+- Replaced browser-supplied draft publishing with one Firestore transaction that rereads the persisted draft and live product, event, or site-content target before either document is written.
+- Added live content revisions, canonical content fingerprints, operational baselines, target-existence baselines, explicit deletion metadata, and monotonically increasing draft revisions.
+- Preserved concurrent live product stock and event ticket counts when a content draft does not edit those values; conflicting same-field inventory edits now fail closed instead of overwriting either side.
+- Made new-record publish atomic, blocked stale reviewed revisions and changed live content, rejected event capacity below current sold-plus-held seats, and required legacy active drafts to be discarded and resaved before safe publish.
+- Added deterministic publish-merge and preview-conflict unit coverage plus an isolated eleven-scenario Auth/Firestore emulator matrix for rules, atomicity, simultaneous publish, inventory preservation, content conflicts, stale review, draft-only/live collision, new records, optional deletion, and legacy-draft handling.
+- Changed unsafe draft previews to show current live data plus a clear conflict warning when live content or the same inventory field changed after the draft began.
+- Added `npm run test:draft-publish-emulators` as the named, demo-project-only entry point for the Phase 38 Auth/Firestore matrix.
 
 ## In Progress Work
 
@@ -239,6 +246,9 @@ Phase 37: Restricted admin order fulfillment and filtered CSV export.
 
 - Public checkout still uses the legacy client-side PayPal flow by default. The server-owned path is isolated behind two flags and has not been deployed or tested against real PayPal sandbox accounts.
 - Phase 37 Firestore order-update rules are verified locally but not deployed. The live admin remains read-only for orders until Luke separately approves a rules deployment.
+- Phase 38 draft-publish rules are verified locally but not deployed. Existing live rules do not understand the new baseline/revision metadata, so this branch must not be used for real draft saves or publishing until a separately approved rules deployment.
+- Active drafts created before Phase 38 do not have a trustworthy live baseline. They must be discarded, reopened from current live data, and saved again after the Phase 38 rules/client are approved together.
+- Approved admin credentials remain a trusted-operator boundary. Phase 38 prevents accidental races through the supported portal; Firebase Console/server-admin access bypasses client rules, and a deliberately custom admin client is not treated as an adversary.
 - Server checkout now binds capture to a token-protected trusted snapshot, reserves inventory before capture, persists recoverable uncertain states, and has a disabled verified webhook recovery path; the path still requires real PayPal sandbox delivery verification before public use.
 - Refunds, partial refunds, disputes, reversals, and voids are recorded for manual review but do not yet update the financial ledger, change order status, or create approved reversing inventory movements.
 - Anonymous checkout callables do not yet enforce App Check or another approved abuse-control/rate-limit layer.
@@ -362,6 +372,7 @@ Phase 37: Restricted admin order fulfillment and filtered CSV export.
 - Server PayPal capture must remain bound to the persisted token-protected checkout snapshot. Inventory may be released only for a verified terminal non-payment state; pending, approved, timeout, and unknown states stay reserved for recovery.
 - Public server checkout requires both the Functions and React flags, reviewed secrets/rules, real PayPal sandbox verification, automatic recovery, and explicit deployment/live-switch approval.
 - Admin order updates are limited to the five fulfillment workflow fields. `cancelled` is a fulfillment label only and must never imply a refund, void, inventory reversal, or event-seat release.
+- Product, event, and site-content publish must use the persisted reviewed draft and live target in one transaction. Stale draft revisions or changed live content fail closed; current live inventory/ticket facts are preserved unless the draft intentionally changed the same operational value.
 
 ## Verification History
 
@@ -558,6 +569,13 @@ Phase 37: Restricted admin order fulfillment and filtered CSV export.
 - 2026-08-26: Independent read-only review found refresh-state loss, mid-save edit loss, incomplete harness cleanup, and inaccurate failed-refresh messaging. All findings were fixed; the final focused rereview returned PASS with no remaining actionable P1/P2 findings.
 - 2026-08-26: Phase 37 fixtures and the emulator-only admin were deleted, temporary browser tabs were closed, temporary ports `3003`, `5001`, `8080`, `8787`, and `9099` were stopped, and the normal local site remained available on `127.0.0.1:3001`.
 - Docs checked: added the Phase 37 plan and verification procedure and updated architecture, admin setup/data shapes, order-ledger planning, current status, decisions, risks, and verification history. No protected business content was edited.
+- 2026-08-27: The Phase 38 isolated Auth/Firestore emulator matrix passed all eleven scenarios: concurrent product stock preservation, optional product-field deletion, concurrent event ticket preservation, atomic site-content conflict rejection, stale reviewed-draft rejection, atomic new-product publish, exactly-one-commit simultaneous publish, draft-only/live collision rejection, legacy-draft publish rejection/discard recovery, and malformed direct-draft rule denial.
+- 2026-08-27: The regular React/Jest suite passed 27 tests with eleven emulator-only tests skipped, including preview conflict and effective-review behavior. The production build and Functions syntax check passed; the build retained only the same four existing unused-code warnings.
+- 2026-08-27: Read-only browser inspection loaded Site Preview, 74 Products, 10 Events, and Site Content with no application console errors. No real Firestore save, publish, discard, inventory, or content mutation was performed.
+- 2026-08-27: An emulator-only browser fixture confirmed conflicting product drafts show current live title and stock plus a visible warning in Site Preview and Products. Browser diagnostics were empty, and all temporary fixture processes were stopped.
+- 2026-08-27: A second emulator-only browser fixture confirmed a safe draft title change over concurrently updated stock shows current `7 on hand`, opens Review Publish without a false conflict, and lists only the title difference. Confirm Publish was not clicked.
+- 2026-08-27: Independent final rereview returned PASS with no remaining P1/P2 issue after the Java 21 emulator proof, added concurrency cases, conflict-preview warnings, UI-ID-safe fingerprints, effective Publish Review inventory merging, trusted-admin boundary documentation, and named emulator test command.
+- Docs checked: added the Phase 38 verification procedure and updated architecture, admin data shapes, editing workflow, current status, decisions, risks, and verification history. No protected business content was edited.
 
 ## Commits
 
@@ -603,6 +621,7 @@ Phase 37: Restricted admin order fulfillment and filtered CSV export.
 - `feat: clean admin editing sections` (current branch)
 - `feat: harden waitlists and inventory transactions` (current branch)
 - `feat: add order fulfillment workflow` (current branch)
+- `feat: harden transactional draft publishing` (current branch)
 - `test: verify waitlist and inventory emulators` (current branch)
 - `feat: harden server paypal checkout` (current branch)
 - `feat: add paypal webhook recovery` (current branch)

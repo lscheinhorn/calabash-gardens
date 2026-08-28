@@ -37,6 +37,12 @@ const normalizeContentBlocks = (blocks) => {
 
 export const normalizeSiteContentForPublic = (siteContentDocs, options = {}) => {
   const content = clone(options.staticContent || staticContent);
+  const draftConflicts = siteContentDocs
+    .filter((contentDoc) => contentDoc._draftConflict)
+    .map((contentDoc) => ({
+      id: contentDoc.id,
+      message: String(contentDoc._draftConflict),
+    }));
   let experienceBlurb = [...(options.staticExperienceBlurb || staticExperienceBlurb)];
   let experienceBlurbBlocks = {};
   const publishedDocs = siteContentDocs.filter((contentDoc) => contentDoc.published === true);
@@ -79,6 +85,7 @@ export const normalizeSiteContentForPublic = (siteContentDocs, options = {}) => 
 
   return {
     content,
+    draftConflicts,
     experienceBlurb,
     experienceBlurbBlocks,
   };

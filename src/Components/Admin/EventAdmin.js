@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import {
   collection,
-  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -25,7 +24,9 @@ import {
 
 import {
   activeAdminDrafts,
+  adminDraftErrorMessage,
   applyAdminDrafts,
+  buildAdminDraftPublishPreview,
   discardAdminDraft,
   loadAdminDrafts,
   publishAdminDraft,
@@ -84,13 +85,6 @@ const allowedEventKeys = new Set([
   "waitlistEnabled",
   ...deprecatedEventKeys,
 ]);
-const optionalEventPublishKeys = [
-  "capacity",
-  "link",
-  "manualSeatsReserved",
-  ...deprecatedEventKeys,
-];
-
 const CollapseIcon = ({ isExpanded }) => (
   <FontAwesomeIcon
     aria-hidden="true"
@@ -477,7 +471,7 @@ const validateEventForm = (form, isNewEvent) => {
   return "";
 };
 
-const buildEventPayload = (form, { clearBlankOptionalFields = false } = {}) => {
+const buildEventPayload = (form) => {
   const payload = {
     category: form.category.trim(),
     date: dateFromInputValue(form.date),
@@ -497,42 +491,29 @@ const buildEventPayload = (form, { clearBlankOptionalFields = false } = {}) => {
 
   if (form.link.trim()) {
     payload.link = form.link.trim();
-  } else if (clearBlankOptionalFields) {
-    payload.link = deleteField();
-  }
-
-  if (clearBlankOptionalFields) {
-    deprecatedEventKeys.forEach((key) => {
-      payload[key] = deleteField();
-    });
   }
 
   if (form.capacity !== "") {
     payload.capacity = Number(form.capacity);
-  } else if (clearBlankOptionalFields) {
-    payload.capacity = deleteField();
   }
 
   if (form.manualSeatsReserved !== "") {
     payload.manualSeatsReserved = Number(form.manualSeatsReserved);
-  } else if (clearBlankOptionalFields) {
-    payload.manualSeatsReserved = deleteField();
   }
 
   return payload;
 };
 
-const buildEventPublishPayload = (draftData, liveData) => {
-  const payload = { ...draftData };
-
-  optionalEventPublishKeys.forEach((key) => {
-    if (!(key in payload) && liveData && key in liveData) {
-      payload[key] = deleteField();
-    }
-  });
-
-  return payload;
-};
+const eventDeletedFieldsForForm = (form, clearBlankOptionalFields = false) => (
+  clearBlankOptionalFields
+    ? [
+      ...deprecatedEventKeys,
+      ...(form.link.trim() ? [] : ["link"]),
+      ...(form.capacity === "" ? ["capacity"] : []),
+      ...(form.manualSeatsReserved === "" ? ["manualSeatsReserved"] : []),
+    ]
+    : []
+);
 
 export default function EventAdmin({
   db,
@@ -817,6 +798,7 @@ export default function EventAdmin({
       await saveAdminDraft({
         data: buildEventPayload(form),
         db,
+        expectedTargetExists: false,
         targetCollection: "events",
         targetId: form.slug,
         userId,
@@ -828,7 +810,7 @@ export default function EventAdmin({
       setIsNewEventExpanded(false);
       await reloadEventsAfterMutation();
     } catch (error) {
-      setMessage("Event could not be saved.");
+      setMessage(adminDraftErrorMessage(error, "Event could not be saved."));
     } finally {
       setIsSaving(false);
     }
@@ -836,6 +818,7 @@ export default function EventAdmin({
 
   const saveExistingEvent = async (eventId) => {
     const editingForm = editingFormsById[eventId];
+    const eventDoc = events.find((candidate) => candidate.id === eventId);
 
     if (!editingForm) {
       setMessage("Open an event before saving.");
@@ -854,8 +837,10 @@ export default function EventAdmin({
 
     try {
       await saveAdminDraft({
-        data: buildEventPayload(editingForm, { clearBlankOptionalFields: true }),
+        data: buildEventPayload(editingForm),
         db,
+        deletedFields: eventDeletedFieldsForForm(editingForm, true),
+        expectedTargetExists: eventDoc?._draftOnly !== true,
         targetCollection: "events",
         targetId: eventId,
         userId,
@@ -864,7 +849,7 @@ export default function EventAdmin({
       setPublishReview(null);
       await reloadEventsAfterMutation();
     } catch (error) {
-      setMessage("Event draft could not be saved.");
+      setMessage(adminDraftErrorMessage(error, "Event draft could not be saved."));
     } finally {
       setIsSaving(false);
     }
@@ -880,9 +865,23 @@ export default function EventAdmin({
 
     setMessage("");
     const liveData = liveEventsById[eventDoc.id] || null;
+    let reviewData;
+
+    try {
+      reviewData = buildAdminDraftPublishPreview({
+        draft,
+        liveData,
+        targetCollection: "events",
+      });
+    } catch (error) {
+      setMessage(adminDraftErrorMessage(error, "Event draft could not be reviewed."));
+      setPublishReview(null);
+      return;
+    }
 
     setPublishReview({
-      data: buildEventPublishPayload(draft.data, liveData),
+      data: reviewData,
+      draftRevision: draft.draftRevision,
       id: eventDoc.id,
       liveData,
       title: eventDoc.title || eventDoc.id,
@@ -899,8 +898,8 @@ export default function EventAdmin({
 
     try {
       await publishAdminDraft({
-        data: publishReview.data,
         db,
+        expectedDraftRevision: publishReview.draftRevision,
         targetCollection: "events",
         targetId: publishReview.id,
         userId,
@@ -909,7 +908,9 @@ export default function EventAdmin({
       setPublishReview(null);
       await reloadEventsAfterMutation();
     } catch (error) {
-      setMessage("Event could not be published.");
+      setMessage(adminDraftErrorMessage(error, "Event could not be published."));
+      setPublishReview(null);
+      await reloadEventsAfterMutation();
     } finally {
       setIsSaving(false);
     }
@@ -950,11 +951,13 @@ export default function EventAdmin({
     setPhotoMessage("");
 
     try {
-      const payload = buildEventPayload(nextForm, { clearBlankOptionalFields: true });
+      const payload = buildEventPayload(nextForm);
 
       await saveAdminDraft({
         data: payload,
         db,
+        deletedFields: eventDeletedFieldsForForm(nextForm, true),
+        expectedTargetExists: events.find((eventDoc) => eventDoc.id === eventId)?._draftOnly !== true,
         targetCollection: "events",
         targetId: eventId,
         userId,
@@ -968,7 +971,7 @@ export default function EventAdmin({
       await reloadEventsAfterMutation();
       return nextForm.photos;
     } catch (error) {
-      setPhotoMessage("Event photo changes could not be saved.");
+      setPhotoMessage(adminDraftErrorMessage(error, "Event photo changes could not be saved."));
       return null;
     } finally {
       savingStateSetter(false);
@@ -1358,6 +1361,11 @@ export default function EventAdmin({
                       <span>{eventAvailabilityLabel(editingFormsById[eventDoc.id] || buildFormFromEvent(eventDoc))}</span>
                       <span>{eventDoc.id}</span>
                     </div>
+                  ) : null}
+                  {eventDoc._draftConflict ? (
+                    <p className="admin_conflict_message" role="alert">
+                      Draft conflict: {eventDoc._draftConflict} Discard and resave this draft before publishing.
+                    </p>
                   ) : null}
 
                   {isEventExpanded && editingForm ? (

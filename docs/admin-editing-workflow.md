@@ -22,6 +22,7 @@ For a new admin-editable content section:
 3. Add preview edit markers only for the approved editable fields.
 4. Keep edits on draft collections first.
 5. Require `Save Draft`, then `Review Publish`, then `Confirm Publish Changes` before live Firestore changes.
+6. Publish the reviewed saved draft and its live target in one Firestore transaction.
 
 Protected static resource files remain read-only unless Luke explicitly approves a content migration or content change.
 
@@ -44,6 +45,28 @@ The admin preview is the map Jette uses to find content the same way a customer 
 - Preview side cards keep instructional notes compact behind help controls so the edit field remains the focus.
 - Added content blocks use the same preview-click drawer flow. A block can be a title, subtitle, or paragraph, and it can be removed from the draft before publishing.
 - Manual refresh and audit/setup tools belong outside the Jette-facing preview editing flow.
+
+## Transactional Publish Contract
+
+Saving a draft records the live content revision, a canonical live-content fingerprint, the live record's existence, an operational inventory snapshot, and a monotonically increasing draft revision. Those values define exactly what Jette reviewed.
+
+Confirm Publish Changes must reread both the saved draft and live target inside one Firestore transaction. The transaction must:
+
+- reject a publish when the saved draft changed after review;
+- reject a publish when live product, event, or site content changed after the draft began;
+- preserve newer live product stock and event ticket counts when the draft did not edit those values;
+- reject conflicting inventory edits instead of choosing one silently;
+- reject event capacity below current sold tickets plus manual holds;
+- write the live target and mark the draft published together, or write neither;
+- publish the persisted draft record, never unsaved form state supplied by the browser.
+
+Product inventory fields and event capacity/holds/waitlist settings are operational data. Their live values may change while a content draft is open, so draft preview and publish merge them through the same ownership rules. Event `ticketsSold` is always preserved from the live record and is never owned by a content draft.
+
+Drafts saved before this contract lack a trustworthy baseline. An active legacy draft against an existing live record must be discarded, reopened from live data, and saved again before it can publish.
+
+If preview overlay detects changed live content or a same-field operational conflict, it must show current live data and an explicit conflict warning. It must never silently render the stale draft as though it can publish.
+
+Firestore rules validate approved-admin identity and document shapes, while the portal owns this review/publish workflow. Approved admin credentials are a trusted-operator boundary: Firebase Console/server-admin access bypasses client rules, and a deliberately custom client using an approved admin account is outside the accidental-overwrite protection provided by this UI.
 
 ## Admin Sections
 
@@ -116,4 +139,7 @@ For each preview-editing phase, verify:
 - Preview clicks do not scroll the parent admin page away from the preview.
 - Draft saves write only to draft collections.
 - Preview refreshes draft-over-live data after saving.
+- Publishing a reviewed revision writes the target and published draft status atomically.
+- A stale reviewed revision or changed live content writes neither document.
+- Concurrent inventory or ticket changes are preserved unless the draft edited the same operational value, in which case conflicting edits fail closed.
 - Protected resource files are unchanged.

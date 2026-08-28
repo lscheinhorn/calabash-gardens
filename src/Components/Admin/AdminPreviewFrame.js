@@ -304,6 +304,7 @@ export default function AdminPreviewFrame() {
   });
   const [previewData, setPreviewData] = useState({
     content: null,
+    draftConflicts: [],
     events: [],
     experienceBlurb: [],
     experienceBlurbBlocks: {},
@@ -337,6 +338,29 @@ export default function AdminPreviewFrame() {
 
       setPreviewData({
         content: siteContent.content,
+        draftConflicts: [
+          ...products
+            .filter((product) => product.draftConflict)
+            .map((product) => ({
+              id: product.id,
+              label: product.title || product.id,
+              message: product.draftConflict,
+              type: "Product",
+            })),
+          ...events
+            .filter((event) => event.draftConflict)
+            .map((event) => ({
+              id: event.id,
+              label: event.title || event.id,
+              message: event.draftConflict,
+              type: "Event",
+            })),
+          ...(siteContent.draftConflicts || []).map((conflict) => ({
+            ...conflict,
+            label: conflict.id,
+            type: "Site content",
+          })),
+        ],
         events,
         experienceBlurb: siteContent.experienceBlurb,
         experienceBlurbBlocks: siteContent.experienceBlurbBlocks,
@@ -701,6 +725,19 @@ export default function AdminPreviewFrame() {
         >
           <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
         </button>
+      ) : null}
+      {previewData.draftConflicts.length ? (
+        <section className="admin_preview_conflict_banner" role="alert">
+          <strong>Draft conflict. Preview is showing current live data for:</strong>
+          <ul>
+            {previewData.draftConflicts.map((conflict) => (
+              <li key={`${conflict.type}-${conflict.id}`}>
+                {conflict.type}: {conflict.label}. {conflict.message}
+              </li>
+            ))}
+          </ul>
+          <span>Discard and resave the affected draft before publishing.</span>
+        </section>
       ) : null}
       <Header
         headerContent={homeContent?.header}

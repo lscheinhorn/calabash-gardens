@@ -117,6 +117,7 @@ export const normalizeFirestoreProductForPublic = (firestoreProduct, options = {
 
   return {
     category: categoryNameById[firestoreProduct.category] || fallbackProduct?.category || firestoreProduct.category || "",
+    draftConflict: String(firestoreProduct._draftConflict || ""),
     id: firestoreProduct.id || firestoreProduct.slug || seedIdForTitle(title),
     info: String(firestoreProduct.info || fallbackProduct?.info || ""),
     info1: String(firestoreProduct.info1 || fallbackProduct?.info1 || ""),

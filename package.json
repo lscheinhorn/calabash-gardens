@@ -37,6 +37,7 @@
     "audit:firebase-ownership": "node scripts/firebase-ownership-audit.js",
     "generate:public-products-cache": "node scripts/generate-public-products-cache.js",
     "functions:check": "npm --prefix functions run check",
+    "test:draft-publish-emulators": "RUN_DRAFT_PUBLISH_EMULATOR_TESTS=true npx firebase-tools emulators:exec --only firestore,auth --project demo-calabash-gardens \"RUN_DRAFT_PUBLISH_EMULATOR_TESTS=true CI=true npm test -- --watchAll=false --runInBand src/data/adminDrafts.emulator.test.js\"",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
