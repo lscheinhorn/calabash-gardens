@@ -6,6 +6,7 @@ This file is the live source of truth for Calabash Gardens project work.
 
 Phase 41 is automatic product/variant identity and the production no-write migration preview on branch `codex/product-variant-migration-preview`, based on committed Phase 40 inventory readiness at `5c15900`. Product IDs are suggested from titles, variant IDs are suggested from option labels, and SKUs are generated as `CG-{PRODUCT-ID}-{VARIANT-ID}` through one shared module. Generated identities follow unsaved title/label edits and persisted IDs/SKUs are read-only. There is no separate product SKU; each sellable product uses at least one variant SKU.
 The 2026-08-28 preview accounts for all 72 reviewed Firestore/static products and proposes 101 variant/SKU rows without inventing inventory. Existing custom variant IDs are preserved, known non-public `Title` and `test-basket` records are excluded, and every real quantity remains Jetta-owned. Legacy rows stay untracked until quantities are explicitly entered; each stock edit enables Track and Sell, and an incomplete product cannot initialize until every option quantity is confirmed. Automated model, transaction/rules, draft-publish, parity, Functions, build, and local browser checks pass without a production write. The preview remains **BLOCKED** only because currently deployed rules deny the signed-in client read of `productSkus`; matching rules/client release and a zero-blocker rerun require separate approval. The broader 2026-08-27 Firebase parity gate also remains **NOT READY**. No Firebase data, deployed rules, public reads, checkout flags, merge, push, or deployment changed.
+Phase 42 is the no-deploy release-candidate gate on branch `codex/phase42-release-candidate`. Once the gate is committed, `main` will be 50 commits behind the accumulated candidate: 49 implementation commits plus this workflow/documentation gate. This is therefore a complete admin/backend release review rather than a one-commit SKU merge. Firestore rules and the GitHub Pages artifact pass dry-run/no-push validation; public Home, Shop, product detail, Contact, and Cart match live, while Events intentionally replaces dead controls for a past event with `This event has passed.` The candidate removes two stale Firebase-generated workflows that would otherwise attempt unconfigured Firebase Hosting deployments on pull requests and `main` pushes; GitHub Pages remains the explicit site-deployment path. Public Firestore and server PayPal switches remain off, protected files remain unchanged, and explicit approval is still required for merge, push, rules deployment, and GitHub Pages deployment.
 
 ## Approved Tech Stack
 
@@ -20,7 +21,7 @@ The 2026-08-28 preview accounts for all 72 reviewed Firestore/static products an
 
 ## Current Phase
 
-Phase 41: Automatic product/variant identity and no-write production migration preview.
+Phase 42: Accumulated admin release candidate and no-deploy production gate.
 
 ## Done Work
 
@@ -173,10 +174,14 @@ Phase 41: Automatic product/variant identity and no-write production migration p
 - Added a guarded production read-only migration preview with exact-project/catalog checks, double-read snapshot stability, allowlisted test-record exclusion, global collision checks, SKU-registry ownership review, reproducible Markdown/JSON output, and no Firestore mutation API.
 - Generated the Phase 41 preview for 72 reviewed products and 101 variants. It preserved three existing custom variant IDs, generated 98 missing variant IDs and all 101 missing SKUs, and left all 101 starting quantities for Jetta.
 - Changed incomplete legacy inventory rows to remain untracked until stock is explicitly confirmed. Each quantity entry automatically turns on Track and Sell, and the product cannot initialize until every option has a confirmed quantity; Inventory Save Changes then persists identities, claims SKUs, records quantity movements, and derives availability in one transaction.
+- Mapped the complete prospective release delta against `main`: 50 linear commits, 124 files, and no protected static business-content/resource difference.
+- Verified Firestore rules against the exact production project in dry-run mode and built the GitHub Pages artifact in `--no-push` mode.
+- Compared live and candidate public routes. Home, Shop, product detail, Contact, and populated Cart matched; Events differed only by the approved past-event purchase safeguard.
+- Removed the stale Firebase-generated pull-request and `main`-push Hosting workflows from the candidate. Firebase Hosting remains deferred and unconfigured; site deployment stays an explicit GitHub Pages operation.
 
 ## In Progress Work
 
-- Deploy the already-reviewed matching Firestore rules and Phase 41 client only after Luke explicitly approves merge/deploy, then rerun the no-write SKU-registry preview. Jetta should enter the 101 real quantities only after that report has zero blockers.
+- Await explicit approval for the complete Phase 42 fast-forward merge, `main` push, Firestore-rules-only deployment, and GitHub Pages deployment. Then rerun the no-write SKU-registry preview; Jetta should enter the 101 real quantities only after that report has zero blockers.
 - Resolve the broader Firebase parity blocker types in separately reviewed phases without changing public reads. Product identity generation is now deterministic, but event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
 - Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
@@ -296,7 +301,7 @@ Phase 41: Automatic product/variant identity and no-write production migration p
 - Admin product photo upload treats 10 MB as the performance threshold and 25 MB as the draft hard cap for rare original-upload overrides.
 - Original admin photo uploads between 10 MB and 25 MB require reviewed/deployed Storage rules before they work live.
 - Media migration importer requires `--confirm` before Firebase writes and signs in with local-only approved admin credentials.
-- `firebase.json` is active for Storage rules only; Firebase Hosting remains outside this config.
+- `firebase.json` configures Functions, Firestore rules, Storage rules, and local emulators. Firebase Hosting remains outside this config, and any approved Firebase operation must use an explicit `--only` target.
 - Firebase Rules System service agent has the `Firebase Rules Firestore Service Agent` role, allowing Storage rules to check Firestore `adminUsers/{uid}`.
 - Confirmed media import uploaded 20 Storage objects, created 20 `mediaAssets` documents, and attached product photo refs to 11 Firestore products.
 - Admin product cards and Photos library resolve Storage download URLs for imported media previews.
@@ -327,7 +332,7 @@ Phase 41: Automatic product/variant identity and no-write production migration p
 - Preview Shop/Event cards still use public components that include cart controls; the preview does not deploy or switch public reads, but checkout isolation should be reviewed before broader testing.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
-- Deployment target appears related to Firebase and/or `homepage`, but current deployment process needs confirmation.
+- The customer site deploys to GitHub Pages through the explicit `npm run deploy` command. Firebase Hosting is deferred; the stale Firebase-generated PR and `main`-push Hosting workflows are removed in the Phase 42 candidate.
 - Product, event, content, inventory, image, and public key files are protected and must not be edited without explicit approval.
 - The strict production parity audit is read-only, but a passing data report alone does not authorize public Firestore rules, Firebase writes, a public source switch, checkout activation, merge, or deployment.
 
@@ -627,6 +632,12 @@ Phase 41: Automatic product/variant identity and no-write production migration p
 - 2026-08-28: The final no-write production SKU preview check returned the expected single `productSkus` rules-permission blocker with 72 products, 101 variants/SKUs, and 2 warnings. It exited `2` by design and preserved identical Markdown/JSON report hashes.
 - 2026-08-28: Independent read-only review found and prompted fixes for setup-required rows displaying stored tracking and for an explicit Track-off choice being ignored after quantity confirmation. Model and emulator regressions now cover stored-true/draft-false persistence plus concurrent-baseline rejection; the final targeted rereview returned PASS.
 - Docs checked: added the Phase 41 verification procedure and generated migration preview, and updated README, architecture, admin data shapes, editing workflow, and current status. No protected business content or resource file was edited.
+- 2026-08-28: Phase 42 mapped the prospective 50-commit, 124-file linear candidate beyond `main`; the protected static product/event/content/inventory/image/public-key diff remained empty.
+- 2026-08-28: Firestore rules compiled for `calabash-54fb5` in dry-run mode. The GitHub Pages artifact built and completed `gh-pages --no-push`; neither command deployed or pushed.
+- 2026-08-28: Browser comparison matched live Home, Shop, product detail, Contact, and a populated Cart. Events intentionally replaced the live past-event purchase controls with `This event has passed.` The temporary production-build server and comparison tabs were removed afterward.
+- 2026-08-28: Independent release audit found that the two legacy GitHub Actions files would attempt unconfigured Firebase Hosting deployments on pull requests and pushes to `main`. Both stale workflows were removed on the candidate branch; no Hosting config, replacement automation, push, or deployment was added.
+- 2026-08-28: Final candidate checks passed 48 ordinary React tests, 14 draft-publish emulator tests, 9 inventory transaction emulator tests, 16 parity-model tests, 14 product-variant migration-model tests, Functions syntax validation, and a production build with only the existing warnings.
+- Docs checked: added the Phase 42 release packet and updated current status, scope, verification, release sequence, exclusions, and rollback boundary. No application or protected business-content file changed.
 
 ## Commits
 

@@ -59,6 +59,8 @@ Before shipping event changes, verify:
 
 ## Deployment
 
-Deployment target needs confirmation. `firebase.json` is currently commented out, while `package.json` includes a `homepage` value and a `gh-pages` deploy script.
+The customer site currently deploys to GitHub Pages through the explicit `npm run deploy` command. `firebase.json` configures Functions, Firestore rules, Storage rules, and local emulators, but it does not configure Firebase Hosting.
+
+The stale Firebase-generated pull-request and `main`-push Hosting workflows were removed in Phase 42. Firebase Hosting remains a separately reviewed future migration. Never use an unscoped `firebase deploy`; deploy only an explicitly approved Firebase target such as `--only firestore:rules`.
 
 Do not deploy without Luke's explicit approval.
