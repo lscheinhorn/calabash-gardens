@@ -7,6 +7,7 @@ This file is the live source of truth for Calabash Gardens project work.
 Phase 41 is automatic product/variant identity and the production no-write migration preview on branch `codex/product-variant-migration-preview`, based on committed Phase 40 inventory readiness at `5c15900`. Product IDs are suggested from titles, variant IDs are suggested from option labels, and SKUs are generated as `CG-{PRODUCT-ID}-{VARIANT-ID}` through one shared module. Generated identities follow unsaved title/label edits and persisted IDs/SKUs are read-only. There is no separate product SKU; each sellable product uses at least one variant SKU.
 The 2026-08-28 preview accounts for all 72 reviewed Firestore/static products and proposes 101 variant/SKU rows without inventing inventory. Existing custom variant IDs are preserved, known non-public `Title` and `test-basket` records are excluded, and every real quantity remains Jetta-owned. Legacy rows stay untracked until quantities are explicitly entered; each stock edit enables Track and Sell, and an incomplete product cannot initialize until every option quantity is confirmed. After the approved Phase 42 client/rules release, the production no-write rerun reports **READY FOR INVENTORY ENTRY** with 72 products, 101 variants/SKUs, 0 blockers, and 2 reviewed warnings. No inventory quantity or SKU claim was written by the check. The broader 2026-08-27 Firebase parity gate remains **NOT READY** and still blocks a public Firestore source switch.
 Phase 42 was approved and released on 2026-08-28. `main` was fast-forwarded through `ab72889`, the custom-domain safeguard was added at `2cd3e8f`, Firestore rules only were deployed to `calabash-54fb5`, and GitHub Pages published `e7a744f` with `www.calabashgardens.com` preserved. Live Home, Shop, product detail, Cart, Events, Contact, and the configured admin sign-in shell passed verification. The deployed storefront is explicitly built from static products with server PayPal, webhook review, and emulator switches disabled; Functions, Storage rules, production inventory, and the public Firestore source did not change.
+Phase 43 is in progress on `codex/admin-preview-inventory-status`. It adds admin-preview-only product labels for saved/live/conflicted/unavailable draft state and exact option inventory. Inventory is all-or-nothing: incomplete, malformed, ambiguously mapped, or untracked variants show `Inventory not set up`. The public storefront remains unchanged, and this branch has not been merged, pushed, or deployed.
 
 ## Approved Tech Stack
 
@@ -21,7 +22,7 @@ Phase 42 was approved and released on 2026-08-28. `main` was fast-forwarded thro
 
 ## Current Phase
 
-Phase 42 released: live admin inventory-entry handoff while the public storefront remains static.
+Phase 43 in progress: trustworthy product draft and inventory status in the admin preview while the public storefront remains static.
 
 ## Done Work
 
@@ -181,10 +182,14 @@ Phase 42 released: live admin inventory-entry handoff while the public storefron
 - Released the accumulated admin client to `main`, deployed Firestore rules only, and published the static-source GitHub Pages build without deploying Functions or Storage rules.
 - Added `public/CNAME` after pre-deploy review found the source build could otherwise drop the existing `www.calabashgardens.com` mapping; the deployed Pages commit preserves it.
 - Verified the live public routes and admin sign-in shell, then reran the production no-write SKU gate successfully with 72 products, 101 variants/SKUs, 0 blockers, and 2 warnings.
+- Added admin-preview-only product status panels across Home highlighted products, Shop cards, and product detail pages. The panel shows saved/live/conflicted/unavailable draft state and exact per-option stock only when every persisted variant is valid and tracked.
+- Made preview draft loading fail closed so a product says `Draft status unavailable` instead of incorrectly saying `Live only` when product drafts cannot be read.
+- Reused the Inventory section's persisted variant-mapping contract for preview status and kept the default public product adapter free of admin-preview metadata.
 
 ## In Progress Work
 
 - Jetta may now enter the real Stock value for every product option in the live Inventory section. Each incomplete product remains untracked until all of its option quantities are explicitly confirmed and saved; no automatic production inventory migration has run.
+- Review and approve the Phase 43 admin-preview inventory-status branch before merge or deployment. Current local browser checks show exact saved Firestore quantities for configured products and `Inventory not set up` for legacy rows; no production writes were performed.
 - Resolve the broader Firebase parity blocker types in separately reviewed phases without changing public reads. Product identity generation is now deterministic, but event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
 - Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
@@ -647,6 +652,9 @@ Phase 42 released: live admin inventory-entry handoff while the public storefron
 - 2026-08-28: Published GitHub Pages commit `e7a744f` with products forced to static and server PayPal, webhook review, and emulator flags forced off. Live Home, Shop, product detail, Cart, Events, Contact, and admin sign-in shell passed; Cart remained `$15 + $17 = $32`, and the past event exposed no purchase controls.
 - 2026-08-28: The production no-write SKU check returned `READY FOR INVENTORY ENTRY`: 72 products, 101 variants/SKUs, 0 blockers, and 2 warnings. It performed no inventory or report write.
 - Docs checked: updated Phase 41/42 release state, deployment/rollback evidence, the inventory handoff, and current risks. Protected business content/resource files were not edited.
+- 2026-09-02: Focused preview-status tests passed for strict inventory mapping, configured zero stock, saved/live/conflicted/unavailable draft states, fail-closed draft reads, adapter opt-in boundaries, and current-live inventory merged under valid/conflicted drafts.
+- 2026-09-02: Read-only local browser verification against production Firestore showed Saffron Maple Syrup as `4 oz 10 on hand` and `8 oz 10 on hand`, Saffron Tincture as `1 oz 2 on hand` and `4 oz 3 on hand`, and incomplete products as `Inventory not set up` in Home, Shop, and product detail preview paths. Product edit mode still opened the existing editor drawer, and the ordinary local Shop showed no admin status labels. No Firestore write was performed.
+- Docs checked: updated the admin editing workflow and current status for preview draft/inventory labels, fail-closed status behavior, and the Inventory-section handoff. Protected business content/resource files were not edited.
 
 ## Commits
 

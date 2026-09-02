@@ -37,6 +37,8 @@ The admin preview is the map Jette uses to find content the same way a customer 
 - The preview route stays where Jette clicked.
 - The lower admin editor sections do not auto-scroll open for preview clicks.
 - Saving a draft refreshes the preview data without publishing.
+- Every preview product shows whether Jetta is viewing a `Saved draft`, the `Live only` record, or a draft conflict. `Live only` may appear only after the product-draft collection loads successfully; a failed draft read must say `Draft status unavailable` instead.
+- Fully configured product inventory shows each option's exact quantity in the preview, including `0 on hand`. If any option is missing, malformed, ambiguously mapped, or not tracked, the product says `Inventory not set up` instead of showing partial quantities.
 - The embedded admin preview keeps viewport size controls behind the view icon.
 - The pencil icon toggles edit mode for the current preview without leaving the preview.
 - The expand icon opens a full-preview admin overlay that keeps the side edit drawer available.
@@ -116,6 +118,8 @@ The client cart also counts event seats across adult, child, dietary, and duplic
 The admin dashboard uses a left-sidebar navigation shell. Only one section renders in the main workspace at a time: Site Preview, Products, Events, Inventory, Orders, Photos, Site Content, or Developer / Audit Tools.
 
 The Inventory section is the operating view over live Firestore inventory records. It combines product variant stock and event capacity/tickets/manual holds without changing protected static resource files.
+
+Jetta should use the Inventory section as the primary workflow for real stock quantities, tracking, sellable status, and low-stock thresholds. The Product Editor remains the place for product copy, category, photos, prices, option names, and visibility; when an intentional product-option edit includes inventory fields, those values can be reviewed in the product draft. Inventory-section saves write operational values directly to the live product record, while content-only product drafts preserve the current live inventory during preview and publish.
 
 Inventory edits are intentionally narrower than product/event content edits:
 

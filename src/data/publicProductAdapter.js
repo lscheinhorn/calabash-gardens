@@ -2,6 +2,7 @@ import { collection, getDocs, orderBy, query } from "firebase/firestore";
 import { getDownloadURL, ref } from "firebase/storage";
 
 import { applyAdminDrafts } from "./adminDrafts";
+import { buildAdminProductPreviewState } from "./adminProductPreviewState";
 import { createKey, products as staticProducts } from "../resources/products";
 
 export const publicProductsSource = process.env.REACT_APP_PUBLIC_PRODUCTS_SOURCE === "firestore"
@@ -106,7 +107,9 @@ export const seedIdForTitle = (title) => String(title || "")
 export const normalizeFirestoreProductForPublic = (firestoreProduct, options = {}) => {
   const {
     categoryNameById = {},
+    draftStatusAvailable = true,
     fallbackProduct,
+    includeAdminPreviewState = false,
     storageUrlByPath = {},
   } = options;
   const title = String(firestoreProduct.title || fallbackProduct?.title || "");
@@ -115,7 +118,7 @@ export const normalizeFirestoreProductForPublic = (firestoreProduct, options = {
   const fallbackPhotos = Array.isArray(fallbackProduct?.photos) ? fallbackProduct.photos : [];
   const photos = storagePhotos.length ? storagePhotos : fallbackPhotos;
 
-  return {
+  const normalizedProduct = {
     category: categoryNameById[firestoreProduct.category] || fallbackProduct?.category || firestoreProduct.category || "",
     draftConflict: String(firestoreProduct._draftConflict || ""),
     id: firestoreProduct.id || firestoreProduct.slug || seedIdForTitle(title),
@@ -132,6 +135,14 @@ export const normalizeFirestoreProductForPublic = (firestoreProduct, options = {
     sortOrder: Number.isFinite(firestoreProduct.sortOrder) ? firestoreProduct.sortOrder : fallbackProduct?.sortOrder ?? 999,
     title,
   };
+
+  if (includeAdminPreviewState) {
+    normalizedProduct.adminPreview = buildAdminProductPreviewState(firestoreProduct, {
+      draftStatusAvailable,
+    });
+  }
+
+  return normalizedProduct;
 };
 
 export const normalizeFirestoreProductsForPublic = (firestoreProducts, options = {}) => {
@@ -175,7 +186,9 @@ const buildStorageUrlMap = async (storage, firestoreProducts) => {
 
 export const loadFirestoreProductsForPublic = async ({
   db,
+  draftStatusAvailable = true,
   drafts = [],
+  includeAdminPreviewState = false,
   staticProductFallbacks = staticProducts,
   storage,
 }) => {
@@ -195,6 +208,8 @@ export const loadFirestoreProductsForPublic = async ({
 
   return normalizeFirestoreProductsForPublic(firestoreProducts, {
     categoryNameById,
+    draftStatusAvailable,
+    includeAdminPreviewState,
     staticProducts: staticProductFallbacks,
     storageUrlByPath,
   });

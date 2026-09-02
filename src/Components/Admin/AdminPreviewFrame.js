@@ -23,6 +23,7 @@ import { loadAdminDrafts } from "../../data/adminDrafts";
 import { loadFirestoreSiteContentForPublic } from "../../data/publicContentAdapter";
 import { loadFirestoreEventsForPublic } from "../../data/publicEventAdapter";
 import { loadFirestoreProductsForPublic } from "../../data/publicProductAdapter";
+import AdminProductPreviewStatus from "./AdminProductPreviewStatus";
 
 const previewTabs = ["home", "shop", "events", "contact", "cart"];
 
@@ -328,9 +329,39 @@ export default function AdminPreviewFrame() {
     setMessage("");
 
     try {
-      const drafts = await loadAdminDrafts({ db });
+      const draftResults = await Promise.all(
+        ["products", "events", "siteContent"].map(async (targetCollection) => {
+          try {
+            return {
+              available: true,
+              drafts: await loadAdminDrafts({
+                db,
+                targetCollection,
+                throwOnError: true,
+              }),
+              targetCollection,
+            };
+          } catch (error) {
+            return {
+              available: false,
+              drafts: [],
+              targetCollection,
+            };
+          }
+        }),
+      );
+      const drafts = draftResults.flatMap((result) => result.drafts);
+      const productDraftStatusAvailable = draftResults.find(
+        (result) => result.targetCollection === "products",
+      )?.available === true;
       const [products, siteContent, liveSiteContent, events] = await Promise.all([
-        loadFirestoreProductsForPublic({ db, drafts, storage }),
+        loadFirestoreProductsForPublic({
+          db,
+          draftStatusAvailable: productDraftStatusAvailable,
+          drafts,
+          includeAdminPreviewState: true,
+          storage,
+        }),
         loadFirestoreSiteContentForPublic({ db, drafts }),
         loadFirestoreSiteContentForPublic({ db }),
         loadFirestoreEventsForPublic({ db, drafts, storage }),
@@ -575,21 +606,26 @@ export default function AdminPreviewFrame() {
   ), [activeEditTarget, isContentEditMode, previewData.liveContent, previewData.liveExperienceBlurb, previewData.liveExperienceBlurbBlocks, requestContentEdit]);
 
   const renderProductPreviewItem = useCallback((product, children) => {
-    if (!isContentEditMode) {
-      return children;
-    }
-
     return (
-      <EditablePreviewRecord
-        isSelected={activeEditTarget.type === "product" && activeEditTarget.id === product.id}
+      <div
+        className={activeTab === "product"
+          ? "admin_preview_product_record admin_preview_product_record_detail"
+          : "admin_preview_product_record"}
         key={product.id || product.key}
-        label={`product ${product.title || product.id}`}
-        onEdit={() => requestRecordEdit("product", product)}
       >
-        {children}
-      </EditablePreviewRecord>
+        {isContentEditMode ? (
+          <EditablePreviewRecord
+            isSelected={activeEditTarget.type === "product" && activeEditTarget.id === product.id}
+            label={`product ${product.title || product.id}`}
+            onEdit={() => requestRecordEdit("product", product)}
+          >
+            {children}
+          </EditablePreviewRecord>
+        ) : children}
+        <AdminProductPreviewStatus product={product} />
+      </div>
     );
-  }, [activeEditTarget, isContentEditMode, requestRecordEdit]);
+  }, [activeEditTarget, activeTab, isContentEditMode, requestRecordEdit]);
 
   const renderEventPreviewItem = useCallback((event, children) => {
     if (!isContentEditMode) {
@@ -679,7 +715,10 @@ export default function AdminPreviewFrame() {
           renderEditableContent={renderBannerContent}
         />
         <div>
-          <HighlightedProducts productsOverride={highlightedProducts} />
+          <HighlightedProducts
+            productsOverride={highlightedProducts}
+            renderProductPreviewItem={renderProductPreviewItem}
+          />
           <Experience />
           <Media />
           <Parallax />

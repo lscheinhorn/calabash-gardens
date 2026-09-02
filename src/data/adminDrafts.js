@@ -200,7 +200,11 @@ const prepareProductSkuRegistryChanges = async ({
   };
 };
 
-export const loadAdminDrafts = async ({ db, targetCollection = "" }) => {
+export const loadAdminDrafts = async ({
+  db,
+  targetCollection = "",
+  throwOnError = false,
+}) => {
   const targetCollections = targetCollection
     ? [targetCollection]
     : Object.keys(draftCollectionsByTarget);
@@ -212,6 +216,10 @@ export const loadAdminDrafts = async ({ db, targetCollection = "" }) => {
     try {
       snapshot = await getDocs(collection(db, draftCollectionForTarget(collectionName)));
     } catch (error) {
+      if (throwOnError) {
+        throw error;
+      }
+
       return [];
     }
 

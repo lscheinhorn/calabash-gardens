@@ -3,7 +3,12 @@ import { useHighlightedProducts } from '../../data/usePublicProducts'
 import Product from '../Product/Product'
 import {  Link } from 'react-router-dom'
 
-export default function HighlightedProducts ({ productsOverride = null }) {
+const renderStaticProductItem = (product, children) => children;
+
+export default function HighlightedProducts ({
+    productsOverride = null,
+    renderProductPreviewItem = renderStaticProductItem
+}) {
     const publicProducts = useHighlightedProducts()
     const products = productsOverride || publicProducts.products
     
@@ -12,7 +17,10 @@ export default function HighlightedProducts ({ productsOverride = null }) {
             <div id="highlighted-products">
                 {
                     products.map( product => {
-                        return <Product product={ product } key={ product.key } />
+                        return renderProductPreviewItem(
+                            product,
+                            <Product product={ product } key={ product.key } />
+                        )
                     })
                 }
 

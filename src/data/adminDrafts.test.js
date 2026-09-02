@@ -7,9 +7,11 @@ import {
   operationalSnapshotForTarget,
   serializeOperationalSnapshot,
 } from "./adminDraftPublishModel";
+import { buildAdminProductPreviewState } from "./adminProductPreviewState";
 
 const product = (overrides = {}) => ({
   id: "preview-product",
+  priceOptions: [{ option: "Jar", price: "15.00" }],
   title: "Live title",
   variants: [{
     active: true,
@@ -71,6 +73,13 @@ describe("admin draft preview conflicts", () => {
     expect(preview._draftConflict).toBeUndefined();
     expect(publishPreview.title).toBe("Draft title");
     expect(publishPreview.variants[0].stockOnHand).toBe(7);
+    expect(buildAdminProductPreviewState(preview)).toEqual({
+      draft: { savedAt: "", state: "saved" },
+      inventory: {
+        isConfigured: true,
+        options: [{ active: true, label: "Jar", stockOnHand: 7 }],
+      },
+    });
   });
 
   test("shows current live content and marks a content conflict", () => {
@@ -85,6 +94,8 @@ describe("admin draft preview conflicts", () => {
 
     expect(preview.title).toBe("Newer live title");
     expect(preview._draftConflict).toMatch(/live content changed/i);
+    expect(buildAdminProductPreviewState(preview).draft.state).toBe("conflict");
+    expect(buildAdminProductPreviewState(preview).inventory.options[0].stockOnHand).toBe(10);
   });
 
   test("shows current live inventory and marks a same-field inventory conflict", () => {
