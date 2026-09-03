@@ -318,14 +318,16 @@ export default function AdminPreviewFrame() {
   const isContentEditMode = queryParams.get("edit") === "content";
   const isEmbeddedPreview = typeof window !== "undefined" && window.parent !== window;
 
-  const loadPreview = useCallback(async () => {
+  const loadPreview = useCallback(async ({ showLoading = true } = {}) => {
     if (!isFirebaseConfigured || !db || !storage) {
       setMessage("Firebase is not configured for this preview.");
       setIsLoading(false);
       return;
     }
 
-    setIsLoading(true);
+    if (showLoading) {
+      setIsLoading(true);
+    }
     setMessage("");
 
     try {
@@ -403,9 +405,15 @@ export default function AdminPreviewFrame() {
     } catch (error) {
       setMessage("Preview could not be loaded from Firestore.");
     } finally {
-      setIsLoading(false);
+      if (showLoading) {
+        setIsLoading(false);
+      }
     }
   }, []);
+
+  const refreshPreviewData = useCallback(() => (
+    loadPreview({ showLoading: false })
+  ), [loadPreview]);
 
   useEffect(() => {
     loadPreview();
@@ -622,10 +630,15 @@ export default function AdminPreviewFrame() {
             {children}
           </EditablePreviewRecord>
         ) : children}
-        <AdminProductPreviewStatus product={product} />
+        <AdminProductPreviewStatus
+          canEditInventory={isContentEditMode}
+          db={db}
+          onInventorySaved={refreshPreviewData}
+          product={product}
+        />
       </div>
     );
-  }, [activeEditTarget, activeTab, isContentEditMode, requestRecordEdit]);
+  }, [activeEditTarget, activeTab, isContentEditMode, refreshPreviewData, requestRecordEdit]);
 
   const renderEventPreviewItem = useCallback((event, children) => {
     if (!isContentEditMode) {

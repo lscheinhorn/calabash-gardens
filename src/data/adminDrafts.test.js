@@ -74,7 +74,7 @@ describe("admin draft preview conflicts", () => {
     expect(publishPreview.title).toBe("Draft title");
     expect(publishPreview.variants[0].stockOnHand).toBe(7);
     expect(buildAdminProductPreviewState(preview)).toEqual({
-      draft: { savedAt: "", state: "saved" },
+      draft: { inventoryEdited: false, savedAt: "", state: "saved" },
       inventory: {
         isConfigured: true,
         options: [{ active: true, label: "Jar", stockOnHand: 7 }],

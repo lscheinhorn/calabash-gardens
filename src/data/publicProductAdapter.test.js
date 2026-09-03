@@ -45,7 +45,7 @@ describe("public product adapter admin preview state", () => {
     });
 
     expect(product.adminPreview).toEqual({
-      draft: { savedAt: "", state: "live" },
+      draft: { inventoryEdited: false, savedAt: "", state: "live" },
       inventory: {
         isConfigured: true,
         options: [{ active: true, label: "4 oz", stockOnHand: 10 }],

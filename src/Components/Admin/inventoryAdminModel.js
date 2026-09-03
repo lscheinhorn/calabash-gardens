@@ -87,16 +87,22 @@ export const productInventoryFormMatches = (candidateOptions, baselineOptions) =
       .map(comparableInventoryOption))
 );
 
-const inventoryFieldChanges = (row, draft) => ({
-  active: row.active !== (draft.active === true),
-  inventoryTracked: (
-    row.inventorySetupRequired === true
-    && draft.stockConfirmed === true
-  ) || row.inventoryTracked !== (draft.inventoryTracked === true),
-  lowStockThreshold: String(row.lowStockThreshold === null ? "" : row.lowStockThreshold)
-    !== String(draft.lowStockThreshold),
-  stockOnHand: String(row.stockOnHand) !== String(draft.stockOnHand),
-});
+const inventoryFieldChanges = (row, draft) => {
+  const confirmedInventorySetup = row.confirmSetupValuesOnSave === true
+    && draft.stockConfirmed === true;
+
+  return {
+    active: confirmedInventorySetup || row.active !== (draft.active === true),
+    inventoryTracked: (
+      row.inventorySetupRequired === true
+      && draft.stockConfirmed === true
+    ) || row.inventoryTracked !== (draft.inventoryTracked === true),
+    lowStockThreshold: String(row.lowStockThreshold === null ? "" : row.lowStockThreshold)
+      !== String(draft.lowStockThreshold),
+    stockOnHand: confirmedInventorySetup
+      || String(row.stockOnHand) !== String(draft.stockOnHand),
+  };
+};
 
 const eventFieldChanges = (row, draft) => ({
   capacity: String(row.capacity === null ? "" : row.capacity) !== String(draft.capacity),
@@ -211,6 +217,40 @@ const assertCompleteVariantMapping = (variants, priceOptions, row) => {
     currentWholeNumber(variant.stockOnHand, row, "stock");
     currentOptionalWholeNumber(variant.lowStockThreshold, row, "low-stock threshold");
   });
+};
+
+const inventoryTargetKey = ({ id, priceOptionIndex }) => (
+  `${cleanText(id)}::${priceOptionIndex}`
+);
+
+const assertTrackedSetupStillCurrent = (variants, changes) => {
+  const trackingSetupChanges = changes.filter(({ row }) => (
+    row.requireTrackedOnSave === true
+  ));
+
+  if (!trackingSetupChanges.length) {
+    return;
+  }
+
+  const row = trackingSetupChanges[0].row;
+  const expectedUntrackedKeys = new Set(trackingSetupChanges.map(({ row: setupRow }) => (
+    inventoryTargetKey({ id: setupRow.variantId, priceOptionIndex: setupRow.priceOptionIndex })
+  )));
+  const currentUntrackedKeys = variants
+    .filter((variant) => variant.inventoryTracked !== true)
+    .map(inventoryTargetKey);
+  const setupStillMatches = expectedUntrackedKeys.size === trackingSetupChanges.length
+    && currentUntrackedKeys.length === expectedUntrackedKeys.size
+    && currentUntrackedKeys.every((key) => expectedUntrackedKeys.has(key));
+  const setupWillBeCompleted = trackingSetupChanges.every(({ draft }) => (
+    draft.stockConfirmed === true
+    && draft.inventoryTracked === true
+    && draft.active === true
+  ));
+
+  if (!setupStillMatches || !setupWillBeCompleted) {
+    conflict(row, "has inventory setup that changed in Firestore while you were editing.");
+  }
 };
 
 const persistedProductVariant = (variant) => ({
@@ -385,6 +425,7 @@ export const mergeProductInventoryDrafts = ({ changes, product }) => {
   if (changes.length) {
     assertCompleteVariantMapping(variants, priceOptions, changes[0].row);
     assertUniqueVariants(variants, changes[0].row);
+    assertTrackedSetupStillCurrent(variants, changes);
   }
 
   if (variants.some((variant) => variant.inventorySetupRequired === true)) {

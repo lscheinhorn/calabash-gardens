@@ -1,10 +1,16 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
+import { fireEvent, render, screen } from "@testing-library/react";
 
 import AdminProductPreviewStatus from "./AdminProductPreviewStatus";
 
-const renderStatus = (adminPreview) => renderToStaticMarkup(
+jest.mock("./AdminProductInventoryEditor", () => function MockAdminProductInventoryEditor() {
+  return <div>Inventory editor open</div>;
+});
+
+const renderStatus = (adminPreview, props = {}) => renderToStaticMarkup(
   <AdminProductPreviewStatus
+    {...props}
     product={{
       adminPreview,
       id: "saffron-maple-syrup",
@@ -53,8 +59,72 @@ describe("admin product preview status", () => {
       inventory: { isConfigured: false, options: [] },
     });
 
-    expect(markup).toContain("Live only");
+    expect(markup).toContain("No draft changes");
     expect(markup).toContain("Inventory not set up");
     expect(markup).not.toContain("on hand");
+  });
+
+  test("only offers inventory editing in preview edit mode", () => {
+    const adminPreview = {
+      draft: { savedAt: "", state: "live" },
+      inventory: { isConfigured: false, options: [] },
+    };
+
+    expect(renderStatus(adminPreview)).not.toContain("Adjust inventory for Saffron Maple Syrup");
+    expect(renderStatus(adminPreview, {
+      canEditInventory: true,
+      db: {},
+    })).toContain("Adjust inventory for Saffron Maple Syrup");
+  });
+
+  test("blocks quick inventory editing when the saved draft already edits inventory", () => {
+    const markup = renderStatus({
+      draft: { inventoryEdited: true, savedAt: "", state: "saved" },
+      inventory: { isConfigured: true, options: [] },
+    }, {
+      canEditInventory: true,
+      db: {},
+    });
+
+    expect(markup).toContain("disabled");
+    expect(markup).toContain("Finish or discard this product draft&#x27;s inventory changes");
+  });
+
+  test("closes an open editor when draft safety changes", () => {
+    const product = {
+      adminPreview: {
+        draft: { inventoryEdited: false, savedAt: "", state: "live" },
+        inventory: { isConfigured: true, options: [] },
+      },
+      id: "saffron-maple-syrup",
+      title: "Saffron Maple Syrup",
+    };
+    const { rerender } = render(
+      <AdminProductPreviewStatus canEditInventory db={{}} product={product} />,
+    );
+
+    fireEvent.click(screen.getByRole("button", {
+      name: "Adjust inventory for Saffron Maple Syrup",
+    }));
+    expect(screen.getByText("Inventory editor open")).toBeTruthy();
+
+    rerender(
+      <AdminProductPreviewStatus
+        canEditInventory
+        db={{}}
+        product={{
+          ...product,
+          adminPreview: {
+            ...product.adminPreview,
+            draft: { inventoryEdited: false, savedAt: "", state: "conflict" },
+          },
+        }}
+      />,
+    );
+
+    expect(screen.queryByText("Inventory editor open")).toBeNull();
+    expect(screen.getByRole("button", {
+      name: "Adjust inventory for Saffron Maple Syrup",
+    }).disabled).toBe(true);
   });
 });

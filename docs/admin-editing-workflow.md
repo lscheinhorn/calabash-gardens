@@ -37,8 +37,11 @@ The admin preview is the map Jette uses to find content the same way a customer 
 - The preview route stays where Jette clicked.
 - The lower admin editor sections do not auto-scroll open for preview clicks.
 - Saving a draft refreshes the preview data without publishing.
-- Every preview product shows whether Jetta is viewing a `Saved draft`, the `Live only` record, or a draft conflict. `Live only` may appear only after the product-draft collection loads successfully; a failed draft read must say `Draft status unavailable` instead.
+- Every preview product shows whether Jetta is viewing a `Saved draft`, a product with `No draft changes`, or a draft conflict. `No draft changes` may appear only after the product-draft collection loads successfully; a failed draft read must say `Draft status unavailable` instead.
 - Fully configured product inventory shows each option's exact quantity in the preview, including `0 on hand`. If any option is missing, malformed, ambiguously mapped, or not tracked, the product says `Inventory not set up` instead of showing partial quantities.
+- In preview edit mode, the product inventory pencil opens a compact inline quantity editor without leaving the preview. Typing a quantity or using minus/plus changes local form state only; `Save Inventory` is the single explicit Firestore write.
+- Quick preview inventory editing always reloads the current live product instead of using draft-over-live preview data. A conflicted/unavailable product draft, or a saved product draft that edits inventory itself, disables the quick editor until that draft is resolved.
+- First-time inventory setup requires an explicit whole-number quantity for every product option that is not yet tracked, including options whose IDs/SKUs already exist. Quantity entry enables Track and Sell for those options; the transaction rejects changed option/tracking sets or concurrent changes to the confirmed stock/Sell values, and partial setup writes nothing.
 - The embedded admin preview keeps viewport size controls behind the view icon.
 - The pencil icon toggles edit mode for the current preview without leaving the preview.
 - The expand icon opens a full-preview admin overlay that keeps the side edit drawer available.
@@ -82,6 +85,8 @@ The admin home should present Jette-facing work areas as top-level sections:
 - `Products`
 - `Events`
 - `Site Content`
+- `Inventory`
+- `Orders`
 - `Photos`
 - `Developer / Audit Tools`
 
@@ -93,7 +98,7 @@ Migration, mirror, parity, and setup/audit tooling belongs under `Developer / Au
 
 Products and events follow the same preview-click pattern by reusing the existing Product Editor and Event Editor draft/publish logic.
 
-Do not create a separate product or event save path for preview editing. The drawer must reuse the existing draft, review, publish, and discard helpers.
+Do not create a separate product or event content-save path for preview editing. The drawer must reuse the existing draft, review, publish, and discard helpers. The compact preview inventory editor is intentionally separate because it writes only live operational quantities through the shared Inventory transaction.
 
 Expected flow:
 
@@ -121,13 +126,17 @@ The Inventory section is the operating view over live Firestore inventory record
 
 Jetta should use the Inventory section as the primary workflow for real stock quantities, tracking, sellable status, and low-stock thresholds. The Product Editor remains the place for product copy, category, photos, prices, option names, and visibility; when an intentional product-option edit includes inventory fields, those values can be reviewed in the product draft. Inventory-section saves write operational values directly to the live product record, while content-only product drafts preserve the current live inventory during preview and publish.
 
+For a quick quantity check or correction, Jetta may also use the compact inventory editor on a product inside preview edit mode. It changes only stock quantities, uses the same transactional save and movement ledger as the Inventory section, and refreshes the preview in place after success. Broader setup and controls remain in the Inventory section.
+
 Inventory edits are intentionally narrower than product/event content edits:
 
 - Product inventory rows can update stock on hand, low-stock threshold, whether inventory is tracked, and whether the variant is sellable.
 - Event inventory rows can update capacity, manual holds, and whether the waitlist opens when full.
+- Product stock and event manual holds use minus/input/plus steppers because they are natural count adjustments. Price, shipping, dates, IDs, SKUs, capacity, and low-stock thresholds remain ordinary validated fields.
 - Product/event descriptions, prices, photos, titles, and visibility still belong in the Product and Event editors.
 - Stock/manual-hold changes create `inventoryMovements` rows for audit. This is the beginning of the inventory ledger; paid orders and future Square/manual imports should use the same movement model.
 - Inventory Save Changes rereads all affected records in one transaction. Same-field stale edits reject the whole save, the conflicted row refreshes, and unrelated unsaved rows remain editable.
+- A preview-editor conflict also reloads the current live quantities and refreshes the preview. If that reload fails, the entered values stay visible and the message must say they were not reloaded or saved.
 - Product `inStock` is derived from active variants and stock tracking; there is no independent availability checkbox.
 - Legacy products can display synthesized option rows, but the first successful save must persist exactly one stable variant and SKU per price option. The current locally verified rules support at most three options.
 - Jetta does not need to make up identifiers. Product IDs are suggested from new product titles; option IDs and SKUs are generated from option labels and stay read-only after persistence. A single-option variant SKU is the product's effective SKU.

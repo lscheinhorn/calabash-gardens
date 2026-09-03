@@ -1,4 +1,9 @@
 import { hasCompletePersistedVariantMapping } from "./productInventoryValidation";
+import {
+  operationalSnapshotForTarget,
+  parseOperationalSnapshot,
+  serializeOperationalSnapshot,
+} from "./adminDraftPublishModel";
 
 const cleanText = (value) => String(value || "").trim();
 
@@ -39,6 +44,19 @@ const completeInventoryOptions = (product) => {
   return variants.map(inventoryOption);
 };
 
+const draftEditsInventory = (draft) => {
+  if (!Array.isArray(draft?.data?.variants)) {
+    return false;
+  }
+
+  try {
+    return serializeOperationalSnapshot(operationalSnapshotForTarget("products", draft.data))
+      !== serializeOperationalSnapshot(parseOperationalSnapshot(draft.draftBaseOperationalJson));
+  } catch (error) {
+    return true;
+  }
+};
+
 export const buildAdminProductPreviewState = (product = {}, options = {}) => {
   const { draftStatusAvailable = true } = options;
   const draft = product._draft && typeof product._draft === "object"
@@ -49,6 +67,7 @@ export const buildAdminProductPreviewState = (product = {}, options = {}) => {
 
   return {
     draft: {
+      inventoryEdited: draftEditsInventory(draft),
       savedAt: isoTimestamp(draft?.draftUpdatedAt),
       state: !draftStatusAvailable
         ? "unavailable"

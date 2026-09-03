@@ -1,4 +1,8 @@
 import { buildAdminProductPreviewState } from "./adminProductPreviewState";
+import {
+  operationalSnapshotForTarget,
+  serializeOperationalSnapshot,
+} from "./adminDraftPublishModel";
 
 const configuredProduct = (overrides = {}) => ({
   id: "saffron-maple-syrup",
@@ -82,6 +86,7 @@ describe("admin product preview state", () => {
         draftUpdatedAt: { toDate: () => new Date("2026-09-02T15:55:28.638Z") },
       },
     })).draft).toEqual({
+      inventoryEdited: false,
       savedAt: "2026-09-02T15:55:28.638Z",
       state: "saved",
     });
@@ -97,6 +102,39 @@ describe("admin product preview state", () => {
       draftStatusAvailable: false,
     });
 
-    expect(state.draft).toEqual({ savedAt: "", state: "unavailable" });
+    expect(state.draft).toEqual({
+      inventoryEdited: false,
+      savedAt: "",
+      state: "unavailable",
+    });
+  });
+
+  test("identifies whether a saved draft edits operational inventory", () => {
+    const liveProduct = configuredProduct();
+    const draftBaseOperationalJson = serializeOperationalSnapshot(
+      operationalSnapshotForTarget("products", liveProduct),
+    );
+    const contentOnlyDraft = {
+      data: {
+        ...liveProduct,
+        title: "Updated title",
+      },
+      draftBaseOperationalJson,
+    };
+    const inventoryDraft = {
+      data: configuredProduct({
+        variants: liveProduct.variants.map((variant, index) => (
+          index === 0 ? { ...variant, stockOnHand: 12 } : variant
+        )),
+      }),
+      draftBaseOperationalJson,
+    };
+
+    expect(buildAdminProductPreviewState(configuredProduct({
+      _draft: contentOnlyDraft,
+    })).draft.inventoryEdited).toBe(false);
+    expect(buildAdminProductPreviewState(configuredProduct({
+      _draft: inventoryDraft,
+    })).draft.inventoryEdited).toBe(true);
   });
 });

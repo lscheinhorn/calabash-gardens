@@ -8,9 +8,19 @@ import {
   InventoryConflictError,
   mergePreservedInventoryDrafts,
   updateInventoryDraftValue,
-  variantsForProduct,
 } from "./inventoryAdminModel";
+import {
+  inventoryNumberOrNull,
+  inventoryStatusLabel,
+  inventoryText,
+  inventoryWholeNumber,
+  productInventoryDraftChanged,
+  productInventoryDraftForRow,
+  productInventoryRowsFromSnapshot,
+  validateProductInventoryChanges,
+} from "./inventoryAdminRows";
 import { saveInventoryRowsTransaction } from "./inventoryAdminTransactions";
+import AdminQuantityStepper from "./AdminQuantityStepper";
 
 const defaultFilters = {
   search: "",
@@ -18,77 +28,12 @@ const defaultFilters = {
   type: "all",
 };
 
-const text = (value, fallback = "") => String(value || fallback).trim();
-
-const numberOrNull = (value) => {
-  if (value === null || value === undefined || String(value).trim() === "") {
-    return null;
-  }
-
-  const number = Number(value);
-
-  return Number.isFinite(number) ? number : null;
-};
-
-const statusLabel = (value) => String(value || "unknown")
-  .replace(/_/g, " ")
-  .replace(/\b\w/g, (letter) => letter.toUpperCase());
-
-const productVariantRows = (snapshot) => snapshot.docs.flatMap((docSnapshot) => {
-  const product = docSnapshot.data();
-  const productId = docSnapshot.id;
-  const variantRows = variantsForProduct(product, productId);
-
-  return variantRows.map((variant, index) => {
-    const stockOnHand = numberOrNull(variant.stockOnHand) || 0;
-    const lowStockThreshold = numberOrNull(variant.lowStockThreshold);
-    const storedInventoryTracked = variant.inventoryTracked !== false;
-    const inventoryTracked = variant.inventorySetupRequired === true
-      ? false
-      : storedInventoryTracked;
-    const variantActive = variant.active !== false;
-    const visible = product.isActive !== false && product.published !== false;
-    const lowStock = inventoryTracked
-      && lowStockThreshold !== null
-      && stockOnHand <= lowStockThreshold;
-    const status = !visible || !variantActive
-      ? "inactive"
-      : !inventoryTracked
-        ? "untracked"
-        : stockOnHand <= 0
-          ? "out"
-          : lowStock
-            ? "low"
-            : "available";
-
-    return {
-      category: text(product.category),
-      id: `product-${productId}-${variant.priceOptionIndex}-${text(variant.id, index)}`,
-      inventoryTracked,
-      inventorySetupRequired: variant.inventorySetupRequired === true,
-      lowStockThreshold,
-      priceOptionIndex: variant.priceOptionIndex,
-      primary: text(product.title, productId),
-      productId,
-      secondary: text(variant.label || variant.id || `Option ${index + 1}`),
-      sku: text(variant.sku),
-      status,
-      stockOnHand,
-      storedInventoryTracked,
-      type: "product",
-      value: inventoryTracked ? `${stockOnHand} on hand` : "Not tracked",
-      active: variantActive,
-      variantId: text(variant.id),
-    };
-  });
-});
-
 const eventRows = (snapshot) => snapshot.docs.map((docSnapshot) => {
   const event = docSnapshot.data();
   const eventId = docSnapshot.id;
-  const capacity = numberOrNull(event.capacity);
-  const ticketsSold = numberOrNull(event.ticketsSold) || 0;
-  const manualSeatsReserved = numberOrNull(event.manualSeatsReserved) || 0;
+  const capacity = inventoryNumberOrNull(event.capacity);
+  const ticketsSold = inventoryNumberOrNull(event.ticketsSold) || 0;
+  const manualSeatsReserved = inventoryNumberOrNull(event.manualSeatsReserved) || 0;
   const visible = event.isActive !== false && event.published !== false;
   const remainingSeats = capacity === null
     ? null
@@ -105,7 +50,7 @@ const eventRows = (snapshot) => snapshot.docs.map((docSnapshot) => {
     capacity,
     id: `event-${eventId}`,
     manualSeatsReserved,
-    primary: text(event.title, eventId),
+    primary: inventoryText(event.title, eventId),
     productId: eventId,
     remainingSeats,
     secondary: Array.isArray(event.eventDates) ? event.eventDates.join(", ") : "",
@@ -118,10 +63,7 @@ const eventRows = (snapshot) => snapshot.docs.map((docSnapshot) => {
 });
 
 const draftForRow = (row) => (row.type === "product" ? {
-  active: row.active === true,
-  inventoryTracked: row.inventoryTracked === true,
-  lowStockThreshold: row.lowStockThreshold === null ? "" : String(row.lowStockThreshold),
-  stockOnHand: String(row.stockOnHand),
+  ...productInventoryDraftForRow(row),
 } : {
   capacity: row.capacity === null ? "" : String(row.capacity),
   manualSeatsReserved: String(row.manualSeatsReserved || 0),
@@ -132,19 +74,6 @@ const draftRowsFor = (rows) => rows.reduce((drafts, row) => ({
   ...drafts,
   [row.id]: draftForRow(row),
 }), {});
-
-const wholeNumber = (value) => /^\d+$/.test(String(value).trim());
-
-const productDraftChanged = (row, draft) => (
-  draft
-  && (
-    (row.inventorySetupRequired === true && draft.stockConfirmed === true)
-    || row.active !== draft.active
-    || String(row.stockOnHand) !== String(draft.stockOnHand)
-    || String(row.lowStockThreshold === null ? "" : row.lowStockThreshold) !== String(draft.lowStockThreshold)
-    || row.inventoryTracked !== draft.inventoryTracked
-  )
-);
 
 const eventDraftChanged = (row, draft) => (
   draft
@@ -157,7 +86,7 @@ const eventDraftChanged = (row, draft) => (
 
 const rowDraftChanged = (row, draft) => (
   row.type === "product"
-    ? productDraftChanged(row, draft)
+    ? productInventoryDraftChanged(row, draft)
     : eventDraftChanged(row, draft)
 );
 
@@ -184,7 +113,7 @@ export default function InventoryAdmin({ db }) {
       ]);
 
       const nextRows = [
-        ...productVariantRows(productsSnapshot),
+        ...productInventoryRowsFromSnapshot(productsSnapshot),
         ...eventRows(eventsSnapshot),
       ].sort((first, second) => (
         first.type.localeCompare(second.type)
@@ -263,65 +192,29 @@ export default function InventoryAdmin({ db }) {
   };
 
   const validateDirtyRows = () => {
-    if (dirtyRows.some((row) => row.type === "product")) {
-      const productSkuOwners = new Map();
+    const productValidationMessage = validateProductInventoryChanges({
+      dirtyRows,
+      draftRows,
+      rows,
+    });
 
-      for (const row of rows.filter((candidate) => candidate.type === "product")) {
-        const sku = text(row.sku).toUpperCase();
-
-        if (!sku) {
-          return `${row.primary} ${row.secondary || "option"} needs a SKU before inventory can be saved.`;
-        }
-
-        if (productSkuOwners.has(sku)) {
-          return `${row.primary} ${row.secondary || "option"} uses the same SKU as ${productSkuOwners.get(sku)}.`;
-        }
-
-        productSkuOwners.set(sku, `${row.primary} ${row.secondary || "option"}`);
-      }
-
-      const setupProductIds = new Set(dirtyRows
-        .filter((row) => row.type === "product" && row.inventorySetupRequired === true)
-        .map((row) => row.productId));
-
-      for (const productId of setupProductIds) {
-        const productRows = rows.filter((row) => (
-          row.type === "product" && row.productId === productId
-        ));
-        const unconfirmedQuantity = productRows.some((row) => (
-          row.inventorySetupRequired === true
-          && draftRows[row.id]?.stockConfirmed !== true
-        ));
-
-        if (unconfirmedQuantity) {
-          return `${productRows[0]?.primary || productId} needs a confirmed stock quantity for every option before inventory setup can be saved.`;
-        }
-      }
+    if (productValidationMessage) {
+      return productValidationMessage;
     }
 
-    for (const row of dirtyRows) {
+    for (const row of dirtyRows.filter((candidate) => candidate.type === "event")) {
       const draft = draftRows[row.id] || {};
 
-      if (row.type === "product") {
-        if (!wholeNumber(draft.stockOnHand)) {
-          return "Every changed product stock value must be a whole number.";
-        }
+      if (!inventoryWholeNumber(draft.capacity)) {
+        return "Every changed event capacity must be a whole number.";
+      }
 
-        if (draft.lowStockThreshold !== "" && !wholeNumber(draft.lowStockThreshold)) {
-          return "Every changed low-stock threshold must be blank or a whole number.";
-        }
-      } else {
-        if (!wholeNumber(draft.capacity)) {
-          return "Every changed event capacity must be a whole number.";
-        }
+      if (!inventoryWholeNumber(draft.manualSeatsReserved)) {
+        return "Every changed event hold value must be a whole number.";
+      }
 
-        if (!wholeNumber(draft.manualSeatsReserved)) {
-          return "Every changed event hold value must be a whole number.";
-        }
-
-        if (row.ticketsSold + Number(draft.manualSeatsReserved) > Number(draft.capacity)) {
-          return "Event capacity cannot be lower than sold tickets plus manual holds.";
-        }
+      if (row.ticketsSold + Number(draft.manualSeatsReserved) > Number(draft.capacity)) {
+        return "Event capacity cannot be lower than sold tickets plus manual holds.";
       }
     }
 
@@ -443,10 +336,10 @@ export default function InventoryAdmin({ db }) {
                 <small>{row.secondary || row.productId}</small>
                 {row.sku ? <small>{row.sku}</small> : null}
               </span>
-              <span>{statusLabel(row.type)}</span>
+              <span>{inventoryStatusLabel(row.type)}</span>
               <span>
                 <mark className={`admin_inventory_status admin_inventory_status_${row.status}`}>
-                  {statusLabel(row.status)}
+                  {inventoryStatusLabel(row.status)}
                 </mark>
                 {isDirty ? <small>Unsaved</small> : null}
               </span>
@@ -461,15 +354,17 @@ export default function InventoryAdmin({ db }) {
               <span className={`admin_inventory_controls admin_inventory_controls_${row.type}`}>
                 {row.type === "product" ? (
                   <>
-                    <label>
-                      Stock
-                      <input
-                        inputMode="numeric"
+                    <div className="admin_inventory_control_group">
+                      <span>Stock</span>
+                      <AdminQuantityStepper
+                        ariaLabel={`${row.secondary || "Default"} ${row.primary} stock`}
+                        decrementLabel={`Decrease ${row.secondary || "Default"} ${row.primary} stock by one`}
                         disabled={isSaving}
-                        onChange={(event) => updateDraft(row.id, "stockOnHand", event.target.value)}
+                        incrementLabel={`Increase ${row.secondary || "Default"} ${row.primary} stock by one`}
+                        onChange={(value) => updateDraft(row.id, "stockOnHand", value)}
                         value={draft.stockOnHand || ""}
                       />
-                    </label>
+                    </div>
                     <label>
                       Low
                       <input
@@ -511,15 +406,17 @@ export default function InventoryAdmin({ db }) {
                         value={draft.capacity || ""}
                       />
                     </label>
-                    <label>
-                      Holds
-                      <input
-                        inputMode="numeric"
+                    <div className="admin_inventory_control_group">
+                      <span>Holds</span>
+                      <AdminQuantityStepper
+                        ariaLabel={`${row.primary} manual holds`}
+                        decrementLabel={`Decrease ${row.primary} manual holds by one`}
                         disabled={isSaving}
-                        onChange={(event) => updateDraft(row.id, "manualSeatsReserved", event.target.value)}
+                        incrementLabel={`Increase ${row.primary} manual holds by one`}
+                        onChange={(value) => updateDraft(row.id, "manualSeatsReserved", value)}
                         value={draft.manualSeatsReserved || "0"}
                       />
-                    </label>
+                    </div>
                     <label className="admin_inline_checkbox">
                       <input
                         checked={draft.waitlistEnabled === true}

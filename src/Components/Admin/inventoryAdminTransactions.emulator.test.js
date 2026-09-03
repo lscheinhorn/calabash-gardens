@@ -312,6 +312,171 @@ describeWithEmulators("admin inventory transactions", () => {
     ]);
   });
 
+  test("preview quick setup completes a partial legacy product", async () => {
+    const partial = productData({
+      variants: [completeVariant({
+        id: "large-custom",
+        label: "Large",
+        price: "20.00",
+        priceOptionIndex: 1,
+        sku: "JETTE-CUSTOM-LARGE",
+        sortOrder: 1,
+        stockOnHand: 3,
+      })],
+    });
+    await seedProduct(partial);
+    const rows = [rowForVariant(partial, 0), rowForVariant(partial, 1)].map((row) => ({
+      ...row,
+      confirmSetupValuesOnSave: true,
+      inventorySetupRequired: true,
+      requireTrackedOnSave: row.storedInventoryTracked !== true,
+    }));
+
+    await saveInventoryRowsTransaction({
+      db: clientDb,
+      dirtyRows: rows,
+      draftRows: {
+        [rows[0].id]: draftForRow(rows[0], {
+          active: true,
+          inventoryTracked: true,
+          stockConfirmed: true,
+          stockOnHand: "4",
+        }),
+        [rows[1].id]: draftForRow(rows[1], {
+          active: true,
+          inventoryTracked: true,
+          stockConfirmed: true,
+          stockOnHand: "3",
+        }),
+      },
+    });
+
+    const saved = (await adminDb.doc(`products/${productId}`).get()).data();
+    expect(saved.variants).toMatchObject([
+      {
+        id: "small",
+        inventoryTracked: true,
+        stockOnHand: 4,
+      },
+      {
+        id: "large-custom",
+        inventoryTracked: true,
+        sku: "JETTE-CUSTOM-LARGE",
+        stockOnHand: 3,
+      },
+    ]);
+    expect(await movements()).toMatchObject([{
+      linkedId: productId,
+      quantityDelta: 4,
+      variantId: "small",
+    }]);
+  });
+
+  test("quick setup rejects a product whose untracked option set changed", async () => {
+    const original = productData({
+      variants: [
+        completeVariant({
+          active: false,
+          inventoryTracked: false,
+          stockOnHand: 0,
+        }),
+        completeVariant({
+          id: "large",
+          label: "Large",
+          price: "20.00",
+          priceOptionIndex: 1,
+          sku: "PHASE40-LARGE",
+          sortOrder: 1,
+          stockOnHand: 6,
+        }),
+      ],
+    });
+    await seedProduct(original);
+    const row = {
+      ...rowForVariant(original, 0),
+      confirmSetupValuesOnSave: true,
+      inventorySetupRequired: true,
+      requireTrackedOnSave: true,
+    };
+    await adminDb.doc(`products/${productId}`).update({
+      variants: [
+        original.variants[0],
+        { ...original.variants[1], inventoryTracked: false },
+      ],
+    });
+
+    await expect(saveInventoryRowsTransaction({
+      db: clientDb,
+      dirtyRows: [row],
+      draftRows: {
+        [row.id]: draftForRow(row, {
+          active: true,
+          inventoryTracked: true,
+          stockConfirmed: true,
+          stockOnHand: "4",
+        }),
+      },
+    })).rejects.toBeInstanceOf(InventoryConflictError);
+
+    const saved = (await adminDb.doc(`products/${productId}`).get()).data();
+    expect(saved.variants).toMatchObject([
+      { inventoryTracked: false, stockOnHand: 0 },
+      { inventoryTracked: false, stockOnHand: 6 },
+    ]);
+    expect(await movements()).toHaveLength(0);
+  });
+
+  test("quick setup rejects concurrent sellability and stock changes", async () => {
+    const original = productData({
+      priceOptions: [priceOptions[0]],
+      variants: [completeVariant({
+        inventoryTracked: false,
+        stockOnHand: 0,
+      })],
+    });
+    await seedProduct(original);
+    const row = {
+      ...rowForVariant(original, 0),
+      confirmSetupValuesOnSave: true,
+      inventorySetupRequired: true,
+      requireTrackedOnSave: true,
+    };
+    const draftRows = {
+      [row.id]: draftForRow(row, {
+        active: true,
+        inventoryTracked: true,
+        stockConfirmed: true,
+        stockOnHand: "0",
+      }),
+    };
+
+    await adminDb.doc(`products/${productId}`).update({
+      variants: [{ ...original.variants[0], active: false }],
+    });
+    await expect(saveInventoryRowsTransaction({
+      db: clientDb,
+      dirtyRows: [row],
+      draftRows,
+    })).rejects.toBeInstanceOf(InventoryConflictError);
+
+    await adminDb.doc(`products/${productId}`).update({
+      variants: [{ ...original.variants[0], stockOnHand: 5 }],
+    });
+    await expect(saveInventoryRowsTransaction({
+      db: clientDb,
+      dirtyRows: [row],
+      draftRows,
+    })).rejects.toBeInstanceOf(InventoryConflictError);
+
+    const saved = (await adminDb.doc(`products/${productId}`).get()).data();
+    expect(saved.variants[0]).toMatchObject({
+      active: true,
+      inventoryTracked: false,
+      stockOnHand: 5,
+    });
+    expect(await movements()).toHaveLength(0);
+  });
+
   test("a threshold-only edit preserves stock changed after the admin loaded the row", async () => {
     const original = productData({
       priceOptions: [priceOptions[0]],

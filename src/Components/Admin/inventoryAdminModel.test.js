@@ -139,6 +139,108 @@ describe("inventoryAdminModel", () => {
     });
   });
 
+  test("quick setup rejects a newly untracked option found by the transaction", () => {
+    const smallVariant = productVariant({
+      active: false,
+      id: "small",
+      inventoryTracked: false,
+      label: "Small",
+      priceOptionIndex: 0,
+      sku: "CG-TEST-PRODUCT-SMALL",
+      sortOrder: 0,
+      stockOnHand: 0,
+    });
+    const largeVariant = productVariant({
+      id: "large",
+      label: "Large",
+      price: "20.00",
+      priceOptionIndex: 1,
+      sku: "CG-TEST-PRODUCT-LARGE",
+      sortOrder: 1,
+    });
+    const smallRow = productRow({
+      active: false,
+      confirmSetupValuesOnSave: true,
+      id: "product-test-product-0-small",
+      inventorySetupRequired: true,
+      inventoryTracked: false,
+      priceOptionIndex: 0,
+      requireTrackedOnSave: true,
+      secondary: "Small",
+      stockOnHand: 0,
+      storedInventoryTracked: false,
+      variantId: "small",
+    });
+    const change = {
+      draft: productDraft({
+        active: true,
+        inventoryTracked: true,
+        stockConfirmed: true,
+        stockOnHand: "4",
+      }),
+      row: smallRow,
+    };
+    const initialized = mergeProductInventoryDrafts({
+      changes: [change],
+      product: productWithVariants([smallVariant, largeVariant]),
+    });
+
+    expect(initialized.variants).toMatchObject([
+      { active: true, id: "small", inventoryTracked: true, stockOnHand: 4 },
+      { id: "large", inventoryTracked: true },
+    ]);
+
+    expect(() => mergeProductInventoryDrafts({
+      changes: [change],
+      product: productWithVariants([
+        smallVariant,
+        { ...largeVariant, inventoryTracked: false },
+      ]),
+    })).toThrow("inventory setup that changed in Firestore");
+  });
+
+  test("quick setup rejects concurrent stock or sellability changes to confirmed values", () => {
+    const variant = productVariant({
+      inventoryTracked: false,
+      stockOnHand: 0,
+    });
+    const row = productRow({
+      confirmSetupValuesOnSave: true,
+      inventorySetupRequired: true,
+      inventoryTracked: false,
+      requireTrackedOnSave: true,
+      stockOnHand: 0,
+      storedInventoryTracked: false,
+    });
+    const change = {
+      draft: productDraft({
+        active: true,
+        inventoryTracked: true,
+        stockConfirmed: true,
+        stockOnHand: "0",
+      }),
+      row,
+    };
+    const initialized = mergeProductInventoryDrafts({
+      changes: [change],
+      product: productWithVariants([variant]),
+    });
+
+    expect(initialized.variants[0]).toMatchObject({
+      active: true,
+      inventoryTracked: true,
+      stockOnHand: 0,
+    });
+    expect(() => mergeProductInventoryDrafts({
+      changes: [change],
+      product: productWithVariants([{ ...variant, active: false }]),
+    })).toThrow("sellable status changed in Firestore");
+    expect(() => mergeProductInventoryDrafts({
+      changes: [change],
+      product: productWithVariants([{ ...variant, stockOnHand: 5 }]),
+    })).toThrow("stock changed in Firestore");
+  });
+
   test("content-only edits can recognize unchanged inventory form values", () => {
     const baseline = [{
       active: true,
