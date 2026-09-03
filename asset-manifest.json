@@ -1,11 +1,12 @@
 {
   "files": {
     "main.css": "/static/css/main.c9ce988c.css",
-    "main.js": "/static/js/main.01e9d5a7.js",
-    "static/js/82.31a3812e.chunk.js": "/static/js/82.31a3812e.chunk.js",
-    "static/js/493.b9bbb8a1.chunk.js": "/static/js/493.b9bbb8a1.chunk.js",
-    "static/js/706.ec964d04.chunk.js": "/static/js/706.ec964d04.chunk.js",
-    "static/css/567.87969f31.chunk.css": "/static/css/567.87969f31.chunk.css",
+    "main.js": "/static/js/main.778c7ae3.js",
+    "static/js/558.989dfe4b.chunk.js": "/static/js/558.989dfe4b.chunk.js",
+    "static/js/889.9b365f66.chunk.js": "/static/js/889.9b365f66.chunk.js",
+    "static/js/464.7e620a46.chunk.js": "/static/js/464.7e620a46.chunk.js",
+    "static/css/59.e6ea43b0.chunk.css": "/static/css/59.e6ea43b0.chunk.css",
+    "static/js/59.eb8297bd.chunk.js": "/static/js/59.eb8297bd.chunk.js",
     "static/media/saffron_simple_syrup.jpg": "/static/media/saffron_simple_syrup.8aa83cd5a97dfc16e396.jpg",
     "static/media/the_heart_and_the_head.jpg": "/static/media/the_heart_and_the_head.3883e90171566ef6db46.jpg",
     "static/media/ageless_beauty_body_butter.jpg": "/static/media/ageless_beauty_body_butter.16e17b37069502a57712.jpg",
@@ -48,14 +49,15 @@
     "static/media/Menu.docx.pdf": "/static/media/Menu.docx.41742f924e9e2d641918.pdf",
     "index.html": "/index.html",
     "main.c9ce988c.css.map": "/static/css/main.c9ce988c.css.map",
-    "main.01e9d5a7.js.map": "/static/js/main.01e9d5a7.js.map",
-    "82.31a3812e.chunk.js.map": "/static/js/82.31a3812e.chunk.js.map",
-    "493.b9bbb8a1.chunk.js.map": "/static/js/493.b9bbb8a1.chunk.js.map",
-    "706.ec964d04.chunk.js.map": "/static/js/706.ec964d04.chunk.js.map",
-    "567.87969f31.chunk.css.map": "/static/css/567.87969f31.chunk.css.map"
+    "main.778c7ae3.js.map": "/static/js/main.778c7ae3.js.map",
+    "558.989dfe4b.chunk.js.map": "/static/js/558.989dfe4b.chunk.js.map",
+    "889.9b365f66.chunk.js.map": "/static/js/889.9b365f66.chunk.js.map",
+    "464.7e620a46.chunk.js.map": "/static/js/464.7e620a46.chunk.js.map",
+    "59.e6ea43b0.chunk.css.map": "/static/css/59.e6ea43b0.chunk.css.map",
+    "59.eb8297bd.chunk.js.map": "/static/js/59.eb8297bd.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.c9ce988c.css",
-    "static/js/main.01e9d5a7.js"
+    "static/js/main.778c7ae3.js"
   ]
 }
