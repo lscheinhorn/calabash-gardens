@@ -7,8 +7,7 @@ This file is the live source of truth for Calabash Gardens project work.
 Phase 41 is automatic product/variant identity and the production no-write migration preview on branch `codex/product-variant-migration-preview`, based on committed Phase 40 inventory readiness at `5c15900`. Product IDs are suggested from titles, variant IDs are suggested from option labels, and SKUs are generated as `CG-{PRODUCT-ID}-{VARIANT-ID}` through one shared module. Generated identities follow unsaved title/label edits and persisted IDs/SKUs are read-only. There is no separate product SKU; each sellable product uses at least one variant SKU.
 The 2026-08-28 preview accounts for all 72 reviewed Firestore/static products and proposes 101 variant/SKU rows without inventing inventory. Existing custom variant IDs are preserved, known non-public `Title` and `test-basket` records are excluded, and every real quantity remains Jetta-owned. Legacy rows stay untracked until quantities are explicitly entered; each stock edit enables Track and Sell, and an incomplete product cannot initialize until every option quantity is confirmed. After the approved Phase 42 client/rules release, the production no-write rerun reports **READY FOR INVENTORY ENTRY** with 72 products, 101 variants/SKUs, 0 blockers, and 2 reviewed warnings. No inventory quantity or SKU claim was written by the check. The broader 2026-08-27 Firebase parity gate remains **NOT READY** and still blocks a public Firestore source switch.
 Phase 42 was approved and released on 2026-08-28. `main` was fast-forwarded through `ab72889`, the custom-domain safeguard was added at `2cd3e8f`, Firestore rules only were deployed to `calabash-54fb5`, and GitHub Pages published `e7a744f` with `www.calabashgardens.com` preserved. Live Home, Shop, product detail, Cart, Events, Contact, and the configured admin sign-in shell passed verification. The deployed storefront is explicitly built from static products with server PayPal, webhook review, and emulator switches disabled; Functions, Storage rules, production inventory, and the public Firestore source did not change.
-Phase 43 is in progress on `codex/admin-preview-inventory-status`. It adds admin-preview-only product labels for saved/live/conflicted/unavailable draft state and exact option inventory. Inventory is all-or-nothing: incomplete, malformed, ambiguously mapped, or untracked variants show `Inventory not set up`. The public storefront remains unchanged, and this branch has not been merged, pushed, or deployed.
-Phase 44 implementation and verification are complete on stacked branch `codex/admin-preview-inventory-editor`. In preview edit mode, each product can open a compact minus/input/plus stock editor that reads current live Firestore inventory and writes only after explicit `Save Inventory`. It reuses the existing conflict-checked Inventory transaction, SKU registry, and movement ledger; first-time setup requires every option quantity and rejects concurrent setup changes. The public storefront remains unchanged, and this branch has not been merged, pushed, or deployed.
+Phases 43 and 44 were approved and released on 2026-09-03. `main` was fast-forwarded through `6ee2149`, and GitHub Pages published `c7ad7c2` with `www.calabashgardens.com` preserved. The live admin preview now shows trustworthy draft/inventory status and offers compact, transactional product stock editing in preview edit mode. The public storefront remains on static products; Firebase Functions, rules, Storage, production data, and server PayPal settings were not deployed or changed.
 
 ## Approved Tech Stack
 
@@ -23,7 +22,7 @@ Phase 44 implementation and verification are complete on stacked branch `codex/a
 
 ## Current Phase
 
-Phase 44 awaiting Luke's merge/deploy review: compact, transactional product stock editing inside the admin preview while the public storefront remains static.
+Phase 44 released. Jetta may use the live admin Inventory section or preview inventory editor to enter reviewed product quantities; the public storefront remains static while broader Firebase parity work continues separately.
 
 ## Done Work
 
@@ -193,8 +192,6 @@ Phase 44 awaiting Luke's merge/deploy review: compact, transactional product sto
 ## In Progress Work
 
 - Jetta may now enter the real Stock value for every product option in the live Inventory section. Each incomplete product remains untracked until all of its option quantities are explicitly confirmed and saved; no automatic production inventory migration has run.
-- Review and approve the Phase 43 admin-preview inventory-status branch before merge or deployment. Current local browser checks show exact saved Firestore quantities for configured products and `Inventory not set up` for legacy rows; no production writes were performed.
-- Review and approve the completed Phase 44 branch before merge or deployment. All write tests used only the isolated `demo-calabash-gardens` emulator; no production Firestore data was changed.
 - Resolve the broader Firebase parity blocker types in separately reviewed phases without changing public reads. Product identity generation is now deterministic, but event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
 - Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
 - Review admin Photos metadata flow, draft `mediaAssets` rules, and media manifest before approving upload migration.
@@ -346,6 +343,7 @@ Phase 44 awaiting Luke's merge/deploy review: compact, transactional product sto
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
 - The customer site deploys to GitHub Pages through the explicit `npm run deploy` command. Firebase Hosting is deferred; the stale Firebase-generated PR and `main`-push Hosting workflows are removed in the Phase 42 candidate.
+- The live GitHub Pages response provides HTTPS/HSTS but no explicit Content Security Policy. CSP hardening or a Firebase Hosting move requires a separate reviewed phase because Firebase, PayPal, EmailJS, preview framing, and Storage media must remain functional under the final policy.
 - Product, event, content, inventory, image, and public key files are protected and must not be edited without explicit approval.
 - The strict production parity audit is read-only, but a passing data report alone does not authorize public Firestore rules, Firebase writes, a public source switch, checkout activation, merge, or deployment.
 
@@ -664,6 +662,11 @@ Phase 44 awaiting Luke's merge/deploy review: compact, transactional product sto
 - 2026-09-03: Phase 44 verification passed all 85 regular React/Jest tests, all 12 inventory transaction/rules emulator scenarios, all 14 draft-publish emulator scenarios, Functions syntax validation, `git diff --check`, and the production build with only the existing warnings.
 - 2026-09-03: Independent read-only review found and prompted fixes for partial legacy setup, setup-time inventory races, changing option sets, stale open-editor permissions, and truthful conflict reload behavior. The final rereview returned PASS with no remaining P1/P2 finding.
 - Docs checked: updated the admin editing workflow and current status for compact preview inventory editing, draft safety, transactional first-time setup, conflict behavior, and quantity-stepper scope. Protected business content/resource files were not edited.
+- 2026-09-03: Luke approved the Phase 43/44 release after local testing. `main` fast-forwarded from `778bb41` through `1532e3d` and `6ee2149`, then pushed to the canonical `lscheinhorn/calabash-gardens` repository.
+- 2026-09-03: Release verification reran all 85 regular tests, all 12 inventory transaction/rules emulator scenarios, all 14 draft-publish emulator scenarios, Functions syntax validation, and the production build. The build retained only the existing unused-code and Browserslist warnings.
+- 2026-09-03: Published GitHub Pages commit `c7ad7c2` with `www.calabashgardens.com` preserved, products explicitly forced to static, and emulator, server PayPal, and webhook-review flags forced off. The custom domain served the new `main.778c7ae3.js` bundle; the live admin sign-in shell and static Shop rendered successfully with no admin-only labels on the public catalog.
+- 2026-09-03: This release deployed no Firebase rules, Functions, or Storage configuration and performed no production Firestore, product, draft, order, SKU, or inventory data write. The live response included HTTPS/HSTS and no explicit CSP header.
+- Docs checked: recorded the Phase 43/44 merge, release checks, exact Pages artifact, live verification, CSP observation, deployment exclusions, and Jetta inventory handoff. Protected business content/resource files were not edited.
 
 ## Commits
 
@@ -702,7 +705,8 @@ Phase 44 awaiting Luke's merge/deploy review: compact, transactional product sto
 - `b151a46 feat: add admin draft publish foundation`
 - `chore: enable firestore rules deploy config` (current branch)
 - `feat: add admin password reset flow` (current branch)
-- `feat: add preview inventory editing` (current branch)
+- `1532e3d feat: show trustworthy inventory in admin preview`
+- `6ee2149 feat: add preview inventory editing`
 - `feat: add preview content edit focus` (current branch)
 - `feat: add preview content edit drawer` (current branch)
 - `feat: simplify preview edit controls` (current branch)
@@ -722,3 +726,4 @@ Phase 44 awaiting Luke's merge/deploy review: compact, transactional product sto
 - 2026-05-07: Published admin product card UI for live `/admin` testing with `npm run deploy`.
 - 2026-06-16: Deployed Firestore rules only to `calabash-54fb5` with `npx firebase-tools deploy --only firestore:rules --project calabash-54fb5`.
 - 2026-08-28: Fast-forwarded and pushed `main` through `2cd3e8f`, deployed Firestore rules only to `calabash-54fb5`, and published GitHub Pages commit `e7a744f`. Functions, Storage rules, public Firestore reads, server PayPal, and production inventory writes remained off.
+- 2026-09-03: Fast-forwarded and pushed `main` through `6ee2149`, then published GitHub Pages commit `c7ad7c2` with the public shop pinned to static products. No Firebase service, rule, or production data deployment was included.
