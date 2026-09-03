@@ -4,6 +4,12 @@ import './index.css';
 import App from './App';
 import store from './Store'
 import { Provider } from 'react-redux'
+import { migrateLegacyHashRoute } from './routing/browserRouting'
+import { isBrowserRoutingEnabled } from './config/deploymentMode'
+
+if (isBrowserRoutingEnabled) {
+  migrateLegacyHashRoute(window)
+}
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
@@ -13,5 +19,3 @@ root.render(
     </Provider>
   </React.StrictMode>
 );
-
-

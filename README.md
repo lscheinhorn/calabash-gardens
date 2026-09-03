@@ -6,7 +6,7 @@ Calabash Gardens is a React storefront and event-booking site for a Vermont saff
 
 - React 18
 - Create React App / `react-scripts`
-- React Router with `HashRouter`
+- React Router with host-specific `HashRouter`/`BrowserRouter` builds
 - Redux Toolkit
 - PayPal React SDK
 - EmailJS
@@ -37,6 +37,9 @@ npm run build
 
 - `npm start`: run local development server
 - `npm run build`: create production build
+- `npm run build:github-pages`: create the existing hash-routed GitHub Pages build
+- `npm run build:firebase-preview`: create the clean-routed, side-effect-disabled Firebase Hosting preview build
+- `npm run deploy:firebase-preview`: deploy only the seven-day `phase45-preview` Hosting channel to the explicit Calabash Firebase project
 - `npm test`: run Create React App test runner
 - `npm run test:firebase-parity-model`: run deterministic parity-model tests
 - `npm run test:product-variant-migration-model`: run deterministic product identity and migration-preview tests
@@ -67,9 +70,12 @@ npm run build
 - `docs/phase41-product-variant-migration-verification.md`: automatic product/variant identity contract and no-write migration-preview verification
 - `docs/firebase-parity-audit.md`: latest read-only Firestore/Storage parity result
 - `docs/product-variant-migration-preview.md`: exact proposed identities for the current Firestore product catalog
+- `docs/firebase-hosting-preview.md`: preview-channel safety, routing, CSP, caching, and live-cutover gate
 
 ## Notes
 
 The public app still defaults to static product, event, and site content. The Firebase-backed admin portal supports draft editing, preview, media, transactionally unique product SKUs, inventory, and order-review foundations. Guarded server checkout and webhook recovery exist only as disabled, emulator-verified pre-live paths; they are not deployed or active on the public site.
+
+The live custom domain remains on GitHub Pages and uses hash routes. Phase 45 adds a temporary Firebase Hosting preview build with clean routes; it does not change DNS or the live host. The preview disables payment, contact, waitlist, password-reset, and admin-write actions.
 
 Before implementation work, confirm scope in `PROJECT_STATUS.md`, use a feature branch, and get Luke's approval.

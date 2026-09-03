@@ -1,21 +1,21 @@
 # Firebase Setup Plan
 
-This document tracks Firebase setup for a future admin editor. The current implementation adds an env-driven Firebase config foundation and admin auth shell, but it does not connect public site data to Firebase, deploy rules, migrate content, or add admin editing behavior.
+This document is the historical setup plan that began the Firebase admin work. Current implementation and release state live in `PROJECT_STATUS.md`; Hosting preview details live in `docs/firebase-hosting-preview.md`.
 
 ## Current State
 
 - `src/firebase-config.js` exports an env-driven Firebase config foundation.
 - Firebase services export `null` until required `REACT_APP_FIREBASE_*` variables are configured.
-- `.firebaserc` is commented out and references project `calabash-54fb5`.
-- `firebase.json` contains Storage rules config only; Firebase Hosting is not enabled there.
+- `.firebaserc` is valid empty JSON so commands cannot inherit an unreviewed default project.
+- `firebase.json` contains explicit Functions, Firestore, Storage, emulator, and Phase 45 Hosting preview configuration.
 - `package.json` now lists `firebase`.
 - `package-lock.json` lists `firebase`.
 - `node_modules/firebase` exists locally.
-- `src/Components/Admin/Admin.js` provides a Firebase sign-in shell and checks `adminUsers/{uid}` for active admin access.
+- `src/Components/Admin/Admin.js` provides the Firebase-backed admin portal and checks `adminUsers/{uid}` for active admin access.
 - `src/Components/ProductEditor/ProductEditor.js` is fully commented out.
 - `src/Components/Editor/Editor.js` imports Firebase services, but it is not mounted by the admin auth shell.
 
-## Non-Goals
+## Initial Phase Non-Goals (Historical)
 
 - Do not modify protected content/data files.
 - Do not connect products, events, content, inventory, checkout, or public pages to Firebase yet.

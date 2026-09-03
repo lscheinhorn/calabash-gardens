@@ -1,8 +1,10 @@
 import './Contact.css'
 import React, { useState, useRef } from 'react';
 import emailjs from '@emailjs/browser';
+import { isFirebaseHostingPreview } from '../../config/deploymentMode';
  
 export default function Contact({ isPreview = false }) {
+    const isReadOnlyPreview = isPreview || isFirebaseHostingPreview
     const formRef = useRef();
     const [ form, setForm] = useState({
         from_name: "",
@@ -26,7 +28,7 @@ export default function Contact({ isPreview = false }) {
 
     const sendEmail = (e) => {
         e.preventDefault() // prevents the page from loading
-        if (isPreview) {
+        if (isReadOnlyPreview) {
             return
         }
 
@@ -103,8 +105,12 @@ export default function Contact({ isPreview = false }) {
                     className="btn btn-primary" 
                     type="submit" 
                     value="Send" 
+                    disabled={isReadOnlyPreview}
                 />
             </div>
+            { isFirebaseHostingPreview ? (
+                <p role="status">Contact form sending is disabled on this temporary hosting preview.</p>
+            ) : null }
             { form.sent === true ? <h4>Your message was sent successfully!</h4> : null }
             { form.sent === 'error' ? <h4>There was an error sending your message. Please try again or email us directly at calabashgardens@gmail.com </h4> : null }
 

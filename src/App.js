@@ -9,7 +9,8 @@ import Cart from './Components/Cart/Cart';
 import Contact from './Components/Contact/Contact';
 import Events from './Components/Events/Events'; 
 
-import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Routes, Route, useLocation } from 'react-router-dom';
+import { isBrowserRoutingEnabled } from './config/deploymentMode';
 
 const Admin = lazy(() => import('./Components/Admin/Admin'));
 const AdminPreviewFrame = lazy(() => import('./Components/Admin/AdminPreviewFrame'));
@@ -52,6 +53,7 @@ function AppRoutes() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/events" element={<Events />} />
         <Route path="/" element={<Main />} />
+        <Route path="*" element={<Navigate replace to="/" />} />
       </Routes>
       {!isAdminPreviewFrame ? <Footer /> : null}
     </>
@@ -59,11 +61,13 @@ function AppRoutes() {
 }
 
 function App() {
+  const Router = isBrowserRoutingEnabled ? BrowserRouter : HashRouter;
+
   return (
     <div className="App app_wrap">
-      <HashRouter>
+      <Router>
         <AppRoutes />
-      </HashRouter>
+      </Router>
     </div>
   );
 }

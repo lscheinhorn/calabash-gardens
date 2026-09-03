@@ -5,6 +5,7 @@ import { selectCart } from '../Cart/cartSlice'
 import { useSelector } from 'react-redux'
 import { keys } from '../../data/siteData'
 import { functions as firebaseFunctions } from '../../firebase-config'
+import { isFirebaseHostingPreview } from '../../config/deploymentMode'
 
 
 export default function Paypal(props) {
@@ -202,6 +203,14 @@ export default function Paypal(props) {
    setCheckoutLocked(false);
    setErrorMessage("An error occurred with your payment.");
 };
+
+ if (isFirebaseHostingPreview) {
+  return (
+    <p role="status" style={{ textAlign: "center" }}>
+      Checkout is disabled on this temporary hosting preview.
+    </p>
+  )
+ }
 
  return (
   <>

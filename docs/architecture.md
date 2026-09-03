@@ -6,7 +6,9 @@ The app is a Create React App project using React 18. It is rendered from `src/i
 
 ## Routing
 
-Routes are defined in `src/App.js` using `HashRouter`, `Routes`, and `Route` from `react-router-dom`.
+Routes are defined in `src/App.js` using `Routes` and `Route` from `react-router-dom`. The existing GitHub Pages build explicitly selects `HashRouter`. The Firebase Hosting preview build selects `BrowserRouter`, relies on the Hosting SPA rewrite for direct-route refreshes, and converts recognized legacy `#/...` links before React renders. Unknown browser routes redirect to the home route instead of rendering an empty shell.
+
+Admin-preview iframe links use the same routing mode as their containing build. This preserves the current local/GitHub Pages preview while allowing clean same-origin routes on Firebase Hosting.
 
 ## State
 
@@ -61,6 +63,8 @@ The server checkout and webhook have been verified only against the exact demo F
 ## Contact
 
 The contact form uses EmailJS from `src/Components/Contact/Contact.js`.
+
+The temporary Firebase Hosting preview build disables EmailJS submission, PayPal checkout, and event waitlist writes. Approved admins may authenticate only to inspect a read-only Firestore site preview; editing and publishing controls are excluded from that build.
 
 ## Backend Foundation
 

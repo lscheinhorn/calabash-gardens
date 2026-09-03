@@ -16,6 +16,8 @@ import {
 import ContentAdmin from "./ContentAdmin";
 import EventAdmin from "./EventAdmin";
 import ProductAdmin from "./ProductAdmin";
+import { isBrowserRoutingEnabled } from "../../config/deploymentMode";
+import { buildBrowserRouteUrl, buildHashRouteUrl } from "../../routing/browserRouting";
 
 const previewViewports = {
   desktop: {
@@ -64,12 +66,21 @@ const previewTabForPath = (path) => {
     return "events";
   }
 
+  if (path.startsWith("/admin/preview/contact")) {
+    return "contact";
+  }
+
+  if (path.startsWith("/admin/preview/cart")) {
+    return "cart";
+  }
+
   return "home";
 };
 
 export default function AdminPreview({
   db,
   defaultExpanded = false,
+  readOnly = false,
   storage = null,
   userId = "",
 }) {
@@ -133,6 +144,10 @@ export default function AdminPreview({
         return;
       }
 
+      if (readOnly) {
+        return;
+      }
+
       if (event.data?.type === "calabash-admin-edit-product") {
         const productId = String(event.data.id || "");
 
@@ -189,7 +204,7 @@ export default function AdminPreview({
     return () => {
       window.removeEventListener("message", handlePreviewMessage);
     };
-  }, []);
+  }, [readOnly]);
 
   useEffect(() => {
     if (!isContentEditMode) {
@@ -226,7 +241,7 @@ export default function AdminPreview({
   }, [isFullPreviewOpen]);
 
   const renderEditDrawer = () => {
-    if (!editTarget) {
+    if (readOnly || !editTarget) {
       return null;
     }
 
@@ -319,16 +334,18 @@ export default function AdminPreview({
       return "";
     }
 
-    const baseUrl = window.location.href.split("#")[0];
-    const queryParams = new URLSearchParams({
-      refresh: String(previewRefreshKey),
+    const buildRouteUrl = isBrowserRoutingEnabled
+      ? buildBrowserRouteUrl
+      : buildHashRouteUrl;
+
+    return buildRouteUrl({
+      origin: window.location.origin,
+      path: previewPath,
+      query: {
+        edit: isContentEditMode ? "content" : "",
+        refresh: previewRefreshKey,
+      },
     });
-
-    if (isContentEditMode) {
-      queryParams.set("edit", "content");
-    }
-
-    return `${baseUrl}#${previewPath}?${queryParams.toString()}`;
   }, [isContentEditMode, previewPath, previewRefreshKey]);
   const previewWorkspaceClassName = editTarget
     ? "admin_preview_workspace admin_preview_workspace_with_drawer"
@@ -354,7 +371,9 @@ export default function AdminPreview({
         <div>
           <h3>Firestore Site Preview</h3>
           <p className="admin_status">
-            Admin-only preview using public components with draft changes over live Firestore data.
+            {readOnly
+              ? "Read-only preview using public components with saved Firestore data."
+              : "Admin-only preview using public components with draft changes over live Firestore data."}
           </p>
         </div>
         <div className="admin_button_row">
@@ -405,16 +424,18 @@ export default function AdminPreview({
                 </div>
               ) : null}
             </div>
-            <button
-              aria-pressed={isContentEditMode}
-              aria-label={isContentEditMode ? "Turn preview edit mode off" : "Turn preview edit mode on"}
-              className={isContentEditMode ? "admin_icon_button admin_icon_button_active" : "admin_icon_button"}
-              onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
-              title={isContentEditMode ? "Turn preview edit mode off" : "Turn preview edit mode on"}
-              type="button"
-            >
-              <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
-            </button>
+            {!readOnly ? (
+              <button
+                aria-pressed={isContentEditMode}
+                aria-label={isContentEditMode ? "Turn preview edit mode off" : "Turn preview edit mode on"}
+                className={isContentEditMode ? "admin_icon_button admin_icon_button_active" : "admin_icon_button"}
+                onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
+                title={isContentEditMode ? "Turn preview edit mode off" : "Turn preview edit mode on"}
+                type="button"
+              >
+                <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
+              </button>
+            ) : null}
             <button
               aria-label="Open full preview"
               className="admin_icon_button"
@@ -458,20 +479,24 @@ export default function AdminPreview({
                 <div>
                   <h3>Firestore Site Preview</h3>
                   <p className="admin_status">
-                    Navigate and edit draft content without leaving the preview.
+                    {readOnly
+                      ? "Navigate the saved Firestore site without changing data."
+                      : "Navigate and edit draft content without leaving the preview."}
                   </p>
                 </div>
                 <div className="admin_button_row">
-                  <button
-                    aria-pressed={isContentEditMode}
-                    aria-label={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
-                    className={isContentEditMode ? "admin_icon_button admin_icon_button_active" : "admin_icon_button"}
-                    onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
-                    title={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
-                    type="button"
-                  >
-                    <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
-                  </button>
+                  {!readOnly ? (
+                    <button
+                      aria-pressed={isContentEditMode}
+                      aria-label={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
+                      className={isContentEditMode ? "admin_icon_button admin_icon_button_active" : "admin_icon_button"}
+                      onClick={() => setIsContentEditMode((currentValue) => !currentValue)}
+                      title={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
+                      type="button"
+                    >
+                      <FontAwesomeIcon aria-hidden="true" icon={faPencilAlt} />
+                    </button>
+                  ) : null}
                   <button
                     aria-label="Close full preview"
                     className="admin_icon_button"

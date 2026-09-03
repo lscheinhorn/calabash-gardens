@@ -12,6 +12,7 @@ export default function Events({
     eventsOverride = null,
     experienceBlurbBlocksOverride = null,
     experienceBlurbOverride = null,
+    isPreview = false,
     renderEventPreviewItem = renderStaticEventItem,
     renderExperienceBlurbContent = renderStaticContent
 }) {
@@ -74,7 +75,7 @@ export default function Events({
                 </div>
                 { activeEvents.length ? renderEventPreviewItem(
                     activeEvents[eventIdx],
-                    <Event event={activeEvents[eventIdx]} />
+                    <Event event={activeEvents[eventIdx]} isPreview={isPreview} />
                 ) : null }
             </div>
         </div>

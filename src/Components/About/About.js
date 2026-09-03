@@ -20,7 +20,7 @@ export default function About ({
                 renderEditableContent={renderEditableContent}
                 variant="about"
             />
-            <Link to="contact">
+            <Link to="/contact">
                 <button className="btn btn-primary" aria-label="Get In Touch" >{ aboutContent.button }</button>
             </Link>
         </div>

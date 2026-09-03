@@ -21,9 +21,9 @@ Calabash Gardens is a React website for a Vermont saffron farm and event busines
 - `/events`: Calabash Experience event flow
 - `/cart`: cart and PayPal checkout
 - `/contact`: contact form
-- `/admin`: Firebase sign-in shell and setup status for approved admins; editors are not connected yet
+- `/admin`: Firebase sign-in and the approved-admin portal for preview, products, events, content, inventory, orders, and photos
 
-The app uses `HashRouter`, so deployed URLs include `#/`.
+The current GitHub Pages site uses `HashRouter`, so its deployed URLs include `#/`. The temporary Firebase Hosting preview uses clean `BrowserRouter` URLs behind an SPA rewrite. The preview does not change the live custom domain and disables public submissions, payments, and admin writes.
 
 ## Product Positioning
 

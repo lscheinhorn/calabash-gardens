@@ -10,6 +10,7 @@ import {
 } from "firebase/auth";
 
 import { auth, db, isFirebaseConfigured, storage } from "../../firebase-config";
+import { isFirebaseHostingPreview } from "../../config/deploymentMode";
 import ContentAdmin from "./ContentAdmin";
 import ContentMirrorAudit from "./ContentMirrorAudit";
 import EventAdmin from "./EventAdmin";
@@ -148,6 +149,10 @@ export default function Admin() {
   };
 
   const handlePasswordReset = async () => {
+    if (isFirebaseHostingPreview) {
+      return;
+    }
+
     const resetEmail = email.trim();
 
     if (!canUseFirebase) {
@@ -211,11 +216,14 @@ export default function Admin() {
           <AdminPreview
             db={db}
             defaultExpanded
+            readOnly={isFirebaseHostingPreview}
             storage={storage}
             userId={user?.uid || ""}
           />
         ),
-        description: "Navigate the draft-aware site preview and edit site copy in context.",
+        description: isFirebaseHostingPreview
+          ? "Inspect the saved Firestore site in a read-only view."
+          : "Navigate the draft-aware site preview and edit site copy in context.",
         id: "preview",
         title: "Site Preview",
       },
@@ -281,13 +289,16 @@ export default function Admin() {
         title: "Developer / Audit Tools",
       },
     ];
-    const activeSection = dashboardSections.find((section) => section.id === activeAdminSection)
-      || dashboardSections[0];
+    const visibleDashboardSections = isFirebaseHostingPreview
+      ? dashboardSections.filter((section) => section.id === "preview")
+      : dashboardSections;
+    const activeSection = visibleDashboardSections.find((section) => section.id === activeAdminSection)
+      || visibleDashboardSections[0];
 
     return (
       <div className="admin_dashboard">
         <aside className="admin_sidebar" aria-label="Admin sections">
-          {dashboardSections.map((section) => (
+          {visibleDashboardSections.map((section) => (
             <button
               aria-current={activeSection.id === section.id ? "page" : undefined}
               className={activeSection.id === section.id ? "admin_sidebar_button admin_sidebar_button_active" : "admin_sidebar_button"}
@@ -353,7 +364,18 @@ export default function Admin() {
 
         {renderStatusPanel()}
 
-        {!canUseFirebase ? (
+        {isFirebaseHostingPreview ? (
+          <div className="admin_panel">
+            <h2>Temporary Hosting Preview</h2>
+            <p>
+              Sign in to inspect the Firestore site preview. Editing, uploads,
+              password resets, and publishing are disabled here so this public
+              preview cannot change live Firebase data.
+            </p>
+          </div>
+        ) : null}
+
+        {!isFirebaseHostingPreview && !canUseFirebase ? (
           <div className="admin_panel">
             <h2>Setup Needed</h2>
             <p>
@@ -397,14 +419,16 @@ export default function Admin() {
               >
                 {isSigningIn ? "Signing In..." : "Sign In"}
               </button>
-              <button
-                className="admin_secondary_button"
-                disabled={!canUseFirebase || isSigningIn || isSendingPasswordReset || !email.trim()}
-                onClick={handlePasswordReset}
-                type="button"
-              >
-                {isSendingPasswordReset ? "Sending Reset..." : "Forgot Password?"}
-              </button>
+              {!isFirebaseHostingPreview ? (
+                <button
+                  className="admin_secondary_button"
+                  disabled={!canUseFirebase || isSigningIn || isSendingPasswordReset || !email.trim()}
+                  onClick={handlePasswordReset}
+                  type="button"
+                >
+                  {isSendingPasswordReset ? "Sending Reset..." : "Forgot Password?"}
+                </button>
+              ) : null}
             </div>
           </form>
         ) : (

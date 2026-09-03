@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'; 
 import { db, isFirebaseConfigured } from '../../firebase-config'
+import { isFirebaseHostingPreview } from '../../config/deploymentMode'
 
 const todayStart = () => {
     const today = new Date()
@@ -102,7 +103,7 @@ const eventAvailability = (event) => {
 }
 
 export default function Event (props) {
-    const { event } = props
+    const { event, isPreview = false } = props
     const dispatch = useDispatch()
     const cartItems = useSelector(selectCart)
     const { title, info = [], eventDates = [], link, priceOptions = [] } = event
@@ -283,6 +284,11 @@ export default function Event (props) {
 
     const submitWaitlist = async (eventSubmit) => {
         eventSubmit.preventDefault()
+
+        if (isPreview || isFirebaseHostingPreview) {
+            setWaitlistStatus('Waitlist signup is disabled in site preview.')
+            return
+        }
 
         if (!waitlistForm.name.trim() || !waitlistForm.email.trim()) {
             setWaitlistStatus('Name and email are required for the waitlist.')

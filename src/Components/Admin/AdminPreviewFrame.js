@@ -18,11 +18,16 @@ import Parallax from "../Parallax/Parallax";
 import ProductPage from "../ProductPage/ProductPage";
 import Shop from "../Shop/Shop";
 import Team from "../Team/Team";
+import { isFirebaseHostingPreview } from "../../config/deploymentMode";
 import { db, isFirebaseConfigured, storage } from "../../firebase-config";
 import { loadAdminDrafts } from "../../data/adminDrafts";
 import { loadFirestoreSiteContentForPublic } from "../../data/publicContentAdapter";
 import { loadFirestoreEventsForPublic } from "../../data/publicEventAdapter";
 import { loadFirestoreProductsForPublic } from "../../data/publicProductAdapter";
+import {
+  previewRouteForPublicPath,
+  sameOriginRouteForHref,
+} from "../../routing/browserRouting";
 import AdminProductPreviewStatus from "./AdminProductPreviewStatus";
 
 const previewTabs = ["home", "shop", "events", "contact", "cart"];
@@ -168,38 +173,6 @@ const renderPreviewDiffText = ({ draftValue, liveValue }) => {
   ));
 };
 
-const previewRouteForPublicPath = (publicPath) => {
-  if (!publicPath || publicPath === "/") {
-    return "/admin/preview/home";
-  }
-
-  if (publicPath === "/shop") {
-    return "/admin/preview/shop";
-  }
-
-  if (publicPath === "/events") {
-    return "/admin/preview/events";
-  }
-
-  if (publicPath === "/contact" || publicPath.endsWith("/contact")) {
-    return "/admin/preview/contact";
-  }
-
-  if (publicPath === "/cart") {
-    return "/admin/preview/cart";
-  }
-
-  if (publicPath.startsWith("/products/")) {
-    return publicPath.replace("/products/", "/admin/preview/products/");
-  }
-
-  if (publicPath.startsWith("/admin/preview")) {
-    return publicPath;
-  }
-
-  return "/admin/preview/home";
-};
-
 const EditablePreviewText = ({
   children,
   contentId,
@@ -315,7 +288,7 @@ export default function AdminPreviewFrame() {
     products: [],
   });
   const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const isContentEditMode = queryParams.get("edit") === "content";
+  const isContentEditMode = !isFirebaseHostingPreview && queryParams.get("edit") === "content";
   const isEmbeddedPreview = typeof window !== "undefined" && window.parent !== window;
 
   const loadPreview = useCallback(async ({ showLoading = true } = {}) => {
@@ -477,18 +450,18 @@ export default function AdminPreviewFrame() {
         return;
       }
 
-      const linkUrl = new URL(anchor.href);
+      const internalRoute = sameOriginRouteForHref(anchor.href, window.location.origin);
 
-      if (linkUrl.origin !== window.location.origin) {
+      if (!internalRoute) {
         return;
       }
 
-      if (!linkUrl.hash.startsWith("#/")) {
+      const previewRoute = previewRouteForPublicPath(internalRoute.pathname);
+
+      if (!previewRoute) {
         return;
       }
 
-      const publicPath = linkUrl.hash.replace(/^#/, "");
-      const previewRoute = previewRouteForPublicPath(publicPath);
       const nextPreviewRoute = isContentEditMode
         ? `${previewRoute}?edit=content`
         : previewRoute;
@@ -568,6 +541,10 @@ export default function AdminPreviewFrame() {
   }, []);
 
   const toggleContentEditMode = useCallback(() => {
+    if (isFirebaseHostingPreview) {
+      return;
+    }
+
     const nextQueryParams = new URLSearchParams(location.search);
 
     if (isContentEditMode) {
@@ -703,6 +680,7 @@ export default function AdminPreviewFrame() {
           eventsOverride={previewData.events}
           experienceBlurbBlocksOverride={previewData.experienceBlurbBlocks}
           experienceBlurbOverride={previewData.experienceBlurb}
+          isPreview
           renderEventPreviewItem={renderEventPreviewItem}
           renderExperienceBlurbContent={renderExperienceBlurbContent}
         />
@@ -766,7 +744,7 @@ export default function AdminPreviewFrame() {
 
   return (
     <div className="admin_preview_frame_site">
-      {!isEmbeddedPreview ? (
+      {!isEmbeddedPreview && !isFirebaseHostingPreview ? (
         <button
           aria-label={isContentEditMode ? "Turn full preview edit mode off" : "Turn full preview edit mode on"}
           aria-pressed={isContentEditMode}

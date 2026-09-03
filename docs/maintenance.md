@@ -59,10 +59,10 @@ Before shipping event changes, verify:
 
 ## Deployment
 
-The customer site currently deploys to GitHub Pages through the explicit `npm run deploy` command. `firebase.json` configures Functions, Firestore rules, Storage rules, and local emulators, but it does not configure Firebase Hosting.
+The customer site currently deploys to GitHub Pages through the explicit `npm run deploy` command. Its predeploy step builds the existing hash-routed app. `firebase.json` also contains the separately gated Firebase Hosting preview-channel configuration; it does not authorize a live Hosting release or custom-domain cutover.
 
 Keep `public/CNAME` set to `www.calabashgardens.com`. Create React App copies it into `build/CNAME`, which prevents a GitHub Pages deployment from dropping the live custom-domain mapping.
 
-The stale Firebase-generated pull-request and `main`-push Hosting workflows were removed in Phase 42. Firebase Hosting remains a separately reviewed future migration. Never use an unscoped `firebase deploy`; deploy only an explicitly approved Firebase target such as `--only firestore:rules`.
+The stale Firebase-generated pull-request and `main`-push Hosting workflows were removed in Phase 42. `npm run deploy:firebase-preview` builds the side-effect-disabled clean-route app and deploys only the expiring `phase45-preview` channel on the explicitly named `calabash-54fb5` site/project. A live Hosting deployment, DNS change, or custom-domain connection remains a separately reviewed future migration. Never use an unscoped `firebase deploy`; deploy only an explicitly approved target or preview channel.
 
 Do not deploy without Luke's explicit approval.

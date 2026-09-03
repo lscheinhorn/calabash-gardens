@@ -8,12 +8,13 @@ Phase 41 is automatic product/variant identity and the production no-write migra
 The 2026-08-28 preview accounts for all 72 reviewed Firestore/static products and proposes 101 variant/SKU rows without inventing inventory. Existing custom variant IDs are preserved, known non-public `Title` and `test-basket` records are excluded, and every real quantity remains Jetta-owned. Legacy rows stay untracked until quantities are explicitly entered; each stock edit enables Track and Sell, and an incomplete product cannot initialize until every option quantity is confirmed. After the approved Phase 42 client/rules release, the production no-write rerun reports **READY FOR INVENTORY ENTRY** with 72 products, 101 variants/SKUs, 0 blockers, and 2 reviewed warnings. No inventory quantity or SKU claim was written by the check. The broader 2026-08-27 Firebase parity gate remains **NOT READY** and still blocks a public Firestore source switch.
 Phase 42 was approved and released on 2026-08-28. `main` was fast-forwarded through `ab72889`, the custom-domain safeguard was added at `2cd3e8f`, Firestore rules only were deployed to `calabash-54fb5`, and GitHub Pages published `e7a744f` with `www.calabashgardens.com` preserved. Live Home, Shop, product detail, Cart, Events, Contact, and the configured admin sign-in shell passed verification. The deployed storefront is explicitly built from static products with server PayPal, webhook review, and emulator switches disabled; Functions, Storage rules, production inventory, and the public Firestore source did not change.
 Phases 43 and 44 were approved and released on 2026-09-03. `main` was fast-forwarded through `6ee2149`, and GitHub Pages published `c7ad7c2` with `www.calabashgardens.com` preserved. The live admin preview now shows trustworthy draft/inventory status and offers compact, transactional product stock editing in preview edit mode. The public storefront remains on static products; Firebase Functions, rules, Storage, production data, and server PayPal settings were not deployed or changed.
+Phase 45 Firebase Hosting preview work is active on `codex/firebase-hosting-preview`. The candidate adds clean routes only to the Firebase preview build, preserves hash routing for the existing GitHub Pages release, pins the explicit Hosting site/project, adds report-only CSP and cache/security headers, and disables payment, contact, waitlist, password-reset, and admin-write side effects on the public preview channel. No DNS, custom-domain, live Hosting, Firebase rule, Function, Storage, Firestore-data, or protected-content change is included.
 
 ## Approved Tech Stack
 
 - React 18
 - Create React App / `react-scripts`
-- React Router with `HashRouter`
+- React Router with a GitHub Pages `HashRouter` build and a gated Firebase Hosting `BrowserRouter` preview build
 - Redux Toolkit for cart state
 - PayPal React SDK for checkout
 - EmailJS for contact form
@@ -22,7 +23,7 @@ Phases 43 and 44 were approved and released on 2026-09-03. `main` was fast-forwa
 
 ## Current Phase
 
-Phase 44 released. Jetta may use the live admin Inventory section or preview inventory editor to enter reviewed product quantities; the public storefront remains static while broader Firebase parity work continues separately.
+Phase 45 preview candidate under verification. The live site remains the released Phase 44 GitHub Pages build; Jetta's current live admin workflow is unchanged.
 
 ## Done Work
 
@@ -178,7 +179,7 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 - Mapped the complete prospective release delta against `main`: 50 linear commits, 124 files, and no protected static business-content/resource difference.
 - Verified Firestore rules against the exact production project in dry-run mode and built the GitHub Pages artifact in `--no-push` mode.
 - Compared live and candidate public routes. Home, Shop, product detail, Contact, and populated Cart matched; Events differed only by the approved past-event purchase safeguard.
-- Removed the stale Firebase-generated pull-request and `main`-push Hosting workflows from the candidate. Firebase Hosting remains deferred and unconfigured; site deployment stays an explicit GitHub Pages operation.
+- Removed the stale Firebase-generated pull-request and `main`-push Hosting workflows from the Phase 42 candidate. At that release point Firebase Hosting remained deferred and unconfigured, and site deployment stayed an explicit GitHub Pages operation.
 - Released the accumulated admin client to `main`, deployed Firestore rules only, and published the static-source GitHub Pages build without deploying Functions or Storage rules.
 - Added `public/CNAME` after pre-deploy review found the source build could otherwise drop the existing `www.calabashgardens.com` mapping; the deployed Pages commit preserves it.
 - Verified the live public routes and admin sign-in shell, then reran the production no-write SKU gate successfully with 72 products, 101 variants/SKUs, 0 blockers, and 2 warnings.
@@ -192,7 +193,7 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 ## In Progress Work
 
 - Future Firebase ownership/billing handoff: have Jetta create a Google Account and business-controlled Cloud Billing account, add her as a verified project Owner, link the existing Calabash project to her billing account, then retain Luke with reviewed maintenance permissions. Do not remove Luke's current access or change billing until Jetta has signed in and both parties have verified the handoff.
-- Future Firebase Hosting migration: prepare a separate reviewed release plan covering Hosting configuration, clean SPA route rewrites, preview-channel validation, CSP/security headers, custom-domain and DNS cutover, rollback to GitHub Pages, static-storefront safeguards, and post-cutover verification. Do not change live Hosting or DNS as part of unrelated work.
+- Phase 45 Firebase Hosting preview: finish preview-channel deployment and review clean routes, headers, responsive/public flows, and read-only admin inspection. DNS/live Hosting cutover remains a later separately approved phase, with GitHub Pages retained as rollback.
 - Jetta may now enter the real Stock value for every product option in the live Inventory section. Each incomplete product remains untracked until all of its option quantities are explicitly confirmed and saved; no automatic production inventory migration has run.
 - Resolve the broader Firebase parity blocker types in separately reviewed phases without changing public reads. Product identity generation is now deterministic, but event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
 - Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
@@ -302,7 +303,7 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 - Local emulator verification requires Java 11 or newer. Homebrew OpenJDK 21 was used successfully without changing the system Java configuration.
 - Installing the already-declared Functions dependencies for emulator verification reported 12 npm audit findings (1 low, 10 moderate, 1 high) and a local Node `23.7.0` versus Functions `node:20` engine warning; review dependency findings and use Node 20 before any Functions deployment.
 - Multi-date events still have one canonical timestamp and event-wide capacity counts. A listed past occurrence can pass the current canonical future-date check when another occurrence is future, so per-occurrence waitlisting needs a new approved data shape.
-- `.firebaserc` is currently commented out and triggers a Firebase CLI JSON warning. Firestore rules were deployed with the explicit `--project calabash-54fb5` flag, so the warning did not affect the deploy.
+- `.firebaserc` is valid empty JSON. Firebase commands must continue naming `calabash-54fb5` explicitly rather than inheriting a default project.
 - Product editor draft writes require Firebase env values, deployed/reviewed draft rules, and an approved admin record for real testing.
 - Product writes require approved `productCategories` records.
 - Product photo upload requires deployed/reviewed Storage rules before real Firebase testing.
@@ -313,7 +314,7 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 - Admin product photo upload treats 10 MB as the performance threshold and 25 MB as the draft hard cap for rare original-upload overrides.
 - Original admin photo uploads between 10 MB and 25 MB require reviewed/deployed Storage rules before they work live.
 - Media migration importer requires `--confirm` before Firebase writes and signs in with local-only approved admin credentials.
-- `firebase.json` configures Functions, Firestore rules, Storage rules, and local emulators. Firebase Hosting remains outside this config, and any approved Firebase operation must use an explicit `--only` target.
+- `firebase.json` configures Functions, Firestore rules, Storage rules, local emulators, and the Phase 45 Hosting preview. Any approved Firebase operation must use an explicit service target/project; preview-channel deployment must not become a live Hosting deployment implicitly.
 - Firebase Rules System service agent has the `Firebase Rules Firestore Service Agent` role, allowing Storage rules to check Firestore `adminUsers/{uid}`.
 - Confirmed media import uploaded 20 Storage objects, created 20 `mediaAssets` documents, and attached product photo refs to 11 Firestore products.
 - Admin product cards and Photos library resolve Storage download URLs for imported media previews.
@@ -341,10 +342,10 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 - The ownership audit found 7 code-owned UI/content surfaces that need an owner decision before the full site can be considered true CRUD.
 - The ownership audit found 4 shared source-file cases that need reuse/linking decisions before any broad media upload/import.
 - Firestore Site Preview is admin-only and overlays active draft records on live Firestore records. If draft reads are denied by currently deployed rules, it falls back to live-only data.
-- Preview Shop/Event cards still use public components that include cart controls; the preview does not deploy or switch public reads, but checkout isolation should be reviewed before broader testing.
+- Admin-preview Event waitlist submission is explicitly blocked. The Firebase Hosting preview also blocks PayPal, EmailJS contact, event waitlist, password-reset, and admin-write actions while leaving browsing and approved-admin read-only preview inspection available.
 - `src/Components/Editor/Editor.js` imports Firebase services and should not be mounted until admin auth/config handling is designed.
 - Event deposits, child tickets, vegetarian/gluten-free fees, and full-payment rules need explicit acceptance criteria.
-- The customer site deploys to GitHub Pages through the explicit `npm run deploy` command. Firebase Hosting is deferred; the stale Firebase-generated PR and `main`-push Hosting workflows are removed in the Phase 42 candidate.
+- The customer site still deploys to GitHub Pages through the explicit `npm run deploy` command, whose predeploy build is pinned to hash routing. Firebase Hosting is limited to the manually invoked Phase 45 preview channel until a separately approved DNS/live cutover.
 - The live GitHub Pages response provides HTTPS/HSTS but no explicit Content Security Policy. CSP hardening or a Firebase Hosting move requires a separate reviewed phase because Firebase, PayPal, EmailJS, preview framing, and Storage media must remain functional under the final policy.
 - Product, event, content, inventory, image, and public key files are protected and must not be edited without explicit approval.
 - The strict production parity audit is read-only, but a passing data report alone does not authorize public Firestore rules, Firebase writes, a public source switch, checkout activation, merge, or deployment.
@@ -670,6 +671,12 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 - 2026-09-03: This release deployed no Firebase rules, Functions, or Storage configuration and performed no production Firestore, product, draft, order, SKU, or inventory data write. The live response included HTTPS/HSTS and no explicit CSP header.
 - Docs checked: recorded the Phase 43/44 merge, release checks, exact Pages artifact, live verification, CSP observation, deployment exclusions, and Jetta inventory handoff. Protected business content/resource files were not edited.
 - 2026-09-03: Docs checked: recorded future Firebase ownership/billing handoff and Firebase Hosting/CSP migration tasks. No application code, protected content, Firebase state, billing link, hosting configuration, domain, or DNS setting was changed.
+- 2026-09-03: Phase 45 candidate verification passed 101 regular React/Jest tests with 26 emulator-gated tests skipped, six Hosting configuration tests, the Functions syntax check, `git diff --check`, both the hash-routed GitHub Pages build and clean-routed Firebase preview build, and an empty protected-file status check. Both builds retained only the existing unused-code and Browserslist warnings.
+- 2026-09-03: Local Firebase Hosting emulator verification passed direct clean-route loading, legacy hash-route conversion, internal Cart-to-Shop navigation, unknown-route recovery, read-only admin controls, disabled PayPal/contact/waitlist actions, empty browser console checks, route/HTML `no-cache`, and hashed-static-asset immutable caching. No Firebase service, production data, DNS, custom domain, GitHub Pages artifact, or live site was changed by this local verification.
+- 2026-09-03: Independent preview review caught a direct `/admin/preview/...?...edit=content` inventory-write path before deployment. The Hosting-preview flag now disables edit mode inside the preview frame itself, hides its standalone edit toggle, and forces preview inventory controls off; a dedicated direct-route regression test passes. Browser verification also confirmed the normal hash-routed admin preview still exposes its expected edit and inventory controls, so the restriction is isolated to the temporary Hosting build. The current report-only PayPal CSP remains preview-only and must be re-reviewed before live checkout or policy enforcement.
+- 2026-09-03: Final preview review also caught a password-reset control that was visually hidden rather than omitted and a relative About-to-Contact route that could escape the iframe's known preview paths. The Hosting build now omits and handler-guards password reset, the About action uses the absolute public Contact route, focused tests pass, and browser verification reached the Contact preview while preserving edit mode in the normal admin build.
+- 2026-09-03: Focused independent rereview returned PASS with no remaining P1/P2 issue after the direct preview-frame, password-reset, and Contact-route fixes. It reconfirmed the GitHub Pages router boundary, explicit preview-only Firebase target, coherent preview CSP/cache configuration, and untouched protected content paths.
+- Docs checked: added the Phase 45 Hosting preview contract and updated setup, architecture, app overview, maintenance, storage-plan, README, current status, decisions, risks, and verification history. Protected business content/resource files were not edited.
 
 ## Commits
 

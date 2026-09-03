@@ -53,7 +53,7 @@ Public image folders allow object reads but deny listing so visitors can load kn
 ## Important Guardrails
 
 - These rules must be reviewed before deployment.
-- `firebase.json` does not enable Firebase Hosting; it points the CLI at `storage.rules` only.
+- `firebase.json` now includes the separately gated Phase 45 Hosting preview configuration as well as `storage.rules`. Preview deployment targets Hosting only and does not deploy or change Storage rules.
 - Existing local image files remain the public storefront source of truth until a later approved backend-read/image migration phase.
 - Public image path names should be stable before Jette starts uploading files.
 - Storage rules depend on Firestore admin records, so Firestore rules and first-admin bootstrap must be handled first.
