@@ -6,6 +6,12 @@ Phase 45 prepares a temporary Firebase Hosting channel for route, header, and vi
 
 The existing customer site remains on GitHub Pages until Luke separately approves the final migration. A preview-channel deployment does not change DNS, the GitHub Pages deployment, Firebase rules, Functions, Storage objects, or Firestore data.
 
+Current reviewed channel:
+
+- URL: `https://calabash-54fb5--phase45-preview-rs478tis.web.app`
+- Source commit: `65f1532`
+- Expires: 2026-09-10 16:26:10 America/New_York
+
 ## Preview Contract
 
 - Firebase project and Hosting site: `calabash-54fb5`
