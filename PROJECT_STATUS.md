@@ -191,6 +191,8 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 
 ## In Progress Work
 
+- Future Firebase ownership/billing handoff: have Jetta create a Google Account and business-controlled Cloud Billing account, add her as a verified project Owner, link the existing Calabash project to her billing account, then retain Luke with reviewed maintenance permissions. Do not remove Luke's current access or change billing until Jetta has signed in and both parties have verified the handoff.
+- Future Firebase Hosting migration: prepare a separate reviewed release plan covering Hosting configuration, clean SPA route rewrites, preview-channel validation, CSP/security headers, custom-domain and DNS cutover, rollback to GitHub Pages, static-storefront safeguards, and post-cutover verification. Do not change live Hosting or DNS as part of unrelated work.
 - Jetta may now enter the real Stock value for every product option in the live Inventory section. Each incomplete product remains untracked until all of its option quantities are explicitly confirmed and saved; no automatic production inventory migration has run.
 - Resolve the broader Firebase parity blocker types in separately reviewed phases without changing public reads. Product identity generation is now deterministic, but event/site/other media migration, event menu access/URL resolution, category cleanup, legacy draft recovery, generated fallback unification, public-read rule testing, and site/default media runtime remain.
 - Keep `docs/firebase-parity-audit.md` at **NOT READY** until every evidence row is resolved and the later visual/rules/source-switch gates pass.
@@ -667,6 +669,7 @@ Phase 44 released. Jetta may use the live admin Inventory section or preview inv
 - 2026-09-03: Published GitHub Pages commit `c7ad7c2` with `www.calabashgardens.com` preserved, products explicitly forced to static, and emulator, server PayPal, and webhook-review flags forced off. The custom domain served the new `main.778c7ae3.js` bundle; the live admin sign-in shell and static Shop rendered successfully with no admin-only labels on the public catalog.
 - 2026-09-03: This release deployed no Firebase rules, Functions, or Storage configuration and performed no production Firestore, product, draft, order, SKU, or inventory data write. The live response included HTTPS/HSTS and no explicit CSP header.
 - Docs checked: recorded the Phase 43/44 merge, release checks, exact Pages artifact, live verification, CSP observation, deployment exclusions, and Jetta inventory handoff. Protected business content/resource files were not edited.
+- 2026-09-03: Docs checked: recorded future Firebase ownership/billing handoff and Firebase Hosting/CSP migration tasks. No application code, protected content, Firebase state, billing link, hosting configuration, domain, or DNS setting was changed.
 
 ## Commits
 
