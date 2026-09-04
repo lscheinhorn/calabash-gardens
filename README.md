@@ -79,6 +79,6 @@ npm run build
 
 The public app still defaults to static product, event, and site content. The Firebase-backed admin portal supports draft editing, preview, media, transactionally unique product SKUs, inventory, and order-review foundations. Guarded server checkout and webhook recovery exist only as disabled, emulator-verified pre-live paths; they are not deployed or active on the public site.
 
-The Firebase Hosting preview disables payment, contact, waitlist, password-reset, and admin-write actions. Production Hosting is deployed at `https://calabash-54fb5.web.app`; it uses clean routes while preserving the current static public catalog, client-side PayPal checkout, EmailJS contact form, waitlist behavior, password reset, and approved admin tools. The custom domain remains on GitHub Pages until its Namecheap CNAME is moved to Firebase and verified.
+The Firebase Hosting preview disables payment, contact, waitlist, password-reset, and admin-write actions. Production Hosting is live at `https://www.calabashgardens.com` and `https://calabash-54fb5.web.app`; it uses clean routes while preserving the current static public catalog, client-side PayPal checkout, EmailJS contact form, waitlist behavior, password reset, and approved admin tools. The prior GitHub Pages deployment remains intact as the DNS rollback target.
 
 Before implementation work, confirm scope in `PROJECT_STATUS.md`, use a feature branch, and get Luke's approval.
