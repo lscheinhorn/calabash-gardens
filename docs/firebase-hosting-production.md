@@ -46,3 +46,14 @@ The default Firebase URL can be verified before DNS changes. The custom domain m
 Keep the existing `gh-pages` branch and GitHub Pages deployment intact during the cutover. If Firebase verification fails after DNS changes, restore the prior DNS records to point the custom domain back to GitHub Pages.
 
 The Content Security Policy remains report-only during the first production observation period. It must be reviewed against normal PayPal, EmailJS, Firebase, Storage, and YouTube traffic before enforcement.
+
+## Current Release State
+
+Production Hosting was deployed on 2026-09-04 from commit `f428b73`:
+
+- Firebase URL: `https://calabash-54fb5.web.app`
+- Firebase release: `2c8f64`
+- JavaScript bundle: `main.70583ccb.js`
+- Custom domain: `www.calabashgardens.com` is added in Firebase and reports `Needs setup`
+
+The active Namecheap DNS still points `www.calabashgardens.com` to `lscheinhorn.github.io`. To complete the custom-domain cutover, replace that CNAME target with `calabash-54fb5.web.app`, wait for Firebase domain and certificate provisioning, and then verify the customer routes on `www`. Leave the existing GitHub Pages deployment intact during this step so restoring the previous CNAME remains the rollback path.
