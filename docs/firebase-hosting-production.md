@@ -52,8 +52,8 @@ The Content Security Policy remains report-only during the first production obse
 Production Hosting was deployed on 2026-09-04 from commit `f428b73`:
 
 - Firebase URL: `https://calabash-54fb5.web.app`
-- Firebase release: `2c8f64`
+- Firebase release: `d4d514`
 - JavaScript bundle: `main.70583ccb.js`
 - Custom domain: `https://www.calabashgardens.com` is connected with trusted HTTPS
 
-Namecheap now points the `www.calabashgardens.com` CNAME to `calabash-54fb5.web.app`, and Firebase reports the domain `Connected`. Home, Shop, Events, Contact, Cart, Admin, unknown clean routes, and fresh legacy hash-bookmark conversion were verified against the custom domain. The existing GitHub Pages deployment remains intact; restoring the prior `www -> lscheinhorn.github.io` CNAME is the rollback path.
+Namecheap now points the `www.calabashgardens.com` CNAME to `calabash-54fb5.web.app`, and Firebase reports the domain `Connected`. Home, Shop, Events, Contact, Cart, Admin, unknown clean routes, and fresh legacy hash-bookmark conversion were verified against the custom domain. A same-artifact Hosting-only redeploy after connection cleared one stale bare-root CDN 404 and produced final release `d4d514`; the JavaScript bundle remained `main.70583ccb.js`. The existing GitHub Pages deployment remains intact; restoring the prior `www -> lscheinhorn.github.io` CNAME is the rollback path.
