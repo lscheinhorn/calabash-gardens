@@ -67,6 +67,22 @@ test("preview builds explicitly retain the current production safety switches", 
   assert.doesNotMatch(previewScript, /firebase-tools deploy --only hosting/);
 });
 
+test("production Hosting restores normal site behavior without switching public data sources", () => {
+  const buildScript = packageJson.scripts["build:firebase-hosting"];
+  const deployScript = packageJson.scripts["deploy:firebase-hosting"];
+
+  assert.match(buildScript, /REACT_APP_DEPLOYMENT_PREVIEW=false/);
+  assert.match(buildScript, /REACT_APP_ROUTER_MODE=browser/);
+  assert.match(buildScript, /REACT_APP_PUBLIC_PRODUCTS_SOURCE=static/);
+  assert.match(buildScript, /REACT_APP_FIREBASE_USE_EMULATORS=false/);
+  assert.match(buildScript, /REACT_APP_PAYPAL_SERVER_CHECKOUT=disabled/);
+  assert.match(buildScript, /REACT_APP_PAYPAL_WEBHOOK_REVIEW=disabled/);
+  assert.equal(
+    deployScript,
+    "npm run build:firebase-hosting && npx firebase-tools deploy --only hosting --project calabash-54fb5 --non-interactive",
+  );
+});
+
 test("the existing GitHub Pages deploy remains pinned to hash routing", () => {
   assert.equal(packageJson.scripts.predeploy, "npm run build:github-pages");
   assert.match(packageJson.scripts["build:github-pages"], /REACT_APP_ROUTER_MODE=hash/);

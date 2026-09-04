@@ -32,6 +32,8 @@
     "build:github-pages": "REACT_APP_ROUTER_MODE=hash npm run build",
     "build:firebase-preview": "REACT_APP_DEPLOYMENT_PREVIEW=true REACT_APP_ROUTER_MODE=browser REACT_APP_PUBLIC_PRODUCTS_SOURCE=static REACT_APP_FIREBASE_USE_EMULATORS=false REACT_APP_PAYPAL_SERVER_CHECKOUT=disabled REACT_APP_PAYPAL_WEBHOOK_REVIEW=disabled npm run build",
     "deploy:firebase-preview": "npm run build:firebase-preview && npx firebase-tools hosting:channel:deploy phase45-preview --project calabash-54fb5 --expires 7d --non-interactive",
+    "build:firebase-hosting": "REACT_APP_DEPLOYMENT_PREVIEW=false REACT_APP_ROUTER_MODE=browser REACT_APP_PUBLIC_PRODUCTS_SOURCE=static REACT_APP_FIREBASE_USE_EMULATORS=false REACT_APP_PAYPAL_SERVER_CHECKOUT=disabled REACT_APP_PAYPAL_WEBHOOK_REVIEW=disabled npm run build",
+    "deploy:firebase-hosting": "npm run build:firebase-hosting && npx firebase-tools deploy --only hosting --project calabash-54fb5 --non-interactive",
     "manifest:product-images": "node scripts/product-image-migration-manifest.js",
     "plan:media-migration": "node scripts/media-migration-dry-run.js",
     "prepare:media-migration-assets": "node scripts/prepare-media-migration-assets.js",

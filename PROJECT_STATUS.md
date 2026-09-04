@@ -9,12 +9,13 @@ The 2026-08-28 preview accounts for all 72 reviewed Firestore/static products an
 Phase 42 was approved and released on 2026-08-28. `main` was fast-forwarded through `ab72889`, the custom-domain safeguard was added at `2cd3e8f`, Firestore rules only were deployed to `calabash-54fb5`, and GitHub Pages published `e7a744f` with `www.calabashgardens.com` preserved. Live Home, Shop, product detail, Cart, Events, Contact, and the configured admin sign-in shell passed verification. The deployed storefront is explicitly built from static products with server PayPal, webhook review, and emulator switches disabled; Functions, Storage rules, production inventory, and the public Firestore source did not change.
 Phases 43 and 44 were approved and released on 2026-09-03. `main` was fast-forwarded through `6ee2149`, and GitHub Pages published `c7ad7c2` with `www.calabashgardens.com` preserved. The live admin preview now shows trustworthy draft/inventory status and offers compact, transactional product stock editing in preview edit mode. The public storefront remains on static products; Firebase Functions, rules, Storage, production data, and server PayPal settings were not deployed or changed.
 Phase 45 Firebase Hosting preview is deployed from commit `65f1532` on `codex/firebase-hosting-preview` at `https://calabash-54fb5--phase45-preview-rs478tis.web.app` through 2026-09-10 16:26:10 America/New_York. The preview adds clean routes only to the Firebase preview build, preserves hash routing for the existing GitHub Pages release, pins the explicit Hosting site/project, adds report-only CSP and cache/security headers, and disables payment, contact, waitlist, password-reset, and admin-write side effects on the public preview channel. No DNS, custom-domain, live Hosting, Firebase rule, Function, Storage, Firestore-data, or protected-content change is included.
+Phase 46 production Hosting cutover is approved on branch `codex/firebase-hosting-production`. The candidate adds explicit clean-route production build/deploy commands while retaining static public data, the current client-side checkout/contact behavior, normal approved-admin tools, and the GitHub Pages rollback artifact. The command targets Hosting only; Functions, rules, Storage, and Firebase business data remain outside this cutover.
 
 ## Approved Tech Stack
 
 - React 18
 - Create React App / `react-scripts`
-- React Router with a GitHub Pages `HashRouter` build and a gated Firebase Hosting `BrowserRouter` preview build
+- React Router with a retained GitHub Pages `HashRouter` build and Firebase Hosting `BrowserRouter` preview/production builds
 - Redux Toolkit for cart state
 - PayPal React SDK for checkout
 - EmailJS for contact form
@@ -23,7 +24,7 @@ Phase 45 Firebase Hosting preview is deployed from commit `65f1532` on `codex/fi
 
 ## Current Phase
 
-Phase 45 temporary Hosting preview deployed and under review. The live site remains the released Phase 44 GitHub Pages build; Jetta's current live admin workflow is unchanged.
+Phase 46 Firebase Hosting production cutover is in release verification. The live custom domain remains on the released Phase 44 GitHub Pages build until the Hosting artifact and DNS move are verified.
 
 ## Done Work
 
